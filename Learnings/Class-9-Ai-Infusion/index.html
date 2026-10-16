@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="AI Infusion Classes 9 and 10: design and evaluate an LLM refund adjudicator, then build it step by step in Python.">
 <title>The Refund Bench</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
@@ -244,11 +250,91 @@ pre code{background:none; padding:0; font-size:inherit; color:inherit}
 footer{border-top:3px double var(--ink); margin-top:40px; padding-top:22px; font-family:var(--mono); font-size:11.5px; color:var(--ink-3); line-height:1.8}
 @media (prefers-reduced-motion: no-preference){ html{scroll-behavior:smooth} }
 :focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+/* ---- added with Part 2 (Class 10) ---- */
+.toc{margin:30px 0 0; padding:18px 0 0; border-top:1px solid var(--rule)}
+.toc ol{list-style:none; margin:0; padding:0; columns:2 240px; column-gap:28px}
+.toc li{margin:0 0 6px; break-inside:avoid; font-size:14.5px}
+.toc a{color:var(--ink-2); text-decoration:none}
+.toc a:hover{color:var(--accent); text-decoration:underline}
+.toc .n{font-family:var(--mono); font-size:11px; color:var(--ink-3); display:inline-block; min-width:26px}
+
+.file{background:var(--code-bg); border-radius:3px; margin:0 0 8px; overflow:hidden}
+.file-bar{display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:8px 14px 8px 22px; border-bottom:1px solid rgba(255,255,255,.08);
+  font-family:var(--mono); font-size:11px; color:var(--code-dim)}
+.file-bar b{color:var(--code-ink); font-weight:600}
+.file pre{margin:0; border-radius:0}
+button.copy{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  background:transparent; color:var(--code-dim); border:1px solid rgba(255,255,255,.18);
+  border-radius:2px; padding:3px 9px; cursor:pointer}
+button.copy:hover{color:var(--code-ink); border-color:rgba(255,255,255,.4)}
+button.copy.done{color:#8FD1A0; border-color:#8FD1A0}
+
+.tree{font-family:var(--mono); font-size:13px; line-height:1.85; background:var(--surface);
+  border:1px solid var(--rule); border-radius:2px; padding:16px 20px; margin:0 0 20px;
+  white-space:pre; overflow-x:auto; color:var(--ink)}
+.tree i{font-style:normal; color:var(--ink-3)}
+
+.sim{background:var(--surface); border:1px solid var(--rule); border-top:4px solid var(--money);
+  border-radius:2px; margin:0 0 22px}
+.sim-head{padding:14px 22px; border-bottom:1px solid var(--rule); background:var(--surface-2);
+  font-family:var(--mono); font-size:11px; color:var(--ink-2); display:flex; flex-wrap:wrap; gap:4px 18px; justify-content:space-between}
+.sim-head b{color:var(--ink); font-weight:600}
+.sim-body{padding:20px 22px}
+.sim label{display:block; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 6px}
+.sim textarea,.sim select,.sim input{width:100%; font:inherit; font-size:15px; color:var(--ink);
+  background:var(--bg); border:1px solid var(--rule-2); border-radius:2px; padding:10px 12px; margin:0 0 14px}
+.sim textarea{min-height:120px; resize:vertical; line-height:1.55}
+.sim .row{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0 16px}
+.btns{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 6px}
+.btn{font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  padding:9px 14px; border-radius:2px; border:1px solid var(--rule-2); background:var(--surface);
+  color:var(--ink); cursor:pointer}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--surface)}
+.out{margin-top:16px}
+.out:empty{display:none}
+.toolout{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1px;
+  background:var(--rule); border:1px solid var(--rule); border-radius:2px; margin:0 0 16px}
+.toolout > div{background:var(--surface); padding:12px 14px; min-width:0}
+.toolout h5{margin:0 0 6px; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3)}
+.toolout .payload{font-family:var(--mono); font-size:11.5px; line-height:1.6; white-space:pre-wrap;
+  word-break:break-word; color:var(--ink-2); margin:6px 0 0}
+.big2{font-family:var(--display); font-size:30px; line-height:1}
+.report{font-family:var(--mono); font-size:12.5px; line-height:1.75; white-space:pre-wrap;
+  background:var(--surface-2); border-radius:2px; padding:14px 16px; color:var(--ink); word-break:break-word}
+.note-sm{font-size:13.5px; color:var(--ink-3); margin:8px 0 0; line-height:1.5}
+
+details.qa{background:var(--surface); border:1px solid var(--rule); border-radius:2px; margin:0 0 10px}
+details.qa summary{cursor:pointer; padding:14px 18px; font-weight:500; list-style:none; display:flex; gap:12px}
+details.qa summary::-webkit-details-marker{display:none}
+details.qa summary::before{content:"+"; font-family:var(--mono); color:var(--accent); font-weight:600; width:12px; flex:none}
+details.qa[open] summary::before{content:"\2212"}
+details.qa .a{padding:0 18px 16px 42px; font-size:15px; color:var(--ink-2)}
+details.qa .a p:last-child{margin-bottom:0}
+
+.series{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px}
+.series a{text-decoration:none}
+.anno{grid-template-columns:32px minmax(0,1fr)}
+:not(pre) > code{overflow-wrap:anywhere}
+
+.partbreak{border-top:3px double var(--ink); border-bottom:3px double var(--ink); margin-top:48px; padding:44px 0 34px; background:var(--surface-2); margin-inline:-20px; padding-inline:20px}
+.parttitle{font-family:var(--display); font-weight:400; font-size:clamp(38px,8vw,64px); line-height:1; letter-spacing:-.01em; margin:0 0 18px}
+.parttitle em{font-style:italic; color:var(--accent)}
+.toc h4{font-family:var(--mono); font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 10px}
+.toc + .toc{border-top:none; padding-top:6px; margin-top:14px}
+kbd{font-family:var(--mono); font-size:.82em; border:1px solid var(--rule-2); border-bottom-width:2px; border-radius:3px; padding:0 5px; background:var(--surface)}
+#bench .toolout{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.bench-row select{width:auto; min-width:52px; padding:5px 6px; margin:0; font-size:13px}
 </style>
+</head>
+<body>
 
 <header>
   <div class="col">
-    <p class="eyebrow">Applied AI · Case study · Agentic system design</p>
+    <p class="eyebrow">AI Infusion · Classes 9 &amp; 10 · Design → evals → hands-on build</p>
     <h1>The <em>Refund</em> Bench</h1>
     <p class="standfirst">A customer types one angry paragraph. Inside it are four separate accusations, some true, some false, one unknowable. An agent must find them, judge each one against evidence, and decide how much money to give back — in under fifteen seconds, without ever paying twice.</p>
     <div class="meta">
@@ -256,12 +342,44 @@ footer{border-top:3px double var(--ink); margin-top:40px; padding-top:22px; font
       <span><b>Budget</b> 14 LLM calls per dispute</span>
       <span><b>Hard limit</b> ₹2,000 auto-approval cap</span>
     </div>
+    <nav class="toc" aria-label="Part 1 contents">
+      <h4>Part 1 · Class 9 · design the flow</h4>
+      <ol>
+        <li><a href="#hook"><span class="n">01</span>Why three judges?</a></li>
+        <li><a href="#case"><span class="n">02</span>The case: four accusations</a></li>
+        <li><a href="#rulings"><span class="n">03</span>Twelve rulings, one cheque</a></li>
+        <li><a href="#arch"><span class="n">04</span>Four stages, one explodes</a></li>
+        <li><a href="#numbers"><span class="n">05</span>14 calls &amp; the latency budget</a></li>
+        <li><a href="#capacity"><span class="n">06</span>Capacity &amp; retention</a></li>
+        <li><a href="#production"><span class="n">07</span>Queues, 429s, visibility timeout</a></li>
+        <li><a href="#loop"><span class="n">08</span>The loop's five landmines</a></li>
+        <li><a href="#prompts"><span class="n">09</span>The three prompts</a></li>
+        <li><a href="#decisions"><span class="n">10</span>Decisions people get wrong</a></li>
+        <li><a href="#next"><span class="n">11</span>Extensions</a></li>
+        <li><a href="#patterns"><span class="n">12</span>Where else this shape fits</a></li>
+      </ol>
+    </nav>
+    <nav class="toc" aria-label="Part 2 contents">
+      <h4>Part 2 · Class 10 · build it, step by step</h4>
+      <ol>
+        <li><a href="#recap"><span class="n">13</span>Recap &amp; flight plan</a></li>
+        <li><a href="#requirements"><span class="n">14</span>Break down the requirements</a></li>
+        <li><a href="#step0"><span class="n">15</span>Steps 0–2 · setup &amp; money rules</a></li>
+        <li><a href="#step3"><span class="n">16</span>Steps 3–5 · LLM wrapper, prompts, stages</a></li>
+        <li><a href="#evals"><span class="n">17</span>Step 6 · evals</a></li>
+        <li><a href="#step7"><span class="n">18</span>Steps 7–8 · ledger &amp; pipeline</a></li>
+        <li><a href="#step9"><span class="n">19</span>Steps 9–10 · proofs &amp; app</a></li>
+        <li><a href="#sim9"><span class="n">20</span>Try the bench</a></li>
+        <li><a href="#ship"><span class="n">21</span>Milestones &amp; shipping</a></li>
+        <li><a href="#homework"><span class="n">22</span>Homework &amp; self-check</a></li>
+      </ol>
+    </nav>
   </div>
 </header>
 
 <main>
 
-<section>
+<section id="hook">
   <div class="col">
     <p class="kicker">The hook</p>
     <h2>Why does a serious court seat <em>three</em> judges?</h2>
@@ -342,7 +460,7 @@ footer{border-top:3px double var(--ink); margin-top:40px; padding-top:22px; font
   </div>
 </section>
 
-<section>
+<section id="case">
   <div class="col">
     <p class="kicker">The case</p>
     <h2>One angry paragraph, four separate accusations</h2>
@@ -392,7 +510,7 @@ footer{border-top:3px double var(--ink); margin-top:40px; padding-top:22px; font
   </div>
 </section>
 
-<section>
+<section id="rulings">
   <div class="col">
     <p class="kicker">The bench rules</p>
     <h2>Four grievances, twelve rulings, one cheque</h2>
@@ -452,7 +570,7 @@ footer{border-top:3px double var(--ink); margin-top:40px; padding-top:22px; font
   </div>
 </section>
 
-<section>
+<section id="arch">
   <div class="col">
     <p class="kicker">Architecture</p>
     <h2>Four stages, one of which <em>explodes</em></h2>
@@ -689,7 +807,7 @@ message: "We've refunded…"</div></dd></div>
   </div>
 </section>
 
-<section>
+<section id="numbers">
   <div class="col">
     <p class="kicker">Number crunching</p>
     <h2>14 calls, and where they go</h2>
@@ -803,7 +921,7 @@ settlement      <i>1.0 sec</i>
   </div>
 </section>
 
-<section>
+<section id="capacity">
   <div class="col">
     <p class="kicker">Capacity estimation</p>
     <h2>35 KB a dispute, 380 GB a year</h2>
@@ -869,7 +987,7 @@ settlement      <i>1.0 sec</i>
   </div>
 </section>
 
-<section>
+<section id="production">
   <div class="col">
     <p class="kicker">Production shape</p>
     <h2>Submission is synchronous. The work is not.</h2>
@@ -987,7 +1105,7 @@ settlement      <i>1.0 sec</i>
   </div>
 </section>
 
-<section>
+<section id="loop">
   <div class="col">
     <p class="kicker">The agentic loop</p>
     <h2>Twenty lines, five landmines</h2>
@@ -1051,7 +1169,7 @@ settlement      <i>1.0 sec</i>
   </div>
 </section>
 
-<section>
+<section id="prompts">
   <div class="col">
     <p class="kicker">The prompts</p>
     <h2>Three prompts, and the one line in each that does the work</h2>
@@ -1154,7 +1272,7 @@ Amount:    {{refund_amount}}</code></pre>
   </div>
 </section>
 
-<section>
+<section id="decisions">
   <div class="col">
     <p class="kicker">Judgement calls</p>
     <h2>Four decisions people get wrong</h2>
@@ -1195,7 +1313,7 @@ Amount:    {{refund_amount}}</code></pre>
   </div>
 </section>
 
-<section>
+<section id="next">
   <div class="col">
     <p class="kicker">Where it goes next</p>
     <h2>Two extensions worth the money</h2>
@@ -1214,7 +1332,7 @@ Amount:    {{refund_amount}}</code></pre>
   </div>
 </section>
 
-<section>
+<section id="patterns">
   <div class="col">
     <p class="kicker">Where else this shape fits</p>
     <h2>Six places to seat a bench</h2>
@@ -1240,11 +1358,1140 @@ Amount:    {{refund_amount}}</code></pre>
   </div>
 </section>
 
+<div class="partbreak" id="build">
+  <div class="col">
+    <p class="eyebrow">Part 2 · Class 10 · Hands-on</p>
+    <p class="parttitle">Now <em>build</em> the bench</p>
+    <p class="standfirst">Part 1 designed the system on a whiteboard. Part 2 builds it on your laptop, one small file at a time, with a check after every step. Then you measure it with evals before you trust it with money.</p>
+  </div>
+</div>
+
+<section id="recap">
+  <div class="col">
+    <p class="kicker">Step back first</p>
+    <h2>You already know every idea in this build</h2>
+    <p>Nothing in this project is new. It combines lessons from the last three classes:</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:22%">From</th><th style="width:36%">The lesson</th><th>Where it shows up here</th></tr></thead>
+        <tbody>
+          <tr><td><a href="../Class-7-AI-infusion/">Class 7</a></td><td>Tools measure, the model explains. Build parts standalone first.</td><td>The judges give rulings; <code>bench.py</code> counts them in plain code. Money rules are tested before any LLM is wired in.</td></tr>
+          <tr><td><a href="../Class-8-AI-infusion/">Class 8</a></td><td>The model reads, code pays. Thresholds live in constants. Unknown means a human decides.</td><td><code>pricing.py</code> computes every rupee. <code>AUTO_APPROVE_CAP</code> is one constant. Unpriceable becomes <span class="v esc">escalate</span>.</td></tr>
+          <tr><td><a href="#hook">Part 1</a></td><td>Self-consistency, the extraction barrier, frozen evidence, idempotency, checkpoints, the cap, the 60% rule.</td><td>Each one becomes a few lines of <code>pipeline.py</code>, and each gets a test.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Our flight plan</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:9%">Step</th><th style="width:30%">You build</th><th style="width:14%">LLM?</th><th>Proof it works</th></tr></thead>
+        <tbody>
+          <tr><td class="num">0</td><td>venv, packages, <code>.env</code></td><td>1 call</td><td>The model says hi.</td></tr>
+          <tr><td class="num">1</td><td><code>evidence.py</code>: the order and the frozen snapshot</td><td>no</td><td>Snapshot prints <code>21:40</code>.</td></tr>
+          <tr><td class="num">2</td><td><code>pricing.py</code> + <code>bench.py</code>: the money rules</td><td>no</td><td><code>check_rules.py</code>: 12 checks pass.</td></tr>
+          <tr><td class="num">3</td><td><code>llm.py</code>: one wrapper with retry, backoff, jitter</td><td>yes</td><td>A JSON reply parses.</td></tr>
+          <tr><td class="num">4</td><td><code>prompts.py</code>: the three prompts from Part 1</td><td>—</td><td>Read them side by side with Part 1.</td></tr>
+          <tr><td class="num">5</td><td><code>stages.py</code>: extract, judge, settle</td><td>yes</td><td>One extraction returns 4 grievances.</td></tr>
+          <tr><td class="num">6</td><td><strong>Evals</strong>: <code>eval_extract.py</code>, <code>eval_judge.py</code></td><td>yes</td><td>Zero false rejects on the golden set.</td></tr>
+          <tr><td class="num">7</td><td><code>ledger.py</code> + <code>payments.py</code>: memory that survives crashes</td><td>no</td><td>Four tables appear in <code>ledger.db</code>.</td></tr>
+          <tr><td class="num">8</td><td><code>pipeline.py</code>: wire it all together</td><td>yes</td><td>₹689 refunded, ₹60 held.</td></tr>
+          <tr><td class="num">9</td><td><code>bench_check.py</code>: replay and outage tests</td><td>yes</td><td>Paid exactly once; a judge outage still settles.</td></tr>
+          <tr><td class="num">10</td><td><code>app.py</code>: Gradio</td><td>yes</td><td>The whole flow in the browser.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Notice the order. Steps 1 and 2 need no API key at all. Every rupee the system can pay is pinned down and tested before a model is involved. The UI comes last, as in Classes 7 and 8.</p>
+  </div>
+</section>
+
+<section id="requirements">
+  <div class="col">
+    <p class="kicker">Break the problem down</p>
+    <h2>From one angry paragraph to a <em>requirements list</em></h2>
+    <p class="lede">Before writing code, turn the problem statement into a list you can tick off. In an interview, this is the first five minutes and the part most people skip.</p>
+    <p>Read the brief four times, each time looking for one thing:</p>
+    <ol>
+      <li><strong>Inputs and outputs.</strong> In: complaint text plus an order id. Out: a refund amount, a customer message, and a record of every decision.</li>
+      <li><strong>What it must do</strong> (functional requirements).</li>
+      <li><strong>How well it must do it</strong> (non-functional: speed, safety, cost).</li>
+      <li><strong>What we are <em>not</em> building today</strong> (out of scope), so the build stays finishable.</li>
+    </ol>
+
+    <h3>Functional requirements</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:6%">#</th><th style="width:36%">The system must…</th><th style="width:32%">Lives in</th><th>Proved by</th></tr></thead>
+        <tbody>
+          <tr><td class="num">F1</td><td>Freeze the order evidence once per dispute</td><td><code>evidence.py</code>, <code>ledger.py</code></td><td>resume test (step 9)</td></tr>
+          <tr><td class="num">F2</td><td>Split a complaint into atomic, checkable grievances and drop feelings and demands</td><td><code>stages.extract_grievances</code></td><td><code>eval_extract.py</code></td></tr>
+          <tr><td class="num">F3</td><td>Judge each grievance K=3 times, independently</td><td><code>stages.judge_grievance</code></td><td><code>eval_judge.py</code></td></tr>
+          <tr><td class="num">F4</td><td>Decide by majority in code; no majority means escalate</td><td><code>bench.tally</code></td><td><code>check_rules.py</code></td></tr>
+          <tr><td class="num">F5</td><td>Price upheld grievances from the order, never from the model</td><td><code>pricing.price</code></td><td><code>check_rules.py</code></td></tr>
+          <tr><td class="num">F6</td><td>Send anything above ₹2,000 to a human</td><td><code>pipeline.py</code></td><td>the simulator below</td></tr>
+          <tr><td class="num">F7</td><td>Pay the resolved part when ≥ 60% resolved; hold the rest</td><td><code>pipeline.py</code></td><td>outage test (step 9)</td></tr>
+          <tr><td class="num">F8</td><td>Write a customer message that states only the computed amount</td><td><code>stages.write_settlement</code></td><td>read it in the app</td></tr>
+          <tr><td class="num">F9</td><td>Never pay the same dispute twice</td><td><code>pipeline.py</code>, <code>payments.py</code></td><td>replay test (step 9)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Non-functional requirements</h3>
+    <div class="kv">
+      <div><dt>Latency</dt><dd><span class="big">&lt; 15 s</span>p50, so parallel judging</dd></div>
+      <div><dt>Budget</dt><dd><span class="big">14</span>LLM calls for 4 grievances</dd></div>
+      <div><dt>Safety</dt><dd><span class="big">₹2,000</span>hard auto-approval cap</dd></div>
+      <div><dt>Audit</dt><dd><span class="big">every</span>raw ruling kept</dd></div>
+    </div>
+
+    <h3>Out of scope for this build (and what stands in)</h3>
+    <ul>
+      <li><strong>Kafka/SQS and worker fleets.</strong> One process calls <code>resolve_dispute()</code> directly. The ledger still checkpoints every stage, so moving to a queue later changes the caller, not the pipeline.</li>
+      <li><strong>Real order services and payments.</strong> <code>evidence.py</code> and <code>payments.py</code> are small stand-ins with the same shape, including an idempotency key.</li>
+      <li><strong>Several model providers.</strong> One Groq model. Seating judges from different providers is an extension (see the end).</li>
+    </ul>
+
+    <div class="ask">
+      <span class="tag">Ask the room</span>
+      <p><q>Part 1 said the refund amount is “a price lookup against the order”. Look at the extraction schema from Part 1. Can you actually do that lookup?</q></p>
+      <p>No. The schema had <code>text</code>, <code>category</code> and spans, but no <em>item</em> and no <em>quantity</em>. “2 of the 4 biryanis” is in the sentence, but code can't price a sentence. Writing requirements is how you find this <strong>before</strong> building: F5 needs two extra fields. So the extraction prompt in step 4 asks for <code>item</code> and <code>quantity</code>. The model still never computes money. It only says <em>which</em> item and <em>how many</em>, and code looks up the price.</p>
+    </div>
+  </div>
+</section>
+
+<section id="step0">
+  <div class="col">
+    <p class="kicker">Step 0 · setup</p>
+    <h2>The project folder</h2>
+<div class="tree">refund-bench/
+├── .env               <i># GROQ_API_KEY=…  (never commit this)</i>
+├── requirements.txt
+├── evidence.py        <i># step 1 · the order + frozen snapshot</i>
+├── pricing.py         <i># step 2 · rupees, in code</i>
+├── bench.py           <i># step 2 · counting votes, in code</i>
+├── check_rules.py     <i># step 2 · proof, no API key</i>
+├── llm.py             <i># step 3 · one door to the model</i>
+├── prompts.py         <i># step 4 · the three prompts</i>
+├── stages.py          <i># step 5 · extract · judge · settle</i>
+├── eval_extract.py    <i># step 6 · evals</i>
+├── eval_judge.py      <i># step 6 · evals</i>
+├── ledger.py          <i># step 7 · SQLite, four tables</i>
+├── payments.py        <i># step 7 · idempotent payout stand-in</i>
+├── pipeline.py        <i># step 8 · resolve_dispute()</i>
+├── bench_check.py     <i># step 9 · end-to-end proof</i>
+└── app.py             <i># step 10 · Gradio</i></div>
+<div class="file"><div class="file-bar"><span><b>requirements.txt</b> · three packages</span><button class="copy" type="button">COPY</button></div><pre><code>groq
+gradio
+python-dotenv</code></pre></div>
+<div class="file"><div class="file-bar"><span><b>setup.sh</b> · terminal · run from the project folder</span><button class="copy" type="button">COPY</button></div><pre><code>python -m venv .venv
+source .venv/bin/activate          <span class="c-dim"># Windows: .venv\Scripts\activate</span>
+pip install -r requirements.txt
+echo <span class="c-str">"GROQ_API_KEY=your_key_here"</span> &gt; .env
+python -c <span class="c-str">"from llm import call; print(call('Say hi in three words', 0))"</span></code></pre></div>
+    <p>The last line is your milestone-0 proof: if the model answers, the key, the network and the package are all fine. It needs <code>llm.py</code> from step 3, so come back and run it then if you're building strictly in order.</p>
+  </div>
+</section>
+
+<section id="step1">
+  <div class="col">
+    <p class="kicker">Step 1 · no LLM</p>
+    <h2>The evidence, and why we <em>freeze</em> it</h2>
+    <p>In production the evidence comes from several services and keeps changing: ratings move, bills are edited, reconciliation runs overnight. Here it's one dictionary with exactly the fields from Part 1's case. Pay attention to what <em>isn't</em> in it.</p>
+<div class="file"><div class="file-bar"><span><b>evidence.py</b> · step 1</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> copy
+<span class="c-key">from</span> datetime <span class="c-key">import</span> datetime
+
+<span class="c-dim"># Stand-in for the order service. In production this is several services</span>
+<span class="c-dim"># (orders, logistics, ratings) and every field can change after the fact.</span>
+ORDERS = {
+    <span class="c-str">"ORD-1840"</span>: {
+        <span class="c-str">"order_id"</span>: <span class="c-str">"ORD-1840"</span>,
+        <span class="c-str">"line_items"</span>: [
+            {<span class="c-str">"name"</span>: <span class="c-str">"Hyderabadi Biryani"</span>, <span class="c-str">"quantity"</span>: 4, <span class="c-str">"unit_price"</span>: 320},
+            {<span class="c-str">"name"</span>: <span class="c-str">"Paneer Tikka"</span>, <span class="c-str">"quantity"</span>: 1, <span class="c-str">"unit_price"</span>: 360},
+            {<span class="c-str">"name"</span>: <span class="c-str">"Raita"</span>, <span class="c-str">"quantity"</span>: 1, <span class="c-str">"unit_price"</span>: 60},
+            {<span class="c-str">"name"</span>: <span class="c-str">"Gulab Jamun"</span>, <span class="c-str">"quantity"</span>: 1, <span class="c-str">"unit_price"</span>: 91},
+        ],
+        <span class="c-str">"delivery_fee"</span>: 49,                       <span class="c-dim"># order total = 1,840</span>
+        <span class="c-str">"placed_at"</span>: <span class="c-str">"20:15"</span>,
+        <span class="c-str">"delivered_at"</span>: <span class="c-str">"21:40"</span>,
+        <span class="c-str">"sla_minutes"</span>: 45,
+        <span class="c-str">"pickup_weight_kg"</span>: 1.2,
+        <span class="c-str">"expected_weight_kg"</span>: 2.4,
+        <span class="c-str">"partner_rating"</span>: {<span class="c-str">"stars"</span>: 5, <span class="c-str">"rated_at"</span>: <span class="c-str">"21:41"</span>},
+        <span class="c-dim"># note what is NOT here: nothing records packaging condition</span>
+    }
+}
+
+
+SAMPLE_COMPLAINT = (
+    <span class="c-str">"Ordered at 8:15pm and the food showed up at 9:40pm. We had guests over, it was "</span>
+    <span class="c-str">"embarrassing. Two of the four were missing completely. The raita had leaked all over "</span>
+    <span class="c-str">"the inside of the bag. And the delivery guy was rude when I asked him about it. "</span>
+    <span class="c-str">"Honestly the worst experience I've had on this app - refund everything."</span>)
+
+
+<span class="c-key">def</span> snapshot(order_id: str) -&gt; dict:
+    <span class="c-str">"""Freeze the evidence once. Every judge on every grievance sees this copy."""</span>
+    frozen = copy.deepcopy(ORDERS[order_id])
+    frozen[<span class="c-str">"snapshot_taken_at"</span>] = datetime.now().isoformat(timespec=<span class="c-str">"seconds"</span>)
+    <span class="c-key">return</span> frozen</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>Prices add up to the case study</b>4 × ₹320 + ₹360 + ₹60 + ₹91 + ₹49 delivery = ₹1,840. When the arithmetic is internally consistent, you can check every later result by hand.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>The missing field is deliberate</b>Nothing records packaging condition. That's why the raita grievance <em>should</em> escalate, and the eval in step 6 checks that it does.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b><code>deepcopy</code> plus a timestamp</b>The snapshot is a copy, not a reference. If someone edits <code>ORDERS</code> later, the dispute is still judged against what was true at intake, and you can say when that was.</span></div>
+    </div>
+    <div class="calc"><i>prove it</i>
+$ python -c "from evidence import snapshot; print(snapshot('ORD-1840')['delivered_at'])"
+<b>21:40</b></div>
+  </div>
+</section>
+
+<section id="step2">
+  <div class="col">
+    <p class="kicker">Step 2 · no LLM</p>
+    <h2>Write the money rules <em>before</em> the model</h2>
+    <p class="lede">Everything here decides money, and none of it needs an API key. That's exactly why it comes first.</p>
+    <h3>Pricing: rupees come from the order</h3>
+<div class="file"><div class="file-bar"><span><b>pricing.py</b> · step 2 · F5</span><button class="copy" type="button">COPY</button></div><pre><code>ITEM_CATEGORIES = {<span class="c-str">"MISSING_ITEM"</span>, <span class="c-str">"WRONG_ITEM"</span>, <span class="c-str">"QUALITY"</span>, <span class="c-str">"PACKAGING"</span>}
+
+
+<span class="c-key">def</span> find_item(name: str | <span class="c-key">None</span>, evidence: dict) -&gt; dict | <span class="c-key">None</span>:
+    <span class="c-key">if</span> <span class="c-key">not</span> name:
+        <span class="c-key">return</span> <span class="c-key">None</span>
+    name = name.lower()
+    <span class="c-key">for</span> item <span class="c-key">in</span> evidence[<span class="c-str">"line_items"</span>]:
+        <span class="c-key">if</span> name <span class="c-key">in</span> item[<span class="c-str">"name"</span>].lower() <span class="c-key">or</span> item[<span class="c-str">"name"</span>].lower() <span class="c-key">in</span> name:
+            <span class="c-key">return</span> item
+    <span class="c-key">return</span> <span class="c-key">None</span>
+
+
+<span class="c-key">def</span> price(grievance: dict, evidence: dict) -&gt; int | <span class="c-key">None</span>:
+    <span class="c-str">"""Rupees owed if this grievance is upheld. None = code cannot price it -&gt; human."""</span>
+    category = grievance[<span class="c-str">"category"</span>]
+    <span class="c-key">if</span> category == <span class="c-str">"LATE_DELIVERY"</span>:
+        <span class="c-key">return</span> evidence[<span class="c-str">"delivery_fee"</span>]
+    <span class="c-key">if</span> category == <span class="c-str">"PARTNER_CONDUCT"</span>:
+        <span class="c-key">return</span> 0                                      <span class="c-dim"># an ops matter, not a refund</span>
+    <span class="c-key">if</span> category <span class="c-key">in</span> ITEM_CATEGORIES:
+        item = find_item(grievance.get(<span class="c-str">"item"</span>), evidence)
+        <span class="c-key">if</span> item <span class="c-key">is</span> <span class="c-key">None</span>:
+            <span class="c-key">return</span> <span class="c-key">None</span>
+        qty = grievance.get(<span class="c-str">"quantity"</span>) <span class="c-key">or</span> 1
+        qty = max(1, min(int(qty), item[<span class="c-str">"quantity"</span>]))   <span class="c-dim"># never refund more than was ordered</span>
+        <span class="c-key">return</span> qty * item[<span class="c-str">"unit_price"</span>]
+    <span class="c-key">return</span> <span class="c-key">None</span>                                       <span class="c-dim"># BILLING, UNKNOWN: always a human</span></code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b><code>None</code> means “a human prices this”</b>Billing disputes, unknown categories and items that aren't on the order all return <code>None</code>. The pipeline turns an upheld-but-unpriceable grievance into an escalation. Code never guesses a number.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>Quantity is clamped</b>If the model extracts “9 biryanis missing” from an order of 4, <code>min(qty, ordered)</code> caps it. A mis-extraction or a lying customer can't push the refund past what was bought.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>Partner conduct prices at ₹0</b>Even if upheld, rudeness isn't a refund line. It's an operations matter. Writing that down as a rule is a product decision you can now see and change.</span></div>
+    </div>
+
+    <h3>The bench: a vote is a <code>Counter</code></h3>
+<div class="file"><div class="file-bar"><span><b>bench.py</b> · step 2 · F4</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> collections <span class="c-key">import</span> Counter
+
+
+<span class="c-key">def</span> tally(rulings: list) -&gt; dict | <span class="c-key">None</span>:
+    <span class="c-str">"""Count K rulings in plain code. None in the list = a judge call that failed."""</span>
+    <span class="c-key">if</span> <span class="c-key">not</span> rulings <span class="c-key">or</span> any(r <span class="c-key">is</span> <span class="c-key">None</span> <span class="c-key">for</span> r <span class="c-key">in</span> rulings):
+        <span class="c-key">return</span> <span class="c-key">None</span>                                   <span class="c-dim"># unresolved, not rejected</span>
+    votes = [r[<span class="c-str">"ruling"</span>] <span class="c-key">for</span> r <span class="c-key">in</span> rulings]
+    winner, count = Counter(votes).most_common(1)[0]
+    <span class="c-key">if</span> count * 2 &lt;= len(votes):                       <span class="c-dim"># no strict majority (e.g. U, R, E)</span>
+        winner = <span class="c-str">"ESCALATE"</span>
+    agreeing = [r.get(<span class="c-str">"confidence"</span>, 0) <span class="c-key">for</span> r <span class="c-key">in</span> rulings <span class="c-key">if</span> r[<span class="c-str">"ruling"</span>] == winner]
+    <span class="c-key">return</span> {
+        <span class="c-str">"ruling"</span>: winner,
+        <span class="c-str">"votes"</span>: <span class="c-str">","</span>.join(v[0] <span class="c-key">for</span> v <span class="c-key">in</span> votes),       <span class="c-dim"># "U,E,E" - keep the split, not just the winner</span>
+        <span class="c-str">"split"</span>: <span class="c-str">f"{count}-{len(votes) - count}"</span>,
+        <span class="c-dim"># logged and charted, never branched on: it is a number the model made up</span>
+        <span class="c-str">"confidence"</span>: round(sum(agreeing) / len(agreeing), 2) <span class="c-key">if</span> agreeing <span class="c-key">else</span> 0.0,
+    }</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>A failed call is not a vote</b>If any judge call failed, the grievance is <em>unresolved</em>, never <span class="v rej">rejected</span>. That's the asymmetry from Part 1 in one <code>return None</code>.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>“Strict majority” in one line</b><code>count * 2 &lt;= len(votes)</code> catches U, R, E: three different rulings, so no majority, so <span class="v esc">escalate</span>.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>Keep the split</b><code>"U,E,E"</code> and <code>"2-1"</code> are stored next to the winner. A 3–0 and a 2–1 <span class="v up">upheld</span> are the same verdict with very different risk.</span></div>
+      <div class="anno"><span class="n">4</span><span class="t"><b>Confidence is logged, never branched on</b>It's an average of numbers the model generated. Chart it, but no <code>if</code> anywhere in the project reads it.</span></div>
+    </div>
+
+    <h3>Prove it, still with no API key</h3>
+<div class="file"><div class="file-bar"><span><b>check_rules.py</b> · step 2 · python check_rules.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> bench <span class="c-key">import</span> tally
+<span class="c-key">from</span> evidence <span class="c-key">import</span> snapshot
+<span class="c-key">from</span> pricing <span class="c-key">import</span> price
+
+ev = snapshot(<span class="c-str">"ORD-1840"</span>)
+
+
+<span class="c-key">def</span> r(ruling, confidence=0.9):
+    <span class="c-key">return</span> {<span class="c-str">"ruling"</span>: ruling, <span class="c-str">"confidence"</span>: confidence}
+
+
+U, R, E = <span class="c-str">"UPHELD"</span>, <span class="c-str">"REJECTED"</span>, <span class="c-str">"ESCALATE"</span>
+
+<span class="c-dim"># the bench - counting, no model</span>
+assert tally([r(U), r(U), r(U)])[<span class="c-str">"ruling"</span>] == U
+assert tally([r(U), r(E), r(E)])[<span class="c-str">"ruling"</span>] == E           <span class="c-dim"># 1-2 -&gt; majority escalates</span>
+assert tally([r(U), r(U), r(R)])[<span class="c-str">"split"</span>] == <span class="c-str">"2-1"</span>        <span class="c-dim"># the split is kept, not thrown away</span>
+assert tally([r(U), r(R), r(E)])[<span class="c-str">"ruling"</span>] == E           <span class="c-dim"># no majority at all -&gt; human</span>
+assert tally([r(U), <span class="c-key">None</span>, r(U)]) <span class="c-key">is</span> <span class="c-key">None</span>                  <span class="c-dim"># a failed call is not a vote</span>
+
+<span class="c-dim"># the price list - code, no model</span>
+assert price({<span class="c-str">"category"</span>: <span class="c-str">"LATE_DELIVERY"</span>}, ev) == 49
+assert price({<span class="c-str">"category"</span>: <span class="c-str">"MISSING_ITEM"</span>, <span class="c-str">"item"</span>: <span class="c-str">"Hyderabadi Biryani"</span>, <span class="c-str">"quantity"</span>: 2}, ev) == 640
+assert price({<span class="c-str">"category"</span>: <span class="c-str">"MISSING_ITEM"</span>, <span class="c-str">"item"</span>: <span class="c-str">"biryani"</span>, <span class="c-str">"quantity"</span>: 9}, ev) == 1280  <span class="c-dim"># capped</span>
+assert price({<span class="c-str">"category"</span>: <span class="c-str">"PACKAGING"</span>, <span class="c-str">"item"</span>: <span class="c-str">"Raita"</span>, <span class="c-str">"quantity"</span>: <span class="c-key">None</span>}, ev) == 60
+assert price({<span class="c-str">"category"</span>: <span class="c-str">"PARTNER_CONDUCT"</span>}, ev) == 0
+assert price({<span class="c-str">"category"</span>: <span class="c-str">"QUALITY"</span>, <span class="c-str">"item"</span>: <span class="c-str">"Pizza"</span>, <span class="c-str">"quantity"</span>: 1}, ev) <span class="c-key">is</span> <span class="c-key">None</span>   <span class="c-dim"># not on the order</span>
+assert price({<span class="c-str">"category"</span>: <span class="c-str">"BILLING"</span>}, ev) <span class="c-key">is</span> <span class="c-key">None</span>
+
+print(<span class="c-str">"all 12 rule checks passed - no API key needed"</span>)</code></pre></div>
+    <div class="calc"><i>$ python check_rules.py</i>
+<b>all 12 rule checks passed - no API key needed</b></div>
+    <div class="room">
+      <span class="tag">Why this order matters</span>
+      <p>If step 8 later refunds the wrong amount, you already <em>know</em> pricing and tallying are correct. So the bug is in extraction (wrong item or quantity) or judging (wrong ruling). Two suspects instead of five, and no tokens spent finding out.</p>
+    </div>
+  </div>
+</section>
+
+<section id="step3">
+  <div class="col">
+    <p class="kicker">Step 3 · the model's only door</p>
+    <h2>One wrapper for every LLM call</h2>
+    <p>Every call in the project goes through these three functions, so retry, backoff, jitter and JSON parsing are written once.</p>
+<div class="file"><div class="file-bar"><span><b>llm.py</b> · step 3</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
+<span class="c-key">import</span> os
+<span class="c-key">import</span> random
+<span class="c-key">import</span> re
+<span class="c-key">import</span> time
+
+<span class="c-key">from</span> dotenv <span class="c-key">import</span> load_dotenv
+<span class="c-key">from</span> groq <span class="c-key">import</span> Groq, RateLimitError, APIConnectionError
+
+load_dotenv()
+client = Groq(api_key=os.environ[<span class="c-str">"GROQ_API_KEY"</span>])
+MODEL = <span class="c-str">"openai/gpt-oss-20b"</span>
+MAX_RETRIES = 4
+
+
+<span class="c-key">def</span> call(prompt: str, temperature: float) -&gt; str:
+    <span class="c-key">for</span> attempt <span class="c-key">in</span> range(MAX_RETRIES + 1):
+        try:
+            resp = client.chat.completions.create(
+                model=MODEL, temperature=temperature,
+                messages=[{<span class="c-str">"role"</span>: <span class="c-str">"user"</span>, <span class="c-str">"content"</span>: prompt}])
+            <span class="c-key">return</span> resp.choices[0].message.content
+        except (RateLimitError, APIConnectionError):          <span class="c-dim"># 429 or network blip</span>
+            <span class="c-key">if</span> attempt == MAX_RETRIES:
+                raise
+            time.sleep(2 ** attempt + random.uniform(0, 1))   <span class="c-dim"># backoff + jitter</span>
+
+
+<span class="c-key">def</span> call_json(prompt: str, temperature: float):
+    text = call(prompt, temperature).strip()
+    text = re.sub(<span class="c-str">r"^```(?:json)?\s*|\s*```$"</span>, <span class="c-str">""</span>, text)      <span class="c-dim"># models love fences</span>
+    <span class="c-key">return</span> json.loads(text)
+
+
+<span class="c-key">def</span> render(template: str, **values) -&gt; str:
+    <span class="c-dim"># {{name}} placeholders, so the JSON braces inside prompts stay untouched</span>
+    <span class="c-key">for</span> key, value <span class="c-key">in</span> values.items():
+        template = template.replace(<span class="c-str">"{{"</span> + key + <span class="c-str">"}}"</span>, str(value))
+    <span class="c-key">return</span> template</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>Backoff plus jitter, exactly as in Part 1</b><code>2 ** attempt</code> waits 1, 2, 4, 8 seconds. <code>random.uniform(0, 1)</code> is the jitter that stops forty workers retrying in lockstep. Only rate limits and network errors are retried. A bad request fails immediately, because retrying it would just fail again more slowly.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>Models wrap JSON in fences anyway</b>The prompt says “no markdown fences”, and sometimes the model adds them. The regex strips them before <code>json.loads</code>. Defend in code; don't just ask nicely in the prompt.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b><code>{{name}}</code> placeholders</b>The prompts contain literal JSON braces, which would break Python's <code>.format()</code>. A tiny <code>replace</code>-based <code>render</code> leaves them alone. LangChain's templates (Class 8) solve the same problem by escaping braces as <code>{{ }}</code>.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="step4">
+  <div class="col">
+    <p class="kicker">Step 4 · prompts</p>
+    <h2>The three prompts, with two edits</h2>
+    <p>These are Part 1's prompts almost word for word. Re-read <a href="#prompts">“the one line in each that does the work”</a> first. Two edits came out of the requirements:</p>
+    <ul>
+      <li><strong>Extraction</strong> now asks for <code>item</code> and <code>quantity</code> (from F5). The model still doesn't judge or price anything.</li>
+      <li><strong>Settlement</strong> now says “do not mention grievances that were REJECTED”. Part 1 called silently dropping g4 a product choice, and a choice only holds if it's written into the prompt.</li>
+    </ul>
+<div class="file"><div class="file-bar"><span><b>prompts.py</b> · step 4</span><button class="copy" type="button">COPY</button></div><pre><code>CATEGORIES = [<span class="c-str">"LATE_DELIVERY"</span>, <span class="c-str">"MISSING_ITEM"</span>, <span class="c-str">"WRONG_ITEM"</span>, <span class="c-str">"QUALITY"</span>,
+              <span class="c-str">"PACKAGING"</span>, <span class="c-str">"PARTNER_CONDUCT"</span>, <span class="c-str">"BILLING"</span>]
+
+EXTRACT = <span class="c-str">"""You are a precise dispute-intake assistant.
+
+Given a customer complaint and the order's line items,
+extract every atomic, checkable grievance.
+
+Rules:
+- A grievance is a statement about something that happened
+  to THIS order, which evidence could confirm or contradict
+- Exclude feelings, opinions, demands, and rhetorical questions
+- Do NOT judge whether the grievance is true - only extract it
+- Each grievance must be self-contained: resolve pronouns and
+  vague references against the order's line items
+- Assign one category from the list below
+- If it concerns a line item, copy the item name exactly and the
+  quantity affected; otherwise use null
+- Return ONLY a JSON array, no preamble, no markdown fences
+
+Categories: LATE_DELIVERY | MISSING_ITEM | WRONG_ITEM |
+            QUALITY | PACKAGING | PARTNER_CONDUCT | BILLING
+
+Schema:
+[{ "text": "&lt;the grievance as a standalone sentence&gt;",
+   "category": "&lt;one of the above&gt;",
+   "item": "&lt;line item name or null&gt;", "quantity": &lt;int or null&gt;,
+   "span_start": &lt;char offset&gt;, "span_end": &lt;char offset&gt; }]
+
+Complaint:  {{complaint_text}}
+Order:      {{line_items_json}}"""</span>
+
+JUDGE = <span class="c-str">"""You are an impartial claims adjudicator.
+Rule on the following grievance using ONLY the evidence given.
+
+Grievance: {{grievance_text}}
+Evidence:  {{evidence_snapshot_json}}
+
+Rulings:
+- UPHELD:   the evidence supports the grievance
+- REJECTED: the evidence contradicts the grievance
+- ESCALATE: the evidence is silent or ambiguous on this point
+
+Rules:
+- Do not hedge - pick the single best ruling
+- Rule ONLY on the evidence provided. Do not reason about what
+  is typical, likely, or fair
+- If the evidence does not speak to this grievance, the ruling
+  is ESCALATE - never REJECTED
+- Return ONLY valid JSON, no preamble, no markdown fences
+
+Schema:
+{ "ruling": "UPHELD" | "REJECTED" | "ESCALATE",
+  "confidence": &lt;float 0.0 to 1.0&gt;,
+  "evidence_cited": "&lt;which field(s) decided it&gt;",
+  "reasoning": "&lt;one to three sentences&gt;" }"""</span>
+
+SETTLE = <span class="c-str">"""You are a customer-support writer for a food delivery app.
+
+Below is a customer's complaint, the final ruling on each
+grievance, and the refund amount already calculated.
+
+Write a 3-4 sentence reply that:
+- States the refund amount and when it will arrive
+- Names what was resolved and what a colleague will look into
+- Acknowledges the experience without grovelling
+
+Rules:
+- Do NOT re-adjudicate any ruling - treat all rulings as final
+- Do NOT state, recalculate, or negotiate any amount other
+  than the one given
+- Never blame the restaurant or the delivery partner
+- Do not mention grievances that were REJECTED
+- Plain language. No apology more than once.
+
+Complaint: {{complaint_text}}
+Rulings:   {{verdicts_json}}
+Amount:    {{refund_amount}}"""</span></code></pre></div>
+  </div>
+</section>
+
+<section id="step5">
+  <div class="col">
+    <p class="kicker">Step 5 · the three stages</p>
+    <h2>Extract, judge, settle: three functions</h2>
+<div class="file"><div class="file-bar"><span><b>stages.py</b> · step 5 · F2, F3, F8</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
+
+<span class="c-key">from</span> llm <span class="c-key">import</span> call, call_json, render
+<span class="c-key">from</span> prompts <span class="c-key">import</span> CATEGORIES, EXTRACT, JUDGE, SETTLE
+
+RULINGS = {<span class="c-str">"UPHELD"</span>, <span class="c-str">"REJECTED"</span>, <span class="c-str">"ESCALATE"</span>}
+
+
+<span class="c-key">def</span> extract_grievances(complaint: str, evidence: dict) -&gt; list:
+    <span class="c-str">"""Stage 2 - one call, temperature 0. The barrier everything waits on."""</span>
+    raw = call_json(render(EXTRACT, complaint_text=complaint,
+                           line_items_json=json.dumps(evidence[<span class="c-str">"line_items"</span>])), temperature=0)
+    grievances = []
+    <span class="c-key">for</span> i, g <span class="c-key">in</span> enumerate(raw, 1):
+        grievances.append({
+            <span class="c-str">"grievance_id"</span>: <span class="c-str">f"g{i}"</span>,              <span class="c-dim"># ids come from code, not the model</span>
+            <span class="c-str">"text"</span>: g[<span class="c-str">"text"</span>],
+            <span class="c-str">"category"</span>: g.get(<span class="c-str">"category"</span>) <span class="c-key">if</span> g.get(<span class="c-str">"category"</span>) <span class="c-key">in</span> CATEGORIES <span class="c-key">else</span> <span class="c-str">"UNKNOWN"</span>,
+            <span class="c-str">"item"</span>: g.get(<span class="c-str">"item"</span>),
+            <span class="c-str">"quantity"</span>: g.get(<span class="c-str">"quantity"</span>),
+            <span class="c-str">"span_start"</span>: g.get(<span class="c-str">"span_start"</span>),
+            <span class="c-str">"span_end"</span>: g.get(<span class="c-str">"span_end"</span>),
+        })
+    <span class="c-key">return</span> grievances
+
+
+<span class="c-key">def</span> judge_grievance(grievance: dict, evidence: dict, judge_index: int) -&gt; dict:
+    <span class="c-str">"""Stage 3 - one of K independent judges. No shared history, T &gt; 0."""</span>
+    prompt = render(JUDGE, grievance_text=grievance[<span class="c-str">"text"</span>],
+                    evidence_snapshot_json=json.dumps(evidence))
+    try:
+        ruling = call_json(prompt, temperature=0.7)
+    except (json.JSONDecodeError, TypeError):
+        ruling = {}
+    <span class="c-key">if</span> ruling.get(<span class="c-str">"ruling"</span>) <span class="c-key">not</span> <span class="c-key">in</span> RULINGS:            <span class="c-dim"># unparseable -&gt; the safe verdict</span>
+        ruling = {<span class="c-str">"ruling"</span>: <span class="c-str">"ESCALATE"</span>, <span class="c-str">"confidence"</span>: 0.0,
+                  <span class="c-str">"evidence_cited"</span>: <span class="c-str">""</span>, <span class="c-str">"reasoning"</span>: <span class="c-str">"judge output could not be parsed"</span>}
+    ruling[<span class="c-str">"judge_index"</span>] = judge_index
+    <span class="c-key">return</span> ruling
+
+
+<span class="c-key">def</span> write_settlement(complaint: str, verdicts: list, amount: int) -&gt; str:
+    <span class="c-str">"""Stage 4 - one call, low temperature. Writes words about a number it was given."""</span>
+    summary = [{<span class="c-str">"grievance"</span>: v[<span class="c-str">"text"</span>], <span class="c-str">"ruling"</span>: v[<span class="c-str">"ruling"</span>]} <span class="c-key">for</span> v <span class="c-key">in</span> verdicts]
+    <span class="c-key">return</span> call(render(SETTLE, complaint_text=complaint,
+                       verdicts_json=json.dumps(summary), refund_amount=<span class="c-str">f"Rs {amount}"</span>),
+                temperature=0.2)</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>Ids come from code: <code>g1</code>, <code>g2</code>…</b>Part 1's schema had the model invent a uuid. Here code numbers the grievances. Ids then stay stable across a resumed run, and the ledger can say “judge 2 on g3 already ruled”.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>Validate the enum</b>A category outside the list becomes <code>UNKNOWN</code>, which pricing refuses to price. A ruling outside UPHELD, REJECTED and ESCALATE becomes ESCALATE. Every model output passes through an allow-list before code acts on it.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>Temperature per stage</b>Extraction runs at 0, because you want the same grievances every time. Judges run at 0.7, because at 0 all three judges would answer identically and the bench would be <em>theatre</em>. Settlement runs at 0.2, because the customer reads it and it must not invent anything.</span></div>
+      <div class="anno"><span class="n">4</span><span class="t"><b>The settlement call gets rulings, not reasoning</b>The writer sees each grievance and its final ruling, plus the amount as a string. It can't re-argue a case it never saw argued.</span></div>
+    </div>
+    <div class="calc"><i>prove it: one extraction on the sample complaint (expected output; the wording of the text varies)</i>
+$ python -c "from stages import *; from evidence import *; \
+  [print(g['grievance_id'], g['category'], g['item'], g['quantity']) \
+   for g in extract_grievances(SAMPLE_COMPLAINT, snapshot('ORD-1840'))]"
+g1 <b>LATE_DELIVERY</b> None None
+g2 <b>MISSING_ITEM</b> Hyderabadi Biryani 2
+g3 <b>PACKAGING</b> Raita 1
+g4 <b>PARTNER_CONDUCT</b> None None        <i>← "embarrassing" and "refund everything" are gone</i></div>
+  </div>
+</section>
+
+<section id="evals">
+  <div class="col">
+    <p class="kicker">Step 6 · evals</p>
+    <h2>Measure the judges <em>before</em> you trust them with money</h2>
+    <p class="lede">A unit test asks “is the answer exactly X?”. That can't work for a component that answers differently each time. An <strong>eval</strong> asks “across a set of cases where we know the right answer, how often is it right, and how bad are the mistakes?”</p>
+    <p>Three ideas make an eval:</p>
+    <ol>
+      <li><strong>A golden set.</strong> Inputs paired with the answer a careful human would give, on <em>this</em> evidence. Start with 8 cases, aim for 200, and add every production mistake you find.</li>
+      <li><strong>Metrics chosen by the cost of each error.</strong> Plain accuracy treats every mistake as equal, and here they aren't. Wrongly <em>refusing</em> a valid claim loses a customer, so that metric gets a hard limit.</li>
+      <li><strong>A gate.</strong> The eval exits non-zero when the limit is breached, so a prompt change that makes the judges harsher fails CI before it reaches customers.</li>
+    </ol>
+
+    <h3>Which metric guards which risk</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:26%">Metric</th><th style="width:34%">Catches</th><th>Gate</th></tr></thead>
+        <tbody>
+          <tr><td><strong>False rejects</strong></td><td>Honest claim refused: the expensive error</td><td><strong>must be 0</strong></td></tr>
+          <tr><td><strong>False approvals</strong></td><td>Paid a claim the evidence doesn't support</td><td>watch and trend</td></tr>
+          <tr><td><strong>Bench vs single-judge accuracy</strong></td><td>Whether K=3 is earning its 3× bill</td><td>bench should be ≥ single</td></tr>
+          <tr><td><strong>Unanimity rate</strong></td><td>How often cases are clear; falling means drift</td><td>watch and trend</td></tr>
+          <tr><td><strong>Calls used</strong></td><td>Cost per eval run, which is also cost per dispute</td><td>matches 1 + N×K + 1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Eval 1: does extraction split complaints correctly?</h3>
+<div class="file"><div class="file-bar"><span><b>eval_extract.py</b> · step 6 · python eval_extract.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> evidence <span class="c-key">import</span> SAMPLE_COMPLAINT, snapshot
+<span class="c-key">from</span> stages <span class="c-key">import</span> extract_grievances
+
+EVIDENCE = snapshot(<span class="c-str">"ORD-1840"</span>)
+
+<span class="c-dim"># complaint -&gt; the categories a careful human would extract (order doesn't matter)</span>
+CASES = [
+    (SAMPLE_COMPLAINT, [<span class="c-str">"LATE_DELIVERY"</span>, <span class="c-str">"MISSING_ITEM"</span>, <span class="c-str">"PACKAGING"</span>, <span class="c-str">"PARTNER_CONDUCT"</span>]),
+    (<span class="c-str">"Worst app ever. Never ordering again. Refund me."</span>, []),          <span class="c-dim"># feelings + demand only</span>
+    (<span class="c-str">"The Paneer Tikka was stone cold and I was charged twice."</span>, [<span class="c-str">"QUALITY"</span>, <span class="c-str">"BILLING"</span>]),
+]
+
+passed = 0
+<span class="c-key">for</span> complaint, expected <span class="c-key">in</span> CASES:
+    got = sorted(g[<span class="c-str">"category"</span>] <span class="c-key">for</span> g <span class="c-key">in</span> extract_grievances(complaint, EVIDENCE))
+    ok = got == sorted(expected)
+    passed += ok
+    print(<span class="c-str">f"{'PASS' if ok else 'FAIL'}  expected {sorted(expected)}\n      got      {got}"</span>)
+print(<span class="c-str">f"\nextraction: {passed}/{len(CASES)} complaints split correctly"</span>)</code></pre></div>
+    <p>Each case pins a different rule from the extraction prompt: the four-grievance case study, a complaint that is <em>only</em> feelings and demands (so the right answer is zero grievances), and a two-claim complaint where one claim is billing and must later go to a human.</p>
+
+    <h3>Eval 2: does the bench rule correctly, and is K=3 worth it?</h3>
+<div class="file"><div class="file-bar"><span><b>eval_judge.py</b> · step 6 · python eval_judge.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> bench <span class="c-key">import</span> tally
+<span class="c-key">from</span> evidence <span class="c-key">import</span> snapshot
+<span class="c-key">from</span> stages <span class="c-key">import</span> judge_grievance
+
+K = 3
+EVIDENCE = snapshot(<span class="c-str">"ORD-1840"</span>)
+
+<span class="c-dim"># The golden set: grievance -&gt; the ruling a careful human gives on THIS evidence.</span>
+GOLDEN = [
+    (<span class="c-str">"Order was delivered 85 minutes after it was placed."</span>, <span class="c-str">"UPHELD"</span>),
+    (<span class="c-str">"2 of the 4 Hyderabadi Biryani units ordered were not delivered."</span>, <span class="c-str">"UPHELD"</span>),
+    (<span class="c-str">"The bag weighed about half of what the order should weigh."</span>, <span class="c-str">"UPHELD"</span>),
+    (<span class="c-str">"The order was delivered more than two hours late."</span>, <span class="c-str">"REJECTED"</span>),
+    (<span class="c-str">"The customer was charged a delivery fee of Rs 99."</span>, <span class="c-str">"REJECTED"</span>),
+    (<span class="c-str">"The delivery partner behaved rudely when asked about the missing items."</span>, <span class="c-str">"REJECTED"</span>),
+    (<span class="c-str">"The raita container leaked inside the delivery bag."</span>, <span class="c-str">"ESCALATE"</span>),
+    (<span class="c-str">"The Paneer Tikka was cold on arrival."</span>, <span class="c-str">"ESCALATE"</span>),
+]
+
+single_ok = bench_ok = false_rejects = false_approvals = unanimous = 0
+print(<span class="c-str">f"{'gold':9} {'1 judge':9} {'bench':9} votes  grievance"</span>)
+<span class="c-key">for</span> text, gold <span class="c-key">in</span> GOLDEN:
+    rulings = [judge_grievance({<span class="c-str">"text"</span>: text}, EVIDENCE, k) <span class="c-key">for</span> k <span class="c-key">in</span> range(K)]
+    verdict = tally(rulings)
+    single, bench = rulings[0][<span class="c-str">"ruling"</span>], verdict[<span class="c-str">"ruling"</span>]
+    single_ok += single == gold
+    bench_ok += bench == gold
+    false_rejects += bench == <span class="c-str">"REJECTED"</span> <span class="c-key">and</span> gold != <span class="c-str">"REJECTED"</span>   <span class="c-dim"># the expensive mistake</span>
+    false_approvals += bench == <span class="c-str">"UPHELD"</span> <span class="c-key">and</span> gold != <span class="c-str">"UPHELD"</span>     <span class="c-dim"># the cheaper one: money we didn't owe</span>
+    unanimous += verdict[<span class="c-str">"split"</span>] == <span class="c-str">f"{K}-0"</span>
+    print(<span class="c-str">f"{gold:9} {single:9} {bench:9} {verdict['votes']:6} {text[:52]}"</span>)
+
+n = len(GOLDEN)
+print(<span class="c-str">f"\nsingle-judge accuracy {single_ok}/{n}   bench accuracy {bench_ok}/{n}"</span>)
+print(<span class="c-str">f"false rejects {false_rejects}   false approvals {false_approvals}   "</span>
+      <span class="c-str">f"unanimous {unanimous}/{n}   LLM calls {n * K}"</span>)
+<span class="c-key">if</span> false_rejects:
+    raise SystemExit(<span class="c-str">"EVAL GATE FAILED: the bench refused a claim the evidence supports"</span>)</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>The golden set covers all three rulings</b>Three upheld, three rejected (two of them contradicted by the evidence: “two hours late” vs 85 minutes, “₹99 fee” vs ₹49), and two that the evidence can't speak to, so they should escalate.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>Single judge vs bench, same run</b><code>rulings[0]</code> is what you'd get with K=1. Comparing it with the tally on the same calls shows what the extra two calls bought.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>The gate is asymmetric on purpose</b>Only false rejects fail the run. False approvals are printed and trended, because the cap and human review already bound that risk.</span></div>
+    </div>
+    <div class="calc"><i>example run against a stand-in model; your numbers will differ by model and by day</i>
+gold      1 judge   bench     votes  grievance
+UPHELD    UPHELD    UPHELD    U,U,U  Order was delivered 85 minutes after it was placed.
+…
+ESCALATE  <b>UPHELD</b>    ESCALATE  U,E,E  The raita container leaked inside the delivery bag.
+ESCALATE  UPHELD    <b>UPHELD</b>    U,U,E  The Paneer Tikka was cold on arrival.
+
+single-judge accuracy 6/8   bench accuracy <b>7/8</b>
+false rejects <b>0</b>   false approvals 1   unanimous 6/8   LLM calls 24</div>
+    <p>Read your own run the way you'd read it at work. In the example above, the single judge would have <strong>paid for the raita</strong> on a claim nothing can prove, and the bench caught it. That's Part 1's argument for K=3, and it's the pattern to look for in your numbers. But the bench still upheld the cold Paneer Tikka 2–1. That's one false approval, and the next thing to work on: a sharper judging rule, or a different model as the third judge.</p>
+    <div class="room">
+      <span class="tag">Production reality</span>
+      <p><strong>Offline evals before release, online evals after.</strong> This is the offline half: a fixed set, run on every prompt or model change. In production you also sample real disputes and compare the bench with what human agents decided on the escalated and appealed cases. Every disagreement you find becomes a new golden case. The golden set is never finished. It grows from your mistakes.</p>
+    </div>
+    <div class="ask">
+      <span class="tag">Ask the room</span>
+      <p><q>Why not use another LLM to grade the judges instead of writing a golden set by hand?</q></p>
+      <p>LLM-as-judge is useful for open-ended text, such as “is this settlement message polite?”. Rulings here are a three-way label with a correct answer on known evidence, so a hand-labelled set is cheaper, exact, and doesn't share the judge's blind spots. Use an LLM grader where there's no single right answer. Use labels where there is one.</p>
+    </div>
+  </div>
+</section>
+
+<section id="step7">
+  <div class="col">
+    <p class="kicker">Step 7 · memory that survives a crash</p>
+    <h2>The ledger: Part 1's four tables, in SQLite</h2>
+    <p>The capacity section of Part 1 counted rows in four tables. Here they are as real tables. SQLite is a file, so there's no server to install.</p>
+<div class="file"><div class="file-bar"><span><b>ledger.py</b> · step 7</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
+<span class="c-key">import</span> sqlite3
+<span class="c-key">from</span> datetime <span class="c-key">import</span> datetime
+
+DB = sqlite3.connect(<span class="c-str">"ledger.db"</span>, check_same_thread=<span class="c-key">False</span>)
+DB.row_factory = sqlite3.Row
+DB.executescript(<span class="c-str">"""
+CREATE TABLE IF NOT EXISTS disputes (
+  dispute_id TEXT PRIMARY KEY, order_id TEXT, complaint TEXT, status TEXT,
+  refund_amount INTEGER DEFAULT 0, held_amount INTEGER DEFAULT 0,
+  message TEXT, updated_at TEXT);
+CREATE TABLE IF NOT EXISTS evidence_snapshots (
+  dispute_id TEXT PRIMARY KEY, snapshot_json TEXT);
+CREATE TABLE IF NOT EXISTS grievances (
+  dispute_id TEXT, grievance_id TEXT, data_json TEXT,
+  PRIMARY KEY (dispute_id, grievance_id));
+CREATE TABLE IF NOT EXISTS judge_rulings (
+  dispute_id TEXT, grievance_id TEXT, judge_index INTEGER, ruling_json TEXT,
+  PRIMARY KEY (dispute_id, grievance_id, judge_index));
+"""</span>)
+
+
+<span class="c-key">def</span> _now():
+    <span class="c-key">return</span> datetime.now().isoformat(timespec=<span class="c-str">"seconds"</span>)
+
+
+<span class="c-key">def</span> get_dispute(dispute_id):
+    row = DB.execute(<span class="c-str">"SELECT * FROM disputes WHERE dispute_id = ?"</span>, (dispute_id,)).fetchone()
+    <span class="c-key">return</span> dict(row) <span class="c-key">if</span> row <span class="c-key">else</span> <span class="c-key">None</span>
+
+
+<span class="c-key">def</span> create_dispute(dispute_id, order_id, complaint):
+    <span class="c-key">with</span> DB:
+        DB.execute(<span class="c-str">"INSERT OR IGNORE INTO disputes (dispute_id, order_id, complaint, status, updated_at)"</span>
+                   <span class="c-str">" VALUES (?, ?, ?, 'RECEIVED', ?)"</span>, (dispute_id, order_id, complaint, _now()))
+
+
+<span class="c-key">def</span> set_status(dispute_id, status, **fields):
+    cols = <span class="c-str">", "</span>.join(<span class="c-str">f"{k} = ?"</span> <span class="c-key">for</span> k <span class="c-key">in</span> fields)
+    <span class="c-key">with</span> DB:
+        DB.execute(<span class="c-str">f"UPDATE disputes SET status = ?, updated_at = ?{', ' + cols if cols else ''}"</span>
+                   <span class="c-str">" WHERE dispute_id = ?"</span>, (status, _now(), *fields.values(), dispute_id))
+
+
+<span class="c-key">def</span> save_evidence(dispute_id, snapshot):
+    <span class="c-key">with</span> DB:
+        DB.execute(<span class="c-str">"INSERT OR IGNORE INTO evidence_snapshots VALUES (?, ?)"</span>,
+                   (dispute_id, json.dumps(snapshot)))
+    <span class="c-key">return</span> get_evidence(dispute_id)
+
+
+<span class="c-key">def</span> get_evidence(dispute_id):
+    row = DB.execute(<span class="c-str">"SELECT snapshot_json FROM evidence_snapshots WHERE dispute_id = ?"</span>,
+                     (dispute_id,)).fetchone()
+    <span class="c-key">return</span> json.loads(row[0]) <span class="c-key">if</span> row <span class="c-key">else</span> <span class="c-key">None</span>
+
+
+<span class="c-key">def</span> save_grievances(dispute_id, grievances):
+    <span class="c-key">with</span> DB:
+        DB.executemany(<span class="c-str">"INSERT OR REPLACE INTO grievances VALUES (?, ?, ?)"</span>,
+                       [(dispute_id, g[<span class="c-str">"grievance_id"</span>], json.dumps(g)) <span class="c-key">for</span> g <span class="c-key">in</span> grievances])
+
+
+<span class="c-key">def</span> get_grievances(dispute_id):
+    rows = DB.execute(<span class="c-str">"SELECT data_json FROM grievances WHERE dispute_id = ? ORDER BY grievance_id"</span>,
+                      (dispute_id,)).fetchall()
+    <span class="c-key">return</span> [json.loads(r[0]) <span class="c-key">for</span> r <span class="c-key">in</span> rows]
+
+
+<span class="c-key">def</span> save_ruling(dispute_id, grievance_id, judge_index, ruling):
+    <span class="c-key">with</span> DB:
+        DB.execute(<span class="c-str">"INSERT OR REPLACE INTO judge_rulings VALUES (?, ?, ?, ?)"</span>,
+                   (dispute_id, grievance_id, judge_index, json.dumps(ruling)))
+
+
+<span class="c-key">def</span> get_rulings(dispute_id):
+    rows = DB.execute(<span class="c-str">"SELECT grievance_id, judge_index, ruling_json FROM judge_rulings"</span>
+                      <span class="c-str">" WHERE dispute_id = ?"</span>, (dispute_id,)).fetchall()
+    <span class="c-key">return</span> {(r[0], r[1]): json.loads(r[2]) <span class="c-key">for</span> r <span class="c-key">in</span> rows}</code></pre></div>
+<div class="file"><div class="file-bar"><span><b>payments.py</b> · step 7 · F9</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># Stand-in for the payment provider. Real ones (Razorpay, Stripe) accept an</span>
+<span class="c-dim"># idempotency key and refuse to execute the same key twice - so does this.</span>
+_executed = {}
+
+
+<span class="c-key">def</span> refund(idempotency_key: str, amount: int) -&gt; dict:
+    <span class="c-key">if</span> idempotency_key <span class="c-key">in</span> _executed:
+        <span class="c-key">return</span> {<span class="c-str">"status"</span>: <span class="c-str">"duplicate_ignored"</span>, <span class="c-str">"amount"</span>: _executed[idempotency_key]}
+    _executed[idempotency_key] = amount
+    <span class="c-key">return</span> {<span class="c-str">"status"</span>: <span class="c-str">"paid"</span>, <span class="c-str">"amount"</span>: amount}
+
+
+<span class="c-key">def</span> payouts() -&gt; dict:
+    <span class="c-key">return</span> dict(_executed)</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>One row per judge call in <code>judge_rulings</code></b>The primary key is (dispute, grievance, judge). That key is what lets a crashed run resume: anything already in the table is never asked again.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b><code>INSERT OR IGNORE</code> on evidence</b>A retry can't overwrite the snapshot with a fresher one, so the evidence is frozen at the database level too.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b><code>with DB:</code> is a transaction</b>Each save either fully happens or doesn't happen. A crash halfway through a write leaves no half-row.</span></div>
+      <div class="anno"><span class="n">4</span><span class="t"><b>Two layers of “never pay twice”</b>The ledger refuses to re-run a settled dispute, and the payment provider refuses to execute the same idempotency key twice. If either layer has a bug, the other still holds. That's why Part 1 passed the key to the payments API as well.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="step8">
+  <div class="col">
+    <p class="kicker">Step 8 · wire it</p>
+    <h2><code>resolve_dispute()</code>: the twenty lines, for real</h2>
+    <p>Put this next to Part 1's <a href="#loop">pseudocode with five landmines</a>. The numbered comments follow the same stages, and every landmine has a line that defuses it.</p>
+<div class="file"><div class="file-bar"><span><b>pipeline.py</b> · step 8 · the whole system</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> hashlib
+<span class="c-key">from</span> concurrent.futures <span class="c-key">import</span> ThreadPoolExecutor, as_completed
+
+<span class="c-key">import</span> ledger
+<span class="c-key">import</span> payments
+<span class="c-key">from</span> bench <span class="c-key">import</span> tally
+<span class="c-key">from</span> evidence <span class="c-key">import</span> snapshot
+<span class="c-key">from</span> pricing <span class="c-key">import</span> price
+<span class="c-key">from</span> stages <span class="c-key">import</span> extract_grievances, judge_grievance, write_settlement
+
+K = 3                       <span class="c-dim"># judges per grievance</span>
+PARALLELISM = 4             <span class="c-dim"># "4 lines" - calls in flight per dispute</span>
+AUTO_APPROVE_CAP = 2000     <span class="c-dim"># rupees; above this a human approves, always</span>
+PARTIAL_SETTLE_MIN = 0.6    <span class="c-dim"># pay now if &gt;= 60% of grievances resolved</span>
+
+
+<span class="c-key">def</span> dispute_key(complaint: str, order_id: str) -&gt; str:
+    <span class="c-key">return</span> hashlib.sha256(<span class="c-str">f"{order_id}|{complaint.strip()}"</span>.encode()).hexdigest()[:16]
+
+
+<span class="c-key">def</span> resolve_dispute(complaint: str, order_id: str) -&gt; dict:
+    dispute_id = dispute_key(complaint, order_id)
+
+    <span class="c-dim"># 1. Idempotency: a finished dispute is returned, never re-run, never re-paid.</span>
+    existing = ledger.get_dispute(dispute_id)
+    <span class="c-key">if</span> existing <span class="c-key">and</span> existing[<span class="c-str">"status"</span>] <span class="c-key">in</span> (<span class="c-str">"SETTLED"</span>, <span class="c-str">"ESCALATED"</span>):
+        <span class="c-key">return</span> {**existing, <span class="c-str">"replayed"</span>: <span class="c-key">True</span>}
+    ledger.create_dispute(dispute_id, order_id, complaint)
+
+    <span class="c-dim"># 2. Freeze the evidence once. A resumed run reuses the same snapshot.</span>
+    evidence = ledger.get_evidence(dispute_id) <span class="c-key">or</span> ledger.save_evidence(dispute_id, snapshot(order_id))
+    ledger.set_status(dispute_id, <span class="c-str">"INTAKE"</span>)
+
+    <span class="c-dim"># 3. Extract - the barrier. Persisted, so a crashed worker never re-extracts.</span>
+    grievances = ledger.get_grievances(dispute_id)
+    <span class="c-key">if</span> <span class="c-key">not</span> grievances:
+        grievances = extract_grievances(complaint, evidence)
+        ledger.save_grievances(dispute_id, grievances)
+    <span class="c-key">if</span> <span class="c-key">not</span> grievances:
+        ledger.set_status(dispute_id, <span class="c-str">"ESCALATED"</span>, message=<span class="c-str">"Nothing checkable found - needs a human."</span>)
+        <span class="c-key">return</span> ledger.get_dispute(dispute_id)
+    ledger.set_status(dispute_id, <span class="c-str">"JUDGING"</span>)
+
+    <span class="c-dim"># 4. Judge: N x K independent calls, PARALLELISM at a time. Skip slots already ruled.</span>
+    done = ledger.get_rulings(dispute_id)
+    todo = [(g, k) <span class="c-key">for</span> g <span class="c-key">in</span> grievances <span class="c-key">for</span> k <span class="c-key">in</span> range(K) <span class="c-key">if</span> (g[<span class="c-str">"grievance_id"</span>], k) <span class="c-key">not</span> <span class="c-key">in</span> done]
+    <span class="c-key">with</span> ThreadPoolExecutor(max_workers=PARALLELISM) <span class="c-key">as</span> pool:
+        futures = {pool.submit(judge_grievance, g, evidence, k): (g[<span class="c-str">"grievance_id"</span>], k) <span class="c-key">for</span> g, k <span class="c-key">in</span> todo}
+        <span class="c-key">for</span> future <span class="c-key">in</span> as_completed(futures):
+            gid, k = futures[future]
+            try:
+                ruling = future.result()
+            except Exception:
+                <span class="c-key">continue</span>                               <span class="c-dim"># stays unresolved; a retry resumes here</span>
+            ledger.save_ruling(dispute_id, gid, k, ruling)
+            done[(gid, k)] = ruling
+
+    <span class="c-dim"># 5. Tally and price - plain code, no model.</span>
+    verdicts = []
+    <span class="c-key">for</span> g <span class="c-key">in</span> grievances:
+        v = tally([done.get((g[<span class="c-str">"grievance_id"</span>], k)) <span class="c-key">for</span> k <span class="c-key">in</span> range(K)])
+        amount = price(g, evidence)
+        <span class="c-key">if</span> v <span class="c-key">and</span> v[<span class="c-str">"ruling"</span>] == <span class="c-str">"UPHELD"</span> <span class="c-key">and</span> amount <span class="c-key">is</span> <span class="c-key">None</span>:
+            v[<span class="c-str">"ruling"</span>] = <span class="c-str">"ESCALATE"</span>                   <span class="c-dim"># upheld but unpriceable -&gt; human</span>
+        verdicts.append({**g, **(v <span class="c-key">or</span> {<span class="c-str">"ruling"</span>: <span class="c-key">None</span>}), <span class="c-str">"amount"</span>: amount})
+    ledger.save_grievances(dispute_id, verdicts)
+
+    resolved = [v <span class="c-key">for</span> v <span class="c-key">in</span> verdicts <span class="c-key">if</span> v[<span class="c-str">"ruling"</span>] <span class="c-key">is</span> <span class="c-key">not</span> <span class="c-key">None</span>]
+    refund = sum(v[<span class="c-str">"amount"</span>] <span class="c-key">for</span> v <span class="c-key">in</span> verdicts <span class="c-key">if</span> v[<span class="c-str">"ruling"</span>] == <span class="c-str">"UPHELD"</span>)
+    held = sum(v[<span class="c-str">"amount"</span>] <span class="c-key">or</span> 0 <span class="c-key">for</span> v <span class="c-key">in</span> verdicts <span class="c-key">if</span> v[<span class="c-str">"ruling"</span>] <span class="c-key">in</span> (<span class="c-str">"ESCALATE"</span>, <span class="c-key">None</span>))
+    ledger.set_status(dispute_id, <span class="c-str">"TALLIED"</span>, refund_amount=refund, held_amount=held)
+
+    <span class="c-dim"># 6. Hard rules decide whether money moves automatically.</span>
+    <span class="c-key">if</span> refund &gt; AUTO_APPROVE_CAP:
+        ledger.set_status(dispute_id, <span class="c-str">"ESCALATED"</span>,
+                          message=<span class="c-str">f"Refund of Rs {refund} exceeds the Rs {AUTO_APPROVE_CAP} cap - awaiting approval."</span>)
+        <span class="c-key">return</span> ledger.get_dispute(dispute_id)
+    <span class="c-key">if</span> len(resolved) / len(verdicts) &lt; PARTIAL_SETTLE_MIN:
+        ledger.set_status(dispute_id, <span class="c-str">"ESCALATED"</span>, message=<span class="c-str">"Too few grievances resolved - sent to an agent."</span>)
+        <span class="c-key">return</span> ledger.get_dispute(dispute_id)
+
+    <span class="c-dim"># 7. Settle: the model writes the words, the code writes the cheque.</span>
+    message = write_settlement(complaint, resolved, refund)
+    <span class="c-key">if</span> refund &gt; 0:
+        payments.refund(idempotency_key=dispute_id, amount=refund)
+    ledger.set_status(dispute_id, <span class="c-str">"SETTLED"</span>, message=message)
+    <span class="c-key">return</span> ledger.get_dispute(dispute_id)</code></pre></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:12%">Comment</th><th style="width:34%">Part 1 idea</th><th>The line that does it</th></tr></thead>
+        <tbody>
+          <tr><td class="num"># 1</td><td>Idempotency is the product</td><td><code>if existing and existing["status"] in ("SETTLED", "ESCALATED"): return</code></td></tr>
+          <tr><td class="num"># 2</td><td>Freeze evidence once</td><td><code>ledger.get_evidence(...) or ledger.save_evidence(...)</code></td></tr>
+          <tr><td class="num"># 3</td><td>The barrier; persist before judging</td><td><code>if not grievances: extract → save</code></td></tr>
+          <tr><td class="num"># 4</td><td>N × K independent calls, 4 lines</td><td><code>ThreadPoolExecutor(max_workers=PARALLELISM)</code>, skipping slots already in the ledger</td></tr>
+          <tr><td class="num"># 5</td><td>The bench counts, the price list prices</td><td><code>tally(...)</code>, <code>price(...)</code>; no model involved</td></tr>
+          <tr><td class="num"># 6</td><td>Cap and the 60% rule</td><td><code>refund &gt; AUTO_APPROVE_CAP</code>, <code>len(resolved) / len(verdicts) &lt; PARTIAL_SETTLE_MIN</code></td></tr>
+          <tr><td class="num"># 7</td><td>The model writes the words, code writes the cheque</td><td><code>write_settlement(...)</code> then <code>payments.refund(idempotency_key=dispute_id, …)</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>The key ignores trailing whitespace</b><code>complaint.strip()</code> means a double-submitted form with an extra newline is still the same dispute. Normalise before you hash.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b><code>as_completed</code> saves each ruling the moment it lands</b>Not after all twelve. If the worker dies after five rulings, those five are in the ledger and the retry makes only the other seven calls.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>A failed future is skipped, not fatal</b>One provider timeout leaves one slot empty, so that grievance is unresolved. The 60% rule then decides whether the rest can still be paid now.</span></div>
+      <div class="anno"><span class="n">4</span><span class="t"><b>Status is written after every stage</b><code>RECEIVED → INTAKE → JUDGING → TALLIED → SETTLED / ESCALATED</code>. That's what a “GET status” endpoint would read, and how you'd find disputes stuck in one stage.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="step9">
+  <div class="col">
+    <p class="kicker">Step 9 · prove the whole thing</p>
+    <h2>Replay it, break it, check the money</h2>
+    <p><code>bench_check.py</code> runs the case study end to end, then attacks the two guarantees that matter most: <em>never pay twice</em> and <em>an outage doesn't mean a rejection</em>.</p>
+<div class="file"><div class="file-bar"><span><b>bench_check.py</b> · step 9 · python bench_check.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> os
+
+<span class="c-key">if</span> os.path.exists(<span class="c-str">"ledger.db"</span>):          <span class="c-dim"># start from an empty ledger (before ledger is imported)</span>
+    os.remove(<span class="c-str">"ledger.db"</span>)
+
+<span class="c-key">import</span> ledger
+<span class="c-key">import</span> payments
+<span class="c-key">import</span> pipeline
+<span class="c-key">from</span> evidence <span class="c-key">import</span> SAMPLE_COMPLAINT
+<span class="c-key">from</span> pipeline <span class="c-key">import</span> resolve_dispute
+
+checks = {}
+
+<span class="c-dim"># 1. the happy path from the case study</span>
+r = resolve_dispute(SAMPLE_COMPLAINT, <span class="c-str">"ORD-1840"</span>)
+by_cat = {g[<span class="c-str">"category"</span>]: g <span class="c-key">for</span> g <span class="c-key">in</span> ledger.get_grievances(r[<span class="c-str">"dispute_id"</span>])}
+checks[<span class="c-str">"settled without a human"</span>] = r[<span class="c-str">"status"</span>] == <span class="c-str">"SETTLED"</span>
+checks[<span class="c-str">"refund is Rs 689 (49 + 640)"</span>] = r[<span class="c-str">"refund_amount"</span>] == 689
+checks[<span class="c-str">"raita (Rs 60) held for an agent"</span>] = r[<span class="c-str">"held_amount"</span>] == 60
+checks[<span class="c-str">"rude-partner claim rejected"</span>] = by_cat.get(<span class="c-str">"PARTNER_CONDUCT"</span>, {}).get(<span class="c-str">"ruling"</span>) == <span class="c-str">"REJECTED"</span>
+
+<span class="c-dim"># 2. idempotency: the customer hits submit again</span>
+again = resolve_dispute(SAMPLE_COMPLAINT, <span class="c-str">"ORD-1840"</span>)
+checks[<span class="c-str">"resubmission replayed, not re-run"</span>] = again.get(<span class="c-str">"replayed"</span>) <span class="c-key">is</span> <span class="c-key">True</span>
+checks[<span class="c-str">"paid exactly once"</span>] = list(payments.payouts().values()) == [689]
+
+<span class="c-dim"># 3. chaos: the provider fails every judge call on one grievance</span>
+real_judge = pipeline.judge_grievance
+
+
+<span class="c-key">def</span> flaky_judge(grievance, evidence, judge_index):
+    <span class="c-key">if</span> grievance[<span class="c-str">"category"</span>] == <span class="c-str">"PACKAGING"</span>:
+        raise TimeoutError(<span class="c-str">"provider down"</span>)
+    <span class="c-key">return</span> real_judge(grievance, evidence, judge_index)
+
+
+pipeline.judge_grievance = flaky_judge
+r2 = resolve_dispute(SAMPLE_COMPLAINT + <span class="c-str">" Please sort it out."</span>, <span class="c-str">"ORD-1840"</span>)
+checks[<span class="c-str">"outage: 3 of 4 resolved (75% &gt;= 60%) -&gt; partial settle"</span>] = r2[<span class="c-str">"status"</span>] == <span class="c-str">"SETTLED"</span>
+checks[<span class="c-str">"outage: unresolved raita held, not rejected"</span>] = r2[<span class="c-str">"held_amount"</span>] == 60
+
+<span class="c-key">for</span> name, ok <span class="c-key">in</span> checks.items():
+    print((<span class="c-str">"PASS "</span> <span class="c-key">if</span> ok <span class="c-key">else</span> <span class="c-str">"FAIL "</span>) + name)
+print(<span class="c-str">f"\n{sum(checks.values())}/{len(checks)} checks passed"</span>)</code></pre></div>
+    <div class="calc"><i>$ python bench_check.py</i>
+<b>PASS</b> settled without a human
+<b>PASS</b> refund is Rs 689 (49 + 640)
+<b>PASS</b> raita (Rs 60) held for an agent
+<b>PASS</b> rude-partner claim rejected
+<b>PASS</b> resubmission replayed, not re-run
+<b>PASS</b> paid exactly once
+<b>PASS</b> outage: 3 of 4 resolved (75% &gt;= 60%) -&gt; partial settle
+<b>PASS</b> outage: unresolved raita held, not rejected
+
+8/8 checks passed</div>
+    <div class="room">
+      <span class="tag">When a check goes red</span>
+      <p>The first four checks depend on the model's rulings. While testing this page with a stand-in model that votes randomly on unprovable claims, one run upheld the raita 2–1 and refunded <span class="rs">₹749</span> instead of <span class="rs">₹689</span>. The code was correct; the bench just ruled differently that time. That's not a flaky test to ignore. It's a <strong>case for the golden set</strong> in step 6. The replay and outage checks test your code and should never go red.</p>
+    </div>
+    <h3>Try the crash yourself</h3>
+    <p>Run <code>python app.py</code>, submit, and press <kbd>Ctrl+C</kbd> in the terminal while it's judging. Start it again and submit the same complaint. The dispute resumes from <code>JUDGING</code>, and only the judge calls missing from <code>judge_rulings</code> are made. When this page was tested (with a stubbed model), a crash after 5 saved rulings resumed with exactly 7 calls.</p>
+  </div>
+</section>
+
+<section id="step10">
+  <div class="col">
+    <p class="kicker">Step 10 · the face</p>
+    <h2>A Gradio app in thirty lines</h2>
+<div class="file"><div class="file-bar"><span><b>app.py</b> · step 10 · python app.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> gradio <span class="c-key">as</span> gr
+
+<span class="c-key">import</span> ledger
+<span class="c-key">from</span> evidence <span class="c-key">import</span> ORDERS, SAMPLE_COMPLAINT
+<span class="c-key">from</span> pipeline <span class="c-key">import</span> resolve_dispute
+
+
+<span class="c-key">def</span> on_submit(complaint, order_id):
+    result = resolve_dispute(complaint, order_id)
+    rows = [[g[<span class="c-str">"grievance_id"</span>], g[<span class="c-str">"text"</span>], g[<span class="c-str">"category"</span>], g.get(<span class="c-str">"votes"</span>, <span class="c-str">"-"</span>),
+             g.get(<span class="c-str">"ruling"</span>) <span class="c-key">or</span> <span class="c-str">"UNRESOLVED"</span>, g.get(<span class="c-str">"amount"</span>)]
+            <span class="c-key">for</span> g <span class="c-key">in</span> ledger.get_grievances(result[<span class="c-str">"dispute_id"</span>])]
+    header = (<span class="c-str">f"### {result['status']}{'  (replayed - no new payment)' if result.get('replayed') else ''}\n"</span>
+              <span class="c-str">f"**Refund:** Rs {result['refund_amount']}  ·  **Held for an agent:** Rs {result['held_amount']}  ·  "</span>
+              <span class="c-str">f"`{result['dispute_id']}`"</span>)
+    <span class="c-key">return</span> header, rows, result.get(<span class="c-str">"message"</span>) <span class="c-key">or</span> <span class="c-str">""</span>
+
+
+<span class="c-key">with</span> gr.Blocks(title=<span class="c-str">"The Refund Bench"</span>) <span class="c-key">as</span> demo:
+    gr.Markdown(<span class="c-str">"# The Refund Bench"</span>)
+    complaint = gr.Textbox(label=<span class="c-str">"Customer complaint"</span>, value=SAMPLE_COMPLAINT, lines=5)
+    order = gr.Dropdown(list(ORDERS), value=<span class="c-str">"ORD-1840"</span>, label=<span class="c-str">"Order"</span>)
+    go = gr.Button(<span class="c-str">"Resolve dispute"</span>, variant=<span class="c-str">"primary"</span>)
+    status = gr.Markdown()
+    table = gr.Dataframe(headers=[<span class="c-str">"id"</span>, <span class="c-str">"grievance"</span>, <span class="c-str">"category"</span>, <span class="c-str">"votes"</span>, <span class="c-str">"ruling"</span>, <span class="c-str">"Rs"</span>],
+                         interactive=<span class="c-key">False</span>, wrap=<span class="c-key">True</span>)
+    message = gr.Textbox(label=<span class="c-str">"Message to the customer"</span>, lines=4)
+    go.click(on_submit, inputs=[complaint, order], outputs=[status, table, message])
+
+<span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    demo.launch()</code></pre></div>
+    <p>The app only formats what the pipeline returns. Press the button twice and the header says <em>replayed - no new payment</em>, which is F9 visible in the UI. All the business logic stays in <code>pipeline.py</code>, so replacing Gradio with a REST endpoint (Part 1's “thin API”) touches only this file.</p>
+  </div>
+</section>
+
+<section id="sim9">
+  <div class="col">
+    <p class="kicker">Try it</p>
+    <h2>Rule on the case yourself</h2>
+    <p>Set each judge's vote, mark a call as failed, change the cap or the number of missing biryanis. The tally, pricing, cap and 60% rule below are a line-for-line port of <code>bench.py</code>, <code>pricing.py</code> and step 6 of <code>pipeline.py</code>. The defaults are the case study.</p>
+    <div class="sim" id="bench">
+      <div class="sim-head"><span><b>THE BENCH</b> · code half only</span><span>K = 3</span></div>
+      <div class="sim-body">
+        <div id="b-rows"></div>
+        <div class="row" style="margin-top:6px">
+          <div><label for="b-qty">Biryanis missing (g2)</label><select id="b-qty"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+          <div><label for="b-cap">Auto-approve cap (₹)</label><input id="b-cap" type="number" value="2000" min="0" step="100"></div>
+        </div>
+        <div class="btns">
+          <button class="btn" id="b-case" type="button">Reset to case study</button>
+          <button class="btn" id="b-outage" type="button">Outage on g3</button>
+          <button class="btn" id="b-split" type="button">Split every bench</button>
+        </div>
+        <div class="out" id="b-out"></div>
+      </div>
+    </div>
+    <p class="note-sm">Try “Split every bench”: U, R, E on every grievance means no majority anywhere, so nothing is paid and everything is held. Then fail two of g2's judges as well as g3's: only 2 of 4 grievances resolve, which is below 60%, so the whole dispute goes to an agent.</p>
+  </div>
+</section>
+
+<section id="ship">
+  <div class="col">
+    <p class="kicker">Milestones &amp; shipping</p>
+    <h2>Ten milestones, then post it</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:10%">M</th><th>Milestone</th><th style="width:38%">Done when</th></tr></thead>
+        <tbody>
+          <tr><td class="num">M1</td><td>Environment and first call</td><td>the model says hi</td></tr>
+          <tr><td class="num">M2</td><td>Evidence snapshot</td><td><code>21:40</code> prints</td></tr>
+          <tr><td class="num">M3</td><td>Money rules</td><td><code>check_rules.py</code>: 12/12</td></tr>
+          <tr><td class="num">M4</td><td>LLM wrapper and prompts</td><td>JSON parses, even with fences</td></tr>
+          <tr><td class="num">M5</td><td>Three stages</td><td>4 grievances from the sample</td></tr>
+          <tr><td class="num">M6</td><td>Evals</td><td>0 false rejects; you can explain every miss</td></tr>
+          <tr><td class="num">M7</td><td>Ledger and payments</td><td><code>ledger.db</code> has four tables</td></tr>
+          <tr><td class="num">M8</td><td>Pipeline</td><td>₹689 paid, ₹60 held</td></tr>
+          <tr><td class="num">M9</td><td>Replay, outage and crash proofs</td><td><code>bench_check.py</code> green; resume works</td></tr>
+          <tr><td class="num">M10</td><td>Gradio app</td><td>submit twice → “replayed”</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Ship it to LinkedIn (same 3 steps as Classes 1–3)</h3>
+    <ol>
+      <li>Push the repo with a README containing the architecture diagram and your eval table.</li>
+      <li>Record 30 seconds: submit the complaint, show the grievance table, submit again to show “replayed”.</li>
+      <li>Post it. A caption to adapt:</li>
+    </ol>
+    <div class="calc">I built an AI refund adjudicator that can't pay twice.
+One complaint → atomic grievances → 3 independent LLM judges each → majority vote in code.
+The model never touches the money: pricing, a ₹2,000 cap and idempotency keys are plain Python.
+My eval: bench accuracy [x/8] vs single judge [y/8], with <b>0 honest claims refused</b>.
+Built in #AIInfusion · repo in comments</div>
+  </div>
+</section>
+
+<section id="homework">
+  <div class="col">
+    <p class="kicker">Extensions · your homework</p>
+    <h2>Four upgrades, each one file</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:28%">Upgrade</th><th style="width:22%">Touches</th><th>Hint</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Judges from different providers</strong></td><td><code>llm.py</code>, <code>stages.py</code></td><td>Pass a model name per <code>judge_index</code>. Re-run <code>eval_judge.py</code>: do false approvals drop when blind spots stop correlating?</td></tr>
+          <tr><td><strong>Judges with tools</strong></td><td><code>stages.py</code></td><td>Class 7's tool-calling loop inside <code>judge_grievance</code>, with <code>get_delivery_timeline()</code> and friends. Log every tool result into the snapshot to keep it reproducible.</td></tr>
+          <tr><td><strong>A real queue</strong></td><td>new <code>worker.py</code></td><td>The API writes the dispute and enqueues the id; a worker loop calls <code>resolve_dispute</code>. The pipeline doesn't change, because it already resumes from the ledger.</td></tr>
+          <tr><td><strong>An eval gate in CI</strong></td><td><code>.github/workflows</code></td><td>Run <code>eval_judge.py</code> on every pull request that touches <code>prompts.py</code>. The non-zero exit fails the build.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="selfcheck9">
+  <div class="col">
+    <p class="kicker">Self-check</p>
+    <h2>Eight questions on the build</h2>
+    <details class="qa"><summary>Why are <code>pricing.py</code> and <code>bench.py</code> built and tested before any LLM code?</summary><div class="a"><p>They decide money and need no API key. Proving them first means any later wrong refund must come from extraction or judging: fewer suspects, and no tokens spent finding them.</p></div></details>
+    <details class="qa"><summary>Which requirement forced the extraction schema to change, and how?</summary><div class="a"><p>F5: price from the order, in code. Code can't price a sentence, so extraction now returns <code>item</code> and <code>quantity</code>. The model names what is affected, and code looks up what it costs.</p></div></details>
+    <details class="qa"><summary>Two judges return results and one call times out. What does <code>tally</code> return, and what happens next?</summary><div class="a"><p><code>None</code>, so the grievance is unresolved, not rejected. If at least 60% of the dispute's grievances are resolved and the refund is under the cap, the rest is paid and this one's amount is held for an agent.</p></div></details>
+    <details class="qa"><summary>Why do the judges run at temperature 0.7 but extraction at 0?</summary><div class="a"><p>At T=0 the three judges would give identical answers and the vote would carry no information. Extraction should return the same grievances every time, so it runs at 0.</p></div></details>
+    <details class="qa"><summary>What is the eval gate, and why does it fail only on false rejects?</summary><div class="a"><p><code>eval_judge.py</code> exits non-zero if the bench refused any claim the golden set says is valid. That's the costly error. False approvals are bounded by the cap and human review, so they're tracked rather than gated.</p></div></details>
+    <details class="qa"><summary>The customer double-clicks “submit”. Name both things that stop a second payment.</summary><div class="a"><p>The ledger returns the settled dispute without re-running it, and the payment provider ignores a repeated idempotency key (the <code>dispute_id</code>).</p></div></details>
+    <details class="qa"><summary>The worker dies after 5 of 12 judge calls. How many calls does the retry make, and why?</summary><div class="a"><p>Seven. Each ruling is saved the moment it completes, and the retry skips every (grievance, judge) slot already in <code>judge_rulings</code>.</p></div></details>
+    <details class="qa"><summary><code>bench_check.py</code> shows ₹749 instead of ₹689. Is the code broken?</summary><div class="a"><p>Probably not. The bench upheld the raita 2–1 on that run. Check the votes in the ledger. If the ruling was wrong for that evidence, add the case to the golden set and improve the judging prompt or the model, not the arithmetic.</p></div></details>
+  </div>
+</section>
+
 <footer>
   <div class="col">
-    Teaching case study. Built on the agentic system-design pattern from Arpit Bhayani's Applied AI Masterclass, session 1.<br>
-    Self-consistency: Wang et al., 2022. The dispute, the order and all figures are invented for teaching; the ₹ amounts are internally consistent so the arithmetic can be checked live.
+    Teaching case study. Part 1 is built on the agentic system-design pattern from Arpit Bhayani's Applied AI Masterclass, session 1.<br>
+    Self-consistency: Wang et al., 2022. The dispute, the order and all figures are invented for teaching; the ₹ amounts are internally consistent so the arithmetic can be checked live.<br>
+    Part 2's code is a runnable reconstruction of Part 1's design, checked end-to-end against a stubbed model (replay, outage and crash-resume included). Run the evals with your own key before trusting any numbers.
+    <div class="series"><a href="../Class-8-AI-infusion/">← Class 8 · Shipment exception desk</a><a href="#build">Part 2 · Build it ↑</a></div>
   </div>
 </footer>
 
 </main>
+
+<script>
+(function(){
+  document.querySelectorAll('button.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre = btn.closest('.file').querySelector('pre');
+      var done = function(){ btn.textContent='COPIED'; btn.classList.add('done');
+        setTimeout(function(){ btn.textContent='COPY'; btn.classList.remove('done'); }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(pre.innerText).then(done, function(){});
+    });
+  });
+
+  // ---- port of bench.tally, pricing.price and step 6 of pipeline.resolve_dispute ----
+  var G = [
+    {id:'g1', text:'Delivered 85 minutes after ordering', cat:'LATE_DELIVERY', price:function(){ return 49; }},
+    {id:'g2', text:'Biryani units not delivered', cat:'MISSING_ITEM', price:function(q){ return q*320; }},
+    {id:'g3', text:'Raita leaked inside the bag', cat:'PACKAGING', price:function(){ return 60; }},
+    {id:'g4', text:'Delivery partner was rude', cat:'PARTNER_CONDUCT', price:function(){ return 0; }}
+  ];
+  var CASE = [['UPHELD','UPHELD','UPHELD'],['UPHELD','UPHELD','UPHELD'],['UPHELD','ESCALATE','ESCALATE'],['REJECTED','REJECTED','REJECTED']];
+  var OPTS = [['UPHELD','U'],['REJECTED','R'],['ESCALATE','E'],['FAILED','✕ failed']];
+  var $ = function(id){ return document.getElementById(id); };
+  function rs(x){ return '₹' + Number(x).toLocaleString('en-IN'); }
+  function tag(r){ if(!r) return '<span class="v drop">unresolved</span>';
+    return '<span class="v ' + ({UPHELD:'up',REJECTED:'rej',ESCALATE:'esc'})[r] + '">' + r.toLowerCase() + '</span>'; }
+
+  function tally(votes){
+    if (votes.some(function(v){ return v === 'FAILED'; })) return null;      // a failed call is not a vote
+    var counts = {}, order = [];
+    votes.forEach(function(v){ if(!(v in counts)){ counts[v]=0; order.push(v); } counts[v]++; });
+    var winner = order.reduce(function(a,b){ return counts[b] > counts[a] ? b : a; });
+    var n = counts[winner];
+    if (n * 2 <= votes.length) winner = 'ESCALATE';                          // no strict majority
+    return {ruling:winner, votes:votes.map(function(v){return v[0];}).join(','), split:n + '-' + (votes.length - n)};
+  }
+
+  var rows = '<div class="tablewrap"><table class="bench-row"><thead><tr><th>Grievance</th><th>Judge 1</th><th>Judge 2</th><th>Judge 3</th><th>Ruling</th><th class="num">₹</th></tr></thead><tbody>';
+  G.forEach(function(g, i){
+    rows += '<tr><td><span class="num" style="color:var(--ink-3)">' + g.id + '</span> ' + g.text + '<br><span class="note-sm">' + g.cat + '</span></td>';
+    for (var k = 0; k < 3; k++){
+      rows += '<td><select id="b-' + i + '-' + k + '" aria-label="' + g.id + ' judge ' + (k+1) + '">' +
+        OPTS.map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></td>';
+    }
+    rows += '<td id="b-r' + i + '"></td><td class="num" id="b-a' + i + '"></td></tr>';
+  });
+  $('b-rows').innerHTML = rows + '</tbody></table></div>';
+
+  function setVotes(matrix){ matrix.forEach(function(vs, i){ vs.forEach(function(v, k){ $('b-' + i + '-' + k).value = v; }); }); }
+
+  function run(){
+    var qty = +$('b-qty').value, cap = +$('b-cap').value || 0;
+    var refund = 0, held = 0, resolved = 0;
+    G.forEach(function(g, i){
+      var v = tally([0,1,2].map(function(k){ return $('b-' + i + '-' + k).value; }));
+      var amount = g.price(qty);
+      if (v) resolved++;
+      if (v && v.ruling === 'UPHELD') refund += amount;
+      if (!v || v.ruling === 'ESCALATE') held += amount;
+      $('b-r' + i).innerHTML = tag(v && v.ruling) + (v ? '<br><span class="note-sm">' + v.votes + ' · ' + v.split + '</span>' : '');
+      $('b-a' + i).textContent = rs(amount);
+    });
+    var status, why, paid = false, share = resolved / G.length;
+    if (refund > cap){ status = 'ESCALATED'; why = 'Refund ' + rs(refund) + ' exceeds the ' + rs(cap) + ' cap: a human approves, whatever the bench said.'; }
+    else if (share < 0.6){ status = 'ESCALATED'; why = 'Only ' + resolved + ' of ' + G.length + ' grievances resolved (' + Math.round(share*100) + '% < 60%): the whole dispute goes to an agent.'; }
+    else { status = 'SETTLED'; paid = refund > 0;
+      why = resolved + ' of ' + G.length + ' resolved (' + Math.round(share*100) + '% ≥ 60%), under the cap: ' +
+        (refund ? 'pay ' + rs(refund) + ' now' : 'nothing was upheld, so nothing is paid') + (held ? '; hold ' + rs(held) + ' for an agent.' : '.'); }
+    var col = status === 'SETTLED' ? 'var(--up)' : 'var(--esc)';
+    $('b-out').innerHTML = '<div class="toolout">' +
+      '<div><h5>Status</h5><span class="big2" style="color:' + col + '">' + status.toLowerCase() + '</span></div>' +
+      '<div><h5>Refund (upheld)</h5><span class="big2">' + rs(refund) + '</span></div>' +
+      '<div><h5>Held for an agent</h5><span class="big2">' + rs(held) + '</span></div>' +
+      '<div><h5>payments.refund()</h5><span class="big2">' + (paid ? 'called' : 'not called') + '</span></div>' +
+      '</div><p class="note-sm" style="margin:0">' + why + '</p>';
+  }
+  $('bench').addEventListener('change', run);
+  $('b-cap').addEventListener('input', run);
+  $('b-case').addEventListener('click', function(){ setVotes(CASE); $('b-qty').value = '2'; $('b-cap').value = 2000; run(); });
+  $('b-outage').addEventListener('click', function(){ setVotes(CASE); [0,1,2].forEach(function(k){ $('b-2-' + k).value = 'FAILED'; }); run(); });
+  $('b-split').addEventListener('click', function(){ setVotes(G.map(function(){ return ['UPHELD','REJECTED','ESCALATE']; })); run(); });
+  setVotes(CASE); run();
+})();
+</script>
+</body>
+</html>
