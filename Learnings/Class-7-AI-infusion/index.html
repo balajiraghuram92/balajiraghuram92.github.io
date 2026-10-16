@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Unbluffable Coach</title>
+<meta name="description" content="AI Infusion Class 7 — live project session: a tool-calling interview coach with session memory, aggregated reporting and a Gradio UI.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F1F1EE; --surface:#FFFFFF; --surface-2:#E6E6E0;
+  --ink:#1A1A18; --ink-2:#585851; --ink-3:#86867E;
+  --rule:#D8D8D1; --rule-2:#BEBEB5;
+  --accent:#2B3A67; --accent-soft:#DFE3EE;
+  --up:#1B6B4C;   --up-soft:#D8EDE3;
+  --rej:#A52A38;  --rej-soft:#F7DEE0;
+  --esc:#5B4A9E;  --esc-soft:#E6E1F5;
+  --money:#8A5E12; --money-soft:#F6E9CE;
+  --code-bg:#1C1C1A; --code-ink:#E4E4DC; --code-dim:#87877D;
+  --display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --body:"Public Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#131312; --surface:#1C1C1A; --surface-2:#252523;
+    --ink:#EDEDE6; --ink-2:#ACACA3; --ink-3:#83837B;
+    --rule:#2F2F2C; --rule-2:#434340;
+    --accent:#9CB2E0; --accent-soft:#1E2436;
+    --up:#4FC79A;   --up-soft:#132E24;
+    --rej:#FF8A90;  --rej-soft:#351A1D;
+    --esc:#AFA0EC;  --esc-soft:#221E38;
+    --money:#E0AE52; --money-soft:#2E2413;
+    --code-bg:#0C0C0B; --code-ink:#E4E4DC; --code-dim:#76766D;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#131312; --surface:#1C1C1A; --surface-2:#252523;
+  --ink:#EDEDE6; --ink-2:#ACACA3; --ink-3:#83837B;
+  --rule:#2F2F2C; --rule-2:#434340;
+  --accent:#9CB2E0; --accent-soft:#1E2436;
+  --up:#4FC79A;   --up-soft:#132E24;
+  --rej:#FF8A90;  --rej-soft:#351A1D;
+  --esc:#AFA0EC;  --esc-soft:#221E38;
+  --money:#E0AE52; --money-soft:#2E2413;
+  --code-bg:#0C0C0B; --code-ink:#E4E4DC; --code-dim:#76766D;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--body); font-size:16.5px; line-height:1.65;
+  padding-inline:20px; padding-block:0 72px;
+  -webkit-font-smoothing:antialiased;
+}
+.col{width:100%; max-width:720px; margin-inline:auto}
+.wide{width:100%; max-width:980px; margin-inline:auto}
+
+header{padding-block:56px 38px; border-bottom:3px double var(--ink); margin-bottom:8px}
+.eyebrow{
+  font-family:var(--mono); font-size:11px; font-weight:600;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--accent);
+  margin:0 0 20px;
+}
+h1{
+  font-family:var(--display); font-weight:400; font-size:clamp(42px,9vw,74px);
+  line-height:.98; letter-spacing:-.01em; margin:0 0 20px; text-wrap:balance;
+}
+h1 em{font-style:italic; color:var(--accent)}
+.standfirst{font-size:19px; color:var(--ink-2); margin:0 0 26px; max-width:56ch}
+.meta{
+  font-family:var(--mono); font-size:11.5px; line-height:1.7; color:var(--ink-3);
+  display:flex; flex-wrap:wrap; gap:6px 22px;
+}
+.meta b{color:var(--ink-2); font-weight:400}
+
+section{padding-block:44px 8px}
+section + section{border-top:1px solid var(--rule)}
+h2{
+  font-family:var(--display); font-weight:400; font-size:clamp(28px,5.4vw,42px);
+  line-height:1.08; letter-spacing:-.005em; margin:0 0 10px; text-wrap:balance;
+}
+h2 em{font-style:italic}
+h3{
+  font-family:var(--body); font-weight:700; font-size:17px;
+  letter-spacing:-.005em; margin:34px 0 8px;
+}
+.kicker{
+  font-family:var(--mono); font-size:11px; font-weight:600;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3);
+  margin:0 0 12px;
+}
+p{margin:0 0 16px}
+.lede{font-size:18px; color:var(--ink-2); margin-bottom:22px}
+strong{font-weight:700}
+code{
+  font-family:var(--mono); font-size:.86em;
+  background:var(--surface-2); padding:1px 5px; border-radius:3px; color:var(--ink);
+}
+.rs{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; font-weight:600}
+ul,ol{margin:0 0 16px; padding-left:22px}
+li{margin-bottom:7px}
+a{color:var(--accent)}
+
+.v{
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase;
+  padding:3px 8px; border-radius:2px; white-space:nowrap;
+  display:inline-block; vertical-align:2px;
+}
+.v.up{background:var(--up-soft); color:var(--up)}
+.v.rej{background:var(--rej-soft); color:var(--rej)}
+.v.esc{background:var(--esc-soft); color:var(--esc)}
+.v.drop{background:var(--surface-2); color:var(--ink-3)}
+
+.casefile{
+  background:var(--surface); border:1px solid var(--rule);
+  border-top:4px solid var(--accent); padding:0; margin:0 0 16px; border-radius:2px;
+}
+.casefile-head{
+  display:flex; flex-wrap:wrap; gap:4px 24px; padding:14px 26px;
+  border-bottom:1px solid var(--rule); background:var(--surface-2);
+  font-family:var(--mono); font-size:11px; color:var(--ink-2);
+}
+.casefile-head b{color:var(--ink); font-weight:600}
+.casefile-body{padding:24px 26px}
+.casefile-body p{font-size:17.5px; line-height:2.05; margin:0}
+mark{background:none; padding:0 1px; border-bottom:2.5px solid; color:inherit}
+mark.up{border-color:var(--up)}
+mark.rej{border-color:var(--rej)}
+mark.esc{border-color:var(--esc)}
+mark.drop{border-bottom:2.5px dotted var(--rule-2); color:var(--ink-3)}
+sup.gid{font-family:var(--mono); font-size:9.5px; font-weight:600; padding-left:2px}
+sup.up{color:var(--up)} sup.rej{color:var(--rej)} sup.esc{color:var(--esc)} sup.drop{color:var(--ink-3)}
+
+.tablewrap{overflow-x:auto; margin:0 0 16px; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:480px}
+th{
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
+  text-align:left; padding:0 14px 8px 0; border-bottom:1.5px solid var(--rule-2);
+  vertical-align:bottom;
+}
+td{padding:11px 14px 11px 0; border-bottom:1px solid var(--rule); vertical-align:top; line-height:1.5}
+td:last-child,th:last-child{padding-right:0}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+tr.total td{border-bottom:none; border-top:2px solid var(--ink); font-weight:700}
+
+figure{margin:28px 0 30px}
+figure svg{display:block; width:100%; height:auto; max-width:100%; color:var(--ink)}
+figcaption{font-size:14px; color:var(--ink-2); margin-top:14px; max-width:70ch; margin-inline:auto; line-height:1.55}
+.svgwrap{overflow-x:auto; -webkit-overflow-scrolling:touch}
+.svgwrap > svg{min-width:520px}
+
+.room,.ask{border-radius:2px; padding:18px 22px; margin:0 0 20px}
+.room{background:var(--accent-soft); border-left:3px solid var(--accent)}
+.ask{background:var(--money-soft); border-left:3px solid var(--money)}
+.room .tag,.ask .tag{
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.13em; text-transform:uppercase;
+  display:block; margin-bottom:8px;
+}
+.room .tag{color:var(--accent)}
+.ask .tag{color:var(--money)}
+.room p,.ask p{margin:0 0 10px; font-size:15.5px}
+.room p:last-child,.ask p:last-child{margin-bottom:0}
+.ask q{font-style:italic; font-family:var(--display); font-size:19px; line-height:1.35; quotes:"“" "”"}
+
+pre{
+  background:var(--code-bg); color:var(--code-ink); border-radius:3px;
+  padding:20px 22px; overflow-x:auto; margin:0 0 6px;
+  font-family:var(--mono); font-size:12.5px; line-height:1.7;
+  -webkit-overflow-scrolling:touch;
+}
+pre code{background:none; padding:0; font-size:inherit; color:inherit}
+.c-dim{color:var(--code-dim)}
+.c-key{color:#CB9BE8}
+.c-str{color:#8FD1A0}
+.c-hi{background:rgba(255,190,90,.17); border-radius:2px; padding:1px 0}
+.marker{font-family:var(--mono); font-size:10.5px; font-weight:600; color:#F0B658; padding-right:10px}
+
+.annos{display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:2px; margin:18px 0 20px}
+.anno{background:var(--surface); padding:14px 16px; display:grid; grid-template-columns:32px 1fr; gap:12px; align-items:start}
+.anno .n{
+  font-family:var(--mono); font-size:11px; font-weight:600; color:var(--money);
+  background:var(--money-soft); border-radius:2px; text-align:center; padding:3px 0;
+}
+.anno .t{font-size:14.5px; line-height:1.5}
+.anno .t b{display:block; font-size:14.5px; margin-bottom:2px}
+
+.tally{display:grid; gap:10px; margin:0 0 18px}
+.trow{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 18px; align-items:center;
+  background:var(--surface); border:1px solid var(--rule); border-radius:2px; padding:13px 16px;
+}
+.tclaim{font-size:15px; line-height:1.45; min-width:0}
+.tclaim .id{font-family:var(--mono); font-size:11px; color:var(--ink-3); font-weight:600; margin-right:7px}
+.tclaim .ev{display:block; font-size:12.5px; color:var(--ink-3); margin-top:4px; font-family:var(--mono)}
+.tvotes{display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end}
+.dots{display:flex; gap:4px}
+.dot{width:12px; height:22px; border-radius:1px}
+.dot.up{background:var(--up)} .dot.rej{background:var(--rej)} .dot.esc{background:var(--esc)}
+.conf{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.amt{font-family:var(--mono); font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; min-width:62px; text-align:right}
+@media (max-width:600px){ .trow{grid-template-columns:1fr} .tvotes{justify-content:flex-start} .amt{text-align:left; min-width:0} }
+
+.kv{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:2px; margin:0 0 22px}
+.kv > div{background:var(--surface); padding:14px 16px}
+.kv dt{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:0 0 5px}
+.kv dd{margin:0; font-size:14.5px; line-height:1.4}
+.kv dd .big{font-family:var(--display); font-weight:400; font-size:30px; letter-spacing:-.01em; display:block; line-height:1.05}
+
+.q{font-family:var(--display); font-weight:400; font-size:23px; line-height:1.3; margin:0 0 18px; padding:2px 0 2px 16px; border-left:3px solid var(--money); text-wrap:balance}
+.calc{
+  font-family:var(--mono); font-size:13px; line-height:2;
+  background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--accent);
+  border-radius:2px; padding:16px 20px; margin:0 0 20px; overflow-x:auto;
+  white-space:pre; color:var(--ink); font-variant-numeric:tabular-nums;
+}
+.calc b{color:var(--money); font-weight:600}
+.calc i{color:var(--ink-3); font-style:normal}
+.callout-ans{background:var(--money-soft); border-radius:2px; padding:15px 20px; margin:0 0 20px; font-size:15.5px; line-height:1.55}
+
+.stage{background:var(--surface); border:1px solid var(--rule); border-radius:2px; margin:0 0 14px; overflow:hidden}
+.stage.boom{border-color:var(--money); border-width:1.5px}
+.stage-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:13px 18px; border-bottom:1px solid var(--rule); background:var(--surface-2)}
+.stage-n{font-family:var(--mono); font-size:11.5px; font-weight:600; width:26px; height:26px; flex:none; border-radius:50%; background:var(--accent); color:#FFF; display:grid; place-items:center}
+.stage.boom .stage-n{background:var(--money)}
+.stage-head h3{font-family:var(--body); font-weight:700; font-size:16px; margin:0; flex:1 1 auto}
+.stage-cost{font-family:var(--mono); font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums; white-space:nowrap}
+.stage.boom .stage-cost{color:var(--money); font-weight:600}
+.stage-body{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule)}
+.io{background:var(--surface); padding:14px 18px}
+.io dt{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); margin:0 0 6px}
+.io dd{margin:0; font-size:14px; line-height:1.5}
+.io .payload{font-family:var(--mono); font-size:11px; line-height:1.6; background:var(--surface-2); border-radius:2px; padding:9px 11px; margin-top:8px; overflow-x:auto; white-space:pre; color:var(--ink-2)}
+.stage-note{padding:13px 18px; border-top:1px solid var(--rule); font-size:14.5px; line-height:1.55; color:var(--ink-2)}
+.stage.boom .stage-note{background:var(--money-soft); color:var(--ink)}
+@media (max-width:640px){ .stage-body{grid-template-columns:1fr} }
+
+.prompt{margin:0 0 26px}
+.prompt h4{font-family:var(--mono); font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
+.prompt h4 span{font-family:var(--body); letter-spacing:0; text-transform:none; font-size:13px; font-weight:400}
+.why{font-size:14.5px; color:var(--ink-2); margin:10px 0 0; line-height:1.55}
+
+footer{border-top:3px double var(--ink); margin-top:40px; padding-top:22px; font-family:var(--mono); font-size:11.5px; color:var(--ink-3); line-height:1.8}
+@media (prefers-reduced-motion: no-preference){ html{scroll-behavior:smooth} }
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+/* ---- additions for the project-session pages (Class 7+) ---- */
+.toc{margin:30px 0 0; padding:18px 0 0; border-top:1px solid var(--rule)}
+.toc ol{list-style:none; margin:0; padding:0; columns:2 240px; column-gap:28px}
+.toc li{margin:0 0 6px; break-inside:avoid; font-size:14.5px}
+.toc a{color:var(--ink-2); text-decoration:none}
+.toc a:hover{color:var(--accent); text-decoration:underline}
+.toc .n{font-family:var(--mono); font-size:11px; color:var(--ink-3); display:inline-block; min-width:26px}
+
+.file{background:var(--code-bg); border-radius:3px; margin:0 0 8px; overflow:hidden}
+.file-bar{display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:8px 14px 8px 22px; border-bottom:1px solid rgba(255,255,255,.08);
+  font-family:var(--mono); font-size:11px; color:var(--code-dim)}
+.file-bar b{color:var(--code-ink); font-weight:600}
+.file pre{margin:0; border-radius:0}
+button.copy{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  background:transparent; color:var(--code-dim); border:1px solid rgba(255,255,255,.18);
+  border-radius:2px; padding:3px 9px; cursor:pointer}
+button.copy:hover{color:var(--code-ink); border-color:rgba(255,255,255,.4)}
+button.copy.done{color:#8FD1A0; border-color:#8FD1A0}
+
+.tree{font-family:var(--mono); font-size:13px; line-height:1.85; background:var(--surface);
+  border:1px solid var(--rule); border-radius:2px; padding:16px 20px; margin:0 0 20px;
+  white-space:pre; overflow-x:auto; color:var(--ink)}
+.tree i{font-style:normal; color:var(--ink-3)}
+
+.sim{background:var(--surface); border:1px solid var(--rule); border-top:4px solid var(--money);
+  border-radius:2px; margin:0 0 22px}
+.sim-head{padding:14px 22px; border-bottom:1px solid var(--rule); background:var(--surface-2);
+  font-family:var(--mono); font-size:11px; color:var(--ink-2); display:flex; flex-wrap:wrap; gap:4px 18px; justify-content:space-between}
+.sim-head b{color:var(--ink); font-weight:600}
+.sim-body{padding:20px 22px}
+.sim label{display:block; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 6px}
+.sim textarea,.sim select,.sim input{width:100%; font:inherit; font-size:15px; color:var(--ink);
+  background:var(--bg); border:1px solid var(--rule-2); border-radius:2px; padding:10px 12px; margin:0 0 14px}
+.sim textarea{min-height:120px; resize:vertical; line-height:1.55}
+.sim .row{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0 16px}
+.btns{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 6px}
+.btn{font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  padding:9px 14px; border-radius:2px; border:1px solid var(--rule-2); background:var(--surface);
+  color:var(--ink); cursor:pointer}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--surface)}
+.out{margin-top:16px}
+.out:empty{display:none}
+.toolout{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1px;
+  background:var(--rule); border:1px solid var(--rule); border-radius:2px; margin:0 0 16px}
+.toolout > div{background:var(--surface); padding:12px 14px; min-width:0}
+.toolout h5{margin:0 0 6px; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3)}
+.toolout .payload{font-family:var(--mono); font-size:11.5px; line-height:1.6; white-space:pre-wrap;
+  word-break:break-word; color:var(--ink-2); margin:6px 0 0}
+.big2{font-family:var(--display); font-size:30px; line-height:1}
+.report{font-family:var(--mono); font-size:12.5px; line-height:1.75; white-space:pre-wrap;
+  background:var(--surface-2); border-radius:2px; padding:14px 16px; color:var(--ink); word-break:break-word}
+.note-sm{font-size:13.5px; color:var(--ink-3); margin:8px 0 0; line-height:1.5}
+
+details.qa{background:var(--surface); border:1px solid var(--rule); border-radius:2px; margin:0 0 10px}
+details.qa summary{cursor:pointer; padding:14px 18px; font-weight:500; list-style:none; display:flex; gap:12px}
+details.qa summary::-webkit-details-marker{display:none}
+details.qa summary::before{content:"+"; font-family:var(--mono); color:var(--accent); font-weight:600; width:12px; flex:none}
+details.qa[open] summary::before{content:"\2212"}
+details.qa .a{padding:0 18px 16px 42px; font-size:15px; color:var(--ink-2)}
+details.qa .a p:last-child{margin-bottom:0}
+
+.series{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px}
+.series a{text-decoration:none}
+.anno{grid-template-columns:32px minmax(0,1fr)}
+:not(pre) > code{overflow-wrap:anywhere}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="col">
+    <p class="eyebrow">AI Infusion · Class 7 · Live project session</p>
+    <h1>The coach that <em>can't</em> be bluffed</h1>
+    <p class="standfirst">A real AI-engineering take-home, solved live in one sitting. An interview coach that grades a candidate's written answers with deterministic tools, remembers the whole session, answers “how am I doing?” mid-interview, and ships behind a Gradio UI.</p>
+    <div class="meta">
+      <span><b>Stack</b> Python · Groq · Gradio</span>
+      <span><b>Model</b> openai/gpt-oss-20b</span>
+      <span><b>Brief</b> a company's AI-engineer assignment</span>
+      <span><b>Scope</b> 11 milestones + 1 bonus</span>
+    </div>
+    <nav class="toc" aria-label="Contents">
+      <ol>
+        <li><a href="#hook"><span class="n">01</span>Why hand an LLM a ruler?</a></li>
+        <li><a href="#brief"><span class="n">02</span>The brief</a></li>
+        <li><a href="#asks"><span class="n">03</span>Four asks, one graded deliverable</a></li>
+        <li><a href="#arch"><span class="n">04</span>Architecture &amp; file layout</a></li>
+        <li><a href="#order"><span class="n">05</span>The build order</a></li>
+        <li><a href="#tools"><span class="n">06</span>The three tools</a></li>
+        <li><a href="#sim"><span class="n">07</span>Try the tools live</a></li>
+        <li><a href="#loop"><span class="n">08</span>The agent loop</a></li>
+        <li><a href="#memory"><span class="n">09</span>Memory &amp; the final report</a></li>
+        <li><a href="#ui"><span class="n">10</span>The Gradio app</a></li>
+        <li><a href="#verify"><span class="n">11</span>Prove the memory works</a></li>
+        <li><a href="#bonus"><span class="n">12</span>Bonus: a second agent</a></li>
+        <li><a href="#calls"><span class="n">13</span>Judgement calls</a></li>
+        <li><a href="#selfcheck"><span class="n">14</span>Self-check</a></li>
+      </ol>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section id="hook">
+  <div class="col">
+    <p class="kicker">The hook</p>
+    <h2>Why hand an LLM a <em>ruler</em>?</h2>
+    <p class="lede">Ask a model “does this answer contain filler words?” and it will tell you. Ask again and it may tell you something slightly different. Ask a different model and you get a different definition of “filler” altogether.</p>
+    <p>That is fine for a chatbot. It is not fine for a hiring screen. If a candidate is rejected because their answer was “padded,” the hiring team has to be able to say <em>what</em> padded means — and it has to mean the same thing on Monday as it did on Friday, for every candidate.</p>
+    <p>So the design splits the work cleanly. <strong>Tools measure. The LLM explains.</strong> Three plain Python functions — filler-word counting, STAR-structure detection, keyword relevance — produce numbers the company defined. The model decides <em>which</em> tool to call, reads the results, and turns them into encouraging, specific feedback. It never invents the score.</p>
+    <div class="ask">
+      <span class="tag">Ask the room</span>
+      <p><q>The model can already spot filler words on its own. Why write <code>detect_filler_words()</code> at all?</q></p>
+      <p>Because the model's understanding of “filler” and the company's can drift apart — and you can't see when they do. A hard-coded list keeps the AI and the hiring team <strong>in the same ballpark</strong>: it gives the same answer every run, it can be reviewed in a pull request, and when a candidate disputes a score you can point at the exact rule. That is what “deterministic” buys you here.</p>
+    </div>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 880 270" role="img" aria-label="Two panels. Left: the same answer graded three times by the LLM alone returns 2, 4 and 3 filler words. Right: the same answer passed through the detect_filler_words tool returns 4 every time, and the LLM only writes the feedback.">
+        <text x="20" y="26" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" letter-spacing="1.2" fill="currentColor">LLM ALONE</text>
+        <text x="20" y="46" font-family="Public Sans, sans-serif" font-size="13" fill="currentColor" opacity=".62">“Count the filler words in this answer.”</text>
+        <rect x="20" y="112" width="96" height="46" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="68" y="140" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">answer</text>
+        <g stroke="currentColor" stroke-width="1.4" fill="none" opacity=".75">
+          <path d="M116,135 C190,80 240,80 300,80"/>
+          <path d="M116,135 L300,135"/>
+          <path d="M116,135 C190,190 240,190 300,190"/>
+        </g>
+        <g font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600">
+          <rect x="300" y="62" width="104" height="36" rx="2" fill="#A52A38"/><text x="352" y="85" text-anchor="middle" fill="#FFFFFF">run 1 → 2</text>
+          <rect x="300" y="117" width="104" height="36" rx="2" fill="#A52A38"/><text x="352" y="140" text-anchor="middle" fill="#FFFFFF">run 2 → 4</text>
+          <rect x="300" y="172" width="104" height="36" rx="2" fill="#A52A38"/><text x="352" y="195" text-anchor="middle" fill="#FFFFFF">run 3 → 3</text>
+        </g>
+        <text x="212" y="248" text-anchor="middle" font-family="Public Sans, sans-serif" font-size="13" fill="currentColor" opacity=".68">three runs, three “facts” — none of them defensible</text>
+
+        <line x1="440" y1="14" x2="440" y2="256" stroke="currentColor" stroke-width="1" opacity=".22"/>
+
+        <text x="462" y="26" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" letter-spacing="1.2" fill="currentColor">LLM + TOOL</text>
+        <text x="462" y="46" font-family="Public Sans, sans-serif" font-size="13" fill="currentColor" opacity=".62">The model calls detect_filler_words(answer)</text>
+        <rect x="462" y="112" width="96" height="46" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="510" y="140" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">answer</text>
+        <line x1="558" y1="135" x2="596" y2="135" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="596" y="113" width="112" height="44" rx="2" fill="#2B3A67"/>
+        <text x="652" y="133" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" fill="#FFFFFF">tool</text>
+        <text x="652" y="148" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#FFFFFF" opacity=".8">total: 4</text>
+        <line x1="708" y1="135" x2="744" y2="135" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="744" y="113" width="114" height="44" rx="2" fill="none" stroke="#1B6B4C" stroke-width="1.5"/>
+        <text x="801" y="133" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" fill="#1B6B4C">LLM writes</text>
+        <text x="801" y="148" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1B6B4C">the feedback</text>
+        <text x="660" y="206" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor">4 · 4 · 4 · 4 · 4 …</text>
+        <text x="660" y="248" text-anchor="middle" font-family="Public Sans, sans-serif" font-size="13" fill="currentColor" opacity=".68">the number is policy; only the prose varies</text>
+      </svg>
+      </div>
+      <figcaption>Same answer, two designs. On the left the model is both the measuring instrument and the narrator, so the measurement wobbles. On the right the measurement is code the company owns, and the model is only asked to do what it is genuinely good at — explaining.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="brief">
+  <div class="col">
+    <p class="kicker">The brief</p>
+    <h2>Screen out the people applying <em>only</em> for the package</h2>
+    <p>The assignment came from a company hiring AI engineers, and the class solved it live instead of taking it home. The scenario: hiring teams drown in résumés, and many applicants aren't qualified — they saw a good opening or a good salary and clicked apply. Before a résumé reaches a human, a text-based AI interview should filter them.</p>
+    <p>Given a candidate's <strong>written</strong> answer to an interview question, the system must:</p>
+    <ol>
+      <li><strong>Evaluate</strong> the answer using a set of tools the agent chooses between.</li>
+      <li><strong>Give feedback</strong> that is encouraging when the answer is good and specific about what to fix when it isn't.</li>
+      <li><strong>Remember</strong> every question, answer and evaluation, so it can produce a final report and answer meta-questions like “how am I doing so far?”</li>
+      <li>Run behind a <strong>browser interface</strong>.</li>
+    </ol>
+    <p>It is conversational, not voice — the candidate types. Questions come from a fixed bank, so the evaluation stays comparable across candidates.</p>
+  </div>
+
+  <div class="col">
+    <h3>One question, two answers</h3>
+    <div class="casefile">
+      <div class="casefile-head">
+        <span><b>Q2</b> behavioural</span>
+        <span><b>ASKED</b> “Describe a situation where you disagreed with a teammate. How did you handle it?”</span>
+      </div>
+      <div class="casefile-body">
+        <p><mark class="up">At my previous company</mark><sup class="gid up">S</sup> a teammate wanted to rewrite our payments service. <mark class="up">I was responsible</mark><sup class="gid up">T</sup> for its uptime, so I <mark class="esc">listened</mark> to his reasons first, then <mark class="up">I proposed</mark><sup class="gid up">A</sup> we look at the incident <mark class="esc">data</mark> together. We agreed on a <mark class="esc">compromise</mark> — rewrite one module behind a flag — and <mark class="esc">communicated</mark> it to the team. <mark class="up">As a result</mark><sup class="gid up">R</sup> the <mark class="esc">outcome</mark> was a 30% drop in incidents and no big-bang rewrite.</p>
+      </div>
+    </div>
+    <div class="casefile" style="border-top-color:var(--rej)">
+      <div class="casefile-head"><span><b>SAME QUESTION</b> a weak answer</span></div>
+      <div class="casefile-body">
+        <p><mark class="rej">Um</mark>, <mark class="rej">basically</mark> I just, <mark class="rej">like</mark>, talked to him and, <mark class="rej">you know</mark>, it was <mark class="rej">kind of</mark> fine <mark class="up">in the end</mark><sup class="gid up">R</sup>.</p>
+      </div>
+    </div>
+    <p style="font-family:var(--mono); font-size:11.5px; color:var(--ink-3); margin-bottom:24px">
+      <span class="v up">STAR cue</span> &nbsp;<span class="v esc">expected keyword</span> &nbsp;<span class="v rej">filler word</span>
+    </p>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Tool</th><th>Strong answer</th><th>Weak answer</th></tr></thead>
+        <tbody>
+          <tr><td><code>detect_filler_words</code></td><td class="num">0 · clean</td><td class="num" style="color:var(--rej)">5 · needs improvement</td></tr>
+          <tr><td><code>check_star_structure</code></td><td class="num">S T A R · all present</td><td class="num" style="color:var(--rej)">R only · missing S, T, A</td></tr>
+          <tr><td><code>score_relevance</code></td><td class="num">100 / 100</td><td class="num" style="color:var(--rej)">0 / 100</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Notice “in the end” in the weak answer. It <em>is</em> one of the result cues — but the weak answer still has no situation, task or action, and it hits none of the expected keywords. The tools aren't fooled by one lucky phrase, because three of them vote on different properties.</p>
+    <div class="room">
+      <span class="tag">Production reality</span>
+      <p>The filler-word tool exists for a specific failure: a candidate who doesn't know the answer pads it to <em>look</em> long. Length alone is a terrible proxy for quality — five sentences of “basically, you know, kind of” score as long as five sentences of substance. A filler count is the cheapest possible signal that separates the two.</p>
+    </div>
+  </div>
+</section>
+
+<section id="asks">
+  <div class="col">
+    <p class="kicker">The asks</p>
+    <h2>Four asks, one graded deliverable</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:9%">#</th><th style="width:30%">Ask</th><th>What “done” means</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td><strong>Tool-calling evaluator agent</strong></td><td>The agent decides which of three tools to call — <code>detect_filler_words</code>, <code>check_star_structure</code>, <code>score_relevance</code> (0–100) — interprets the structured results and writes short, encouraging feedback.</td></tr>
+          <tr><td class="num">2</td><td><strong>Session memory → aggregated evaluation</strong></td><td>Every question, answer and tool result is kept. The final report computes the <em>average</em> relevance, the <em>lowest-scoring question</em> and the <em>weakest area</em> from the whole session — not just the last answer. Verified by <code>memory_check.py</code>.</td></tr>
+          <tr><td class="num">3</td><td><strong>Working Gradio interface</strong></td><td>Current question, answer box, feedback panel, live scorecard, meta-question box, final-report button. Any UI framework is acceptable if you don't know Gradio.</td></tr>
+          <tr><td class="num">4</td><td><strong>Bonus · multi-agent</strong> <span class="v drop">not graded</span></td><td>A second <em>interviewer</em> agent picks the next question's category from the candidate's performance so far, then hands the question to the existing evaluator.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ask">
+      <span class="tag">Ask the room</span>
+      <p><q>The final report has to name the weakest area. Can the LLM just “look back” at the conversation and decide?</q></p>
+      <p>Only if the conversation still exists, and only if it holds something you can <em>aggregate</em>. Feedback prose can't be averaged. That is why ask 2 is about memory first and the report second: store the tool outputs — the numbers — and the report becomes arithmetic over a list.</p>
+    </div>
+  </div>
+</section>
+
+<section id="arch">
+  <div class="col">
+    <p class="kicker">Architecture</p>
+    <h2>One loop, one list, two front doors</h2>
+    <p>Strip away the UI and the system is small: a function that loops between the model and the tools, and a list that remembers what the tools said.</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 980 360" role="img" aria-label="Architecture. The Gradio app and the CLI main.py both call run_turn. run_turn calls run_loop, which exchanges messages with the Groq model; when the model requests tools, run_loop executes them from the tool table and sends results back. run_turn appends the question, answer and tool results to session_log. ask_agent and generate_final_report both read session_log.">
+        <defs>
+          <marker id="a7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+        </defs>
+        <g font-family="IBM Plex Mono, monospace">
+          <rect x="14" y="60" width="140" height="52" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="84" y="82" text-anchor="middle" font-size="10.5" font-weight="600" fill="currentColor">app.py</text>
+          <text x="84" y="99" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".6">Gradio · browser</text>
+          <rect x="14" y="140" width="140" height="52" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="84" y="162" text-anchor="middle" font-size="10.5" font-weight="600" fill="currentColor">main.py</text>
+          <text x="84" y="179" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".6">CLI · sequential</text>
+
+          <path d="M154,86 C190,86 192,126 222,126" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7)"/>
+          <path d="M154,166 C190,166 192,130 222,130" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7)"/>
+
+          <rect x="228" y="100" width="136" height="56" rx="2" fill="#2B3A67"/>
+          <text x="296" y="124" text-anchor="middle" font-size="10.5" font-weight="600" fill="#FFFFFF">run_turn()</text>
+          <text x="296" y="141" text-anchor="middle" font-size="9.5" fill="#FFFFFF" opacity=".8">question + answer</text>
+
+          <line x1="364" y1="128" x2="414" y2="128" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7)"/>
+
+          <rect x="420" y="100" width="136" height="56" rx="2" fill="#2B3A67"/>
+          <text x="488" y="124" text-anchor="middle" font-size="10.5" font-weight="600" fill="#FFFFFF">run_loop()</text>
+          <text x="488" y="141" text-anchor="middle" font-size="9.5" fill="#FFFFFF" opacity=".8">≤ 5 tool rounds</text>
+
+          <path d="M556,116 L640,72" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7)"/>
+          <path d="M644,86 L560,128" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a7)"/>
+          <rect x="646" y="38" width="150" height="52" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="721" y="60" text-anchor="middle" font-size="10.5" font-weight="600" fill="currentColor">Groq LLM</text>
+          <text x="721" y="77" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".6">gpt-oss-20b</text>
+          <text x="600" y="58" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">messages</text>
+          <text x="618" y="122" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">tool_calls</text>
+
+          <path d="M556,140 L640,184" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7)"/>
+          <rect x="646" y="160" width="310" height="104" rx="2" fill="none" stroke="#8A5E12" stroke-width="1.5"/>
+          <text x="660" y="180" font-size="10.5" font-weight="600" fill="#8A5E12">TOOL_FUNCTIONS</text>
+          <text x="660" y="202" font-size="10" fill="currentColor">detect_filler_words(answer)</text>
+          <text x="660" y="220" font-size="10" fill="currentColor">check_star_structure(answer)</text>
+          <text x="660" y="238" font-size="10" fill="currentColor">score_relevance(answer, keywords)</text>
+          <text x="660" y="256" font-size="10" fill="currentColor" opacity=".6">generate_final_report()</text>
+
+          <line x1="296" y1="156" x2="296" y2="262" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7)"/>
+          <text x="306" y="214" font-size="9" fill="currentColor" opacity=".6">append</text>
+          <path d="M226,268 a70,12 0 0,1 140,0 v40 a70,12 0 0,1 -140,0 z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M226,268 a70,12 0 0,0 140,0" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="296" y="300" text-anchor="middle" font-size="10.5" font-weight="600" fill="currentColor">session_log</text>
+          <text x="296" y="342" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".6">list of dicts</text>
+
+          <rect x="420" y="276" width="136" height="44" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="488" y="303" text-anchor="middle" font-size="10.5" font-weight="600" fill="currentColor">ask_agent()</text>
+          <line x1="418" y1="298" x2="370" y2="292" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7)"/>
+          <path d="M488,276 L488,160" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3" opacity=".6" marker-end="url(#a7)"/>
+          <text x="20" y="300" font-size="10.5" font-weight="600" fill="currentColor">final report</text>
+          <text x="20" y="317" font-size="9.5" fill="currentColor" opacity=".6">aggregates the list</text>
+          <line x1="140" y1="304" x2="220" y2="292" stroke="currentColor" stroke-width="1.5" marker-start="url(#a7)"/>
+        </g>
+      </svg>
+      </div>
+      <figcaption>The solid arrows are one evaluated answer. The dashed arrow is the meta-question path: <code>ask_agent()</code> reads the whole session log and goes through the <em>same</em> loop, so the model can still call a tool (usually <code>generate_final_report</code>) while answering “how am I doing?”.</figcaption>
+    </figure>
+  </div>
+
+  <div class="col">
+    <h3>The project folder</h3>
+<div class="tree">interview-iq/
+├── .env                  <i># GROQ_API_KEY=…  (never commit this)</i>
+├── requirements.txt      <i># groq, gradio, python-dotenv</i>
+├── tools.py              <i># ask 1 · the three deterministic tools</i>
+├── interview_bank.py     <i># questions + expected keywords + category</i>
+├── agent.py              <i># schemas, run_loop, session_log, report, ask_agent</i>
+├── main.py               <i># terminal flow</i>
+├── app.py                <i># ask 3 · Gradio UI</i>
+├── memory_check.py       <i># ask 2 · verification script — written last</i>
+├── interviewer_agent.py  <i># ask 4 · bonus</i>
+└── run_multi_agent.py    <i># ask 4 · bonus</i></div>
+    <p>Separate files are not ceremony. When a tool call fails you go straight to <code>tools.py</code>; when the scorecard renders wrong you go straight to <code>app.py</code>. That is how the solution is laid out in industry, and it is why the session insisted on it.</p>
+  </div>
+</section>
+
+<section id="order">
+  <div class="col">
+    <p class="kicker">The build order</p>
+    <h2>Wire nothing until it works <em>alone</em></h2>
+    <p class="lede">The most important instruction of the session wasn't about AI at all. It was about the order you build things in.</p>
+    <p>If you write three tools, plug them straight into the LLM and the output is wrong, you can't tell whether the tool is broken, the schema is wrong, or the model ignored you — and every attempt to find out burns API tokens. So the suggested approach is strictly bottom-up:</p>
+  </div>
+  <div class="col">
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:8%">Step</th><th style="width:34%">Build</th><th>Done when</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>venv, <code>requirements.txt</code>, <code>.env</code>, one plain LLM call</td><td>The model answers “hello” — the key and provider config are proven before anything else exists.</td></tr>
+          <tr><td class="num">2</td><td>The three tools as standalone functions</td><td>Each returns the dict you expect for a hand-written strong and weak answer. No LLM involved.</td></tr>
+          <tr><td class="num">3</td><td>Wire tools into the evaluator loop</td><td>One complete evaluation runs end-to-end through <code>main.py</code>.</td></tr>
+          <tr><td class="num">4</td><td>Session memory</td><td>Every evaluated answer, its scores and feedback are in <code>session_log</code> and still there later.</td></tr>
+          <tr><td class="num">5</td><td><code>generate_final_report()</code></td><td>Average relevance, lowest-scoring question, weakest area — computed from the list.</td></tr>
+          <tr><td class="num">6</td><td><code>ask_agent()</code> for meta-questions</td><td>“How am I doing?” is answered from the full history, mid-interview.</td></tr>
+          <tr><td class="num">7</td><td><code>memory_check.py</code></td><td>A deliberately weak answer is correctly named as the weakest area.</td></tr>
+          <tr><td class="num">8</td><td><code>app.py</code></td><td>The whole workflow runs in the browser. The UI is the <em>last</em> layer.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The same thing as graded milestones</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:12%">M</th><th>Milestone</th><th style="width:30%">Proof</th></tr></thead>
+        <tbody>
+          <tr><td class="num">M1</td><td>Environment setup — venv, install requirements, configure <code>.env</code></td><td><code>pip list</code> inside the venv</td></tr>
+          <tr><td class="num">M2</td><td>Basic LLM call without tools</td><td>a reply from the provider</td></tr>
+          <tr><td class="num">M3</td><td><code>detect_filler_words</code> implemented and tested directly</td><td><code>python tools.py</code></td></tr>
+          <tr><td class="num">M4</td><td><code>check_star_structure</code> implemented and tested directly</td><td><code>python tools.py</code></td></tr>
+          <tr><td class="num">M5</td><td><code>score_relevance</code> implemented and tested directly</td><td><code>python tools.py</code></td></tr>
+          <tr><td class="num">M6</td><td>Tool-calling evaluator — all three tools in the loop</td><td><code>python main.py</code></td></tr>
+          <tr><td class="num">M7</td><td>Session memory</td><td>log persists across turns</td></tr>
+          <tr><td class="num">M8</td><td>Final report with real aggregation</td><td>average · lowest · weakest</td></tr>
+          <tr><td class="num">M9</td><td>Mid-session agent questions via <code>ask_agent()</code></td><td>answers use full history</td></tr>
+          <tr><td class="num">M10</td><td>Memory verification</td><td><code>python memory_check.py</code></td></tr>
+          <tr><td class="num">M11</td><td>Gradio application</td><td><code>python app.py</code></td></tr>
+          <tr><td class="num">M12</td><td><span class="v drop">bonus</span> Multi-agent system</td><td><code>python run_multi_agent.py</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="room">
+      <span class="tag">On vibe-coding it</span>
+      <p>Using an LLM to write the code was explicitly allowed. What wasn't recommended was asking for the whole project in one prompt. You get a large, confident, sometimes-broken codebase you can't debug. Prompt <strong>one ask at a time</strong> and check each piece against the step it's meant to satisfy. You still have to read what it gave you.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="col">
+    <p class="kicker">Ask 1 · the tools</p>
+    <h2>Three functions, each returning a <em>dict</em></h2>
+    <p>Every tool takes the raw answer and returns structured data, never a sentence. The model reads JSON reliably; the report needs numbers; the scorecard needs fields. A formatted string would serve none of them.</p>
+<div class="file"><div class="file-bar"><span><b>tools.py</b> · ask 1 · run it directly to test</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> re
+
+<span class="c-dim"># Deliberately small and hard-coded: the company decides what counts as filler,</span>
+<span class="c-dim"># not the model. Extend the list; never hand the definition to the LLM.</span>
+FILLER_WORDS = [<span class="c-str">"um"</span>, <span class="c-str">"uh"</span>, <span class="c-str">"like"</span>, <span class="c-str">"basically"</span>, <span class="c-str">"actually"</span>, <span class="c-str">"literally"</span>,
+                <span class="c-str">"you know"</span>, <span class="c-str">"kind of"</span>, <span class="c-str">"sort of"</span>, <span class="c-str">"i mean"</span>]
+
+STAR_SIGNALS = {
+    <span class="c-str">"situation"</span>: [<span class="c-str">"when i was"</span>, <span class="c-str">"at my previous"</span>, <span class="c-str">"in my previous"</span>, <span class="c-str">"while working"</span>,
+                  <span class="c-str">"at my last"</span>, <span class="c-str">"we had a"</span>],
+    <span class="c-str">"task"</span>:      [<span class="c-str">"i needed to"</span>, <span class="c-str">"my task was"</span>, <span class="c-str">"i was responsible"</span>, <span class="c-str">"the goal was"</span>,
+                  <span class="c-str">"i had to"</span>, <span class="c-str">"my job was"</span>],
+    <span class="c-str">"action"</span>:    [<span class="c-str">"i decided"</span>, <span class="c-str">"i implemented"</span>, <span class="c-str">"i built"</span>, <span class="c-str">"i led"</span>, <span class="c-str">"i created"</span>,
+                  <span class="c-str">"i wrote"</span>, <span class="c-str">"i set up"</span>, <span class="c-str">"i proposed"</span>],
+    <span class="c-str">"result"</span>:    [<span class="c-str">"as a result"</span>, <span class="c-str">"this led to"</span>, <span class="c-str">"which led to"</span>, <span class="c-str">"we achieved"</span>,
+                  <span class="c-str">"reduced"</span>, <span class="c-str">"improved"</span>, <span class="c-str">"in the end"</span>],
+}
+
+
+<span class="c-key">def</span> _count(phrase: str, text: str) -&gt; int:
+    <span class="c-dim"># \b on both sides: "um" must not match "summary", "like" must not match "likely"</span>
+    <span class="c-key">return</span> len(re.findall(<span class="c-str">r"\b"</span> + re.escape(phrase) + <span class="c-str">r"\b"</span>, text))
+
+
+<span class="c-key">def</span> detect_filler_words(answer: str) -&gt; dict:
+    text = answer.lower()
+    found = {w: _count(w, text) <span class="c-key">for</span> w <span class="c-key">in</span> FILLER_WORDS}
+    found = {w: n <span class="c-key">for</span> w, n <span class="c-key">in</span> found.items() <span class="c-key">if</span> n &gt; 0}
+    total = sum(found.values())
+    <span class="c-key">return</span> {
+        <span class="c-str">"total"</span>: total,
+        <span class="c-str">"found"</span>: found,
+        <span class="c-str">"verdict"</span>: <span class="c-str">"clean"</span> <span class="c-key">if</span> total &lt;= 2 <span class="c-key">else</span> <span class="c-str">"needs improvement"</span>,
+    }
+
+
+<span class="c-key">def</span> check_star_structure(answer: str) -&gt; dict:
+    text = answer.lower()
+    present = [part <span class="c-key">for</span> part, cues <span class="c-key">in</span> STAR_SIGNALS.items()
+               <span class="c-key">if</span> any(_count(cue, text) <span class="c-key">for</span> cue <span class="c-key">in</span> cues)]
+    missing = [part <span class="c-key">for</span> part <span class="c-key">in</span> STAR_SIGNALS <span class="c-key">if</span> part <span class="c-key">not</span> <span class="c-key">in</span> present]
+    <span class="c-key">return</span> {<span class="c-str">"present"</span>: present, <span class="c-str">"missing"</span>: missing, <span class="c-str">"all_present"</span>: <span class="c-key">not</span> missing}
+
+
+<span class="c-key">def</span> score_relevance(answer: str, expected_keywords: list) -&gt; dict:
+    text = answer.lower()
+    <span class="c-dim"># plain substring on purpose: "listen" should credit "listened"</span>
+    covered = [k <span class="c-key">for</span> k <span class="c-key">in</span> expected_keywords <span class="c-key">if</span> k.lower() <span class="c-key">in</span> text]
+    missed = [k <span class="c-key">for</span> k <span class="c-key">in</span> expected_keywords <span class="c-key">if</span> k.lower() <span class="c-key">not</span> <span class="c-key">in</span> text]
+    score = round(len(covered) / len(expected_keywords) * 100) <span class="c-key">if</span> expected_keywords <span class="c-key">else</span> 0
+    <span class="c-key">return</span> {<span class="c-str">"score"</span>: score, <span class="c-str">"covered"</span>: covered, <span class="c-str">"missed"</span>: missed}
+
+
+<span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    <span class="c-dim"># Step 2: prove every tool on its own before any LLM sees it.</span>
+    weak = <span class="c-str">"Um, basically I just, like, talked to him and you know it was fine."</span>
+    print(detect_filler_words(weak))
+    print(check_star_structure(weak))
+    print(score_relevance(weak, [<span class="c-str">"communicat"</span>, <span class="c-str">"listen"</span>, <span class="c-str">"compromise"</span>, <span class="c-str">"data"</span>]))</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>Lists are policy, and they are deliberately incomplete</b>The filler list and the STAR cue lists are non-exhaustive. Extend them as you find misses. The point is that a <em>person</em> extends them, in a reviewed change, not that the model improvises.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>The landmine: substring counting</b>The obvious version is <code>answer.lower().count("um")</code>. It counts the “um” in <em>summary</em>, <em>document</em> and <em>umbrella</em>, and the “like” in <em>likely</em>. A careful candidate gets penalised for vocabulary. Word boundaries (<code>\b</code>) fix it.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>A verdict, not just a count</b><code>total ≤ 2</code> is “clean”. Everyone says “um” occasionally; the threshold encodes how much the company tolerates.</span></div>
+      <div class="anno"><span class="n">4</span><span class="t"><b>Relevance uses substrings on purpose</b>Here the opposite choice is right: the keyword <code>listen</code> should credit “listened”, and <code>communicat</code> should credit both “communicated” and “communication”. Store stems in the bank and let the substring match do the rest.</span></div>
+      <div class="anno"><span class="n">5</span><span class="t"><b><code>all_present: not missing</code></b>An empty list is falsy, so <code>not missing</code> is <code>True</code> exactly when nothing is missing. It's a small idiom that reads like the sentence it implements.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="sim">
+  <div class="col">
+    <p class="kicker">Try it</p>
+    <h2>Run the three tools in your browser</h2>
+    <p>This is a line-for-line JavaScript port of <code>tools.py</code> and <code>generate_final_report()</code>. Everything the LLM would <em>base</em> its feedback on is computed here exactly as in Python. The only thing missing is the model's paragraph of prose. Answer a few questions, then build the report.</p>
+    <div class="sim" id="iq">
+      <div class="sim-head"><span><b>INTERVIEWIQ</b> · tools only, no LLM</span><span id="iq-count">session: 0 answers</span></div>
+      <div class="sim-body">
+        <label for="iq-q">Question</label>
+        <select id="iq-q"></select>
+        <label for="iq-a">Candidate answer</label>
+        <textarea id="iq-a" placeholder="Type an answer, or load one of the samples…"></textarea>
+        <div class="btns">
+          <button class="btn primary" id="iq-eval" type="button">Evaluate &amp; store</button>
+          <button class="btn" id="iq-strong" type="button">Load strong</button>
+          <button class="btn" id="iq-weak" type="button">Load weak</button>
+          <button class="btn" id="iq-report" type="button">Final report</button>
+          <button class="btn" id="iq-reset" type="button">Reset session</button>
+        </div>
+        <div class="out" id="iq-out"></div>
+        <div class="out" id="iq-card"></div>
+        <div class="out" id="iq-rep"></div>
+      </div>
+    </div>
+    <p class="note-sm">Try this: type “I summarised the document and it was likely fine.” A naive <code>.count()</code> would find two fillers in that sentence (“um” inside <em>summarised</em> and <em>document</em>) plus a “like” inside <em>likely</em>. The word-boundary version finds zero.</p>
+  </div>
+</section>
+
+<section id="loop">
+  <div class="col">
+    <p class="kicker">Ask 1 · the agent</p>
+    <h2>The loop that decides when it's <em>done</em></h2>
+    <p>The question bank comes first, because <code>score_relevance</code> needs the expected keywords for each question:</p>
+<div class="file"><div class="file-bar"><span><b>interview_bank.py</b> · questions are hard-coded on purpose</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># The company's question bank. Hard-coded on purpose: in production an LLM may</span>
+<span class="c-dim"># generate questions, but only inside categories the hiring team defines.</span>
+QUESTIONS = [
+    {
+        <span class="c-str">"category"</span>: <span class="c-str">"behavioural"</span>,
+        <span class="c-str">"question"</span>: <span class="c-str">"Tell me about a time you debugged a really hard problem."</span>,
+        <span class="c-str">"expected_keywords"</span>: [<span class="c-str">"reproduce"</span>, <span class="c-str">"logs"</span>, <span class="c-str">"root cause"</span>, <span class="c-str">"fix"</span>, <span class="c-str">"test"</span>],
+    },
+    {
+        <span class="c-str">"category"</span>: <span class="c-str">"behavioural"</span>,
+        <span class="c-str">"question"</span>: <span class="c-str">"Describe a situation where you disagreed with a teammate. How did you handle it?"</span>,
+        <span class="c-str">"expected_keywords"</span>: [<span class="c-str">"communicat"</span>, <span class="c-str">"listen"</span>, <span class="c-str">"compromise"</span>, <span class="c-str">"data"</span>, <span class="c-str">"outcome"</span>],
+    },
+    {
+        <span class="c-str">"category"</span>: <span class="c-str">"technical"</span>,
+        <span class="c-str">"question"</span>: <span class="c-str">"A query that used to take 50 ms now takes 4 seconds. Walk me through what you do."</span>,
+        <span class="c-str">"expected_keywords"</span>: [<span class="c-str">"explain"</span>, <span class="c-str">"index"</span>, <span class="c-str">"query plan"</span>, <span class="c-str">"n+1"</span>, <span class="c-str">"cache"</span>],
+    },
+    {
+        <span class="c-str">"category"</span>: <span class="c-str">"technical"</span>,
+        <span class="c-str">"question"</span>: <span class="c-str">"How would you rate-limit a public API?"</span>,
+        <span class="c-str">"expected_keywords"</span>: [<span class="c-str">"token bucket"</span>, <span class="c-str">"redis"</span>, <span class="c-str">"window"</span>, <span class="c-str">"429"</span>, <span class="c-str">"per user"</span>],
+    },
+    {
+        <span class="c-str">"category"</span>: <span class="c-str">"behavioural"</span>,
+        <span class="c-str">"question"</span>: <span class="c-str">"Tell me about a deadline you nearly missed."</span>,
+        <span class="c-str">"expected_keywords"</span>: [<span class="c-str">"priorit"</span>, <span class="c-str">"stakeholder"</span>, <span class="c-str">"scope"</span>, <span class="c-str">"communicat"</span>, <span class="c-str">"deliver"</span>],
+    },
+]</code></pre></div>
+    <p>In production the questions might be LLM-generated, but always <em>inside</em> categories the company defines. For this build they're fixed so every candidate is measured on the same ground.</p>
+
+    <h3>Tools the model can see: the schema</h3>
+    <p>The model never sees your Python. It sees a JSON description of each tool: its name, a sentence about what it does, and the parameters it takes. The <strong>description is how the model decides whether to call it</strong>, so write it like documentation for a colleague.</p>
+<div class="file"><div class="file-bar"><span><b>agent.py</b> · ask 1 + ask 2 · the heart of the project</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
+<span class="c-key">import</span> os
+
+<span class="c-key">from</span> dotenv <span class="c-key">import</span> load_dotenv
+<span class="c-key">from</span> groq <span class="c-key">import</span> Groq
+
+<span class="c-key">from</span> tools <span class="c-key">import</span> detect_filler_words, check_star_structure, score_relevance
+
+load_dotenv()
+client = Groq(api_key=os.environ[<span class="c-str">"GROQ_API_KEY"</span>])
+MODEL = <span class="c-str">"openai/gpt-oss-20b"</span>   <span class="c-dim"># llama-3.3-70b-versatile is deprecated on Groq</span>
+
+<span class="c-dim"># Session memory: one structured dict per evaluated answer.</span>
+<span class="c-dim"># {"question", "category", "answer", "results": {tool_name: tool_output}, "feedback"}</span>
+session_log = []
+
+TOOL_SCHEMA = [
+    {<span class="c-str">"type"</span>: <span class="c-str">"function"</span>, <span class="c-str">"function"</span>: {
+        <span class="c-str">"name"</span>: <span class="c-str">"detect_filler_words"</span>,
+        <span class="c-str">"description"</span>: <span class="c-str">"Count filler words (um, uh, basically, you know ...) in the candidate's answer."</span>,
+        <span class="c-str">"parameters"</span>: {<span class="c-str">"type"</span>: <span class="c-str">"object"</span>,
+                       <span class="c-str">"properties"</span>: {<span class="c-str">"answer"</span>: {<span class="c-str">"type"</span>: <span class="c-str">"string"</span>}},
+                       <span class="c-str">"required"</span>: [<span class="c-str">"answer"</span>]}}},
+    {<span class="c-str">"type"</span>: <span class="c-str">"function"</span>, <span class="c-str">"function"</span>: {
+        <span class="c-str">"name"</span>: <span class="c-str">"check_star_structure"</span>,
+        <span class="c-str">"description"</span>: <span class="c-str">"Check which parts of Situation, Task, Action, Result the answer contains."</span>,
+        <span class="c-str">"parameters"</span>: {<span class="c-str">"type"</span>: <span class="c-str">"object"</span>,
+                       <span class="c-str">"properties"</span>: {<span class="c-str">"answer"</span>: {<span class="c-str">"type"</span>: <span class="c-str">"string"</span>}},
+                       <span class="c-str">"required"</span>: [<span class="c-str">"answer"</span>]}}},
+    {<span class="c-str">"type"</span>: <span class="c-str">"function"</span>, <span class="c-str">"function"</span>: {
+        <span class="c-str">"name"</span>: <span class="c-str">"score_relevance"</span>,
+        <span class="c-str">"description"</span>: <span class="c-str">"Score 0-100 for how many expected keywords the answer covers."</span>,
+        <span class="c-str">"parameters"</span>: {<span class="c-str">"type"</span>: <span class="c-str">"object"</span>,
+                       <span class="c-str">"properties"</span>: {
+                           <span class="c-str">"answer"</span>: {<span class="c-str">"type"</span>: <span class="c-str">"string"</span>},
+                           <span class="c-str">"expected_keywords"</span>: {<span class="c-str">"type"</span>: <span class="c-str">"array"</span>, <span class="c-str">"items"</span>: {<span class="c-str">"type"</span>: <span class="c-str">"string"</span>}}},
+                       <span class="c-str">"required"</span>: [<span class="c-str">"answer"</span>, <span class="c-str">"expected_keywords"</span>]}}},
+    {<span class="c-str">"type"</span>: <span class="c-str">"function"</span>, <span class="c-str">"function"</span>: {
+        <span class="c-str">"name"</span>: <span class="c-str">"generate_final_report"</span>,
+        <span class="c-str">"description"</span>: <span class="c-str">"Aggregate the whole session: average relevance, lowest-scoring question, weakest area."</span>,
+        <span class="c-str">"parameters"</span>: {<span class="c-str">"type"</span>: <span class="c-str">"object"</span>, <span class="c-str">"properties"</span>: {}}}},   <span class="c-dim"># no arguments</span>
+]
+
+
+<span class="c-key">def</span> generate_final_report() -&gt; str:
+    <span class="c-key">if</span> <span class="c-key">not</span> session_log:
+        <span class="c-key">return</span> <span class="c-str">"No answers evaluated yet."</span>
+    lines, scores, gaps = [], [], {}
+    <span class="c-key">for</span> i, entry <span class="c-key">in</span> enumerate(session_log, 1):
+        r = entry[<span class="c-str">"results"</span>]
+        fill = r.get(<span class="c-str">"detect_filler_words"</span>, {})
+        star = r.get(<span class="c-str">"check_star_structure"</span>, {})
+        rel = r.get(<span class="c-str">"score_relevance"</span>, {})
+        lines.append(<span class="c-str">f"Q{i}. {entry['question']}"</span>)
+        lines.append(<span class="c-str">f"   fillers: {fill.get('total', '-')}  |  "</span>
+                     <span class="c-str">f"STAR missing: {', '.join(star.get('missing', [])) or 'none'}  |  "</span>
+                     <span class="c-str">f"relevance: {rel.get('score', '-')}/100"</span>)
+        <span class="c-key">if</span> <span class="c-str">"score"</span> <span class="c-key">in</span> rel:
+            scores.append((rel[<span class="c-str">"score"</span>], i, entry))
+        <span class="c-key">for</span> part <span class="c-key">in</span> star.get(<span class="c-str">"missing"</span>, []):
+            gaps[part] = gaps.get(part, 0) + 1
+        <span class="c-key">if</span> fill.get(<span class="c-str">"total"</span>, 0) &gt; 2:
+            gaps[<span class="c-str">"filler words"</span>] = gaps.get(<span class="c-str">"filler words"</span>, 0) + 1
+    <span class="c-key">if</span> scores:
+        avg = sum(s <span class="c-key">for</span> s, _, _ <span class="c-key">in</span> scores) / len(scores)
+        low_score, low_i, low = min(scores, key=<span class="c-key">lambda</span> t: t[0])
+        low_gaps = low[<span class="c-str">"results"</span>].get(<span class="c-str">"check_star_structure"</span>, {}).get(<span class="c-str">"missing"</span>, [])
+        lines.append(<span class="c-str">f"\nAverage relevance: {avg:.0f}/100"</span>)
+        lines.append(<span class="c-str">f"Lowest-scoring question: Q{low_i} ({low['category']}) at {low_score}/100"</span>)
+        lines.append(<span class="c-str">f"Weakest area: {low['question']} "</span>
+                     <span class="c-str">f"- missed {', '.join(low['results']['score_relevance']['missed']) or 'nothing'}"</span>
+                     <span class="c-str">f"{'; STAR gaps: ' + ', '.join(low_gaps) if low_gaps else ''}"</span>)
+    <span class="c-key">if</span> gaps:
+        ranked = sorted(gaps.items(), key=<span class="c-key">lambda</span> kv: -kv[1])
+        lines.append(<span class="c-str">"Recurring gaps: "</span> + <span class="c-str">", "</span>.join(<span class="c-str">f"{k} x{n}"</span> <span class="c-key">for</span> k, n <span class="c-key">in</span> ranked))
+    <span class="c-key">return</span> <span class="c-str">"\n"</span>.join(lines)
+
+
+TOOL_FUNCTIONS = {
+    <span class="c-str">"detect_filler_words"</span>:   <span class="c-key">lambda</span> a: detect_filler_words(a[<span class="c-str">"answer"</span>]),
+    <span class="c-str">"check_star_structure"</span>:  <span class="c-key">lambda</span> a: check_star_structure(a[<span class="c-str">"answer"</span>]),
+    <span class="c-str">"score_relevance"</span>:       <span class="c-key">lambda</span> a: score_relevance(a[<span class="c-str">"answer"</span>], a[<span class="c-str">"expected_keywords"</span>]),
+    <span class="c-str">"generate_final_report"</span>: <span class="c-key">lambda</span> a: generate_final_report(),
+}
+
+SYSTEM_PROMPT = <span class="c-str">"""You are InterviewIQ, an encouraging AI mock-interview coach.
+For every candidate answer:
+- call detect_filler_words, check_star_structure and score_relevance
+- base your feedback ONLY on what the tools return; never invent a score
+- reply in 3-4 sentences: one thing that worked, one concrete fix
+When asked about overall performance, use the session history you are given,
+or call generate_final_report."""</span>
+
+MAX_TOOL_ROUNDS = 5
+
+
+<span class="c-key">def</span> run_loop(messages: list, result_out: dict | <span class="c-key">None</span> = <span class="c-key">None</span>) -&gt; str:
+    <span class="c-key">for</span> _ <span class="c-key">in</span> range(MAX_TOOL_ROUNDS):
+        response = client.chat.completions.create(
+            model=MODEL, messages=messages, tools=TOOL_SCHEMA, tool_choice=<span class="c-str">"auto"</span>)
+        msg = response.choices[0].message
+        <span class="c-key">if</span> <span class="c-key">not</span> msg.tool_calls:                      <span class="c-dim"># model is done: plain answer</span>
+            <span class="c-key">return</span> msg.content
+        messages.append({
+            <span class="c-str">"role"</span>: <span class="c-str">"assistant"</span>, <span class="c-str">"content"</span>: msg.content <span class="c-key">or</span> <span class="c-str">""</span>,
+            <span class="c-str">"tool_calls"</span>: [{<span class="c-str">"id"</span>: c.id, <span class="c-str">"type"</span>: <span class="c-str">"function"</span>,
+                            <span class="c-str">"function"</span>: {<span class="c-str">"name"</span>: c.function.name,
+                                         <span class="c-str">"arguments"</span>: c.function.arguments}}
+                           <span class="c-key">for</span> c <span class="c-key">in</span> msg.tool_calls]})
+        <span class="c-key">for</span> call <span class="c-key">in</span> msg.tool_calls:
+            name = call.function.name
+            args = json.loads(call.function.arguments <span class="c-key">or</span> <span class="c-str">"{}"</span>)
+            result = TOOL_FUNCTIONS[name](args)
+            <span class="c-key">if</span> result_out <span class="c-key">is</span> <span class="c-key">not</span> <span class="c-key">None</span> <span class="c-key">and</span> name != <span class="c-str">"generate_final_report"</span>:
+                result_out[name] = result           <span class="c-dim"># captured for session memory</span>
+            messages.append({<span class="c-str">"role"</span>: <span class="c-str">"tool"</span>, <span class="c-str">"tool_call_id"</span>: call.id,
+                             <span class="c-str">"content"</span>: json.dumps(result)})
+    <span class="c-key">return</span> <span class="c-str">"Sorry - I couldn't finish evaluating that answer."</span>
+
+
+<span class="c-key">def</span> run_turn(item: dict, answer: str) -&gt; str:
+    user_message = (<span class="c-str">f"Question: {item['question']}\n"</span>
+                    <span class="c-str">f"Candidate answer: {answer}\n"</span>
+                    <span class="c-str">f"Expected keywords: {item['expected_keywords']}\n"</span>
+                    <span class="c-str">"Evaluate this answer using the available tools, then give short feedback."</span>)
+    messages = [{<span class="c-str">"role"</span>: <span class="c-str">"system"</span>, <span class="c-str">"content"</span>: SYSTEM_PROMPT},
+                {<span class="c-str">"role"</span>: <span class="c-str">"user"</span>, <span class="c-str">"content"</span>: user_message}]
+    results = {}
+    feedback = run_loop(messages, result_out=results)
+    session_log.append({<span class="c-str">"question"</span>: item[<span class="c-str">"question"</span>], <span class="c-str">"category"</span>: item[<span class="c-str">"category"</span>],
+                        <span class="c-str">"answer"</span>: answer, <span class="c-str">"results"</span>: results, <span class="c-str">"feedback"</span>: feedback})
+    <span class="c-key">return</span> feedback
+
+
+<span class="c-key">def</span> ask_agent(user_message: str) -&gt; str:
+    history = json.dumps([{k: e[k] <span class="c-key">for</span> k <span class="c-key">in</span> (<span class="c-str">"question"</span>, <span class="c-str">"category"</span>, <span class="c-str">"results"</span>)}
+                          <span class="c-key">for</span> e <span class="c-key">in</span> session_log], indent=1)
+    messages = [{<span class="c-str">"role"</span>: <span class="c-str">"system"</span>, <span class="c-str">"content"</span>: SYSTEM_PROMPT},
+                {<span class="c-str">"role"</span>: <span class="c-str">"user"</span>, <span class="c-str">"content"</span>: <span class="c-str">f"Session so far:\n{history}\n\n"</span>
+                                            <span class="c-str">f"Candidate asks: {user_message}"</span>}]
+    <span class="c-key">return</span> run_loop(messages)
+
+
+<span class="c-key">def</span> ask_final_report() -&gt; str:
+    <span class="c-key">return</span> generate_final_report()</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>No parameters still needs a schema</b><code>generate_final_report</code> declares <code>"properties": {}</code>. In plain Python you'd never write that, but without it the model doesn't know the function can be called with nothing.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>The dispatch table</b><code>TOOL_FUNCTIONS</code> maps the name the model asks for to a <code>lambda</code> that unpacks its arguments. One dictionary lookup replaces an <code>if/elif</code> chain, and adding a tool is one line here plus one schema entry.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b><code>MAX_TOOL_ROUNDS = 5</code> is a seatbelt</b>A model that keeps calling tools forever is a real failure mode, and every round is a paid request. Cap it, and return something graceful when the cap is hit.</span></div>
+      <div class="anno"><span class="n">4</span><span class="t"><b>Message order is part of the protocol</b>The assistant message carrying the <code>tool_calls</code> must go into <code>messages</code> <em>before</em> the tool results, and each result carries the <code>tool_call_id</code> it answers. Get either wrong and the provider rejects the next request.</span></div>
+      <div class="anno"><span class="n">5</span><span class="t"><b>Memory stores what the tools said, not what the model said</b><code>result_out</code> is filled inside the loop from the tool return values. The session log holds measured numbers. The model's paraphrase of them goes in <code>feedback</code>, next to them, never in place of them.</span></div>
+      <div class="anno"><span class="n">6</span><span class="t"><b>The model is named in one place</b><code>llama-3.3-70b-versatile</code> was deprecated on Groq while the class ran. Swapping to <code>openai/gpt-oss-20b</code>, which has a generous free tier, is a one-line change. Other providers work too, but check their tool-call format, which can differ slightly.</span></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <h3>One evaluated answer, request by request</h3>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-n">1</span><h3>Request 1 — system + user message</h3><span class="stage-cost">1 LLM call</span></div>
+      <div class="stage-body">
+        <div class="io"><dt>Sends</dt><dd>System prompt, then question, answer and expected keywords. Plus <code>TOOL_SCHEMA</code>.</dd></div>
+        <div class="io"><dt>Model returns</dt><dd>No text. Three <code>tool_calls</code> in one message.</dd></div>
+        <div class="io"><dt>Payload</dt><dd><div class="payload">detect_filler_words
+check_star_structure
+score_relevance
+  {"answer": "…",
+   "expected_keywords": […]}</div></dd></div>
+      </div>
+      <div class="stage-note">The model chose all three because the system prompt says “for every candidate answer, call…”. On a meta-question it would choose differently. That choice is what makes it an <strong>agent</strong> and not a script.</div>
+    </div>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-n">2</span><h3>Your code runs the tools</h3><span class="stage-cost">0 LLM calls · microseconds</span></div>
+      <div class="stage-body">
+        <div class="io"><dt>Looks up</dt><dd><code>TOOL_FUNCTIONS[name]</code> for each call.</dd></div>
+        <div class="io"><dt>Runs</dt><dd>Plain Python. Deterministic. Free.</dd></div>
+        <div class="io"><dt>Appends</dt><dd><div class="payload">{"role": "tool",
+ "tool_call_id": "call_…",
+ "content": "{\"score\": 100, …}"}</div></dd></div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-n">3</span><h3>Request 2 — the same messages, now with results</h3><span class="stage-cost">1 LLM call</span></div>
+      <div class="stage-body">
+        <div class="io"><dt>Sends</dt><dd>Everything so far, including the three tool results.</dd></div>
+        <div class="io"><dt>Model returns</dt><dd>Text, no tool calls, so the loop exits.</dd></div>
+        <div class="io"><dt>Output</dt><dd><div class="payload">"Great job — you nailed
+the STAR structure and
+hit every key concept,
+with no fillers…"</div></dd></div>
+      </div>
+      <div class="stage-note">Two requests per answer is the normal case. The loop allows five in case the model wants a second look, for example re-scoring after it notices something.</div>
+    </div>
+  </div>
+</section>
+
+<section id="memory">
+  <div class="col">
+    <p class="kicker">Ask 2 · memory</p>
+    <h2>A list that remembers, and arithmetic over it</h2>
+    <p>Session memory here is a Python list. That was deliberate, to keep the build doable in two hours. It still has to be <strong>structured</strong>. Appending free text would make the final report impossible; appending one dict per answer makes it a loop.</p>
+    <div class="calc">session_log[1] = {
+  "question": <b>"Describe a situation where you disagreed…"</b>,
+  "category": "behavioural",
+  "answer":   "Um, basically I just, like, talked to him…",
+  "results":  {
+    "detect_filler_words":  {"total": <b>5</b>, "verdict": "needs improvement", …},
+    "check_star_structure": {"missing": [<b>"situation","task","action","result"</b>], …},
+    "score_relevance":      {"score": <b>0</b>, "missed": [...], …}
+  },
+  "feedback": <i>"You used a lot of filler words, which can distract…"</i>
+}</div>
+    <p>From that shape, the report is three lines of arithmetic. <strong>Average relevance</strong> is the mean of every <code>score</code>. The <strong>lowest-scoring question</strong> is a <code>min()</code>. The <strong>weakest area</strong> is the lowest-scoring question together with exactly what it missed, plus a tally of recurring gaps across <em>all</em> answers. That tally is what makes it “based on the complete session” rather than the last answer.</p>
+    <h3>What the demo produced</h3>
+    <div class="kv">
+      <div><dt>Q1 · debugging</dt><dd><span class="big">100</span>fillers 0 · STAR complete</dd></div>
+      <div><dt>Q2 · disagreement</dt><dd><span class="big" style="color:var(--rej)">0</span>fillers 3+ · STAR missing</dd></div>
+      <div><dt>Average</dt><dd><span class="big">50</span>out of 100</dd></div>
+      <div><dt>Weakest area</dt><dd>Handling disagreements with a teammate</dd></div>
+    </div>
+    <p>Asked “what is my weakest area?” mid-session, the coach named the disagreement question and suggested how to restructure it. It could only do that because <code>ask_agent()</code> handed it the session log.</p>
+    <div class="room">
+      <span class="tag">Production reality</span>
+      <p><strong>A module-level list is shared by every browser tab.</strong> <code>session_log = []</code> lives once per Python process, so if two candidates use the Gradio app at the same time, their answers land in the same list and each sees the other's scores. That's fine for a single-user demo. For real users, key memory by session: Gradio's <code>gr.State</code> for per-tab state, or a database table keyed by <code>session_id</code>. The schema of each entry stays exactly the same.</p>
+    </div>
+    <div class="ask">
+      <span class="tag">Ask the room</span>
+      <p><q>Should the final report be written by the LLM or by a Python function?</q></p>
+      <p>The <em>numbers</em> by Python, always. Averages and minimums are not a judgement call. In this solution the report is pure code, and the model is free to <em>narrate</em> it when the candidate asks, by calling <code>generate_final_report</code> as a tool and explaining the result. The same split as everywhere else: code measures, the model talks.</p>
+    </div>
+  </div>
+</section>
+
+<section id="ui">
+  <div class="col">
+    <p class="kicker">Ask 3 · the interface</p>
+    <h2>Six components, three click handlers</h2>
+    <div class="kv">
+      <div><dt>Current question</dt><dd><code>gr.Markdown</code>, advances after each submit</dd></div>
+      <div><dt>Answer box</dt><dd><code>gr.Textbox</code>, cleared after submit</dd></div>
+      <div><dt>Feedback panel</dt><dd>appears once an answer is scored</dd></div>
+      <div><dt>Live scorecard</dt><dd>table rebuilt from <code>session_log</code></dd></div>
+      <div><dt>Meta-question box</dt><dd>routes to <code>ask_agent()</code></dd></div>
+      <div><dt>Final report</dt><dd>button → <code>generate_final_report()</code></dd></div>
+    </div>
+<div class="file"><div class="file-bar"><span><b>app.py</b> · ask 3 · python app.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> gradio <span class="c-key">as</span> gr
+
+<span class="c-key">import</span> agent
+<span class="c-key">from</span> interview_bank <span class="c-key">import</span> QUESTIONS
+
+
+<span class="c-key">def</span> format_scorecard() -&gt; str:
+    <span class="c-key">if</span> <span class="c-key">not</span> agent.session_log:
+        <span class="c-key">return</span> <span class="c-str">"_No answers scored yet._"</span>
+    lines = [<span class="c-str">"| # | Question | Relevance | Fillers | STAR |"</span>, <span class="c-str">"|---|---|---|---|---|"</span>]
+    <span class="c-key">for</span> i, e <span class="c-key">in</span> enumerate(agent.session_log, 1):
+        rel = e[<span class="c-str">"results"</span>].get(<span class="c-str">"score_relevance"</span>, {}).get(<span class="c-str">"score"</span>, <span class="c-str">"-"</span>)
+        fill = e[<span class="c-str">"results"</span>].get(<span class="c-str">"detect_filler_words"</span>, {}).get(<span class="c-str">"total"</span>, <span class="c-str">"-"</span>)
+        star = e[<span class="c-str">"results"</span>].get(<span class="c-str">"check_star_structure"</span>, {})
+        star_txt = <span class="c-str">"complete"</span> <span class="c-key">if</span> star.get(<span class="c-str">"all_present"</span>) <span class="c-key">else</span> <span class="c-str">"missing "</span> + <span class="c-str">", "</span>.join(star.get(<span class="c-str">"missing"</span>, [<span class="c-str">"-"</span>]))
+        lines.append(<span class="c-str">f"| {i} | {e['question'][:48]}... | {rel}/100 | {fill} | {star_txt} |"</span>)
+    <span class="c-key">return</span> <span class="c-str">"\n"</span>.join(lines)
+
+
+<span class="c-key">def</span> show(i: int) -&gt; str:
+    <span class="c-key">return</span> <span class="c-str">f"**Question {i + 1} of {len(QUESTIONS)}** - {QUESTIONS[i]['question']}"</span>
+
+
+<span class="c-key">def</span> on_submit(answer, q_index):
+    <span class="c-key">if</span> q_index &gt;= len(QUESTIONS):
+        <span class="c-key">return</span> <span class="c-str">"No more questions - click **Final report**."</span>, format_scorecard(), q_index, <span class="c-str">"Interview complete."</span>, <span class="c-str">""</span>
+    feedback = agent.run_turn(QUESTIONS[q_index], answer)
+    nxt = q_index + 1
+    display = show(nxt) <span class="c-key">if</span> nxt &lt; len(QUESTIONS) <span class="c-key">else</span> <span class="c-str">"Interview complete - click **Final report**."</span>
+    <span class="c-key">return</span> feedback, format_scorecard(), nxt, display, <span class="c-str">""</span>   <span class="c-dim"># "" clears the answer box</span>
+
+
+<span class="c-key">def</span> ask_coach(message):
+    <span class="c-key">return</span> agent.ask_agent(message)
+
+
+<span class="c-key">def</span> final_report():
+    <span class="c-key">return</span> <span class="c-str">f"```\n{agent.ask_final_report()}\n```"</span>
+
+
+<span class="c-key">with</span> gr.Blocks(title=<span class="c-str">"InterviewIQ"</span>) <span class="c-key">as</span> demo:
+    gr.Markdown(<span class="c-str">"# InterviewIQ - AI mock interview coach"</span>)
+    q_state = gr.State(0)
+    question_display = gr.Markdown(show(0))
+    answer_box = gr.Textbox(label=<span class="c-str">"Your answer"</span>, lines=6)
+    submit_btn = gr.Button(<span class="c-str">"Submit answer"</span>, variant=<span class="c-str">"primary"</span>)
+    feedback_box = gr.Markdown()
+    gr.Markdown(<span class="c-str">"### Live scorecard"</span>)
+    scorecard = gr.Markdown(format_scorecard())
+    gr.Markdown(<span class="c-str">"### Ask the coach"</span>)
+    meta_box = gr.Textbox(label=<span class="c-str">"e.g. How am I doing so far?"</span>)
+    meta_btn = gr.Button(<span class="c-str">"Ask"</span>)
+    meta_reply = gr.Markdown()
+    report_btn = gr.Button(<span class="c-str">"Final report"</span>)
+    report_box = gr.Markdown()
+
+    submit_btn.click(on_submit, inputs=[answer_box, q_state],
+                     outputs=[feedback_box, scorecard, q_state, question_display, answer_box])
+    meta_btn.click(ask_coach, inputs=meta_box, outputs=meta_reply)
+    report_btn.click(final_report, outputs=report_box)
+
+<span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    demo.launch()</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b><code>gr.State(0)</code> holds the question index</b>The state value goes in as an input and comes back out as an output. That round trip is how a Gradio app remembers anything between clicks.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>Five outputs, five return values, in order</b><code>on_submit</code> returns feedback, scorecard, next index, next question and <code>""</code>. That last empty string is what clears the answer box. The order has to match the <code>outputs=[…]</code> list exactly.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>Defensive <code>.get(…, "-")</code> everywhere</b>If the model skipped a tool on some turn, the scorecard shows a dash instead of raising <code>KeyError</code> and blanking the UI. A demo that crashes on a missing key is a failed demo.</span></div>
+    </div>
+
+    <h3>The terminal version is not the same product</h3>
+<div class="file"><div class="file-bar"><span><b>main.py</b> · python main.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> agent
+<span class="c-key">from</span> interview_bank <span class="c-key">import</span> QUESTIONS
+
+<span class="c-dim"># The CLI flow is strictly sequential: no meta questions mid-interview,</span>
+<span class="c-dim"># and the final report prints automatically once the questions run out.</span>
+print(<span class="c-str">"=== InterviewIQ (terminal mode) ==="</span>)
+<span class="c-key">for</span> i, item <span class="c-key">in</span> enumerate(QUESTIONS, 1):
+    print(<span class="c-str">f"\nQ{i}. {item['question']}"</span>)
+    answer = input(<span class="c-str">"Your answer: "</span>)
+    print(<span class="c-str">"\nCoach:"</span>, agent.run_turn(item, answer))
+    print(<span class="c-str">"-"</span> * 60)
+
+print(<span class="c-str">"\n=== Final report ==="</span>)
+print(agent.ask_final_report())</code></pre></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:24%"></th><th>main.py · CLI</th><th>app.py · Gradio</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Flow</strong></td><td>Strictly sequential. One input channel.</td><td>Any order. Several input boxes.</td></tr>
+          <tr><td><strong>Meta-questions</strong></td><td>Not possible mid-interview.</td><td>Any time, via the meta box.</td></tr>
+          <tr><td><strong>Final report</strong></td><td>Printed automatically after the last question.</td><td>On demand, even halfway through.</td></tr>
+          <tr><td><strong>Use it for</strong></td><td>Milestone 6: proving the agent end-to-end.</td><td>Milestone 11: the deliverable.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="verify">
+  <div class="col">
+    <p class="kicker">Ask 2 · verification</p>
+    <h2>Prove the memory with a <em>planted</em> weak answer</h2>
+    <p><code>memory_check.py</code> is written last, once there is something to check. It feeds one strong answer and one deliberately weak answer, asks the agent about performance, and checks the weak answer was identified as the weakest area. It's a test with a known right answer, because you planted it.</p>
+<div class="file"><div class="file-bar"><span><b>memory_check.py</b> · milestone 10 · python memory_check.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> agent
+<span class="c-key">from</span> interview_bank <span class="c-key">import</span> QUESTIONS
+
+STRONG = (<span class="c-str">"When I was at my previous company, checkout failed for 2% of users. "</span>
+          <span class="c-str">"I was responsible for finding why. I decided to reproduce it locally, read the logs, "</span>
+          <span class="c-str">"found the root cause in a race condition, wrote a fix and a regression test. "</span>
+          <span class="c-str">"As a result failures dropped to zero."</span>)
+WEAK = <span class="c-str">"Um, basically I, like, just talked to him and, you know, it was kind of fine."</span>
+
+agent.session_log.clear()
+agent.run_turn(QUESTIONS[0], STRONG)     <span class="c-dim"># should score high</span>
+agent.run_turn(QUESTIONS[1], WEAK)       <span class="c-dim"># deliberately weak</span>
+
+report = agent.ask_final_report()
+reply = agent.ask_agent(<span class="c-str">"What is my weakest area so far?"</span>)
+print(report, <span class="c-str">"\n\nAgent says:"</span>, reply)
+
+weak_q = QUESTIONS[1][<span class="c-str">"question"</span>]
+checks = {
+    <span class="c-str">"report names Q2 as lowest-scoring"</span>: <span class="c-str">"Lowest-scoring question: Q2"</span> <span class="c-key">in</span> report,
+    <span class="c-str">"Q2 scored below Q1"</span>: (agent.session_log[1][<span class="c-str">"results"</span>][<span class="c-str">"score_relevance"</span>][<span class="c-str">"score"</span>]
+                           &lt; agent.session_log[0][<span class="c-str">"results"</span>][<span class="c-str">"score_relevance"</span>][<span class="c-str">"score"</span>]),
+    <span class="c-str">"agent's answer points at the disagreement question"</span>:
+        any(w <span class="c-key">in</span> reply.lower() <span class="c-key">for</span> w <span class="c-key">in</span> (<span class="c-str">"disagree"</span>, <span class="c-str">"teammate"</span>, <span class="c-str">"q2"</span>, <span class="c-str">"question 2"</span>)),
+}
+<span class="c-key">for</span> name, ok <span class="c-key">in</span> checks.items():
+    print((<span class="c-str">"PASS "</span> <span class="c-key">if</span> ok <span class="c-key">else</span> <span class="c-str">"FAIL "</span>) + name)</code></pre></div>
+    <div class="calc"><i>expected output (abridged)</i>
+Average relevance: <b>50/100</b>
+Lowest-scoring question: <b>Q2</b> (behavioural) at <b>0/100</b>
+Weakest area: Describe a situation where you disagreed with a teammate…
+Recurring gaps: situation x1, task x1, action x1, result x1, filler words x1
+
+<b>PASS</b> report names Q2 as lowest-scoring
+<b>PASS</b> Q2 scored below Q1
+<b>PASS</b> agent's answer points at the disagreement question</div>
+    <p>The first two checks are deterministic: they test code. The third tests the model, and it can occasionally fail on wording even when the memory is fine. Keep that distinction in mind when one of them goes red.</p>
+  </div>
+</section>
+
+<section id="bonus">
+  <div class="col">
+    <p class="kicker">Ask 4 · bonus</p>
+    <h2>Add an interviewer that <em>chases</em> weak spots</h2>
+    <p>The evaluator judges answers. A second agent decides <em>what to ask next</em>. If the candidate fumbles a technical question, the interviewer stays in technical and asks another one to probe depth. It only moves on once the candidate answers well, or the category runs out of questions.</p>
+  </div>
+  <div class="wide">
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 900 214" role="img" aria-label="Multi-agent loop. The interviewer agent reads performance so far and picks a category; a question from that category is taken from the bank; the candidate answers; the evaluator agent scores it into session_log; the interviewer reads session_log again.">
+        <defs><marker id="a7b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+        <g font-family="IBM Plex Mono, monospace">
+          <rect x="16" y="60" width="160" height="60" rx="2" fill="#5B4A9E"/>
+          <text x="96" y="86" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">INTERVIEWER</text>
+          <text x="96" y="104" text-anchor="middle" font-size="9.5" fill="#FFFFFF" opacity=".85">picks a category</text>
+          <line x1="176" y1="90" x2="226" y2="90" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7b)"/>
+          <rect x="232" y="64" width="130" height="52" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="297" y="86" text-anchor="middle" font-size="10.5" font-weight="600" fill="currentColor">question bank</text>
+          <text x="297" y="103" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".6">next unasked</text>
+          <line x1="362" y1="90" x2="412" y2="90" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7b)"/>
+          <rect x="418" y="64" width="110" height="52" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="473" y="94" text-anchor="middle" font-size="10.5" font-weight="600" fill="currentColor">candidate</text>
+          <line x1="528" y1="90" x2="578" y2="90" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7b)"/>
+          <rect x="584" y="60" width="160" height="60" rx="2" fill="#2B3A67"/>
+          <text x="664" y="86" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">EVALUATOR</text>
+          <text x="664" y="104" text-anchor="middle" font-size="9.5" fill="#FFFFFF" opacity=".85">3 tools · feedback</text>
+          <line x1="744" y1="90" x2="790" y2="90" stroke="currentColor" stroke-width="1.5" marker-end="url(#a7b)"/>
+          <path d="M796,74 a44,10 0 0,1 88,0 v34 a44,10 0 0,1 -88,0 z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M796,74 a44,10 0 0,0 88,0" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="840" y="100" text-anchor="middle" font-size="9.5" fill="currentColor">session_log</text>
+          <path d="M840,120 C840,178 96,178 96,126" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#a7b)"/>
+          <text x="468" y="200" text-anchor="middle" font-size="10" fill="currentColor" opacity=".7">score &lt; 60 and questions left in this category → stay; otherwise move on</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>Two agents, one shared memory. The interviewer never grades and the evaluator never chooses questions. Each has one job, and the session log is the only thing they pass between them.</figcaption>
+    </figure>
+  </div>
+  <div class="col">
+<div class="file"><div class="file-bar"><span><b>interviewer_agent.py</b> · bonus · the second agent</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
+
+<span class="c-key">import</span> agent
+<span class="c-key">from</span> interview_bank <span class="c-key">import</span> QUESTIONS
+
+CATEGORIES = sorted({q[<span class="c-str">"category"</span>] <span class="c-key">for</span> q <span class="c-key">in</span> QUESTIONS})
+PASS_MARK = 60
+
+INTERVIEWER_PROMPT = <span class="c-str">f"""You are the interviewer. Choose the category of the NEXT question.
+Rules:
+- If the last answer scored below {PASS_MARK} and that category still has unasked
+  questions, stay in the same category to probe depth.
+- Otherwise move to a category the candidate has seen least.
+Reply with exactly one word from: {", ".join(CATEGORIES)}"""</span>
+
+
+<span class="c-key">def</span> remaining(category: str, asked: set) -&gt; list:
+    <span class="c-key">return</span> [q <span class="c-key">for</span> q <span class="c-key">in</span> QUESTIONS <span class="c-key">if</span> q[<span class="c-str">"category"</span>] == category <span class="c-key">and</span> q[<span class="c-str">"question"</span>] <span class="c-key">not</span> <span class="c-key">in</span> asked]
+
+
+<span class="c-key">def</span> choose_next_question(asked: set) -&gt; dict | <span class="c-key">None</span>:
+    <span class="c-key">if</span> len(asked) == len(QUESTIONS):
+        <span class="c-key">return</span> <span class="c-key">None</span>
+    history = [{<span class="c-str">"category"</span>: e[<span class="c-str">"category"</span>],
+                <span class="c-str">"score"</span>: e[<span class="c-str">"results"</span>].get(<span class="c-str">"score_relevance"</span>, {}).get(<span class="c-str">"score"</span>)}
+               <span class="c-key">for</span> e <span class="c-key">in</span> agent.session_log]
+    reply = agent.client.chat.completions.create(
+        model=agent.MODEL,
+        messages=[{<span class="c-str">"role"</span>: <span class="c-str">"system"</span>, <span class="c-str">"content"</span>: INTERVIEWER_PROMPT},
+                  {<span class="c-str">"role"</span>: <span class="c-str">"user"</span>, <span class="c-str">"content"</span>: json.dumps(history)}],
+    ).choices[0].message.content.strip().lower()
+    <span class="c-dim"># Never trust the hand-off blindly: validate, then fall back to any open category.</span>
+    category = reply <span class="c-key">if</span> reply <span class="c-key">in</span> CATEGORIES <span class="c-key">and</span> remaining(reply, asked) <span class="c-key">else</span> <span class="c-key">None</span>
+    <span class="c-key">if</span> category <span class="c-key">is</span> <span class="c-key">None</span>:
+        category = next(c <span class="c-key">for</span> c <span class="c-key">in</span> CATEGORIES <span class="c-key">if</span> remaining(c, asked))
+    <span class="c-key">return</span> remaining(category, asked)[0]</code></pre></div>
+<div class="file"><div class="file-bar"><span><b>run_multi_agent.py</b> · bonus · python run_multi_agent.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> agent
+<span class="c-key">from</span> interviewer_agent <span class="c-key">import</span> choose_next_question
+
+asked = set()
+<span class="c-key">while</span> (item := choose_next_question(asked)) <span class="c-key">is</span> <span class="c-key">not</span> <span class="c-key">None</span>:     <span class="c-dim"># interviewer agent picks</span>
+    print(<span class="c-str">f"\n[{item['category']}] {item['question']}"</span>)
+    answer = input(<span class="c-str">"Your answer: "</span>)
+    print(<span class="c-str">"Coach:"</span>, agent.run_turn(item, answer))              <span class="c-dim"># evaluator agent judges</span>
+    asked.add(item[<span class="c-str">"question"</span>])
+
+print(<span class="c-str">"\n"</span> + agent.ask_final_report())</code></pre></div>
+    <div class="room">
+      <span class="tag">Production reality</span>
+      <p><strong>Validate every hand-off between agents.</strong> The interviewer is asked for one word from a fixed list. Sometimes it will answer “Technical.” or “I'd suggest behavioural”, or name a category that has run out of questions. The code checks the reply against the allowed set and falls back deterministically. An agent's output is untrusted input to the next agent.</p>
+    </div>
+  </div>
+</section>
+
+<section id="calls">
+  <div class="col">
+    <p class="kicker">Judgement calls</p>
+    <h2>Six decisions people get wrong</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:22%">Decision</th><th style="width:30%">Tempting answer</th><th>What it should be</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Who judges fillers &amp; STAR</strong></td><td>Ask the LLM. It understands language better than a list.</td><td>A tool. The company's definition has to win, every time, auditably. The LLM's job is choosing tools and explaining results.</td></tr>
+          <tr><td><strong>Where to start building</strong></td><td>The UI, because it's what the client sees.</td><td>The tools, standalone. The UI is the last layer. Bugs found bottom-up cost seconds; bugs found top-down cost tokens and hours.</td></tr>
+          <tr><td><strong>What goes in memory</strong></td><td>The conversation transcript as one long string.</td><td>One dict per answer with the raw tool outputs. You can't average a paragraph.</td></tr>
+          <tr><td><strong>Counting fillers</strong></td><td><code>text.count("um")</code></td><td>Word-boundary regex. Substrings punish “summary”, “document”, “likely”.</td></tr>
+          <tr><td><strong>Relevance scoring</strong></td><td>Exact keyword match.</td><td>Stem substrings (<code>communicat</code>), and accept that it's a floor, not a ceiling. A brilliant answer in different words still scores low. That's the first thing to upgrade (embeddings).</td></tr>
+          <tr><td><strong>Vibe-coding</strong></td><td>One prompt: “build the whole project”.</td><td>One ask per prompt, and read the diff. You'll be reviewing AI-written code for the rest of your career, so start now.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Where it goes next</h3>
+    <ul>
+      <li><strong>Semantic relevance.</strong> Embed the answer and a reference answer and use cosine similarity, so a strong answer in different words isn't scored zero. Keep keyword coverage alongside it as an explainable second signal.</li>
+      <li><strong>Generated questions, bounded categories.</strong> Let the model write questions, but only from categories and seniority levels the hiring team defines, and store the expected keywords it was graded against.</li>
+      <li><strong>Per-user sessions.</strong> <code>gr.State</code> or a <code>sessions</code> table keyed by id. Same entry schema.</li>
+      <li><strong>Voice.</strong> Speech-to-text in front of the same pipeline. The evaluator doesn't change; fillers just get more frequent.</li>
+      <li><strong>LangChain or another framework.</strong> Allowed and sensible. The session used plain Python so every moving part stayed visible.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="selfcheck">
+  <div class="col">
+    <p class="kicker">Self-check</p>
+    <h2>Eight questions before you build it yourself</h2>
+    <details class="qa"><summary>Why are the three evaluators tools instead of instructions in the system prompt?</summary><div class="a"><p>Instructions are interpreted differently run to run. Tools are code: the same answer always gets the same count, and the definition can be reviewed and changed deliberately. That keeps the AI and the hiring team in the same ballpark.</p></div></details>
+    <details class="qa"><summary>What would break if you appended the tool results to <code>messages</code> before the assistant message that requested them?</summary><div class="a"><p>The provider would reject the request. Each <code>role: "tool"</code> message has to answer a <code>tool_call_id</code> that appears in a preceding assistant message's <code>tool_calls</code>.</p></div></details>
+    <details class="qa"><summary>Why does <code>generate_final_report</code> need <code>"properties": {}</code>?</summary><div class="a"><p>The schema is the model's only knowledge of the function. An explicit empty object tells it the function takes no arguments and can be called directly.</p></div></details>
+    <details class="qa"><summary>What does <code>MAX_TOOL_ROUNDS</code> protect against?</summary><div class="a"><p>A model that keeps requesting tools without ever producing a final answer. That's an infinite loop of paid API calls. The cap bounds cost and latency.</p></div></details>
+    <details class="qa"><summary>Why store tool outputs in <code>session_log</code> rather than the feedback text?</summary><div class="a"><p>The report needs numbers to average and compare. The model's prose may paraphrase or round. Store both, but aggregate only the measured values.</p></div></details>
+    <details class="qa"><summary>Two candidates use the deployed Gradio app at once. What goes wrong?</summary><div class="a"><p>They share the module-level <code>session_log</code> and the scorecards mix. Use <code>gr.State</code> or a database keyed by session id.</p></div></details>
+    <details class="qa"><summary>In <code>memory_check.py</code>, which check could fail even when the code is correct?</summary><div class="a"><p>The third one. It inspects the model's free-text reply for words like “disagree”. The first two check deterministic code and should never flake.</p></div></details>
+    <details class="qa"><summary>In the bonus, why validate the interviewer's one-word reply?</summary><div class="a"><p>An agent's output is untrusted input to the next stage. It may add punctuation, change case, or pick an exhausted category. Check it against the allowed set and fall back deterministically.</p></div></details>
+  </div>
+</section>
+
+<footer>
+  <div class="col">
+    AI Infusion · Class 7 — live project session. The problem was an AI-engineer take-home a company shared, solved live with Scaler's AI/ML team: Virat leading, Shijan presenting the brief and the solution walkthrough, Pulkit running the debugging room.<br>
+    The code on this page is a cleaned, runnable reconstruction of the walkthrough (checked against a stubbed model), not the official solution zip. Use that from the post-reads to compare.
+    <div class="series"><a href="../Class-6-AI-infusion/">← Class 6 · AI agents on AWS</a><a href="../Class-8-AI-infusion/">Class 8 · Shipment exception desk →</a></div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  // ---- copy buttons on code files ----
+  document.querySelectorAll('button.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre = btn.closest('.file').querySelector('pre');
+      var done = function(){ btn.textContent='COPIED'; btn.classList.add('done');
+        setTimeout(function(){ btn.textContent='COPY'; btn.classList.remove('done'); }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(pre.innerText).then(done, function(){});
+    });
+  });
+
+  // ---- InterviewIQ tool simulator: a port of tools.py + generate_final_report ----
+  var FILLER = ["um","uh","like","basically","actually","literally","you know","kind of","sort of","i mean"];
+  var STAR = {
+    situation:["when i was","at my previous","in my previous","while working","at my last","we had a"],
+    task:["i needed to","my task was","i was responsible","the goal was","i had to","my job was"],
+    action:["i decided","i implemented","i built","i led","i created","i wrote","i set up","i proposed"],
+    result:["as a result","this led to","which led to","we achieved","reduced","improved","in the end"]
+  };
+  var BANK = [
+    {category:"behavioural", question:"Tell me about a time you debugged a really hard problem.", kw:["reproduce","logs","root cause","fix","test"],
+     strong:"When I was at my previous company, checkout failed for 2% of users. I was responsible for finding why. I decided to reproduce it locally, read the logs, found the root cause in a race condition, wrote a fix and a regression test. As a result failures dropped to zero.",
+     weak:"Um, I basically just, like, kept trying stuff until it worked, you know."},
+    {category:"behavioural", question:"Describe a situation where you disagreed with a teammate. How did you handle it?", kw:["communicat","listen","compromise","data","outcome"],
+     strong:"At my previous company a teammate wanted to rewrite our payments service. I was responsible for its uptime, so I listened to his reasons first, then I proposed we look at the incident data together. We agreed on a compromise and communicated it to the team. As a result the outcome was a 30% drop in incidents.",
+     weak:"Um, basically I just, like, talked to him and, you know, it was kind of fine in the end."},
+    {category:"technical", question:"A query that used to take 50 ms now takes 4 seconds. Walk me through what you do.", kw:["explain","index","query plan","n+1","cache"],
+     strong:"While working on our orders API we had a query regress to 4 seconds. My task was to fix it before the sale. I ran EXPLAIN ANALYZE, read the query plan, saw a sequential scan, added a composite index and removed an N+1 in the ORM. I added a cache for the hot path. As a result p95 went back to 40 ms.",
+     weak:"I would actually just add more servers and literally restart the database, I mean that usually works."},
+    {category:"technical", question:"How would you rate-limit a public API?", kw:["token bucket","redis","window","429","per user"],
+     strong:"At my last job we had a scraping problem. I had to protect the API. I implemented a token bucket per user stored in Redis, with a sliding window fallback, and returned 429 with Retry-After. This led to a 90% drop in abusive traffic.",
+     weak:"Uh, you know, some kind of limit, sort of like blocking people who call too much."},
+    {category:"behavioural", question:"Tell me about a deadline you nearly missed.", kw:["priorit","stakeholder","scope","communicat","deliver"],
+     strong:"When I was leading a migration, a dependency slipped two weeks. My job was to land it for quarter end. I decided to cut scope, prioritised the three critical tables, and communicated the plan to every stakeholder. We delivered on time and finished the rest the next sprint.",
+     weak:"Basically we were, like, late, and um, it was kind of stressful but it got done."}
+  ];
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function reEsc(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+  function count(phrase, text){ var m = text.match(new RegExp('\\b'+reEsc(phrase)+'\\b','g')); return m ? m.length : 0; }
+  function detectFiller(a){ var t=a.toLowerCase(), found={}, total=0;
+    FILLER.forEach(function(w){ var n=count(w,t); if(n){found[w]=n; total+=n;} });
+    return {total:total, found:found, verdict: total<=2 ? "clean" : "needs improvement"}; }
+  function checkStar(a){ var t=a.toLowerCase(), present=[], missing=[];
+    Object.keys(STAR).forEach(function(p){ (STAR[p].some(function(c){return count(c,t)>0;}) ? present : missing).push(p); });
+    return {present:present, missing:missing, all_present: missing.length===0}; }
+  function scoreRel(a, kws){ var t=a.toLowerCase();
+    var covered=kws.filter(function(k){return t.indexOf(k.toLowerCase())>=0;});
+    var missed=kws.filter(function(k){return t.indexOf(k.toLowerCase())<0;});
+    return {score: kws.length ? Math.round(covered.length/kws.length*100) : 0, covered:covered, missed:missed}; }
+
+  var log = [];
+  var $ = function(id){ return document.getElementById(id); };
+  var sel = $('iq-q');
+  BANK.forEach(function(q,i){ var o=document.createElement('option'); o.value=i; o.textContent='Q'+(i+1)+' · '+q.category+' — '+q.question; sel.appendChild(o); });
+
+  function card(){
+    $('iq-count').textContent = 'session: '+log.length+' answer'+(log.length===1?'':'s');
+    if(!log.length){ $('iq-card').innerHTML=''; return; }
+    var rows = log.map(function(e,i){
+      var s=e.results.check_star_structure;
+      return '<tr><td class="num">'+(i+1)+'</td><td>'+esc(e.question.slice(0,52))+'…</td><td class="num">'+e.results.score_relevance.score+'/100</td><td class="num">'+e.results.detect_filler_words.total+'</td><td>'+(s.all_present?'complete':'missing '+esc(s.missing.join(', ')))+'</td></tr>';
+    }).join('');
+    $('iq-card').innerHTML='<h5 style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px">Live scorecard</h5><div class="tablewrap"><table><thead><tr><th>#</th><th>Question</th><th>Relevance</th><th>Fillers</th><th>STAR</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+  function report(){
+    if(!log.length) return 'No answers evaluated yet.';
+    var lines=[], scores=[], gaps={};
+    log.forEach(function(e,i){ var r=e.results;
+      lines.push('Q'+(i+1)+'. '+e.question);
+      lines.push('   fillers: '+r.detect_filler_words.total+'  |  STAR missing: '+(r.check_star_structure.missing.join(', ')||'none')+'  |  relevance: '+r.score_relevance.score+'/100');
+      scores.push([r.score_relevance.score,i+1,e]);
+      r.check_star_structure.missing.forEach(function(p){ gaps[p]=(gaps[p]||0)+1; });
+      if(r.detect_filler_words.total>2) gaps['filler words']=(gaps['filler words']||0)+1;
+    });
+    var avg = scores.reduce(function(s,x){return s+x[0];},0)/scores.length;
+    var low = scores.reduce(function(m,x){ return x[0]<m[0]?x:m; });
+    var lg = low[2].results.check_star_structure.missing;
+    lines.push('');
+    lines.push('Average relevance: '+Math.round(avg)+'/100');
+    lines.push('Lowest-scoring question: Q'+low[1]+' ('+low[2].category+') at '+low[0]+'/100');
+    lines.push('Weakest area: '+low[2].question+' - missed '+(low[2].results.score_relevance.missed.join(', ')||'nothing')+(lg.length?'; STAR gaps: '+lg.join(', '):''));
+    var ranked = Object.keys(gaps).sort(function(a,b){return gaps[b]-gaps[a];});
+    if(ranked.length) lines.push('Recurring gaps: '+ranked.map(function(k){return k+' x'+gaps[k];}).join(', '));
+    return lines.join('\n');
+  }
+  $('iq-strong').addEventListener('click',function(){ $('iq-a').value = BANK[+sel.value].strong; });
+  $('iq-weak').addEventListener('click',function(){ $('iq-a').value = BANK[+sel.value].weak; });
+  $('iq-eval').addEventListener('click',function(){
+    var q=BANK[+sel.value], a=$('iq-a').value.trim();
+    if(!a){ $('iq-out').innerHTML='<p class="note-sm">Type or load an answer first.</p>'; return; }
+    var r={detect_filler_words:detectFiller(a), check_star_structure:checkStar(a), score_relevance:scoreRel(a,q.kw)};
+    log.push({question:q.question, category:q.category, answer:a, results:r});
+    var f=r.detect_filler_words, s=r.check_star_structure, rel=r.score_relevance;
+    $('iq-out').innerHTML='<div class="toolout">'+
+      '<div><h5>detect_filler_words</h5><span class="big2" style="color:'+(f.total>2?'var(--rej)':'var(--up)')+'">'+f.total+'</span> '+esc(f.verdict)+'<div class="payload">'+esc(JSON.stringify(f.found))+'</div></div>'+
+      '<div><h5>check_star_structure</h5><span class="big2" style="color:'+(s.all_present?'var(--up)':'var(--rej)')+'">'+s.present.length+'/4</span> '+(s.all_present?'all present':'incomplete')+'<div class="payload">present: '+esc(s.present.join(', ')||'—')+'\nmissing: '+esc(s.missing.join(', ')||'—')+'</div></div>'+
+      '<div><h5>score_relevance</h5><span class="big2" style="color:'+(rel.score>=60?'var(--up)':'var(--rej)')+'">'+rel.score+'</span> / 100<div class="payload">covered: '+esc(rel.covered.join(', ')||'—')+'\nmissed: '+esc(rel.missed.join(', ')||'—')+'</div></div>'+
+      '</div>';
+    card(); $('iq-rep').innerHTML='';
+    if(+sel.value < BANK.length-1){ sel.value = +sel.value+1; }
+    $('iq-a').value='';
+  });
+  $('iq-report').addEventListener('click',function(){ $('iq-rep').innerHTML='<div class="report">'+esc(report())+'</div>'; });
+  $('iq-reset').addEventListener('click',function(){ log=[]; $('iq-out').innerHTML=''; $('iq-rep').innerHTML=''; sel.value=0; card(); });
+  card();
+})();
+</script>
+</body>
+</html>

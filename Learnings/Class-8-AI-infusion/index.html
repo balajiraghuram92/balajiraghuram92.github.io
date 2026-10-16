@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shipment Exception Desk</title>
+<meta name="description" content="AI Infusion Class 8 — live project session: a LangChain pipeline that classifies shipment problems with an LLM, computes compensation in code, escalates by policy, and drafts the right message.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F1F1EE; --surface:#FFFFFF; --surface-2:#E6E6E0;
+  --ink:#1A1A18; --ink-2:#585851; --ink-3:#86867E;
+  --rule:#D8D8D1; --rule-2:#BEBEB5;
+  --accent:#2B3A67; --accent-soft:#DFE3EE;
+  --up:#1B6B4C;   --up-soft:#D8EDE3;
+  --rej:#A52A38;  --rej-soft:#F7DEE0;
+  --esc:#5B4A9E;  --esc-soft:#E6E1F5;
+  --money:#8A5E12; --money-soft:#F6E9CE;
+  --code-bg:#1C1C1A; --code-ink:#E4E4DC; --code-dim:#87877D;
+  --display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --body:"Public Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#131312; --surface:#1C1C1A; --surface-2:#252523;
+    --ink:#EDEDE6; --ink-2:#ACACA3; --ink-3:#83837B;
+    --rule:#2F2F2C; --rule-2:#434340;
+    --accent:#9CB2E0; --accent-soft:#1E2436;
+    --up:#4FC79A;   --up-soft:#132E24;
+    --rej:#FF8A90;  --rej-soft:#351A1D;
+    --esc:#AFA0EC;  --esc-soft:#221E38;
+    --money:#E0AE52; --money-soft:#2E2413;
+    --code-bg:#0C0C0B; --code-ink:#E4E4DC; --code-dim:#76766D;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#131312; --surface:#1C1C1A; --surface-2:#252523;
+  --ink:#EDEDE6; --ink-2:#ACACA3; --ink-3:#83837B;
+  --rule:#2F2F2C; --rule-2:#434340;
+  --accent:#9CB2E0; --accent-soft:#1E2436;
+  --up:#4FC79A;   --up-soft:#132E24;
+  --rej:#FF8A90;  --rej-soft:#351A1D;
+  --esc:#AFA0EC;  --esc-soft:#221E38;
+  --money:#E0AE52; --money-soft:#2E2413;
+  --code-bg:#0C0C0B; --code-ink:#E4E4DC; --code-dim:#76766D;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--body); font-size:16.5px; line-height:1.65;
+  padding-inline:20px; padding-block:0 72px;
+  -webkit-font-smoothing:antialiased;
+}
+.col{width:100%; max-width:720px; margin-inline:auto}
+.wide{width:100%; max-width:980px; margin-inline:auto}
+
+header{padding-block:56px 38px; border-bottom:3px double var(--ink); margin-bottom:8px}
+.eyebrow{
+  font-family:var(--mono); font-size:11px; font-weight:600;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--accent);
+  margin:0 0 20px;
+}
+h1{
+  font-family:var(--display); font-weight:400; font-size:clamp(42px,9vw,74px);
+  line-height:.98; letter-spacing:-.01em; margin:0 0 20px; text-wrap:balance;
+}
+h1 em{font-style:italic; color:var(--accent)}
+.standfirst{font-size:19px; color:var(--ink-2); margin:0 0 26px; max-width:56ch}
+.meta{
+  font-family:var(--mono); font-size:11.5px; line-height:1.7; color:var(--ink-3);
+  display:flex; flex-wrap:wrap; gap:6px 22px;
+}
+.meta b{color:var(--ink-2); font-weight:400}
+
+section{padding-block:44px 8px}
+section + section{border-top:1px solid var(--rule)}
+h2{
+  font-family:var(--display); font-weight:400; font-size:clamp(28px,5.4vw,42px);
+  line-height:1.08; letter-spacing:-.005em; margin:0 0 10px; text-wrap:balance;
+}
+h2 em{font-style:italic}
+h3{
+  font-family:var(--body); font-weight:700; font-size:17px;
+  letter-spacing:-.005em; margin:34px 0 8px;
+}
+.kicker{
+  font-family:var(--mono); font-size:11px; font-weight:600;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3);
+  margin:0 0 12px;
+}
+p{margin:0 0 16px}
+.lede{font-size:18px; color:var(--ink-2); margin-bottom:22px}
+strong{font-weight:700}
+code{
+  font-family:var(--mono); font-size:.86em;
+  background:var(--surface-2); padding:1px 5px; border-radius:3px; color:var(--ink);
+}
+.rs{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; font-weight:600}
+ul,ol{margin:0 0 16px; padding-left:22px}
+li{margin-bottom:7px}
+a{color:var(--accent)}
+
+.v{
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase;
+  padding:3px 8px; border-radius:2px; white-space:nowrap;
+  display:inline-block; vertical-align:2px;
+}
+.v.up{background:var(--up-soft); color:var(--up)}
+.v.rej{background:var(--rej-soft); color:var(--rej)}
+.v.esc{background:var(--esc-soft); color:var(--esc)}
+.v.drop{background:var(--surface-2); color:var(--ink-3)}
+
+.casefile{
+  background:var(--surface); border:1px solid var(--rule);
+  border-top:4px solid var(--accent); padding:0; margin:0 0 16px; border-radius:2px;
+}
+.casefile-head{
+  display:flex; flex-wrap:wrap; gap:4px 24px; padding:14px 26px;
+  border-bottom:1px solid var(--rule); background:var(--surface-2);
+  font-family:var(--mono); font-size:11px; color:var(--ink-2);
+}
+.casefile-head b{color:var(--ink); font-weight:600}
+.casefile-body{padding:24px 26px}
+.casefile-body p{font-size:17.5px; line-height:2.05; margin:0}
+mark{background:none; padding:0 1px; border-bottom:2.5px solid; color:inherit}
+mark.up{border-color:var(--up)}
+mark.rej{border-color:var(--rej)}
+mark.esc{border-color:var(--esc)}
+mark.drop{border-bottom:2.5px dotted var(--rule-2); color:var(--ink-3)}
+sup.gid{font-family:var(--mono); font-size:9.5px; font-weight:600; padding-left:2px}
+sup.up{color:var(--up)} sup.rej{color:var(--rej)} sup.esc{color:var(--esc)} sup.drop{color:var(--ink-3)}
+
+.tablewrap{overflow-x:auto; margin:0 0 16px; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:480px}
+th{
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);
+  text-align:left; padding:0 14px 8px 0; border-bottom:1.5px solid var(--rule-2);
+  vertical-align:bottom;
+}
+td{padding:11px 14px 11px 0; border-bottom:1px solid var(--rule); vertical-align:top; line-height:1.5}
+td:last-child,th:last-child{padding-right:0}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+tr.total td{border-bottom:none; border-top:2px solid var(--ink); font-weight:700}
+
+figure{margin:28px 0 30px}
+figure svg{display:block; width:100%; height:auto; max-width:100%; color:var(--ink)}
+figcaption{font-size:14px; color:var(--ink-2); margin-top:14px; max-width:70ch; margin-inline:auto; line-height:1.55}
+.svgwrap{overflow-x:auto; -webkit-overflow-scrolling:touch}
+.svgwrap > svg{min-width:520px}
+
+.room,.ask{border-radius:2px; padding:18px 22px; margin:0 0 20px}
+.room{background:var(--accent-soft); border-left:3px solid var(--accent)}
+.ask{background:var(--money-soft); border-left:3px solid var(--money)}
+.room .tag,.ask .tag{
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  letter-spacing:.13em; text-transform:uppercase;
+  display:block; margin-bottom:8px;
+}
+.room .tag{color:var(--accent)}
+.ask .tag{color:var(--money)}
+.room p,.ask p{margin:0 0 10px; font-size:15.5px}
+.room p:last-child,.ask p:last-child{margin-bottom:0}
+.ask q{font-style:italic; font-family:var(--display); font-size:19px; line-height:1.35; quotes:"“" "”"}
+
+pre{
+  background:var(--code-bg); color:var(--code-ink); border-radius:3px;
+  padding:20px 22px; overflow-x:auto; margin:0 0 6px;
+  font-family:var(--mono); font-size:12.5px; line-height:1.7;
+  -webkit-overflow-scrolling:touch;
+}
+pre code{background:none; padding:0; font-size:inherit; color:inherit}
+.c-dim{color:var(--code-dim)}
+.c-key{color:#CB9BE8}
+.c-str{color:#8FD1A0}
+.c-hi{background:rgba(255,190,90,.17); border-radius:2px; padding:1px 0}
+.marker{font-family:var(--mono); font-size:10.5px; font-weight:600; color:#F0B658; padding-right:10px}
+
+.annos{display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:2px; margin:18px 0 20px}
+.anno{background:var(--surface); padding:14px 16px; display:grid; grid-template-columns:32px 1fr; gap:12px; align-items:start}
+.anno .n{
+  font-family:var(--mono); font-size:11px; font-weight:600; color:var(--money);
+  background:var(--money-soft); border-radius:2px; text-align:center; padding:3px 0;
+}
+.anno .t{font-size:14.5px; line-height:1.5}
+.anno .t b{display:block; font-size:14.5px; margin-bottom:2px}
+
+.tally{display:grid; gap:10px; margin:0 0 18px}
+.trow{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 18px; align-items:center;
+  background:var(--surface); border:1px solid var(--rule); border-radius:2px; padding:13px 16px;
+}
+.tclaim{font-size:15px; line-height:1.45; min-width:0}
+.tclaim .id{font-family:var(--mono); font-size:11px; color:var(--ink-3); font-weight:600; margin-right:7px}
+.tclaim .ev{display:block; font-size:12.5px; color:var(--ink-3); margin-top:4px; font-family:var(--mono)}
+.tvotes{display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end}
+.dots{display:flex; gap:4px}
+.dot{width:12px; height:22px; border-radius:1px}
+.dot.up{background:var(--up)} .dot.rej{background:var(--rej)} .dot.esc{background:var(--esc)}
+.conf{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.amt{font-family:var(--mono); font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; min-width:62px; text-align:right}
+@media (max-width:600px){ .trow{grid-template-columns:1fr} .tvotes{justify-content:flex-start} .amt{text-align:left; min-width:0} }
+
+.kv{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:2px; margin:0 0 22px}
+.kv > div{background:var(--surface); padding:14px 16px}
+.kv dt{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:0 0 5px}
+.kv dd{margin:0; font-size:14.5px; line-height:1.4}
+.kv dd .big{font-family:var(--display); font-weight:400; font-size:30px; letter-spacing:-.01em; display:block; line-height:1.05}
+
+.q{font-family:var(--display); font-weight:400; font-size:23px; line-height:1.3; margin:0 0 18px; padding:2px 0 2px 16px; border-left:3px solid var(--money); text-wrap:balance}
+.calc{
+  font-family:var(--mono); font-size:13px; line-height:2;
+  background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--accent);
+  border-radius:2px; padding:16px 20px; margin:0 0 20px; overflow-x:auto;
+  white-space:pre; color:var(--ink); font-variant-numeric:tabular-nums;
+}
+.calc b{color:var(--money); font-weight:600}
+.calc i{color:var(--ink-3); font-style:normal}
+.callout-ans{background:var(--money-soft); border-radius:2px; padding:15px 20px; margin:0 0 20px; font-size:15.5px; line-height:1.55}
+
+.stage{background:var(--surface); border:1px solid var(--rule); border-radius:2px; margin:0 0 14px; overflow:hidden}
+.stage.boom{border-color:var(--money); border-width:1.5px}
+.stage-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:13px 18px; border-bottom:1px solid var(--rule); background:var(--surface-2)}
+.stage-n{font-family:var(--mono); font-size:11.5px; font-weight:600; width:26px; height:26px; flex:none; border-radius:50%; background:var(--accent); color:#FFF; display:grid; place-items:center}
+.stage.boom .stage-n{background:var(--money)}
+.stage-head h3{font-family:var(--body); font-weight:700; font-size:16px; margin:0; flex:1 1 auto}
+.stage-cost{font-family:var(--mono); font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums; white-space:nowrap}
+.stage.boom .stage-cost{color:var(--money); font-weight:600}
+.stage-body{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule)}
+.io{background:var(--surface); padding:14px 18px}
+.io dt{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); margin:0 0 6px}
+.io dd{margin:0; font-size:14px; line-height:1.5}
+.io .payload{font-family:var(--mono); font-size:11px; line-height:1.6; background:var(--surface-2); border-radius:2px; padding:9px 11px; margin-top:8px; overflow-x:auto; white-space:pre; color:var(--ink-2)}
+.stage-note{padding:13px 18px; border-top:1px solid var(--rule); font-size:14.5px; line-height:1.55; color:var(--ink-2)}
+.stage.boom .stage-note{background:var(--money-soft); color:var(--ink)}
+@media (max-width:640px){ .stage-body{grid-template-columns:1fr} }
+
+.prompt{margin:0 0 26px}
+.prompt h4{font-family:var(--mono); font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
+.prompt h4 span{font-family:var(--body); letter-spacing:0; text-transform:none; font-size:13px; font-weight:400}
+.why{font-size:14.5px; color:var(--ink-2); margin:10px 0 0; line-height:1.55}
+
+footer{border-top:3px double var(--ink); margin-top:40px; padding-top:22px; font-family:var(--mono); font-size:11.5px; color:var(--ink-3); line-height:1.8}
+@media (prefers-reduced-motion: no-preference){ html{scroll-behavior:smooth} }
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+/* ---- additions for the project-session pages (Class 7+) ---- */
+.toc{margin:30px 0 0; padding:18px 0 0; border-top:1px solid var(--rule)}
+.toc ol{list-style:none; margin:0; padding:0; columns:2 240px; column-gap:28px}
+.toc li{margin:0 0 6px; break-inside:avoid; font-size:14.5px}
+.toc a{color:var(--ink-2); text-decoration:none}
+.toc a:hover{color:var(--accent); text-decoration:underline}
+.toc .n{font-family:var(--mono); font-size:11px; color:var(--ink-3); display:inline-block; min-width:26px}
+
+.file{background:var(--code-bg); border-radius:3px; margin:0 0 8px; overflow:hidden}
+.file-bar{display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:8px 14px 8px 22px; border-bottom:1px solid rgba(255,255,255,.08);
+  font-family:var(--mono); font-size:11px; color:var(--code-dim)}
+.file-bar b{color:var(--code-ink); font-weight:600}
+.file pre{margin:0; border-radius:0}
+button.copy{font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  background:transparent; color:var(--code-dim); border:1px solid rgba(255,255,255,.18);
+  border-radius:2px; padding:3px 9px; cursor:pointer}
+button.copy:hover{color:var(--code-ink); border-color:rgba(255,255,255,.4)}
+button.copy.done{color:#8FD1A0; border-color:#8FD1A0}
+
+.tree{font-family:var(--mono); font-size:13px; line-height:1.85; background:var(--surface);
+  border:1px solid var(--rule); border-radius:2px; padding:16px 20px; margin:0 0 20px;
+  white-space:pre; overflow-x:auto; color:var(--ink)}
+.tree i{font-style:normal; color:var(--ink-3)}
+
+.sim{background:var(--surface); border:1px solid var(--rule); border-top:4px solid var(--money);
+  border-radius:2px; margin:0 0 22px}
+.sim-head{padding:14px 22px; border-bottom:1px solid var(--rule); background:var(--surface-2);
+  font-family:var(--mono); font-size:11px; color:var(--ink-2); display:flex; flex-wrap:wrap; gap:4px 18px; justify-content:space-between}
+.sim-head b{color:var(--ink); font-weight:600}
+.sim-body{padding:20px 22px}
+.sim label{display:block; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 6px}
+.sim textarea,.sim select,.sim input{width:100%; font:inherit; font-size:15px; color:var(--ink);
+  background:var(--bg); border:1px solid var(--rule-2); border-radius:2px; padding:10px 12px; margin:0 0 14px}
+.sim textarea{min-height:120px; resize:vertical; line-height:1.55}
+.sim .row{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0 16px}
+.btns{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 6px}
+.btn{font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  padding:9px 14px; border-radius:2px; border:1px solid var(--rule-2); background:var(--surface);
+  color:var(--ink); cursor:pointer}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--surface)}
+.out{margin-top:16px}
+.out:empty{display:none}
+.toolout{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1px;
+  background:var(--rule); border:1px solid var(--rule); border-radius:2px; margin:0 0 16px}
+.toolout > div{background:var(--surface); padding:12px 14px; min-width:0}
+.toolout h5{margin:0 0 6px; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3)}
+.toolout .payload{font-family:var(--mono); font-size:11.5px; line-height:1.6; white-space:pre-wrap;
+  word-break:break-word; color:var(--ink-2); margin:6px 0 0}
+.big2{font-family:var(--display); font-size:30px; line-height:1}
+.report{font-family:var(--mono); font-size:12.5px; line-height:1.75; white-space:pre-wrap;
+  background:var(--surface-2); border-radius:2px; padding:14px 16px; color:var(--ink); word-break:break-word}
+.note-sm{font-size:13.5px; color:var(--ink-3); margin:8px 0 0; line-height:1.5}
+
+details.qa{background:var(--surface); border:1px solid var(--rule); border-radius:2px; margin:0 0 10px}
+details.qa summary{cursor:pointer; padding:14px 18px; font-weight:500; list-style:none; display:flex; gap:12px}
+details.qa summary::-webkit-details-marker{display:none}
+details.qa summary::before{content:"+"; font-family:var(--mono); color:var(--accent); font-weight:600; width:12px; flex:none}
+details.qa[open] summary::before{content:"\2212"}
+details.qa .a{padding:0 18px 16px 42px; font-size:15px; color:var(--ink-2)}
+details.qa .a p:last-child{margin-bottom:0}
+
+.series{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px}
+.series a{text-decoration:none}
+.anno{grid-template-columns:32px minmax(0,1fr)}
+:not(pre) > code{overflow-wrap:anywhere}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="col">
+    <p class="eyebrow">AI Infusion · Class 8 · Live project session</p>
+    <h1>The model reads the ticket. <em>Code</em> signs the refund.</h1>
+    <p class="standfirst">A customer reports a late, broken or missing parcel. One LLM call works out what kind of problem it is. Python computes the compensation and decides whether a manager has to approve it. A second LLM call writes the customer email or the internal escalation note. Built live with LangChain and Gradio.</p>
+    <div class="meta">
+      <span><b>Stack</b> Python · LangChain · Groq · Gradio</span>
+      <span><b>LLM calls</b> 2 per exception</span>
+      <span><b>Decisions the model makes</b> 1</span>
+      <span><b>Scope</b> 9 milestones</span>
+    </div>
+    <nav class="toc" aria-label="Contents">
+      <ol>
+        <li><a href="#why"><span class="n">01</span>Before the build: why projects, why Python</a></li>
+        <li><a href="#next"><span class="n">02</span>Preview: the weekend projects</a></li>
+        <li><a href="#brief"><span class="n">03</span>The brief</a></li>
+        <li><a href="#split"><span class="n">04</span>Four decisions, two owners</a></li>
+        <li><a href="#asks"><span class="n">05</span>Three asks</a></li>
+        <li><a href="#arch"><span class="n">06</span>Architecture &amp; build order</a></li>
+        <li><a href="#tools"><span class="n">07</span>The calculators</a></li>
+        <li><a href="#sim"><span class="n">08</span>Try the desk live</a></li>
+        <li><a href="#chains"><span class="n">09</span>Three chains</a></li>
+        <li><a href="#pipeline"><span class="n">10</span>The pipeline</a></li>
+        <li><a href="#session"><span class="n">11</span>The daily summary</a></li>
+        <li><a href="#ui"><span class="n">12</span>Gradio, CLI &amp; the triage check</a></li>
+        <li><a href="#calls"><span class="n">13</span>Judgement calls</a></li>
+        <li><a href="#selfcheck"><span class="n">14</span>Self-check</a></li>
+      </ol>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<section id="why">
+  <div class="col">
+    <p class="kicker">Before the build</p>
+    <h2>“You have two hours. Solve it in front of us.”</h2>
+    <p class="lede">Shivank opened with a concern rather than a topic: many learners had treated the previous project session as optional. It isn't, and the reason is how hiring has changed.</p>
+    <p>Interviews for AI roles increasingly look like this: <em>here's the data, here's the problem statement, you have two hours, think out loud.</em> You can't answer “I only do take-home assignments.” The same is true of the job. He pointed at the <strong>Forward Deployed Engineer</strong> (FDE) role that's appearing across the market, where you sit with a client, sometimes with their CXOs, and write code in front of them while they ask you questions.</p>
+    <p>Building live is uncomfortable for everyone, instructors included. That's the point of practising it in class first.</p>
+
+    <div class="ask">
+      <span class="tag">Asked in class</span>
+      <p><q>Claude and Cursor can write code in any language. Why do AI companies now insist on Python?</q></p>
+      <p>Because the AI ecosystem lives in Python, and because generated code still has to be <strong>read</strong>. Shivank estimated that about <strong>40% of his own working time</strong> goes into reviewing AI-written code, line by line. The model writes syntactically correct code that's often logically wrong, or works but isn't fit for production. You can't review a language you can't read. More and more AI-focused job descriptions now say “Python” where they used to say “Java, Python or Scala.”</p>
+    </div>
+    <div class="room">
+      <span class="tag">For anyone joining at this class</span>
+      <p>A learner from a Java background asked why they were in an AI session. The answer from the room: AI now touches every layer of a product, from the user-facing edge to internal tooling. Even when you aren't building models, you need enough hands-on context to follow what stakeholders are deciding and to connect it to your own system. The only prerequisite for this track is one programming language.</p>
+    </div>
+  </div>
+</section>
+
+<section id="next">
+  <div class="col">
+    <p class="kicker">Preview · not final</p>
+    <h2>What the weekend intensives will build</h2>
+    <p>To speed up placement-readiness, Shivank is planning <strong>hands-on weekend intensives</strong> of roughly 16 hours, possibly over two or three weekends. They'll be online, with an optional in-person room in Bangalore and at least 10 days' notice. He flagged it as <em>still in planning</em>, and asked people not to raise support tickets about it yet. He showed the first of two projects so you can see the scale.</p>
+  </div>
+
+  <div class="wide">
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 980 330" role="img" aria-label="Preview architecture of the blog-writing multi-agent system. Sources such as web pages, GitHub repos, YouTube videos and local files feed a research agent that loops search, evaluate and refine in a ReAct pattern, then writes research.md. A writer agent built with LangGraph takes the research, a voice profile, style rule books and past articles, and loops draft, review and fix with checkpoints until no issues remain, producing the article. Underneath both run memory, observability and delivery layers.">
+        <defs><marker id="a8p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+        <g font-family="IBM Plex Mono, monospace">
+          <text x="16" y="24" font-size="11" font-weight="600" letter-spacing="1" fill="currentColor">SOURCES</text>
+          <g font-size="10" fill="currentColor">
+            <rect x="16" y="38" width="128" height="28" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="80" y="56" text-anchor="middle">seed + web URLs</text>
+            <rect x="16" y="74" width="128" height="28" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="80" y="92" text-anchor="middle">GitHub repos</text>
+            <rect x="16" y="110" width="128" height="28" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="80" y="128" text-anchor="middle">YouTube → text</text>
+            <rect x="16" y="146" width="128" height="28" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><text x="80" y="164" text-anchor="middle">local files · blogs</text>
+          </g>
+          <path d="M144,106 L190,106" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8p)"/>
+
+          <rect x="196" y="44" width="220" height="124" rx="2" fill="none" stroke="#5B4A9E" stroke-width="1.6"/>
+          <text x="306" y="66" text-anchor="middle" font-size="11" font-weight="600" fill="#5B4A9E">RESEARCH AGENT</text>
+          <text x="306" y="84" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".65">ReAct · no fixed order</text>
+          <g font-size="9.5" fill="currentColor">
+            <rect x="214" y="98" width="56" height="24" rx="12" fill="none" stroke="currentColor"/><text x="242" y="114" text-anchor="middle">search</text>
+            <rect x="278" y="98" width="56" height="24" rx="12" fill="none" stroke="currentColor"/><text x="306" y="114" text-anchor="middle">judge</text>
+            <rect x="342" y="98" width="56" height="24" rx="12" fill="none" stroke="currentColor"/><text x="370" y="114" text-anchor="middle">refine</text>
+          </g>
+          <path d="M370,124 C370,150 242,150 242,126" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="3 3" marker-end="url(#a8p)"/>
+          <text x="306" y="160" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">keep or drop each source (cost!)</text>
+
+          <path d="M416,106 L462,106" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8p)"/>
+          <rect x="468" y="88" width="98" height="36" rx="2" fill="#8A5E12"/>
+          <text x="517" y="111" text-anchor="middle" font-size="10.5" font-weight="600" fill="#FFFFFF">research.md</text>
+          <path d="M566,106 L612,106" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8p)"/>
+
+          <rect x="618" y="44" width="232" height="124" rx="2" fill="none" stroke="#2B3A67" stroke-width="1.6"/>
+          <text x="734" y="66" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">WRITER AGENT · LangGraph</text>
+          <text x="734" y="84" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".65">voice · style rules · past articles</text>
+          <g font-size="9.5" fill="currentColor">
+            <rect x="636" y="98" width="58" height="24" rx="12" fill="none" stroke="currentColor"/><text x="665" y="114" text-anchor="middle">draft</text>
+            <rect x="704" y="98" width="58" height="24" rx="12" fill="none" stroke="currentColor"/><text x="733" y="114" text-anchor="middle">review</text>
+            <rect x="772" y="98" width="58" height="24" rx="12" fill="none" stroke="currentColor"/><text x="801" y="114" text-anchor="middle">fix</text>
+          </g>
+          <path d="M801,124 C801,150 665,150 665,126" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="3 3" marker-end="url(#a8p)"/>
+          <text x="734" y="160" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">checkpoint every round · stop when clean</text>
+          <path d="M850,106 L896,106" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8p)"/>
+          <text x="938" y="102" text-anchor="middle" font-size="10.5" font-weight="600" fill="currentColor">article</text>
+          <text x="938" y="118" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">.md</text>
+
+          <g font-size="10" fill="currentColor">
+            <rect x="196" y="204" width="210" height="48" rx="2" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity=".8"/>
+            <text x="301" y="224" text-anchor="middle" font-weight="600">memory</text>
+            <text x="301" y="240" text-anchor="middle" opacity=".65">short- &amp; long-term · own DB</text>
+            <rect x="420" y="204" width="210" height="48" rx="2" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity=".8"/>
+            <text x="525" y="224" text-anchor="middle" font-weight="600">observability</text>
+            <text x="525" y="240" text-anchor="middle" opacity=".65">tracing · offline evals · CI</text>
+            <rect x="644" y="204" width="206" height="48" rx="2" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity=".8"/>
+            <text x="747" y="224" text-anchor="middle" font-weight="600">delivery</text>
+            <text x="747" y="240" text-anchor="middle" opacity=".65">containers · registry · runtime</text>
+          </g>
+          <text x="523" y="292" text-anchor="middle" font-family="Public Sans, sans-serif" font-size="13" fill="currentColor" opacity=".72">tools named: Gemini (swappable for Opus etc.) · Perplexity (web search) · Tavily (Google search) · Firecrawl (clean text)</text>
+          <text x="523" y="314" text-anchor="middle" font-family="Public Sans, sans-serif" font-size="13" fill="currentColor" opacity=".72">plus repo ingestion and YouTube-to-text conversion, with an eye on cost</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>“Write a blog post” sounds trivial until you draw it. Run the research agent 40 times and you get 40 different source sets, yet the article has to come out factually right every time. Long drafts are full of mistakes, so the writer has to find them, fix them, and decide when to stop.</figcaption>
+    </figure>
+  </div>
+
+  <div class="col">
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:28%">Hard part</th><th>Why it's hard</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Reliable research</strong></td><td>A ReAct loop has no fixed order: act, observe, decide it isn't good enough, go again. Non-determinism is the default. The design has to make the <em>result</em> reliable even when the path isn't.</td></tr>
+          <tr><td><strong>Choosing what to keep</strong></td><td>Finding 47 relevant sources is easy. Writing from all 47 is expensive and worse. The agent has to decide what to drop.</td></tr>
+          <tr><td><strong>Long-form writing</strong></td><td>Large outputs carry many mistakes. The writer needs checkpoints, a review step with explicit guidelines, and a stopping condition. That's why it uses LangGraph rather than a single prompt.</td></tr>
+          <tr><td><strong>Cost control</strong></td><td>Beyond model choice, <strong>reasoning effort</strong> is a dial on every call, set per step. High everywhere is how a demo turns into a bill.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The second planned project is a <strong>deep RAG system</strong> with no agents: a chatbot that answers from an entire body of teaching content. It's the kind of system a learner's company was struggling with, including when fine-tuning becomes necessary. His advice on both projects: <strong>don't all put the identical project on your résumé.</strong> Use them to learn the pattern, then rebuild it around your own idea, or on AWS once that track is done.</p>
+  </div>
+</section>
+
+<section id="brief">
+  <div class="col">
+    <p class="kicker">The brief</p>
+    <h2>A support desk for parcels that went wrong</h2>
+    <p>Think of the support chats you've had with Amazon, Swiggy, Zepto or Instamart. Agents handle most of those tickets behind the scenes, and a few still need a human. This project builds that shape for a logistics company:</p>
+    <ol>
+      <li><strong>Classify</strong> a customer's exception report as <span class="v up">delayed</span> <span class="v esc">damaged</span> <span class="v rej">lost</span> or <span class="v drop">unknown</span>.</li>
+      <li><strong>Calculate compensation</strong> using the company's business rules for that category.</li>
+      <li><strong>Decide</strong> whether it is safe to auto-resolve, or must be escalated to a manager.</li>
+      <li><strong>Draft</strong> the right message: a customer-facing email, or an internal note asking for approval.</li>
+      <li><strong>Keep a log</strong> of every decision, and summarise the day on demand.</li>
+    </ol>
+  </div>
+  <div class="col">
+    <h3>The demo case</h3>
+    <div class="casefile">
+      <div class="casefile-head">
+        <span><b>VALUE</b> $800.00</span>
+        <span><b>TIER</b> standard</span>
+        <span><b>OUTCOME</b> auto-resolved</span>
+      </div>
+      <div class="casefile-body">
+        <p>“Package arrived <mark class="up">2 days later than the estimated delivery date</mark> and the customer just flagged the delay for the record.”</p>
+      </div>
+    </div>
+    <div class="kv">
+      <div><dt>Category</dt><dd><span class="big">delayed</span>LLM · classify_chain</dd></div>
+      <div><dt>Compensation</dt><dd><span class="big">$40</span>5% of $800 · code</dd></div>
+      <div><dt>Threshold</dt><dd><span class="big">$200</span>standard tier · code</dd></div>
+      <div><dt>Message</dt><dd><span class="big">email</span>LLM · draft_email_chain</dd></div>
+    </div>
+    <p>$40 is under the standard customer's $200 threshold and the category is known, so no human is needed. The customer gets an email and the triage log gets a line. Every number on that card came from code. The model chose one word and wrote one paragraph.</p>
+  </div>
+</section>
+
+<section id="split">
+  <div class="col">
+    <p class="kicker">The hook</p>
+    <h2>Four decisions, <em>two</em> owners</h2>
+    <p class="lede">Every exception involves four decisions. Before writing any code, decide which of them you would trust a language model with.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:30%">Decision</th><th style="width:16%">Owner</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>What kind of problem is this?</td><td><span class="v esc">LLM</span></td><td>Customers describe the same problem a hundred ways (“never showed up”, “tracking froze”, “not here yet”). Reading messy language is what models are for.</td></tr>
+          <tr><td>How much do we pay?</td><td><span class="v up">code</span></td><td>Money must be deterministic, auditable and identical for identical cases. Compensation rules are company policy, and they belong in reviewed code.</td></tr>
+          <tr><td>Does a manager sign off?</td><td><span class="v up">code</span></td><td>A threshold is a business rule with real cost. You don't want it to vary with a model's mood.</td></tr>
+          <tr><td>What do we say?</td><td><span class="v esc">LLM</span></td><td>Tone, acknowledgement and clarity are language work. The model gets the amount as an input and is told not to change it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ask">
+      <span class="tag">Asked in class</span>
+      <p><q>Could the model also detect urgency, or judge how severe the damage sounds?</q></p>
+      <p>It could, but that puts a model's judgement straight into the money path, where it can hallucinate. The solution keeps urgency and severity as keyword rules in <code>tools.py</code>: crude, but deterministic and reviewable. In situations where money moves, you want determinism and hard rules, and you keep the model out of the decision. Last class's rule was “tools measure, the model explains.” This class it becomes <strong>the model reads, code pays.</strong></p>
+    </div>
+  </div>
+</section>
+
+<section id="asks">
+  <div class="col">
+    <p class="kicker">The asks</p>
+    <h2>Three asks, no starter code</h2>
+    <p>The problem was small enough that no starter code was provided. You got the brief, a README and <code>requirements.txt</code>, and wrote every file yourself.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:8%">#</th><th style="width:30%">Ask</th><th>What “done” means</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td><strong>Exception-processing pipeline</strong></td><td><code>chains.py</code> holds three LangChain chains: classify, escalate, draft email. <code>tools.py</code> holds three compensation calculators that each return a <em>structured dict, not a formatted string</em>. <code>pipeline.py</code>'s <code>process_exception()</code> classifies, routes to the right calculator, applies a tier threshold, sends <span class="v drop">unknown</span> straight to a manager, and calls the right drafting chain.</td></tr>
+          <tr><td class="num">2</td><td><strong>Real daily aggregation</strong></td><td><code>session.py</code> records every processed exception and computes total compensation paid, escalation rate, and the costliest category by total compensation. <code>triage_check.py</code> runs four reports with stated expected outcomes against your pipeline.</td></tr>
+          <tr><td class="num">3</td><td><strong>Working Gradio interface</strong></td><td><code>app.py</code>: a form with report text, shipment value and customer tier, an outcome panel, the running triage log and a daily-summary button. Any UI framework you're comfortable with is acceptable.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Much of it was intentionally open-ended: the compensation formulas, the escalation rule, what goes in the summary, even extra form fields. Business rules differ from company to company, so the brief asked you to <strong>design them</strong> rather than copy them. The rules below are one defensible set, not the answer key.</p>
+  </div>
+</section>
+
+<section id="arch">
+  <div class="col">
+    <p class="kicker">Architecture</p>
+    <h2>Two LLM calls with code in between</h2>
+  </div>
+  <div class="wide">
+    <figure>
+      <div class="svgwrap">
+      <svg viewBox="0 0 980 306" role="img" aria-label="Pipeline. The report text goes to classify_chain, an LLM call, which returns a category. Code routes the category to one of three calculators, or to zero dollars for unknown. Code compares the amount with the tier threshold. If over the threshold or unknown, escalate_chain writes a manager note; otherwise draft_email_chain writes a customer email. The result dict is recorded into the daily log, which feeds the daily summary.">
+        <defs><marker id="a8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+        <g font-family="IBM Plex Mono, monospace">
+          <rect x="12" y="112" width="104" height="52" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="64" y="134" text-anchor="middle" font-size="10.5" font-weight="600" fill="currentColor">report</text>
+          <text x="64" y="151" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">+ value + tier</text>
+          <line x1="116" y1="138" x2="146" y2="138" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8)"/>
+
+          <rect x="152" y="112" width="132" height="52" rx="2" fill="#5B4A9E"/>
+          <text x="218" y="134" text-anchor="middle" font-size="10.5" font-weight="600" fill="#FFFFFF">classify_chain</text>
+          <text x="218" y="151" text-anchor="middle" font-size="9" fill="#FFFFFF" opacity=".85">LLM call 1</text>
+          <line x1="284" y1="138" x2="314" y2="138" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8)"/>
+
+          <rect x="320" y="40" width="168" height="196" rx="2" fill="none" stroke="#1B6B4C" stroke-width="1.5"/>
+          <text x="404" y="60" text-anchor="middle" font-size="10" font-weight="600" fill="#1B6B4C">CALCULATORS · code</text>
+          <g font-size="9.5" fill="currentColor">
+            <text x="334" y="88">delayed → 5% (×2 urgent)</text>
+            <text x="334" y="116">damaged → 25 / 50 / 100%</text>
+            <text x="334" y="144">lost    → 100%</text>
+            <text x="334" y="172" opacity=".7">unknown → $0</text>
+          </g>
+          <text x="404" y="222" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">tools.py</text>
+          <line x1="488" y1="138" x2="518" y2="138" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8)"/>
+
+          <path d="M524,138 L588,96 L652,138 L588,180 Z" fill="none" stroke="#1B6B4C" stroke-width="1.5"/>
+          <text x="588" y="134" text-anchor="middle" font-size="9.5" font-weight="600" fill="#1B6B4C">amount &gt;</text>
+          <text x="588" y="148" text-anchor="middle" font-size="9.5" font-weight="600" fill="#1B6B4C">threshold?</text>
+          <text x="588" y="254" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">premium $100 · standard $200</text>
+          <text x="588" y="268" text-anchor="middle" font-size="9" fill="currentColor" opacity=".6">or category unknown</text>
+
+          <path d="M622,116 C660,70 670,62 704,62" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8)"/>
+          <text x="656" y="96" text-anchor="middle" font-size="9.5" font-weight="600" fill="#A52A38">yes</text>
+          <path d="M622,160 C660,206 670,214 704,214" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8)"/>
+          <text x="652" y="188" text-anchor="middle" font-size="9.5" font-weight="600" fill="#1B6B4C">no</text>
+
+          <rect x="710" y="36" width="140" height="52" rx="2" fill="#5B4A9E"/>
+          <text x="780" y="58" text-anchor="middle" font-size="10.5" font-weight="600" fill="#FFFFFF">escalate_chain</text>
+          <text x="780" y="75" text-anchor="middle" font-size="9" fill="#FFFFFF" opacity=".85">LLM 2 · manager note</text>
+          <rect x="710" y="188" width="140" height="52" rx="2" fill="#5B4A9E"/>
+          <text x="780" y="210" text-anchor="middle" font-size="10.5" font-weight="600" fill="#FFFFFF">draft_email_chain</text>
+          <text x="780" y="227" text-anchor="middle" font-size="9" fill="#FFFFFF" opacity=".85">LLM 2 · customer email</text>
+
+          <path d="M850,62 C890,62 880,126 906,130" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8)"/>
+          <path d="M850,214 C890,214 880,150 906,146" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#a8)"/>
+          <path d="M912,122 a28,9 0 0,1 56,0 v32 a28,9 0 0,1 -56,0 z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M912,122 a28,9 0 0,0 56,0" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="940" y="180" text-anchor="middle" font-size="9" fill="currentColor" opacity=".7">daily_log</text>
+
+          <text x="490" y="294" text-anchor="middle" font-family="Public Sans, sans-serif" font-size="13" fill="currentColor" opacity=".72">purple = model · green = company policy in code</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption>The model sits at the two ends, reading language in and writing language out. Everything in the middle, where money and approval are decided, is plain Python with constants a reviewer can read.</figcaption>
+    </figure>
+  </div>
+  <div class="col">
+<div class="tree">shipment-exception-desk/
+├── .env               <i># GROQ_API_KEY=…</i>
+├── requirements.txt   <i># langchain-core, langchain-groq, gradio, python-dotenv</i>
+├── llm.py             <i># the one model object every chain shares</i>
+├── chains.py          <i># classify · escalate · draft email</i>
+├── tools.py           <i># delay · damage · lost calculators</i>
+├── pipeline.py        <i># process_exception(): the wiring</i>
+├── session.py         <i># daily_log, record(), generate_daily_summary()</i>
+├── main.py            <i># terminal test of the pipeline</i>
+├── triage_check.py    <i># four scenarios with expected outcomes</i>
+└── app.py             <i># Gradio UI — built last</i></div>
+
+    <h3>Milestones, in the order to build them</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:10%">M</th><th>Build</th><th style="width:34%">Prove it</th></tr></thead>
+        <tbody>
+          <tr><td class="num">M1</td><td>venv, <code>pip install -r requirements.txt</code>, <code>.env</code> with the API key</td><td>imports work inside the venv</td></tr>
+          <tr><td class="num">M2</td><td><code>delay_compensation</code></td><td rowspan="3"><code>python tools.py</code>: each calculator alone, with known inputs and expected amounts. No LLM.</td></tr>
+          <tr><td class="num">M3</td><td><code>damage_compensation</code></td></tr>
+          <tr><td class="num">M4</td><td><code>lost_compensation</code></td></tr>
+          <tr><td class="num">M5</td><td><code>pipeline.py</code>: classify + compensate, <em>single path</em> (always draft the email)</td><td><code>python main.py</code></td></tr>
+          <tr><td class="num">M6</td><td>Add the escalation branch: threshold or unknown → manager note</td><td><code>python main.py</code></td></tr>
+          <tr><td class="num">M7</td><td><code>session.py</code>: <code>generate_daily_summary()</code> with real aggregation</td><td>summary after a few runs</td></tr>
+          <tr><td class="num">M8</td><td><code>triage_check.py</code>: delayed · damaged · lost · unknown</td><td><code>python triage_check.py</code></td></tr>
+          <tr><td class="num">M9</td><td><code>app.py</code>: the full flow in a browser</td><td><code>python app.py</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="room">
+      <span class="tag">Same rule as last class</span>
+      <p>Get the three calculators working and tested <strong>on their own</strong> before any chain touches them. If you wire everything together and the refund is wrong, you won't know whether the classifier, the calculator or the threshold is to blame, and every guess costs API tokens. The UI is the last layer. You can start from the UI if you prefer, but then you're debugging back-end wiring through a browser.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="col">
+    <p class="kicker">Milestones 2–4 · tools.py</p>
+    <h2>Company policy, written as <em>constants</em></h2>
+    <p>Each calculator takes the shipment value and the report text and returns <code>{"amount", "reasoning"}</code>. The amount drives the escalation decision. The reasoning travels into both the email and the manager's note, so the humans downstream can see <em>why</em>.</p>
+<div class="file"><div class="file-bar"><span><b>tools.py</b> · milestones 2–4 · python tools.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># Company policy, written as code. The LLM never computes money.</span>
+DELAY_BASE_RATE = 0.05                 <span class="c-dim"># 5% of shipment value</span>
+URGENT_MULTIPLIER = 2
+URGENT_SIGNALS = [<span class="c-str">"urgent"</span>, <span class="c-str">"critical"</span>, <span class="c-str">"time-sensitive"</span>, <span class="c-str">"time sensitive"</span>, <span class="c-str">"asap"</span>, <span class="c-str">"medical"</span>]
+
+SEVERE_DAMAGE_KEYWORDS = [<span class="c-str">"destroyed"</span>, <span class="c-str">"shattered"</span>, <span class="c-str">"crushed"</span>, <span class="c-str">"unusable"</span>]
+MINOR_DAMAGE_KEYWORDS = [<span class="c-str">"scratch"</span>, <span class="c-str">"dent"</span>, <span class="c-str">"scuff"</span>, <span class="c-str">"torn packaging"</span>]
+
+
+<span class="c-key">def</span> delay_compensation(shipment_value: float, report_text: str) -&gt; dict:
+    text = report_text.lower()
+    urgent = any(signal <span class="c-key">in</span> text <span class="c-key">for</span> signal <span class="c-key">in</span> URGENT_SIGNALS)
+    rate = DELAY_BASE_RATE * (URGENT_MULTIPLIER <span class="c-key">if</span> urgent <span class="c-key">else</span> 1)
+    amount = round(shipment_value * rate, 2)
+    reasoning = (<span class="c-str">f"Delay compensation at {rate:.0%} of the ${shipment_value:,.2f} shipment value"</span>
+                 <span class="c-str">f"{' (urgent signal detected, rate doubled)' if urgent else ''}."</span>)
+    <span class="c-key">return</span> {<span class="c-str">"amount"</span>: amount, <span class="c-str">"reasoning"</span>: reasoning}
+
+
+<span class="c-key">def</span> damage_compensation(shipment_value: float, report_text: str) -&gt; dict:
+    text = report_text.lower()
+    <span class="c-key">if</span> any(k <span class="c-key">in</span> text <span class="c-key">for</span> k <span class="c-key">in</span> SEVERE_DAMAGE_KEYWORDS):
+        rate, tier = 1.0, <span class="c-str">"severe"</span>
+    <span class="c-key">elif</span> any(k <span class="c-key">in</span> text <span class="c-key">for</span> k <span class="c-key">in</span> MINOR_DAMAGE_KEYWORDS):
+        rate, tier = 0.25, <span class="c-str">"minor"</span>
+    <span class="c-key">else</span>:
+        rate, tier = 0.5, <span class="c-str">"unclear severity"</span>
+    amount = round(shipment_value * rate, 2)
+    reasoning = <span class="c-str">f"Damage compensation ({tier}) at {rate:.0%} of the ${shipment_value:,.2f} shipment value."</span>
+    <span class="c-key">return</span> {<span class="c-str">"amount"</span>: amount, <span class="c-str">"reasoning"</span>: reasoning}
+
+
+<span class="c-key">def</span> lost_compensation(shipment_value: float, report_text: str) -&gt; dict:
+    amount = round(float(shipment_value), 2)
+    <span class="c-key">return</span> {<span class="c-str">"amount"</span>: amount, <span class="c-str">"reasoning"</span>: <span class="c-str">f"Lost shipment: full value of ${amount:,.2f} refunded."</span>}
+
+
+<span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    <span class="c-dim"># Milestones 2-4: prove each calculator before any chain touches it.</span>
+    print(delay_compensation(800, <span class="c-str">"Package arrived 2 days late."</span>))          <span class="c-dim"># 40.0</span>
+    print(delay_compensation(800, <span class="c-str">"URGENT medical supplies arrived late"</span>))  <span class="c-dim"># 80.0</span>
+    print(damage_compensation(400, <span class="c-str">"The vase was shattered"</span>))               <span class="c-dim"># 400.0</span>
+    print(damage_compensation(400, <span class="c-str">"small scratch on the lid"</span>))             <span class="c-dim"># 100.0</span>
+    print(lost_compensation(1250, <span class="c-str">"never arrived"</span>))                         <span class="c-dim"># 1250.0</span></code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>Every rate is a named constant at the top</b>When finance changes the delay rate from 5% to 7%, it's a one-line diff in a reviewed pull request, not a prompt edit that silently changes every future payout.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>Severity from wording: crude on purpose</b>“Shattered” → 100%, “scratch” → 25%, anything else → 50%. Keyword rules will misjudge some reports. But they misjudge <em>consistently</em> and visibly, and the 50% default for unclear severity is an explicit policy choice, not an accident.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>Check severe before minor</b>“Crushed box, a few scratches on the casing” contains both. The first matching branch wins, so the order of the <code>if</code>s is itself a rule: the worse reading takes priority.</span></div>
+      <div class="anno"><span class="n">4</span><span class="t"><b>A dict, not an f-string</b>The pipeline needs <code>amount</code> as a number to compare with a threshold, and the summary needs it to add up totals. A sentence like “Refund $40 because…” would have to be parsed back. That's why the brief insisted on structured returns.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="sim">
+  <div class="col">
+    <p class="kicker">Try it</p>
+    <h2>Run the desk in your browser</h2>
+    <p>The calculators, thresholds, triage log and daily summary are a line-for-line port of the Python. The two LLM calls are replaced by <strong>clearly fake stand-ins</strong>: a keyword classifier and a fill-in-the-blanks message. You can also override the category to play “what if the model said…”. The money never changes with the wording of the message.</p>
+    <div class="sim" id="desk">
+      <div class="sim-head"><span><b>EXCEPTION DESK</b> · rules real, LLM simulated</span><span id="d-count">0 processed today</span></div>
+      <div class="sim-body">
+        <label>Samples</label>
+        <div class="btns" id="d-samples"></div>
+        <label for="d-report" style="margin-top:12px">Exception report</label>
+        <textarea id="d-report">Package arrived 2 days later than the estimated delivery date and the customer just flagged the delay for the record.</textarea>
+        <div class="row">
+          <div><label for="d-value">Shipment value ($)</label><input id="d-value" type="number" min="0" step="0.01" value="800"></div>
+          <div><label for="d-tier">Customer tier</label><select id="d-tier"><option value="standard">standard</option><option value="premium">premium</option></select></div>
+          <div><label for="d-cat">Category</label><select id="d-cat"><option value="auto">auto (stand-in classifier)</option><option value="delayed">force: delayed</option><option value="damaged">force: damaged</option><option value="lost">force: lost</option><option value="unknown">force: unknown</option></select></div>
+        </div>
+        <div class="btns">
+          <button class="btn primary" id="d-go" type="button">Process exception</button>
+          <button class="btn" id="d-sum" type="button">Daily summary</button>
+          <button class="btn" id="d-reset" type="button">Reset day</button>
+        </div>
+        <div class="out" id="d-out"></div>
+        <div class="out" id="d-log"></div>
+        <div class="out" id="d-summary"></div>
+      </div>
+    </div>
+    <p class="note-sm">Things to try: send the routine delay as <em>premium</em> and nothing changes, because $40 is under $100. Make it a $1,500 urgent delay and the doubled rate pushes it past $100. Force <em>unknown</em> on anything and it always escalates at $0.</p>
+  </div>
+</section>
+
+<section id="chains">
+  <div class="col">
+    <p class="kicker">Ask 1 · chains.py</p>
+    <h2>Three chains, one model, three <em>jobs</em></h2>
+    <p>All three chains use the same LLM object. What makes them behave differently is the system prompt. Each chain is LangChain's expression language, <code>prompt | llm | parser</code>: fill the template, call the model, and turn the reply into a plain string.</p>
+<div class="file"><div class="file-bar"><span><b>llm.py</b> · the one model object</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> dotenv <span class="c-key">import</span> load_dotenv
+<span class="c-key">from</span> langchain_groq <span class="c-key">import</span> ChatGroq
+
+load_dotenv()   <span class="c-dim"># reads GROQ_API_KEY from .env</span>
+
+llm = ChatGroq(model=<span class="c-str">"openai/gpt-oss-20b"</span>, temperature=0)</code></pre></div>
+<div class="file"><div class="file-bar"><span><b>chains.py</b> · ask 1 · the three LLM jobs</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> langchain_core.output_parsers <span class="c-key">import</span> StrOutputParser
+<span class="c-key">from</span> langchain_core.prompts <span class="c-key">import</span> ChatPromptTemplate
+
+<span class="c-key">from</span> llm <span class="c-key">import</span> llm
+
+<span class="c-dim"># 1. Classify: the only decision the model makes in this whole system.</span>
+classify_prompt = ChatPromptTemplate.from_messages([
+    (<span class="c-str">"system"</span>,
+     <span class="c-str">"You triage shipment exception reports for a logistics company. "</span>
+     <span class="c-str">"Read the report and classify it with exactly ONE word: "</span>
+     <span class="c-str">"delayed, damaged, lost, or unknown. Use unknown if it does not clearly fit "</span>
+     <span class="c-str">"one of the other three. Reply with that single word only - nothing else."</span>),
+    (<span class="c-str">"human"</span>, <span class="c-str">"{report_text}"</span>),
+])
+classify_chain = classify_prompt | llm | StrOutputParser()
+
+<span class="c-dim"># 2. Escalate: an internal note a manager reads before approving money.</span>
+escalate_prompt = ChatPromptTemplate.from_messages([
+    (<span class="c-str">"system"</span>,
+     <span class="c-str">"Write a short internal note for a shipment-exceptions manager who must approve "</span>
+     <span class="c-str">"compensation. Summarise the report, the category and the reasoning in 2-3 "</span>
+     <span class="c-str">"sentences, then end with a clear request for approval. Do not change the amount."</span>),
+    (<span class="c-str">"human"</span>, <span class="c-str">"Report: {report_text}\nCategory: {category}\n"</span>
+              <span class="c-str">"Proposed compensation: ${amount}\nReasoning: {reasoning}"</span>),
+])
+escalate_chain = escalate_prompt | llm | StrOutputParser()
+
+<span class="c-dim"># 3. Draft email: what the customer reads when the case auto-resolves.</span>
+email_prompt = ChatPromptTemplate.from_messages([
+    (<span class="c-str">"system"</span>,
+     <span class="c-str">"Write a short, polite customer-facing email for a logistics company resolving a "</span>
+     <span class="c-str">"shipment exception. Acknowledge the issue, state the compensation being issued, "</span>
+     <span class="c-str">"keep it to 3-4 sentences. Never state an amount other than the one given."</span>),
+    (<span class="c-str">"human"</span>, <span class="c-str">"Report: {report_text}\nCategory: {category}\n"</span>
+              <span class="c-str">"Compensation: ${amount}\nReasoning: {reasoning}"</span>),
+])
+draft_email_chain = email_prompt | llm | StrOutputParser()</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>System vs human messages</b>The system message says how to behave (“reply with that single word only”). The human message is the data (<code>{report_text}</code>). Keeping the data out of the instructions makes the prompt reusable and keeps the instructions harder to override with a cleverly worded report.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>“Exactly one word… nothing else”</b>The classification prompt is the most important prompt in the system. A one-word answer is easy to check in code. A sentence like “This appears to be a delay issue” is not.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>The amount is an input to the writers</b>Both writing prompts receive <code>{amount}</code> and are told not to change it. The model narrates a number it was given; it never produces one.</span></div>
+      <div class="anno"><span class="n">4</span><span class="t"><b><code>temperature=0</code></b>Classification should be as repeatable as a model allows. The more detailed the system prompt, the better the output, and the tighter the instructions, the less there is to vary.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="pipeline">
+  <div class="col">
+    <p class="kicker">Ask 1 · pipeline.py</p>
+    <h2>Where every piece meets</h2>
+    <p><code>process_exception()</code> is the only function that knows about all the others. It takes exactly the three things the form collects and returns one flat dict with everything the UI, the log and the summary need.</p>
+<div class="file"><div class="file-bar"><span><b>pipeline.py</b> · milestones 5–6 · the wiring</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> chains <span class="c-key">import</span> classify_chain, escalate_chain, draft_email_chain
+<span class="c-key">from</span> tools <span class="c-key">import</span> delay_compensation, damage_compensation, lost_compensation
+
+<span class="c-dim"># Escalation thresholds by customer tier. Premium gets a human sooner.</span>
+PREMIUM_ESCALATION_THRESHOLD = 100
+STANDARD_ESCALATION_THRESHOLD = 200
+
+CALCULATORS = {
+    <span class="c-str">"delayed"</span>: delay_compensation,
+    <span class="c-str">"damaged"</span>: damage_compensation,
+    <span class="c-str">"lost"</span>: lost_compensation,
+}
+
+
+<span class="c-key">def</span> process_exception(report_text: str, shipment_value: float, customer_tier: str) -&gt; dict:
+    log = []
+
+    <span class="c-dim"># 1. The LLM classifies - and that is ALL it decides.</span>
+    raw = classify_chain.invoke({<span class="c-str">"report_text"</span>: report_text}).strip().lower().strip(<span class="c-str">"."</span>)
+    category = raw <span class="c-key">if</span> raw <span class="c-key">in</span> CALCULATORS <span class="c-key">else</span> <span class="c-str">"unknown"</span>
+    log.append(<span class="c-str">f"classified as '{category}' (model said '{raw}')"</span>)
+
+    <span class="c-dim"># 2. Code computes the money.</span>
+    <span class="c-key">if</span> category == <span class="c-str">"unknown"</span>:
+        comp = {<span class="c-str">"amount"</span>: 0.0, <span class="c-str">"reasoning"</span>: <span class="c-str">"Could not confidently classify this report."</span>}
+    <span class="c-key">else</span>:
+        comp = CALCULATORS[category](shipment_value, report_text)
+    log.append(<span class="c-str">f"compensation ${comp['amount']:,.2f}: {comp['reasoning']}"</span>)
+
+    <span class="c-dim"># 3. Code decides who signs off.</span>
+    threshold = (PREMIUM_ESCALATION_THRESHOLD <span class="c-key">if</span> customer_tier == <span class="c-str">"premium"</span>
+                 <span class="c-key">else</span> STANDARD_ESCALATION_THRESHOLD)
+    needs_approval = category == <span class="c-str">"unknown"</span> <span class="c-key">or</span> comp[<span class="c-str">"amount"</span>] &gt; threshold
+    log.append(<span class="c-str">f"{customer_tier} threshold ${threshold}: "</span>
+               <span class="c-str">f"{'ESCALATE' if needs_approval else 'auto-resolve'}"</span>)
+
+    <span class="c-dim"># 4. The LLM writes the words for whichever path was chosen.</span>
+    chain_input = {<span class="c-str">"report_text"</span>: report_text, <span class="c-str">"category"</span>: category,
+                   <span class="c-str">"amount"</span>: comp[<span class="c-str">"amount"</span>], <span class="c-str">"reasoning"</span>: comp[<span class="c-str">"reasoning"</span>]}
+    <span class="c-key">if</span> needs_approval:
+        message = escalate_chain.invoke(chain_input)
+        log.append(<span class="c-str">"drafted internal escalation note"</span>)
+    <span class="c-key">else</span>:
+        message = draft_email_chain.invoke(chain_input)
+        log.append(<span class="c-str">"drafted customer email"</span>)
+
+    <span class="c-key">return</span> {
+        <span class="c-str">"report_text"</span>: report_text, <span class="c-str">"shipment_value"</span>: shipment_value,
+        <span class="c-str">"customer_tier"</span>: customer_tier, <span class="c-str">"category"</span>: category,
+        <span class="c-str">"compensation_amount"</span>: comp[<span class="c-str">"amount"</span>], <span class="c-str">"compensation_reasoning"</span>: comp[<span class="c-str">"reasoning"</span>],
+        <span class="c-str">"needs_approval"</span>: needs_approval, <span class="c-str">"drafted_message"</span>: message, <span class="c-str">"log"</span>: log,
+    }</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>Normalise, then check against an allowed set</b><code>.strip().lower().strip(".")</code> turns “Delayed.” into <code>delayed</code>. Anything still not a known category becomes <code>unknown</code>. The model's reply is <em>untrusted input</em>, and this line is the guard.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>A dispatch dict instead of if/elif</b><code>CALCULATORS[category]</code> picks the function. Adding a new category, say “wrong item”, means one calculator and one dict entry.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b>Unknown never auto-resolves</b><code>needs_approval = category == "unknown" or amount &gt; threshold</code>. If the system can't say what happened, a person decides. That's the cheap mistake to make.</span></div>
+      <div class="anno"><span class="n">4</span><span class="t"><b>The log is built as you go</b>Every step appends a human-readable line. When a manager asks why a case escalated, the answer is already written down in the order it happened.</span></div>
+    </div>
+
+    <h3>The demo case, step by step</h3>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-n">1</span><h3>Classify</h3><span class="stage-cost">LLM call 1</span></div>
+      <div class="stage-body">
+        <div class="io"><dt>In</dt><dd>“Package arrived 2 days later than the estimated delivery date…”</dd></div>
+        <div class="io"><dt>Model says</dt><dd><code>Delayed.</code></dd></div>
+        <div class="io"><dt>Code keeps</dt><dd><div class="payload">category = "delayed"</div></dd></div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-n">2</span><h3>Compensate</h3><span class="stage-cost">0 LLM calls</span></div>
+      <div class="stage-body">
+        <div class="io"><dt>Calls</dt><dd><code>delay_compensation(800, report)</code></dd></div>
+        <div class="io"><dt>Rule</dt><dd>5%; no urgent signal, so no doubling</dd></div>
+        <div class="io"><dt>Out</dt><dd><div class="payload">{"amount": 40.0,
+ "reasoning": "Delay
+  compensation at 5%…"}</div></dd></div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-n">3</span><h3>Decide</h3><span class="stage-cost">0 LLM calls</span></div>
+      <div class="stage-body">
+        <div class="io"><dt>Tier</dt><dd>standard → threshold $200</dd></div>
+        <div class="io"><dt>Test</dt><dd>unknown? no · 40 &gt; 200? no</dd></div>
+        <div class="io"><dt>Out</dt><dd><div class="payload">needs_approval = False</div></dd></div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-n">4</span><h3>Draft</h3><span class="stage-cost">LLM call 2</span></div>
+      <div class="stage-body">
+        <div class="io"><dt>Chain</dt><dd><code>draft_email_chain</code></dd></div>
+        <div class="io"><dt>Given</dt><dd>report, category, amount, reasoning</dd></div>
+        <div class="io"><dt>Out</dt><dd>A 3–4 sentence customer email stating the $40.</dd></div>
+      </div>
+      <div class="stage-note">If step 3 had said <code>True</code>, the same four inputs would go to <code>escalate_chain</code> instead, and the output would be a note asking a manager to approve, not an email.</div>
+    </div>
+
+    <div class="ask">
+      <span class="tag">Ask the room</span>
+      <p><q>Premium customers escalate above $100, standard above $200. Isn't that backwards? Shouldn't premium customers get paid faster?</q></p>
+      <p>Both readings came up during the session, and both are defensible. A <strong>lower</strong> premium threshold puts a human on high-value relationships sooner. A <strong>higher</strong> one auto-pays them more generously. One alternative even escalated every premium case regardless of amount, because “I don't want to lose that customer.” Which is right is a business decision, not an engineering one. That's exactly why it lives in two named constants a product owner can read and change, rather than in a prompt.</p>
+    </div>
+  </div>
+</section>
+
+<section id="session">
+  <div class="col">
+    <p class="kicker">Ask 2 · session.py</p>
+    <h2>A daily log that can actually be <em>summed</em></h2>
+    <p>Same idea as the interview coach's memory. A plain Python list stands in for a database, and each entry is the full structured result of <code>process_exception()</code>, never a concatenated string. Because the entries have keys, the summary is a few lines of arithmetic.</p>
+<div class="file"><div class="file-bar"><span><b>session.py</b> · ask 2 · real aggregation</span><button class="copy" type="button">COPY</button></div><pre><code>daily_log = []   <span class="c-dim"># one structured dict per processed exception (a DB table in real life)</span>
+
+
+<span class="c-key">def</span> record(final_state: dict) -&gt; <span class="c-key">None</span>:
+    daily_log.append(final_state)
+
+
+<span class="c-key">def</span> generate_daily_summary() -&gt; str:
+    <span class="c-key">if</span> <span class="c-key">not</span> daily_log:
+        <span class="c-key">return</span> <span class="c-str">"No exceptions processed yet today."</span>
+
+    total = sum(s[<span class="c-str">"compensation_amount"</span>] <span class="c-key">for</span> s <span class="c-key">in</span> daily_log)
+    escalated = [s <span class="c-key">for</span> s <span class="c-key">in</span> daily_log <span class="c-key">if</span> s[<span class="c-str">"needs_approval"</span>]]
+    escalation_rate = len(escalated) / len(daily_log) * 100
+
+    by_category = {}
+    <span class="c-key">for</span> s <span class="c-key">in</span> daily_log:
+        by_category[s[<span class="c-str">"category"</span>]] = by_category.get(s[<span class="c-str">"category"</span>], 0) + s[<span class="c-str">"compensation_amount"</span>]
+    costliest = max(by_category, key=by_category.get)
+
+    lines = [<span class="c-str">f"**Daily triage summary** - {len(daily_log)} exceptions processed"</span>, <span class="c-str">""</span>]
+    <span class="c-key">for</span> s <span class="c-key">in</span> daily_log:
+        status = <span class="c-str">"ESCALATED"</span> <span class="c-key">if</span> s[<span class="c-str">"needs_approval"</span>] <span class="c-key">else</span> <span class="c-str">"auto-resolved"</span>
+        lines.append(<span class="c-str">f"- {s['category']} - ${s['compensation_amount']:,.2f} - {status}"</span>)
+    lines += [<span class="c-str">""</span>,
+              <span class="c-str">f"Total compensation: ${total:,.2f}"</span>,
+              <span class="c-str">f"Escalation rate: {escalation_rate:.0f}%"</span>,
+              <span class="c-str">f"Costliest category: {costliest} (${by_category[costliest]:,.2f})"</span>]
+    <span class="c-key">return</span> <span class="c-str">"\n"</span>.join(lines)</code></pre></div>
+    <div class="kv">
+      <div><dt>Total compensation</dt><dd>sum of <code>compensation_amount</code></dd></div>
+      <div><dt>Escalation rate</dt><dd>escalated ÷ processed × 100</dd></div>
+      <div><dt>Costliest category</dt><dd>argmax of per-category totals</dd></div>
+    </div>
+    <p>What goes in the summary was left open, because the readers are the company's own staff, not customers. Add whatever an operations lead would want: average payout per tier, the single largest claim, how many unknowns came in. You can format it with plain Python, render a chart, or hand the structured log to an LLM to narrate. The structure is what makes all three possible.</p>
+    <div class="room">
+      <span class="tag">Production reality</span>
+      <p>In production, <code>daily_log</code> is a table and <code>record()</code> is an insert. Two things change when you make that move. Records need a <strong>timestamp</strong>, because “daily” has to mean a date and not “since the server restarted”. And they need an <strong>id</strong>, so that processing the same report twice is detectable. Paying twice is the failure Class 9 is built around.</p>
+    </div>
+  </div>
+</section>
+
+<section id="ui">
+  <div class="col">
+    <p class="kicker">Ask 3 · the interface</p>
+    <h2>A form, an outcome, a log</h2>
+<div class="file"><div class="file-bar"><span><b>app.py</b> · ask 3 · python app.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> gradio <span class="c-key">as</span> gr
+
+<span class="c-key">from</span> pipeline <span class="c-key">import</span> process_exception
+<span class="c-key">from</span> session <span class="c-key">import</span> daily_log, record, generate_daily_summary
+
+
+<span class="c-key">def</span> format_triage_log() -&gt; str:
+    lines = []
+    <span class="c-key">for</span> i, s <span class="c-key">in</span> enumerate(daily_log, 1):
+        status = <span class="c-str">"ESCALATED"</span> <span class="c-key">if</span> s[<span class="c-str">"needs_approval"</span>] <span class="c-key">else</span> <span class="c-str">"auto-resolved"</span>
+        lines.append(<span class="c-str">f"{i}. **{status}** - {s['category']} - "</span>
+                     <span class="c-str">f"${s['compensation_amount']:,.2f} ({s['customer_tier']})"</span>)
+    <span class="c-key">return</span> <span class="c-str">"\n"</span>.join(lines) <span class="c-key">or</span> <span class="c-str">"_Nothing processed yet._"</span>
+
+
+<span class="c-key">def</span> on_submit(report_text, shipment_value, customer_tier):
+    <span class="c-key">if</span> <span class="c-key">not</span> report_text.strip():
+        <span class="c-key">return</span> <span class="c-str">"Please paste an exception report first."</span>, format_triage_log(), report_text
+    result = process_exception(report_text, float(shipment_value), customer_tier)
+    record(result)
+    status = <span class="c-str">"Escalated to manager"</span> <span class="c-key">if</span> result[<span class="c-str">"needs_approval"</span>] <span class="c-key">else</span> <span class="c-str">"Auto-resolved"</span>
+    outcome = (<span class="c-str">f"### {status}\n"</span>
+               <span class="c-str">f"**Category:** {result['category']}  \n"</span>
+               <span class="c-str">f"**Compensation:** ${result['compensation_amount']:,.2f} - "</span>
+               <span class="c-str">f"{result['compensation_reasoning']}\n\n"</span>
+               <span class="c-str">f"**Drafted message**\n\n{result['drafted_message']}\n\n"</span>
+               <span class="c-str">f"**Steps:** "</span> + <span class="c-str">" -&gt; "</span>.join(result[<span class="c-str">"log"</span>]))
+    <span class="c-key">return</span> outcome, format_triage_log(), <span class="c-str">""</span>
+
+
+<span class="c-key">with</span> gr.Blocks(title=<span class="c-str">"Shipment Exception Desk"</span>) <span class="c-key">as</span> demo:
+    gr.Markdown(<span class="c-str">"# Shipment Exception Desk"</span>)
+    <span class="c-key">with</span> gr.Row():
+        report_box = gr.Textbox(label=<span class="c-str">"Exception report"</span>, lines=5, scale=3)
+        <span class="c-key">with</span> gr.Column(scale=1):
+            value_box = gr.Number(label=<span class="c-str">"Shipment value ($)"</span>, value=800)
+            tier_box = gr.Radio([<span class="c-str">"standard"</span>, <span class="c-str">"premium"</span>], value=<span class="c-str">"standard"</span>, label=<span class="c-str">"Customer tier"</span>)
+    submit_btn = gr.Button(<span class="c-str">"Process exception"</span>, variant=<span class="c-str">"primary"</span>)
+    outcome_box = gr.Markdown()
+    gr.Markdown(<span class="c-str">"### Triage log"</span>)
+    log_box = gr.Markdown(format_triage_log())
+    summary_btn = gr.Button(<span class="c-str">"Generate daily summary"</span>)
+    summary_box = gr.Markdown()
+
+    submit_btn.click(on_submit, inputs=[report_box, value_box, tier_box],
+                     outputs=[outcome_box, log_box, report_box])
+    summary_btn.click(generate_daily_summary, outputs=summary_box)
+
+<span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    demo.launch()</code></pre></div>
+    <div class="annos">
+      <div class="anno"><span class="n">1</span><span class="t"><b>Validate before you spend</b>An empty report returns immediately with a message. Otherwise you'd pay for an LLM call to classify nothing, and get <span class="v drop">unknown</span> plus an escalation for your trouble.</span></div>
+      <div class="anno"><span class="n">2</span><span class="t"><b>The UI only formats</b><code>on_submit</code> calls the pipeline, records the result and renders it. No business logic lives in <code>app.py</code>, so swapping Gradio for Streamlit or a REST API touches one file.</span></div>
+      <div class="anno"><span class="n">3</span><span class="t"><b><code>gr.Row</code> / <code>gr.Column(scale=…)</code></b>The report box takes three-quarters of the width, and value and tier stack in the remaining quarter. That's all the layout this app needs.</span></div>
+    </div>
+
+    <h3>Terminal test</h3>
+<div class="file"><div class="file-bar"><span><b>main.py</b> · milestones 5–6 · python main.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> pipeline <span class="c-key">import</span> process_exception
+<span class="c-key">from</span> session <span class="c-key">import</span> record, generate_daily_summary
+
+SAMPLES = [
+    (<span class="c-str">"Package arrived 2 days later than the estimated delivery date. Customer just flagged it."</span>, 800, <span class="c-str">"standard"</span>),
+    (<span class="c-str">"URGENT: medical kit arrived three days late, patient had to wait."</span>, 1500, <span class="c-str">"premium"</span>),
+    (<span class="c-str">"The crate was crushed and the glass panels are unusable."</span>, 320, <span class="c-str">"standard"</span>),
+]
+
+<span class="c-key">for</span> report, value, tier <span class="c-key">in</span> SAMPLES:
+    r = process_exception(report, value, tier)
+    record(r)
+    print(<span class="c-str">f"\n[{'ESCALATE' if r['needs_approval'] else 'AUTO'}] {r['category']} "</span>
+          <span class="c-str">f"${r['compensation_amount']:,.2f}"</span>)
+    print(<span class="c-str">"  "</span> + <span class="c-str">"\n  "</span>.join(r[<span class="c-str">"log"</span>]))
+    print(r[<span class="c-str">"drafted_message"</span>])
+
+print(<span class="c-str">"\n"</span> + generate_daily_summary())</code></pre></div>
+
+    <h3>The triage check</h3>
+    <p>Four reports, one per category, each with the outcome <em>your</em> rules should produce. If you change the thresholds or rates, update the expectations. The scenarios encode your policy, not the instructor's.</p>
+<div class="file"><div class="file-bar"><span><b>triage_check.py</b> · milestone 8 · python triage_check.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> pipeline <span class="c-key">import</span> process_exception
+
+<span class="c-dim"># label, report, value, tier, expected category, expected escalation</span>
+SCENARIOS = [
+    (<span class="c-str">"routine delay"</span>, <span class="c-str">"Package arrived 2 days after the estimated date. Just flagging it."</span>,
+     800, <span class="c-str">"standard"</span>, <span class="c-str">"delayed"</span>, <span class="c-key">False</span>),
+    (<span class="c-str">"severe damage"</span>, <span class="c-str">"Box was crushed and the monitor inside is shattered."</span>,
+     450, <span class="c-str">"standard"</span>, <span class="c-str">"damaged"</span>, <span class="c-key">True</span>),
+    (<span class="c-str">"lost, premium"</span>, <span class="c-str">"Tracking stopped a week ago and the parcel never arrived."</span>,
+     90, <span class="c-str">"premium"</span>, <span class="c-str">"lost"</span>, <span class="c-key">False</span>),
+    (<span class="c-str">"unclassifiable"</span>, <span class="c-str">"Your driver parked on my lawn."</span>,
+     60, <span class="c-str">"standard"</span>, <span class="c-str">"unknown"</span>, <span class="c-key">True</span>),
+]
+
+passed = 0
+<span class="c-key">for</span> label, report, value, tier, want_cat, want_esc <span class="c-key">in</span> SCENARIOS:
+    r = process_exception(report, value, tier)
+    ok = r[<span class="c-str">"category"</span>] == want_cat <span class="c-key">and</span> r[<span class="c-str">"needs_approval"</span>] == want_esc
+    passed += ok
+    print(<span class="c-str">f"{'PASS' if ok else 'FAIL'}  {label:15} expected {want_cat}/{'esc' if want_esc else 'auto'}"</span>
+          <span class="c-str">f"  got {r['category']}/{'esc' if r['needs_approval'] else 'auto'}"</span>
+          <span class="c-str">f"  ${r['compensation_amount']:,.2f}"</span>)
+print(<span class="c-str">f"\n{passed}/{len(SCENARIOS)} scenarios behave as designed"</span>)</code></pre></div>
+    <div class="calc"><i>expected output with the rules on this page</i>
+<b>PASS</b>  routine delay   expected delayed/auto  got delayed/auto  $40.00
+<b>PASS</b>  severe damage   expected damaged/esc  got damaged/esc  $450.00
+<b>PASS</b>  lost, premium   expected lost/auto  got lost/auto  $90.00
+<b>PASS</b>  unclassifiable  expected unknown/esc  got unknown/esc  $0.00
+
+4/4 scenarios behave as designed</div>
+    <p>A failure here has two possible causes: the model classified differently, or your rules computed differently. The printed <code>got</code> category tells you which. If the category matches but the escalation doesn't, the bug is in your code.</p>
+  </div>
+</section>
+
+<section id="calls">
+  <div class="col">
+    <p class="kicker">Judgement calls</p>
+    <h2>Six decisions people get wrong</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th style="width:22%">Decision</th><th style="width:30%">Tempting answer</th><th>What it should be</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Who computes the refund</strong></td><td>Give the model the policy and let it calculate.</td><td>Code. A model can hallucinate a number, and a payout must be identical for identical cases.</td></tr>
+          <tr><td><strong>One prompt or three</strong></td><td>One prompt: classify, price and write the email at once.</td><td>Three chains with one job each, plus code in between. Each piece can be tested, and the money step isn't in a prompt.</td></tr>
+          <tr><td><strong>Trusting the classifier</strong></td><td><code>if raw == "delayed"</code></td><td>Normalise, then check membership in an allowed set, falling back to <code>unknown</code>. “Delayed.” with a full stop would otherwise escalate every delay.</td></tr>
+          <tr><td><strong>When unsure</strong></td><td>Pick the closest category.</td><td><span class="v drop">unknown</span> → $0 → manager. Escalating is the cheap mistake.</td></tr>
+          <tr><td><strong>Calculator returns</strong></td><td><code>return f"Refund ${amt}"</code></td><td><code>{"amount": …, "reasoning": …}</code>. The threshold and the summary need a number.</td></tr>
+          <tr><td><strong>Where to start</strong></td><td>The UI, because it's the demo.</td><td>The calculators, standalone. The UI is the last layer.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Where it goes next</h3>
+    <ul>
+      <li><strong>Structured classification.</strong> Ask for a typed enum (for example with <code>llm.with_structured_output(…)</code>) instead of parsing one word. The guard stays anyway.</li>
+      <li><strong>Mixed reports.</strong> “Arrived a week late <em>and</em> the lid is cracked” is two exceptions. Extract each one, price each, and sum them. That's the extraction step Class 9 starts from.</li>
+      <li><strong>An approval queue.</strong> Escalations land in a manager view with approve and reject buttons, and only an approval releases the payment.</li>
+      <li><strong>Idempotency and timestamps.</strong> Key each exception by a hash of the report plus the shipment id, so a double-click never pays twice.</li>
+      <li><strong>LangGraph.</strong> The if/else branch is a two-node graph. Once there are retries, approvals and loops, a graph framework earns its place, which is exactly where the weekend projects begin.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="selfcheck">
+  <div class="col">
+    <p class="kicker">Self-check</p>
+    <h2>Eight questions before you build it yourself</h2>
+    <details class="qa"><summary>Which two of the four decisions does the LLM make, and why only those?</summary><div class="a"><p>Classifying the report and writing the message, because both are language tasks. The compensation and the escalation decision are money and policy, so they're deterministic code.</p></div></details>
+    <details class="qa"><summary>The classifier returns “Damaged.” What does the pipeline do?</summary><div class="a"><p><code>.strip().lower().strip(".")</code> gives <code>damaged</code>, which is in <code>CALCULATORS</code>, so it routes to <code>damage_compensation</code>. Without the normalisation it would fall through to <code>unknown</code> and escalate.</p></div></details>
+    <details class="qa"><summary>A $1,500 premium delay marked “URGENT”. Amount and outcome?</summary><div class="a"><p>5% × 2 = 10% → $150. The premium threshold is $100, so it escalates to a manager with an internal note.</p></div></details>
+    <details class="qa"><summary>Why must the calculators return dicts?</summary><div class="a"><p>The pipeline compares <code>amount</code> with a threshold, the summary adds amounts up, and the chains need <code>reasoning</code> as a separate field. A formatted string would have to be parsed back into a number.</p></div></details>
+    <details class="qa"><summary>What is the <code>|</code> in <code>prompt | llm | StrOutputParser()</code>?</summary><div class="a"><p>LangChain's expression language composes runnables into a chain. The output of each step is the input to the next: the template becomes messages, the model returns an AI message, and the parser turns that into a string.</p></div></details>
+    <details class="qa"><summary>Why does an empty report return early in <code>on_submit</code>?</summary><div class="a"><p>To avoid paying for an LLM call on nothing, and to avoid logging a meaningless escalation.</p></div></details>
+    <details class="qa"><summary>A triage-check scenario fails. How do you tell whether the model or your rules caused it?</summary><div class="a"><p>Compare the printed <code>got</code> category with the expected one. If the category is wrong, it's the classifier, so look at the prompt. If the category is right but the escalation or amount is wrong, it's your code.</p></div></details>
+    <details class="qa"><summary>Why did Shivank say Python knowledge still matters when AI writes the code?</summary><div class="a"><p>Because generated code has to be reviewed. It's often syntactically fine but logically wrong or not production-ready. He spends about 40% of his time reading AI-written code, and AI-focused roles increasingly interview in Python only.</p></div></details>
+  </div>
+</section>
+
+<footer>
+  <div class="col">
+    AI Infusion · Class 8 — live project session. It opened with Shivank on why project sessions matter, the FDE role, Python in AI hiring, and a preview of the planned weekend intensives. Shijan then presented the Shipment Exception Desk brief, milestones and solution walkthrough.<br>
+    The code on this page is a cleaned, runnable reconstruction of the walkthrough (checked against a stubbed model), not the official solution zip. The rates and thresholds are one defensible policy, and the brief asked you to design your own.
+    <div class="series"><a href="../Class-7-AI-infusion/">← Class 7 · Interview coach</a><a href="../Class-9-Ai-Infusion/">Class 9 · The refund bench →</a></div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  document.querySelectorAll('button.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre = btn.closest('.file').querySelector('pre');
+      var done = function(){ btn.textContent='COPIED'; btn.classList.add('done');
+        setTimeout(function(){ btn.textContent='COPY'; btn.classList.remove('done'); }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(pre.innerText).then(done, function(){});
+    });
+  });
+
+  // ---- port of tools.py / pipeline.py thresholds / session.py ----
+  var DELAY_BASE_RATE = 0.05, URGENT_MULTIPLIER = 2;
+  var URGENT_SIGNALS = ["urgent","critical","time-sensitive","time sensitive","asap","medical"];
+  var SEVERE = ["destroyed","shattered","crushed","unusable"];
+  var MINOR = ["scratch","dent","scuff","torn packaging"];
+  var PREMIUM_T = 100, STANDARD_T = 200;
+  function money(x){ return '$'+Number(x).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function pct(r){ return Math.round(r*100)+'%'; }
+  function r2(x){ return Math.round(x*100)/100; }
+  function has(text, list){ return list.some(function(k){ return text.indexOf(k)>=0; }); }
+  function delay(v, t){ t=t.toLowerCase(); var u=has(t,URGENT_SIGNALS), rate=DELAY_BASE_RATE*(u?URGENT_MULTIPLIER:1);
+    return {amount:r2(v*rate), reasoning:'Delay compensation at '+pct(rate)+' of the '+money(v)+' shipment value'+(u?' (urgent signal detected, rate doubled)':'')+'.'}; }
+  function damage(v, t){ t=t.toLowerCase(); var rate, tier;
+    if(has(t,SEVERE)){rate=1.0;tier='severe';} else if(has(t,MINOR)){rate=0.25;tier='minor';} else {rate=0.5;tier='unclear severity';}
+    return {amount:r2(v*rate), reasoning:'Damage compensation ('+tier+') at '+pct(rate)+' of the '+money(v)+' shipment value.'}; }
+  function lost(v){ return {amount:r2(v), reasoning:'Lost shipment: full value of '+money(v)+' refunded.'}; }
+  var CALC = {delayed:delay, damaged:damage, lost:lost};
+  // stand-in for classify_chain — NOT what the real system does
+  function fakeClassify(t){ t=t.toLowerCase();
+    if(has(t,["never arrived","never showed","lost","tracking stopped","not delivered","didn't arrive","did not arrive"])) return 'lost';
+    if(has(t,["damag","broken","crushed","shattered","dent","scratch","cracked","torn","leak","unusable","destroyed"])) return 'damaged';
+    if(has(t,["late","delay","after the estimated","overdue"])) return 'delayed';
+    return 'unknown'; }
+
+  var SAMPLES = [
+    ["Routine delay","Package arrived 2 days later than the estimated delivery date and the customer just flagged the delay for the record.",800,"standard"],
+    ["Urgent premium","URGENT: medical kit arrived three days late, the patient had to wait.",1500,"premium"],
+    ["Shattered","The box was crushed and the glass table inside is shattered.",450,"standard"],
+    ["Scratch","Small scratch on the lid of the speaker, works fine otherwise.",300,"premium"],
+    ["Lost","Tracking stopped a week ago and the parcel never arrived.",90,"premium"],
+    ["Unclassifiable","Your driver parked on my lawn and was rude.",60,"standard"]
+  ];
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  SAMPLES.forEach(function(s){ var b=document.createElement('button'); b.className='btn'; b.type='button'; b.textContent=s[0];
+    b.addEventListener('click',function(){ $('d-report').value=s[1]; $('d-value').value=s[2]; $('d-tier').value=s[3]; $('d-cat').value='auto'; });
+    $('d-samples').appendChild(b); });
+
+  var daily = [];
+  function process(report, value, tier, forced){
+    var log=[], raw = forced==='auto' ? fakeClassify(report) : forced;
+    var category = CALC[raw] ? raw : 'unknown';
+    log.push("classified as '"+category+"'"+(forced==='auto'?' (stand-in classifier)':' (forced)'));
+    var comp = category==='unknown' ? {amount:0, reasoning:'Could not confidently classify this report.'} : CALC[category](value, report);
+    log.push('compensation '+money(comp.amount)+': '+comp.reasoning);
+    var threshold = tier==='premium' ? PREMIUM_T : STANDARD_T;
+    var needs = category==='unknown' || comp.amount > threshold;
+    log.push(tier+' threshold $'+threshold+': '+(needs?'ESCALATE':'auto-resolve'));
+    var msg = needs
+      ? 'Internal note (stand-in for escalate_chain): customer reports “'+report.slice(0,90)+(report.length>90?'…':'')+'”. Category: '+category+'. Proposed compensation '+money(comp.amount)+'. '+comp.reasoning+' Please approve.'
+      : 'Email (stand-in for draft_email_chain): Hi, we\'re sorry about the trouble with your shipment. We\'ve reviewed your report and are issuing '+money(comp.amount)+' in compensation. '+comp.reasoning+' Thank you for your patience.';
+    log.push(needs?'drafted internal escalation note':'drafted customer email');
+    return {report_text:report, shipment_value:value, customer_tier:tier, category:category, compensation_amount:comp.amount,
+            compensation_reasoning:comp.reasoning, needs_approval:needs, drafted_message:msg, log:log, threshold:threshold};
+  }
+  function renderLog(){
+    $('d-count').textContent = daily.length+' processed today';
+    if(!daily.length){ $('d-log').innerHTML=''; return; }
+    $('d-log').innerHTML = '<h5 style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px">Triage log</h5><div class="tablewrap"><table><thead><tr><th>#</th><th>Status</th><th>Category</th><th>Tier</th><th class="num">Amount</th></tr></thead><tbody>'+
+      daily.map(function(s,i){ return '<tr><td class="num">'+(i+1)+'</td><td>'+(s.needs_approval?'<span class="v rej">escalated</span>':'<span class="v up">auto-resolved</span>')+'</td><td>'+s.category+'</td><td>'+s.customer_tier+'</td><td class="num">'+money(s.compensation_amount)+'</td></tr>'; }).join('')+
+      '</tbody></table></div>';
+  }
+  function summary(){
+    if(!daily.length) return 'No exceptions processed yet today.';
+    var total = daily.reduce(function(a,s){return a+s.compensation_amount;},0);
+    var esc_ = daily.filter(function(s){return s.needs_approval;}).length;
+    var by = {}; daily.forEach(function(s){ by[s.category]=(by[s.category]||0)+s.compensation_amount; });
+    var costliest = Object.keys(by).reduce(function(a,b){ return by[b]>by[a]?b:a; });
+    var lines = ['Daily triage summary - '+daily.length+' exceptions processed',''];
+    daily.forEach(function(s){ lines.push('- '+s.category+' - '+money(s.compensation_amount)+' - '+(s.needs_approval?'ESCALATED':'auto-resolved')); });
+    lines.push('', 'Total compensation: '+money(total), 'Escalation rate: '+Math.round(esc_/daily.length*100)+'%', 'Costliest category: '+costliest+' ('+money(by[costliest])+')');
+    return lines.join('\n');
+  }
+  $('d-go').addEventListener('click',function(){
+    var report=$('d-report').value.trim(), value=parseFloat($('d-value').value);
+    if(!report){ $('d-out').innerHTML='<p class="note-sm">Please paste an exception report first. (No LLM call is made.)</p>'; return; }
+    if(!(value>=0)){ $('d-out').innerHTML='<p class="note-sm">Enter a shipment value.</p>'; return; }
+    var r = process(report, value, $('d-tier').value, $('d-cat').value);
+    daily.push(r);
+    var col = r.needs_approval ? 'var(--rej)' : 'var(--up)';
+    $('d-out').innerHTML = '<div class="toolout">'+
+      '<div><h5>Outcome</h5><span class="big2" style="color:'+col+'">'+(r.needs_approval?'Escalated':'Auto-resolved')+'</span></div>'+
+      '<div><h5>Category</h5><span class="big2">'+r.category+'</span></div>'+
+      '<div><h5>Compensation</h5><span class="big2">'+money(r.compensation_amount)+'</span><div class="payload">'+esc(r.compensation_reasoning)+'</div></div>'+
+      '<div><h5>Threshold</h5><span class="big2">$'+r.threshold+'</span><div class="payload">'+r.customer_tier+' tier</div></div>'+
+      '</div><div class="report" style="margin-bottom:12px">'+esc(r.drafted_message)+'</div><div class="report">'+esc(r.log.map(function(l,i){return (i+1)+'. '+l;}).join('\n'))+'</div>';
+    renderLog(); $('d-summary').innerHTML='';
+  });
+  $('d-sum').addEventListener('click',function(){ $('d-summary').innerHTML='<div class="report">'+esc(summary())+'</div>'; });
+  $('d-reset').addEventListener('click',function(){ daily=[]; $('d-out').innerHTML=''; $('d-summary').innerHTML=''; renderLog(); });
+  renderLog();
+})();
+</script>
+</body>
+</html>
