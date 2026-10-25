@@ -1,0 +1,1327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 00 · AWS Revision</title>
+<meta name="description" content="Part 00 of the AI-Infusion-AWS Bootcamp: a revision of LangChain foundations before Lesson 1. Keys in .env, PromptTemplate | chat model chains on OpenAI and Ollama, the AIMessage response object, then agents with a placeholder tool, Tavily web search, the ready-made TavilySearch tool and structured output.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* ---------- Tokens ---------- */
+:root{
+  --paper:#F2F4F8; --card:#FFFFFF; --card-2:#F8F9FC;
+  --ink:#19203F; --ink-2:#3A4266; --muted:#586082; --rule:#D7DCE8; --rule-2:#E6E9F1;
+  --code-bg:#1B2136; --code-ink:#E4E8F6; --code-mute:#8E97B8;
+  --brain:#B07600; --brain-ink:#6E4A00; --brain-t:#FFF1CC;
+  --tool:#0B7F73;  --tool-ink:#075A51;  --tool-t:#D6F2EE;
+  --data:#2958C4;  --data-ink:#1C3F8F;  --data-t:#E1E9FC;
+  --proto:#6C43CC; --proto-ink:#4B2B97; --proto-t:#ECE5FC;
+  --risk:#C4344F;  --risk-ink:#8E1F35;  --risk-t:#FBE3E8;
+  --user:#4A5170;  --user-t:#E8EAF1;
+  --ok:#0B7F73; --bad:#C4344F;
+  --focus:#2958C4;
+  --font-body:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-head:"Bricolage Grotesque",var(--font-body);
+  --font-mono:"Atkinson Hyperlegible Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121830; --card:#1A2142; --card-2:#1E2649;
+    --ink:#E9ECF7; --ink-2:#C5CBE3; --muted:#A1A8C6; --rule:#2F3863; --rule-2:#283058;
+    --code-bg:#0E1328; --code-ink:#E4E8F6; --code-mute:#8E97B8;
+    --brain:#F0B43A; --brain-ink:#F6CD74; --brain-t:#3A2E12;
+    --tool:#2EC2AE;  --tool-ink:#7FE0D2;  --tool-t:#0F3530;
+    --data:#7099FF;  --data-ink:#A9C1FF;  --data-t:#18284F;
+    --proto:#A98BFF; --proto-ink:#CDBBFF; --proto-t:#2A2150;
+    --risk:#FF6E86;  --risk-ink:#FFA3B3;  --risk-t:#3F1B27;
+    --user:#B3B9D6;  --user-t:#262E55;
+    --focus:#8FB0FF;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121830; --card:#1A2142; --card-2:#1E2649;
+  --ink:#E9ECF7; --ink-2:#C5CBE3; --muted:#A1A8C6; --rule:#2F3863; --rule-2:#283058;
+  --code-bg:#0E1328; --code-ink:#E4E8F6; --code-mute:#8E97B8;
+  --brain:#F0B43A; --brain-ink:#F6CD74; --brain-t:#3A2E12;
+  --tool:#2EC2AE;  --tool-ink:#7FE0D2;  --tool-t:#0F3530;
+  --data:#7099FF;  --data-ink:#A9C1FF;  --data-t:#18284F;
+  --proto:#A98BFF; --proto-ink:#CDBBFF; --proto-t:#2A2150;
+  --risk:#FF6E86;  --risk-ink:#FFA3B3;  --risk-t:#3F1B27;
+  --user:#B3B9D6;  --user-t:#262E55;
+  --focus:#8FB0FF;
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:1.125rem;line-height:1.68;overflow-x:hidden}
+img,svg{max-width:100%}
+a{color:var(--data-ink);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
+code,kbd,pre{font-family:var(--font-mono)}
+p code,li code,td code,figcaption code,.callout code{overflow-wrap:anywhere;font-size:.88em;background:var(--rule-2);padding:.08em .38em;border-radius:5px;color:var(--ink)}
+h1,h2,h3,h4{font-family:var(--font-head);line-height:1.12;color:var(--ink);margin:0}
+h2{font-weight:800;font-size:clamp(2rem,3.6vw,2.8rem);letter-spacing:-.02em}
+h3{font-weight:800;font-size:clamp(1.45rem,2.4vw,1.8rem);letter-spacing:-.01em;margin-top:3.2rem}
+h4{font-weight:600;font-size:1.22rem;margin-top:2rem}
+p{margin:1rem 0}
+ul,ol{padding-left:1.4rem}
+li{margin:.4rem 0}
+strong{font-weight:700}
+hr{border:0;border-top:1px solid var(--rule);margin:3rem 0}
+
+/* ---------- Layout ---------- */
+.shell{display:grid;grid-template-columns:280px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;overflow:auto;border-right:1px solid var(--rule);background:var(--card);padding:28px 22px 40px}
+.main{min-width:0}
+.wrap{max-width:72rem;margin:0 auto;padding:0 40px}
+.prose{max-width:46rem}
+.sec{padding:72px 0 40px;border-top:1px solid var(--rule)}
+.sec-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+.sec-num{font-family:var(--font-head);font-weight:800;font-size:clamp(2rem,3.6vw,2.8rem);color:var(--muted);letter-spacing:-.02em}
+.lede{font-size:1.25rem;color:var(--ink-2);max-width:44rem}
+@media (max-width:1100px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:min(320px,86vw);z-index:60;transform:translateX(-102%);transition:transform .25s ease;box-shadow:0 0 0 100vmax rgba(10,14,30,0)}
+  .side.open{transform:none;box-shadow:0 0 0 100vmax rgba(10,14,30,.45)}
+  .wrap{padding:0 24px}
+}
+@media (max-width:640px){.wrap{padding:0 16px} body{font-size:1.06rem}.sec{padding:56px 0 32px}}
+
+/* ---------- Top bar ---------- */
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+.topbar .wrap{display:flex;align-items:center;gap:14px;height:60px}
+.topbar .where{font-weight:600;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.progress{position:absolute;left:0;bottom:-1px;height:3px;background:var(--tool);width:0}
+.icon-btn{border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:10px;height:40px;min-width:40px;padding:0 12px;font:600 .95rem var(--font-body);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.icon-btn:hover{border-color:var(--ink-2)}
+.menu-btn{display:none}
+@media (max-width:1100px){.menu-btn{display:inline-flex}}
+
+/* ---------- Sidebar ---------- */
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:22px}
+.brand-mark{width:42px;height:42px;flex:none}
+.brand b{display:block;font-family:var(--font-head);font-size:1.05rem;line-height:1.15}
+.brand span{font-size:.86rem;color:var(--muted)}
+.toc{list-style:none;padding:0;margin:0;counter-reset:none}
+.toc li{margin:0}
+.toc a{display:grid;grid-template-columns:2.9rem 1fr;gap:4px;padding:8px 10px;border-radius:10px;color:var(--ink-2);text-decoration:none;font-size:.97rem;line-height:1.3}
+.toc a .n{color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.toc a:hover{background:var(--card-2);color:var(--ink)}
+.toc a.active{background:var(--data-t);color:var(--ink)}
+.toc a.active .n{color:var(--data-ink)}
+.toc a.done .n{color:var(--tool)}
+.toc .sub a{grid-template-columns:2.9rem 1fr;padding:5px 10px 5px 10px;font-size:.9rem;color:var(--muted)}
+.toc .sub a .n{opacity:0}
+.side-foot{margin-top:24px;font-size:.88rem;color:var(--muted);border-top:1px solid var(--rule);padding-top:16px}
+.legend-mini{display:grid;gap:6px;margin-top:10px}
+.legend-mini span{display:flex;align-items:center;gap:8px}
+.sw{width:14px;height:14px;border-radius:4px;border:2px solid;flex:none}
+
+/* ---------- Hero ---------- */
+.hero{padding:64px 0 36px}
+.hero .brandline{font-weight:700;color:var(--muted);font-size:1rem;margin-bottom:18px}
+.hero h1{font-weight:800;font-size:clamp(3rem,7.2vw,5.6rem);letter-spacing:-.035em;line-height:.98}
+.hero .sub{font-size:clamp(1.15rem,1.8vw,1.4rem);color:var(--ink-2);max-width:46rem;margin-top:22px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.pill{display:inline-flex;flex-wrap:wrap;max-width:100%;align-items:center;gap:4px 8px;border:1px solid var(--rule);background:var(--card);border-radius:999px;padding:6px 14px;font-size:.95rem;color:var(--ink-2)}
+.pill code{background:none;padding:0}
+
+/* ---------- Figures & SVG ---------- */
+.fig{margin:2rem 0 2.4rem;background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:22px 22px 14px}
+.fig .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.fig svg{display:block;width:100%;height:auto;min-width:640px;margin:0 auto}
+.fig figcaption{font-size:1rem;color:var(--muted);padding:12px 4px 4px;border-top:1px solid var(--rule-2);margin-top:12px}
+.fig figcaption b{color:var(--ink)}
+.scroll-hint{display:none;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+@media (max-width:700px){.scroll-hint{display:block}}
+svg text{font-family:var(--font-body);fill:var(--ink)}
+svg .t{font-size:19px;font-weight:700}
+svg .tl{font-size:24px;font-weight:700;font-family:var(--font-head)}
+svg .ts{font-size:16px;fill:var(--muted);font-weight:400}
+svg .tm{font-size:16px;fill:var(--ink-2)}
+svg .tx{font-size:14px;fill:var(--muted)}
+svg .code{font-family:var(--font-mono);font-size:15px}
+svg .lab{font-size:15px;font-weight:700;fill:var(--ink-2)}
+svg .bx{fill:var(--card);stroke:var(--rule);stroke-width:2}
+svg .bx2{fill:var(--card-2);stroke:var(--rule);stroke-width:2}
+svg .brain{fill:var(--brain-t);stroke:var(--brain);stroke-width:2.5}
+svg .tool{fill:var(--tool-t);stroke:var(--tool);stroke-width:2.5}
+svg .data{fill:var(--data-t);stroke:var(--data);stroke-width:2.5}
+svg .proto{fill:var(--proto-t);stroke:var(--proto);stroke-width:2.5}
+svg .risk{fill:var(--risk-t);stroke:var(--risk);stroke-width:2.5}
+svg .usr{fill:var(--user-t);stroke:var(--user);stroke-width:2.5}
+svg .ln{stroke:var(--ink-2);stroke-width:2.5;fill:none}
+svg .ln-brain{stroke:var(--brain);stroke-width:3;fill:none}
+svg .ln-tool{stroke:var(--tool);stroke-width:3;fill:none}
+svg .ln-data{stroke:var(--data);stroke-width:3;fill:none}
+svg .ln-proto{stroke:var(--proto);stroke-width:3;fill:none}
+svg .ln-risk{stroke:var(--risk);stroke-width:3;fill:none}
+svg .dash{stroke-dasharray:7 7}
+svg .fill-brain{fill:var(--brain)} svg .fill-tool{fill:var(--tool)} svg .fill-data{fill:var(--data)} svg .fill-proto{fill:var(--proto)} svg .fill-risk{fill:var(--risk)} svg .fill-ink{fill:var(--ink-2)} svg .fill-user{fill:var(--user)} svg .fill-muted{fill:var(--muted)}
+svg .ink-brain{fill:var(--brain-ink)} svg .ink-tool{fill:var(--tool-ink)} svg .ink-data{fill:var(--data-ink)} svg .ink-proto{fill:var(--proto-ink)} svg .ink-risk{fill:var(--risk-ink)}
+svg .ah{fill:var(--ink-2)} svg .ah-brain{fill:var(--brain)} svg .ah-tool{fill:var(--tool)} svg .ah-data{fill:var(--data)} svg .ah-proto{fill:var(--proto)} svg .ah-risk{fill:var(--risk)}
+svg .zone{fill:none;stroke:var(--rule);stroke-width:2;stroke-dasharray:8 6}
+svg .agent{fill:var(--ink);stroke:var(--ink);stroke-width:2}
+svg text.on-agent{fill:var(--paper)}
+svg .chev{outline:none}
+svg .chev:focus-visible path{stroke:var(--focus);stroke-width:5}
+svg .chev:hover path{filter:brightness(1.03)}
+svg .paper{fill:var(--card)}
+/* interactive highlight inside SVGs */
+svg [data-step]{transition:opacity .25s ease}
+svg.dimmable.running [data-step]{opacity:.22}
+svg.dimmable.running [data-step].on{opacity:1}
+svg .flow.on{stroke-dasharray:10 8;animation:flow 0.9s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-36}}
+
+/* ---------- Callouts ---------- */
+.callout{border:1px solid var(--rule);background:var(--card);border-radius:14px;padding:18px 22px;margin:1.6rem 0;max-width:46rem}
+.callout h5{margin:0 0 6px;font:700 1.02rem var(--font-body);display:flex;align-items:center;gap:10px;color:var(--ink)}
+.callout p{margin:.5rem 0}
+.callout p:last-child{margin-bottom:0}
+.callout .ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:1rem}
+.callout.analogy{background:var(--brain-t);border-color:color-mix(in srgb,var(--brain) 40%,transparent)}
+.callout.analogy .ico{background:var(--brain);color:#fff}
+.callout.word{background:var(--data-t);border-color:color-mix(in srgb,var(--data) 35%,transparent)}
+.callout.word .ico{background:var(--data);color:#fff}
+.callout.note .ico{background:var(--user);color:var(--card)}
+.callout.warn{background:var(--risk-t);border-color:color-mix(in srgb,var(--risk) 35%,transparent)}
+.callout.warn .ico{background:var(--risk);color:#fff}
+.callout.code-tie{background:var(--tool-t);border-color:color-mix(in srgb,var(--tool) 35%,transparent)}
+.callout.code-tie .ico{background:var(--tool);color:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:1.6rem 0}
+.two .callout{margin:0}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+
+/* ---------- Step cards (real sequences only) ---------- */
+.steps{list-style:none;padding:0;margin:1.6rem 0;display:grid;gap:14px;max-width:52rem}
+.steps>li{display:grid;grid-template-columns:52px 1fr;gap:16px;background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:16px 18px;margin:0}
+.steps .k{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font:800 1.2rem var(--font-head);background:var(--user-t);color:var(--ink)}
+.steps h4{margin:2px 0 4px;font-size:1.16rem}
+.steps p{margin:.35rem 0}
+.steps .k.c-data{background:var(--data-t);color:var(--data-ink)} .steps .k.c-tool{background:var(--tool-t);color:var(--tool-ink)} .steps .k.c-brain{background:var(--brain-t);color:var(--brain-ink)} .steps .k.c-proto{background:var(--proto-t);color:var(--proto-ink)} .steps .k.c-risk{background:var(--risk-t);color:var(--risk-ink)}
+
+/* ---------- Tables ---------- */
+.tbl-wrap{overflow-x:auto;margin:1.6rem 0;border:1px solid var(--rule);border-radius:14px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:1rem;min-width:560px}
+th,td{text-align:left;vertical-align:top;padding:12px 16px;border-bottom:1px solid var(--rule-2)}
+thead th{background:var(--card-2);font-weight:700;color:var(--ink)}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700}
+
+/* ---------- Code ---------- */
+.code{position:relative;margin:1.4rem 0;background:var(--code-bg);color:var(--code-ink);border-radius:14px;overflow:hidden;max-width:56rem}
+.code .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08);font:600 .88rem var(--font-mono);color:var(--code-mute)}
+.code .bar .file{color:#C9D2F2}
+.code pre{margin:0;padding:16px 18px;overflow-x:auto;font-size:.95rem;line-height:1.6;tab-size:4}
+.copy{background:transparent;border:1px solid rgba(255,255,255,.2);color:#DDE3F7;border-radius:8px;padding:3px 10px;font:600 .82rem var(--font-body);cursor:pointer}
+.copy:hover{border-color:#fff}
+.tok-k{color:#FFB86B}.tok-s{color:#9BE29B}.tok-c{color:#8E97B8;font-style:italic}.tok-d{color:#F78FB3}.tok-n{color:#FFD580}.tok-f{color:#82B1FF}.tok-b{color:#7FE0D2}
+.code.term pre{color:#D7DEF5}
+.term .ok{color:#7FE0A0}.term .dim{color:#8E97B8}.term .pr{color:#82B1FF}
+.annot{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start;margin:1.6rem 0}
+.annot .code{margin:0}
+.annot ol{margin:0;padding-left:0;list-style:none;display:grid;gap:10px}
+.annot ol li{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:10px 14px;margin:0;font-size:1rem}
+.annot ol li b{font-family:var(--font-mono);font-size:.92rem}
+@media (max-width:980px){.annot{grid-template-columns:1fr}}
+
+/* ---------- Glossary terms ---------- */
+.kw{border:0;background:none;padding:0;font:inherit;color:inherit;cursor:help;border-bottom:2px dotted var(--data);line-height:inherit}
+.kw:hover,.kw:focus-visible{background:var(--data-t);border-radius:3px}
+.tip{position:absolute;z-index:80;max-width:340px;background:var(--ink);color:var(--paper);padding:12px 14px;border-radius:12px;font-size:.95rem;line-height:1.45;box-shadow:0 10px 30px rgba(0,0,0,.25);pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
+.tip.show{opacity:1;transform:none}
+.tip b{display:block;margin-bottom:3px;font-family:var(--font-head);font-size:1.05rem}
+
+/* ---------- Simulations ---------- */
+.sim{margin:2rem 0 2.6rem;border:2px solid var(--rule);border-radius:18px;background:var(--card);overflow:hidden}
+.sim-head{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--card-2);border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.sim-head h4{margin:0;font-size:1.15rem}
+.sim-head .tag{font-size:.85rem;font-weight:700;color:var(--tool-ink);background:var(--tool-t);border-radius:999px;padding:3px 10px}
+.sim-body{padding:20px}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.btn{border:1.5px solid var(--ink-2);background:var(--ink);color:var(--paper);border-radius:10px;padding:8px 16px;font:700 .98rem var(--font-body);cursor:pointer}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+.btn.ghost:hover{border-color:var(--ink-2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chip{border:1.5px solid var(--rule);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 14px;font:600 .95rem var(--font-body);cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--data-t);border-color:var(--data);color:var(--ink)}
+.out{background:var(--card-2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;font-size:1rem}
+.mono{font-family:var(--font-mono);font-size:.92rem}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:420px;overflow:auto}
+.log li{margin:0;border-left:4px solid var(--rule);padding:8px 12px;background:var(--card-2);border-radius:0 10px 10px 0;font-size:.98rem}
+.log li.plan{border-color:var(--brain)} .log li.act{border-color:var(--tool)} .log li.obs{border-color:var(--data)} .log li.warn{border-color:var(--risk)} .log li.done{border-color:var(--ok);font-weight:700} .log li.msg{border-color:var(--proto)}
+.log li .who{font-weight:700;margin-right:6px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-2>*,.two>*,.cards-3>*{min-width:0}
+@media (max-width:860px){.grid-2{grid-template-columns:1fr}}
+.meter{height:10px;border-radius:99px;background:var(--rule-2);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--data);border-radius:99px;transition:width .3s}
+input[type=range]{width:100%;accent-color:var(--data)}
+.field{display:grid;gap:6px;font-weight:700;font-size:.98rem}
+.field .val{font-family:var(--font-mono);color:var(--data-ink)}
+.theme-ico{width:18px;height:18px}
+.field input[type=text],textarea{font:inherit;font-weight:400;border:1.5px solid var(--rule);border-radius:10px;padding:9px 12px;background:var(--card);color:var(--ink);width:100%}
+.statusrow{display:flex;gap:8px;flex-wrap:wrap}
+.status{border-radius:999px;padding:4px 12px;font-weight:700;font-size:.88rem;background:var(--rule-2);color:var(--muted)}
+.status.on{background:var(--tool);color:#fff}
+.mini-label{font-size:.9rem;font-weight:700;color:var(--muted);margin:0 0 6px}
+
+/* chunk & rag sim */
+.chunks{display:flex;flex-wrap:wrap;gap:4px;line-height:1.9}
+.chunks span{padding:2px 6px;border-radius:6px}
+.doc-list{display:grid;gap:8px}
+.doc{display:grid;grid-template-columns:44px 1fr 110px;gap:10px;align-items:center;border:1.5px solid var(--rule);border-radius:12px;padding:8px 12px;background:var(--card);font-size:.98rem}
+.doc.top{border-color:var(--data);background:var(--data-t)}
+.doc .id{font-weight:800;color:var(--muted);font-family:var(--font-mono)}
+.doc .sc{font-family:var(--font-mono);font-size:.85rem;color:var(--muted);display:grid;gap:4px}
+@media (max-width:640px){.doc{grid-template-columns:36px 1fr}.doc .sc{grid-column:2}}
+
+/* stack picker / misc */
+.cards-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:1.6rem 0}
+@media (max-width:900px){.cards-3{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:16px 18px}
+.card h4{margin:0 0 6px}
+.json{white-space:pre;font-family:var(--font-mono);font-size:.86rem;line-height:1.5;background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:12px 14px;overflow:auto;border:2px solid transparent;transition:border-color .2s}
+.json.hit{border-color:var(--tool)}
+.json.scan{border-color:var(--brain)}
+
+/* quiz */
+.quiz{display:grid;gap:18px;max-width:52rem}
+.q{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:16px 18px}
+.q p{margin:.2rem 0 .8rem;font-weight:700}
+.q .opts{display:grid;gap:8px}
+.q button{text-align:left;border:1.5px solid var(--rule);background:var(--card-2);color:var(--ink);border-radius:10px;padding:9px 12px;font:inherit;font-size:1rem;cursor:pointer}
+.q button:hover{border-color:var(--ink-2)}
+.q button.right{border-color:var(--ok);background:var(--tool-t)}
+.q button.wrong{border-color:var(--bad);background:var(--risk-t)}
+.q .why{margin-top:10px;font-size:1rem;color:var(--ink-2);display:none}
+.q.answered .why{display:block}
+
+/* glossary */
+.gloss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px;margin:1.6rem 0}
+.gloss div{border-bottom:1px solid var(--rule-2);padding:8px 0}
+.gloss b{font-family:var(--font-head);font-size:1.08rem}
+.gloss p{margin:.2rem 0 0;font-size:1rem;color:var(--ink-2)}
+@media (max-width:760px){.gloss{grid-template-columns:1fr}}
+
+footer{padding:48px 0 80px;color:var(--muted);font-size:.95rem;border-top:1px solid var(--rule)}
+
+/* print */
+@media print{
+  .side,.topbar,.sim .ctrls{display:none!important}
+  .shell{display:block}
+  .fig,.sim,.callout,.steps>li{break-inside:avoid}
+  body{background:#fff}
+}
+
+/* ---------- Part 00 additions ---------- */
+.fig.small svg{min-width:560px}
+.map-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:1.6rem 0}
+@media (max-width:860px){.map-row{grid-template-columns:1fr}}
+.swap-out{margin-top:12px}
+.swap-out .code{margin:.6rem 0 0}
+.trail li .idx{font-family:var(--font-mono);font-weight:700;color:var(--muted);margin-right:6px}
+.code .bar .file{min-width:0;overflow-wrap:anywhere}
+.code .bar .copy{flex:none}
+</style>
+</head>
+<body>
+<!-- Shared arrowheads for every diagram on the page -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ah-brain" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-brain" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ah-tool" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-tool" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ah-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-data" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ah-proto" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-proto" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ah-risk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-risk" d="M0,0 L10,5 L0,10 z"/></marker>
+  </defs>
+</svg>
+<div class="shell">
+<aside class="side" id="side" aria-label="Section contents">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+      <rect x="1" y="1" width="46" height="46" rx="12" fill="var(--ink)"/>
+      <path d="M33 15a12 12 0 1 0 3.2 12.6" fill="none" stroke="var(--brain)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M30.5 10.5 L35 15.5 L28.6 17.4" fill="none" stroke="var(--brain)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="24" cy="24" r="4.5" fill="var(--tool)"/>
+    </svg>
+    <div><b>Future with Shivank</b><span>Part 00 · Revision</span></div>
+  </div>
+  <nav>
+  <ol class="toc" id="toc">
+    <li><a href="#overview"><span class="n">0.0</span><span>The revision at a glance</span></a></li>
+    <li class="sub"><a href="#setup"><span class="n">·</span><span>Set up once</span></a></li>
+    <li><a href="#env"><span class="n">0.1</span><span>Keep keys out of your code</span></a></li>
+    <li><a href="#chain"><span class="n">0.2</span><span>Your first chain</span></a></li>
+    <li><a href="#ollama"><span class="n">0.3</span><span>Same chain, local model</span></a></li>
+    <li><a href="#response"><span class="n">0.4</span><span>What comes back: AIMessage</span></a></li>
+    <li class="sub"><a href="#langsmith"><span class="n">·</span><span>Tracing with LangSmith</span></a></li>
+    <li><a href="#agent"><span class="n">0.5</span><span>From chain to agent</span></a></li>
+    <li><a href="#trace"><span class="n">0.6</span><span>Reading an agent run</span></a></li>
+    <li><a href="#tavily-sdk"><span class="n">0.7</span><span>Real search: your own tool</span></a></li>
+    <li><a href="#tavily-builtin"><span class="n">0.8</span><span>The ready-made TavilySearch</span></a></li>
+    <li><a href="#structured"><span class="n">0.9</span><span>Structured output</span></a></li>
+    <li><a href="#trouble"><span class="n">0.10</span><span>When things go wrong</span></a></li>
+    <li><a href="#recap"><span class="n">0.11</span><span>Recap and self-check</span></a></li>
+    <li><a href="#glossary"><span class="n">A–Z</span><span>Glossary</span></a></li>
+  </ol>
+  </nav>
+  <div class="side-foot">
+    <div>Colour code used in every diagram</div>
+    <div class="legend-mini">
+      <span><i class="sw" style="background:var(--brain-t);border-color:var(--brain)"></i>LLM, the brain</span>
+      <span><i class="sw" style="background:var(--tool-t);border-color:var(--tool)"></i>Tools and actions</span>
+      <span><i class="sw" style="background:var(--data-t);border-color:var(--data)"></i>Prompts, data, results</span>
+      <span><i class="sw" style="background:var(--user-t);border-color:var(--user)"></i>You and your setup</span>
+      <span><i class="sw" style="background:var(--ink);border-color:var(--ink)"></i>The agent itself</span>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+<header class="topbar">
+  <div class="wrap">
+    <button class="icon-btn menu-btn" id="menuBtn" aria-controls="side" aria-expanded="false">☰ Contents</button>
+    <div class="where" id="where">Part 00: AWS Revision</div>
+    <button class="icon-btn" id="themeBtn" aria-label="Switch between light and dark theme"><svg class="theme-ico" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2a8 8 0 0 1 0 16z" fill="currentColor"/></svg>Theme</button>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+<!-- awsq:top -->
+<style>
+.awsq{max-width:72rem;margin:18px auto;padding:0 40px;font-family:var(--font-body)}
+.awsq-box{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:12px 14px}
+.awsq-cap{display:block;margin:0 0 9px;font:600 .7rem/1.4 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.awsq-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+.awsq-l{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;padding:9px 13px;border-radius:9px;border:1px solid var(--rule);color:var(--ink);text-decoration:none;font-size:.95rem;line-height:1.3}
+a.awsq-l:hover{border-color:var(--tool);text-decoration:none}
+.awsq-next{text-align:right;align-items:flex-end}
+.awsq-d{font:600 .7rem/1.3 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--tool)}
+.awsq-t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+span.awsq-l{border-style:dashed;color:var(--muted)} span.awsq-l .awsq-d,span.awsq-l .awsq-t{color:var(--muted);font-weight:400}
+a.awsq-home{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 12px;border-radius:9px;text-decoration:none;color:var(--ink);text-align:center;font-size:.85rem;line-height:1.3}
+a.awsq-home:hover{background:var(--card-2);text-decoration:none}
+.awsq-home b{font:600 .7rem/1.3 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.awsq-steps{display:flex;gap:5px;margin:11px 0 0;padding:0;list-style:none}
+.awsq-steps li{flex:1 1 0;margin:0}
+.awsq-steps a{display:block;text-align:center;padding:4px 0;border-radius:5px;font:600 .75rem/1.4 var(--font-mono);text-decoration:none;background:var(--card-2);border:1px solid var(--rule);color:var(--muted)}
+.awsq-steps a.done{background:var(--tool-t);color:var(--tool-ink);border-color:transparent}
+.awsq-steps a.cur{background:var(--brain);color:#fff;border-color:transparent}
+.awsq-steps a:hover{border-color:var(--tool);text-decoration:none}
+.awsq a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+@media (max-width:1100px){.awsq{padding:0 24px}}
+@media (max-width:640px){.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}}
+.awsq-bottom{padding:0 !important;margin:48px 0 8px;max-width:none}
+@media print{.awsq{display:none}}
+</style>
+<nav class="awsq awsq-top" aria-label="Bootcamp navigation (top)"><div class="awsq-box"><span class="awsq-cap">AI-Infusion-AWS Bootcamp · Part 00 · AWS Revision</span><div class="awsq-row"><span class="awsq-l awsq-prev"><span class="awsq-d">← Previous</span><span class="awsq-t">You're at the start</span></span><a class="awsq-home" href="../../#aws-bootcamp"><b>AWS Bootcamp</b>all lessons</a><a class="awsq-l awsq-next" href="../your-first-agent/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 1 · Your first AI agent</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="cur" href="../part-00-AWS-Revision/" title="Part 00 · AWS Revision" aria-current="page">0</a></li><li><a class="" href="../your-first-agent/" title="Lesson 1 · Your first AI agent">1</a></li><li><a class="" href="../giving-agents-tools/" title="Lesson 2 · Giving agents tools">2</a></li><li><a class="" href="../Agents-that-remember/" title="Lesson 3 · Agents that remember">3</a></li><li><a class="" href="../How-agents-talk/" title="Lesson 4 · How agents talk">4</a></li></ol></div></nav>
+<!-- /awsq:top -->
+
+<div class="wrap">
+<section class="hero" aria-labelledby="title">
+  <div class="brandline">AI-Infusion-AWS Bootcamp, the revision session before Lesson 1</div>
+  <h1 id="title">Part 00<br>AWS Revision</h1>
+  <p class="sub">Before we build agents on AWS, we revise the two warm-up sections: how a LangChain <em>chain</em> turns a prompt into an answer, and how an <em>agent</em> adds tools, real web search and structured results on top. Every idea here comes back in Lesson 1.</p>
+  <div class="hero-meta">
+    <span class="pill">Folder <code>day1/section1</code> chains</span>
+    <span class="pill">Folder <code>day1/section2</code> agents</span>
+    <span class="pill">Models: OpenAI <code>gpt-5.6-sol</code> · Ollama <code>gemma3:270m</code></span>
+    <span class="pill">Search: Tavily</span>
+  </div>
+
+  <figure class="fig" style="margin-top:34px">
+    <div class="scroll-hint">Swipe sideways to see the full diagram</div>
+    <div class="scroll">
+    <svg viewBox="0 0 1100 330" role="img" aria-label="The eight scripts of the revision in two rows. Part A, chains: keys in .env, prompt piped into ChatOpenAI, the same chain on Ollama, inspecting the AIMessage. Part B, agents: a fake search tool, your own Tavily tool, the ready-made TavilySearch tool, structured output.">
+      <text x="40" y="30" class="lab">PART A · CHAINS (section 1)</text>
+      <rect x="40" y="44" width="220" height="100" rx="14" class="usr"/>
+      <text x="58" y="72" class="tx code">01</text><text x="58" y="102" class="t">Keys in .env</text><text x="58" y="128" class="ts">load_dotenv()</text>
+      <rect x="300" y="44" width="220" height="100" rx="14" class="brain"/>
+      <text x="318" y="72" class="tx code">02</text><text x="318" y="102" class="t">prompt | LLM</text><text x="318" y="128" class="ts">your first chain</text>
+      <rect x="560" y="44" width="220" height="100" rx="14" class="brain"/>
+      <text x="578" y="72" class="tx code">03</text><text x="578" y="102" class="t">Same chain, Ollama</text><text x="578" y="128" class="ts">one line changes</text>
+      <rect x="820" y="44" width="220" height="100" rx="14" class="data"/>
+      <text x="838" y="72" class="tx code">04</text><text x="838" y="102" class="t">Inspect AIMessage</text><text x="838" y="128" class="ts">text, tokens, metadata</text>
+      <line x1="262" y1="94" x2="296" y2="94" class="ln" marker-end="url(#ah)"/>
+      <line x1="522" y1="94" x2="556" y2="94" class="ln" marker-end="url(#ah)"/>
+      <line x1="782" y1="94" x2="816" y2="94" class="ln" marker-end="url(#ah)"/>
+
+      <text x="40" y="200" class="lab">PART B · AGENTS (section 2)</text>
+      <rect x="40" y="214" width="220" height="100" rx="14" class="tool"/>
+      <text x="58" y="242" class="tx code">01</text><text x="58" y="272" class="t">Fake search tool</text><text x="58" y="298" class="ts">the agent loop, bare</text>
+      <rect x="300" y="214" width="220" height="100" rx="14" class="tool"/>
+      <text x="318" y="242" class="tx code">02</text><text x="318" y="272" class="t">Your Tavily tool</text><text x="318" y="298" class="ts">real web search</text>
+      <rect x="560" y="214" width="220" height="100" rx="14" class="tool"/>
+      <text x="578" y="242" class="tx code">03</text><text x="578" y="272" class="t">TavilySearch()</text><text x="578" y="298" class="ts">vendor-made tool</text>
+      <rect x="820" y="214" width="220" height="100" rx="14" class="data"/>
+      <text x="838" y="242" class="tx code">04</text><text x="838" y="272" class="t">Structured output</text><text x="838" y="298" class="ts">a Pydantic object back</text>
+      <line x1="262" y1="264" x2="296" y2="264" class="ln" marker-end="url(#ah)"/>
+      <line x1="522" y1="264" x2="556" y2="264" class="ln" marker-end="url(#ah)"/>
+      <line x1="782" y1="264" x2="816" y2="264" class="ln" marker-end="url(#ah)"/>
+    </svg>
+    </div>
+    <figcaption><b>Eight small scripts, one idea at a time.</b> Each script changes exactly one thing compared with the one before it, so you can open two side by side and see the difference. A helper, <code>agent_trace_printer.py</code>, prints every agent run in Part B.</figcaption>
+  </figure>
+</section>
+
+<section class="sec" id="overview" aria-labelledby="overview-h">
+  <div class="sec-head"><span class="sec-num">0.0</span><h2 id="overview-h">The revision at a glance</h2></div>
+  <p class="lede">Part A is about talking to a model reliably. Part B is about letting the model decide to <em>do</em> something, by calling a tool, and then reading what it did.</p>
+  <div class="map-row">
+    <div class="callout word" style="margin:0;max-width:none">
+      <h5><span class="ico">A</span>Part A: LangChain foundations</h5>
+      <p>Keep API keys in a <code>.env</code> file. Build a chain from a <button class="kw" data-k="prompt-template">PromptTemplate</button> and a <button class="kw" data-k="chat-model">chat model</button>. Swap the paid cloud model for a free local one. Look inside the <button class="kw" data-k="aimessage">AIMessage</button> that comes back.</p>
+    </div>
+    <div class="callout code-tie" style="margin:0;max-width:none">
+      <h5><span class="ico">B</span>Part B: your first agent</h5>
+      <p>Turn a Python function into a <button class="kw" data-k="tool">tool</button>, build an <button class="kw" data-k="agent">agent</button> with <code>create_agent</code>, give it real web search through Tavily, and make it return a validated object instead of a paragraph.</p>
+    </div>
+  </div>
+  <div class="callout note">
+    <h5><span class="ico">i</span>Why "AWS Revision" when the code uses OpenAI?</h5>
+    <p>This is the revision session that opens the AWS bootcamp. The scripts run on OpenAI and Ollama so that anyone can try them without an AWS account. The ideas are the same ones you'll use on Amazon Bedrock in Lesson 1: a prompt, a model, tools, and a loop that runs until the model stops asking for tools. The <a href="#recap">recap</a> maps each one to its Lesson 1 equivalent.</p>
+  </div>
+
+  <section id="setup" aria-labelledby="setup-h">
+    <h3 id="setup-h">Set up once</h3>
+    <div class="prose"><p>Each section folder is its own small project. <button class="kw" data-k="uv">uv</button> reads the project file, creates a <button class="kw" data-k="venv">virtual environment</button> and installs the exact locked versions, so everyone in the class runs the same code.</p></div>
+    <div class="code"><div class="bar"><span class="file">terminal, in each section folder</span><button class="copy">Copy</button></div><pre><code class="lang-sh">uv sync                      # create .venv, install locked versions
+cp .env.example .env         # then paste your keys into .env</code></pre></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Script</th><th>What it shows</th><th>Needs</th></tr></thead>
+        <tbody>
+          <tr><td>A · 01_hello_world_env_setup.py</td><td>Loading keys from <code>.env</code> safely, printing a masked key</td><td>nothing, or <code>OPENAI_API_KEY</code></td></tr>
+          <tr><td>A · 02_summary_chain_openai.py</td><td>Your first chain: <code>PromptTemplate | ChatOpenAI</code></td><td><code>OPENAI_API_KEY</code></td></tr>
+          <tr><td>A · 03_summary_chain_ollama.py</td><td>The same chain on a local model</td><td>Ollama + <code>gemma3:270m</code></td></tr>
+          <tr><td>A · 04_inspect_the_response_object.py</td><td>Every useful field of the returned <code>AIMessage</code></td><td><code>OPENAI_API_KEY</code> or <code>--local</code></td></tr>
+          <tr><td>B · 01_agent_with_placeholder_tool.py</td><td>The agent loop with a fake <code>search</code> tool</td><td><code>OPENAI_API_KEY</code></td></tr>
+          <tr><td>B · 02_agent_with_tavily_sdk_tool.py</td><td>Your own <code>search</code> tool calling the Tavily SDK</td><td>+ <code>TAVILY_API_KEY</code></td></tr>
+          <tr><td>B · 03_agent_with_builtin_tavily_tool.py</td><td>The vendor's ready-made <code>TavilySearch</code> tool</td><td>+ <code>TAVILY_API_KEY</code></td></tr>
+          <tr><td>B · 04_agent_with_structured_output.py</td><td><code>response_format=AgentAnswer</code> returns a Pydantic object</td><td>+ <code>TAVILY_API_KEY</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose"><p>Run any script with <code>uv run python &lt;file&gt;.py</code>. For the local model you also need <button class="kw" data-k="ollama">Ollama</button> installed and running, plus the tiny model downloaded once with <code>ollama pull gemma3:270m</code> (about 300 MB). A free Tavily key (1,000 credits a month) comes from app.tavily.com.</p></div>
+  </section>
+</section>
+
+<section class="sec" id="env" aria-labelledby="env-h">
+  <div class="sec-head"><span class="sec-num">0.1</span><h2 id="env-h">Keep keys out of your code</h2></div>
+  <p class="lede">Before talking to any model you need two boring but critical things: Python runs your project, and your secret <button class="kw" data-k="api-key">API keys</button> are loaded from a file, never typed into code.</p>
+  <div class="prose">
+    <p>A <button class="kw" data-k="env-file">.env file</button> is a plain text file of <code>KEY=value</code> lines. It's listed in <code>.gitignore</code>, so it never reaches GitHub. Every SDK (OpenAI, LangSmith, Tavily) looks for its key in an <button class="kw" data-k="env-var">environment variable</button> with a fixed name, such as <code>OPENAI_API_KEY</code>. <code>load_dotenv()</code> copies each line of <code>.env</code> into the environment, and the SDKs find their keys on their own.</p>
+  </div>
+  <div class="code"><div class="bar"><span class="file">.env (placeholders, never commit the real file)</span><button class="copy">Copy</button></div><pre><code class="lang-sh">OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-5.6-sol          # optional, this is the default
+TAVILY_API_KEY=tvly-...           # section 2 only
+# optional tracing
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=lsv2_...
+LANGSMITH_PROJECT=section-01-langchain-foundations</code></pre></div>
+
+  <div class="annot">
+    <div class="code"><div class="bar"><span class="file">01_hello_world_env_setup.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+def describe_secret(name: str) -> str:
+    value = os.environ.get(name)
+    if not value:
+        return f"{name} is missing ❌  → copy .env.example to .env"
+    return f"{name} loaded ✅  (starts with {value[:8]!r}, {len(value)} characters)"
+
+print(describe_secret("OPENAI_API_KEY"))</code></pre></div>
+    <ol>
+      <li><b>load_dotenv()</b> Reads <code>.env</code> from this folder (or a parent) into <code>os.environ</code>. A variable already exported in your terminal wins over the file.</li>
+      <li><b>os.environ.get(name)</b> Returns the value, or <code>None</code> if it isn't set, so a missing key gives a friendly message instead of a crash.</li>
+      <li><b>value[:8]</b> Shows only the first 8 characters, such as <code>'sk-proj-'</code>. That tells you the key <em>type</em> but is useless to an attacker.</li>
+      <li><b>len(value)</b> A quick sanity check: a truncated paste shows up as the wrong length.</li>
+    </ol>
+  </div>
+  <div class="code term"><div class="bar"><span class="file">expected output</span></div><pre>Hello from Future with Shivank — AI Harness!
+OPENAI_API_KEY loaded ✅  (starts with 'sk-proj-', 164 characters)
+LANGSMITH_TRACING = (not set) → tracing is optional, see Script 02</pre></div>
+  <div class="callout warn">
+    <h5><span class="ico">!</span>Never print a full key</h5>
+    <p>Terminal output ends up in screenshots, screen recordings and logs. Print a masked prefix like this script does, and if a key ever leaks, revoke it and make a new one.</p>
+  </div>
+</section>
+
+<section class="sec" id="chain" aria-labelledby="chain-h">
+  <div class="sec-head"><span class="sec-num">0.2</span><h2 id="chain-h">Your first chain</h2></div>
+  <p class="lede">Three building blocks appear in every later script: a prompt template, a chat model, and the pipe <code>|</code> that joins them into a chain.</p>
+  <figure class="fig">
+    <div class="scroll-hint">Swipe sideways to see the full diagram</div>
+    <div class="scroll">
+    <svg viewBox="0 0 1100 250" role="img" aria-label="A chain: an input dictionary goes into PromptTemplate, which fills the placeholder; the filled prompt goes to ChatOpenAI; the model returns an AIMessage whose text property is the answer. PromptTemplate and ChatOpenAI together form the chain prompt pipe llm.">
+      <rect x="282" y="20" width="536" height="212" rx="18" class="zone"/>
+      <text x="550" y="46" text-anchor="middle" class="lab">chain = prompt | llm   (a RunnableSequence)</text>
+      <rect x="20" y="90" width="220" height="110" rx="14" class="usr"/>
+      <text x="130" y="132" text-anchor="middle" class="t">Input dict</text>
+      <text x="130" y="162" text-anchor="middle" class="code" style="font-size:14px">{"information": bio}</text>
+      <rect x="310" y="90" width="220" height="110" rx="14" class="data"/>
+      <text x="420" y="132" text-anchor="middle" class="t">PromptTemplate</text>
+      <text x="420" y="160" text-anchor="middle" class="ts">fills {information}</text>
+      <rect x="570" y="90" width="220" height="110" rx="14" class="brain"/>
+      <text x="680" y="132" text-anchor="middle" class="t">ChatOpenAI</text>
+      <text x="680" y="160" text-anchor="middle" class="ts">sends it to the model</text>
+      <rect x="860" y="90" width="220" height="110" rx="14" class="data"/>
+      <text x="970" y="132" text-anchor="middle" class="t">AIMessage</text>
+      <text x="970" y="160" text-anchor="middle" class="code" style="font-size:14px">.text → the answer</text>
+      <line x1="242" y1="145" x2="306" y2="145" class="ln" marker-end="url(#ah)"/>
+      <line x1="532" y1="145" x2="566" y2="145" class="ln-data" marker-end="url(#ah-data)"/>
+      <line x1="792" y1="145" x2="856" y2="145" class="ln-brain" marker-end="url(#ah-brain)"/>
+    </svg>
+    </div>
+    <figcaption><b>What <code>chain.invoke({...})</code> runs.</b> The template turns your dict into prompt text, the model answers, and you read the answer from <code>.text</code>. The dict keys must match the template's placeholders.</figcaption>
+  </figure>
+
+  <h3>The prompt is a template with an output contract</h3>
+  <div class="prose"><p>Every script summarises the same short biography (of Dr A. P. J. Abdul Kalam) from <code>sample_data.py</code>, so cloud and local models can be compared on identical input. The template has one <button class="kw" data-k="placeholder">placeholder</button>, <code>{information}</code>, and a numbered list that tells the model exactly which three parts to return.</p></div>
+  <div class="code"><div class="bar"><span class="file">02_summary_chain_openai.py, the template</span><button class="copy">Copy</button></div><pre><code class="lang-py">PROFILE_TEMPLATE = """Here is a short biography:
+{information}
+
+Using only this text, give me:
+1. A one-line headline about this person
+2. A three-bullet summary a 12-year-old would understand
+3. One question you would ask them in an interview
+"""</code></pre></div>
+  <div class="callout analogy">
+    <h5><span class="ico">✦</span>Think of it like this</h5>
+    <p>A prompt template is a fill-in-the-blanks form, like a railway reservation slip. The printed parts never change; you only write in the blanks. The numbered list is the "output contract": the wording of the answer changes every run, but its <em>shape</em> (headline, three bullets, one question) stays the same.</p>
+  </div>
+
+  <h3>Building and running the chain</h3>
+  <div class="annot">
+    <div class="code"><div class="bar"><span class="file">02_summary_chain_openai.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+from sample_data import PERSON_INFORMATION
+
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6-sol")
+
+def build_profile_chain(model_name: str):
+    profile_prompt_template = PromptTemplate(
+        input_variables=["information"], template=PROFILE_TEMPLATE
+    )
+    llm = ChatOpenAI(temperature=0, model=model_name)
+    return profile_prompt_template | llm
+
+chain = build_profile_chain(OPENAI_MODEL)
+response = chain.invoke(input={"information": PERSON_INFORMATION})
+print(response.text)</code></pre></div>
+    <ol>
+      <li><b>os.getenv("OPENAI_MODEL", ...)</b> The model name lives in <code>.env</code>, so you can switch models without editing code.</li>
+      <li><b>input_variables</b> Lists every <code>{placeholder}</code> the template expects.</li>
+      <li><b>temperature=0</b> Asks for the most predictable answer. GPT-5.x reasoning models only allow their default, so LangChain quietly drops it there; it matters for local models.</li>
+      <li><b>prompt | llm</b> The pipe builds a <button class="kw" data-k="runnable">RunnableSequence</button>: the output of the left side becomes the input of the right. This style is called <button class="kw" data-k="lcel">LCEL</button>.</li>
+      <li><b>chain.invoke(...)</b> Runs the whole chain once and returns an <code>AIMessage</code>.</li>
+      <li><b>response.text</b> The answer as one plain string. More on why not <code>.content</code> in <a href="#response">0.4</a>.</li>
+    </ol>
+  </div>
+  <div class="code term"><div class="bar"><span class="file">sample output (wording changes every run)</span></div><pre>Model: gpt-5.6-sol
+
+1. Headline: From newspaper boy in Rameswaram to India's "Missile Man" and President.
+
+2. Summary for a 12-year-old:
+- He was a scientist who helped India build its own rockets and put a satellite into space.
+- People called him the "Missile Man of India", and later he became the country's 11th President.
+- He loved teaching students and was giving a lecture when he died in 2015.
+
+3. Interview question:
+What did selling newspapers as a boy teach you that helped you as a scientist?</pre></div>
+  <div class="callout code-tie">
+    <h5><span class="ico">↻</span>Try this</h5>
+    <p>Replace <code>PERSON_INFORMATION</code> in <code>sample_data.py</code> with a paragraph about anyone you like, a cricketer or your favourite founder, and run it again. Nothing else changes. That's the point of a template.</p>
+  </div>
+</section>
+
+<section class="sec" id="ollama" aria-labelledby="ollama-h">
+  <div class="sec-head"><span class="sec-num">0.3</span><h2 id="ollama-h">Same chain, local model</h2></div>
+  <p class="lede">LangChain gives every chat model the same interface. Moving from a paid cloud model to a free one on your laptop changes exactly one line.</p>
+  <div class="prose"><p><button class="kw" data-k="ollama">Ollama</button> is a free app that downloads <button class="kw" data-k="open-weights">open-weights</button> models (Gemma, Qwen, Llama and others) and serves them at <code>http://localhost:11434</code>. No API key, no cost, and your data never leaves your machine. Pick a model below to see the one line that differs.</p></div>
+
+  <div class="sim" id="swap">
+    <div class="sim-head"><h4>Swap the model, keep the chain</h4><span class="tag">interactive</span></div>
+    <div class="sim-body">
+      <div class="ctrls" role="group" aria-label="Choose a model">
+        <button class="chip" data-m="openai" aria-pressed="true">Cloud: ChatOpenAI</button>
+        <button class="chip" data-m="ollama" aria-pressed="false">Local: ChatOllama</button>
+      </div>
+      <div class="swap-out" aria-live="polite">
+        <p class="mini-label">The only line that changes</p>
+        <div class="code"><div class="bar"><span class="file" id="swap-file">02_summary_chain_openai.py</span><button class="copy">Copy</button></div><pre><code id="swap-code"></code></pre></div>
+        <p class="mini-label" style="margin-top:14px">Typical result</p>
+        <div class="out" id="swap-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Trade-off</th><th>Cloud (gpt-5.6-sol)</th><th>Local (gemma3:270m)</th></tr></thead>
+      <tbody>
+        <tr><td>Cost</td><td>Pay per token</td><td>Free</td></tr>
+        <tr><td>Privacy</td><td>Text goes to the provider</td><td>Never leaves your laptop</td></tr>
+        <tr><td>Setup</td><td>An API key</td><td>Install Ollama, <code>ollama pull</code> the model</td></tr>
+        <tr><td>Quality</td><td>Follows the three-part contract</td><td>Tiny model: may write four bullets or forget the question</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout note">
+    <h5><span class="ico">i</span>Want better local answers?</h5>
+    <p>270 million parameters is tiny next to GPT-class models. Pull a bigger one, for example <code>ollama pull gemma4</code> (about 10 GB), and set <code>OLLAMA_MODEL=gemma4</code> in <code>.env</code>. Same code, much better answers.</p>
+  </div>
+</section>
+
+<section class="sec" id="response" aria-labelledby="response-h">
+  <div class="sec-head"><span class="sec-num">0.4</span><h2 id="response-h">What comes back: the AIMessage</h2></div>
+  <p class="lede">So far we printed only the answer text, but <code>chain.invoke()</code> returns a rich object. Knowing its fields matters for agents: the same object will carry the model's tool calls in Part B.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Field</th><th>What it holds</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>type</td><td>Who wrote the message: <code>"ai"</code>, vs <code>"human"</code>, <code>"system"</code>, <code>"tool"</code></td><td><code>ai</code></td></tr>
+        <tr><td>content</td><td>The raw content: a string, or a <em>list</em> of content blocks</td><td><code>list</code> on OpenAI, <code>str</code> on Ollama</td></tr>
+        <tr><td>text</td><td>The answer as one plain string. Use this.</td><td><code>1. Headline: From newspaper boy…</code></td></tr>
+        <tr><td>tool_calls</td><td>Empty for now; filled when the model wants a tool</td><td><code>[]</code></td></tr>
+        <tr><td>usage_metadata</td><td>Provider-independent <button class="kw" data-k="token">token</button> counts, which is what you pay for</td><td><code>{'input_tokens': 412, 'output_tokens': 386, …}</code></td></tr>
+        <tr><td>response_metadata</td><td>Provider-specific details: model name, finish reason, timings</td><td><code>model_name</code>, or <code>done_reason</code> on Ollama</td></tr>
+        <tr><td>id</td><td>A unique id for this response</td><td><code>resp_0a1b2c…</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="annot">
+    <div class="code"><div class="bar"><span class="file">04_inspect_the_response_object.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">def make_llm(use_local: bool):
+    if use_local:
+        from langchain_ollama import ChatOllama
+        return ChatOllama(temperature=0, model=OLLAMA_MODEL), OLLAMA_MODEL
+    from langchain_openai import ChatOpenAI
+    return ChatOpenAI(temperature=0, model=OPENAI_MODEL), OPENAI_MODEL
+
+use_local = "--local" in sys.argv
+llm, model_name = make_llm(use_local)
+chain = PromptTemplate.from_template(PROFILE_TEMPLATE) | llm
+response = chain.invoke({"information": PERSON_INFORMATION})
+
+print(response.usage_metadata)
+print(list(response.response_metadata.keys()))
+print(type(response.content).__name__)</code></pre></div>
+    <ol>
+      <li><b>make_llm()</b> Returns a cloud or a local model. Both have the same interface, so nothing after this line cares which one it got.</li>
+      <li><b>"--local" in sys.argv</b> Run with <code>--local</code> to use Ollama instead of OpenAI.</li>
+      <li><b>PromptTemplate.from_template</b> A shortcut that finds the placeholders for you, instead of listing <code>input_variables</code>.</li>
+      <li><b>usage_metadata</b> Input, output and total tokens: your cost per call.</li>
+      <li><b>type(response.content)</b> Prints <code>list</code> on newer OpenAI models, which is exactly why every script prints <code>.text</code>.</li>
+    </ol>
+  </div>
+  <div class="code term"><div class="bar"><span class="file">sample output (numbers and ids differ every run)</span></div><pre>type(response)        : AIMessage
+response.type         : ai
+response.tool_calls   : []
+usage_metadata        : {'input_tokens': 412, 'output_tokens': 386, 'total_tokens': 798, ...}
+model_name            : gpt-5.6-sol
+content is a          : list  (Responses-API content blocks) — that's why we use .text</pre></div>
+  <div class="callout word">
+    <h5><span class="ico">?</span>Why <code>.text</code> and not <code>.content</code>?</h5>
+    <p>Newer OpenAI models reply through the <button class="kw" data-k="responses-api">Responses API</button>, where <code>.content</code> can be a list of content blocks rather than a string. <code>.text</code> always gives you one plain string, for every provider, so the course uses it everywhere.</p>
+  </div>
+
+  <section id="langsmith" aria-labelledby="langsmith-h">
+    <h3 id="langsmith-h">Tracing with LangSmith, no code changes</h3>
+    <div class="prose"><p>Add the three <code>LANGSMITH_*</code> lines from <a href="#env">0.1</a> to <code>.env</code> and run any script again. LangChain notices them and sends a <button class="kw" data-k="trace">trace</button> of every call to smith.langchain.com automatically.</p></div>
+    <ol class="steps">
+      <li><span class="k c-data">1</span><div><h4>RunnableSequence</h4><p>The parent trace: one run of your whole chain.</p></div></li>
+      <li><span class="k c-data">2</span><div><h4>PromptTemplate</h4><p>A child step showing the filled-in prompt that was actually sent.</p></div></li>
+      <li><span class="k c-brain">3</span><div><h4>ChatOpenAI or ChatOllama</h4><p>The model call, with latency, token count and cost. Compare a cloud and a local run side by side.</p></div></li>
+    </ol>
+    <div class="prose"><p>In Part B tracing is even more useful: you'll see two model calls with the tool call in between, which is the agent loop made visible.</p></div>
+  </section>
+</section>
+
+<section class="sec" id="agent" aria-labelledby="agent-h">
+  <div class="sec-head"><span class="sec-num">0.5</span><h2 id="agent-h">From chain to agent</h2></div>
+  <p class="lede">A model on its own can only produce text. It doesn't know today's weather, this week's news or the current price of anything. An agent fixes that by pairing the model with tools it may call.</p>
+  <div class="prose">
+    <p>Think of it as <strong>agent = LLM (the brain that decides) + tools (functions it may call)</strong>. LangChain's <code>create_agent(model, tools)</code> builds the whole <button class="kw" data-k="agent-loop">agent loop</button> for you:</p>
+    <ol>
+      <li>Send the question and the list of tools to the model.</li>
+      <li>If the model replies "please call tool X with arguments Y", run X(Y).</li>
+      <li>Send the tool's result back to the model and repeat, until it answers in plain text.</li>
+    </ol>
+  </div>
+
+  <figure class="fig">
+    <div class="scroll-hint">Swipe sideways to see the full diagram</div>
+    <div class="ctrls" style="margin-bottom:10px">
+      <button class="btn" id="loop-step">Step through the loop</button>
+      <button class="btn ghost" id="loop-reset">Reset</button>
+      <span class="mono" id="loop-msg" aria-live="polite" style="color:var(--muted)">Press the button to follow one run.</span>
+    </div>
+    <div class="scroll">
+    <svg id="loop-svg" class="dimmable" viewBox="0 0 1100 380" role="img" aria-label="The agent loop. 1: your question goes to the LLM. 2: the LLM replies with a tool call. 3: LangChain runs the search tool and sends a ToolMessage back to the LLM; steps 2 and 3 may repeat. 4: when there are no more tool calls, the LLM writes the final answer.">
+      <rect x="20" y="40" width="200" height="110" rx="14" class="usr"/>
+      <text x="120" y="88" text-anchor="middle" class="t">You</text>
+      <text x="120" y="116" text-anchor="middle" class="ts">ask a question</text>
+      <rect x="330" y="40" width="300" height="110" rx="16" class="brain"/>
+      <text x="480" y="86" text-anchor="middle" class="tl">LLM</text>
+      <text x="480" y="116" text-anchor="middle" class="ts">answer, or ask for a tool?</text>
+      <rect x="800" y="40" width="280" height="110" rx="14" class="tool"/>
+      <text x="940" y="86" text-anchor="middle" class="t code">search(query)</text>
+      <text x="940" y="116" text-anchor="middle" class="ts">LangChain runs it</text>
+      <rect x="330" y="270" width="300" height="90" rx="16" class="agent"/>
+      <text x="480" y="323" text-anchor="middle" class="t on-agent">Final answer</text>
+
+      <g data-step="1">
+        <line x1="222" y1="95" x2="326" y2="95" class="ln flow" marker-end="url(#ah)"/>
+        <text x="275" y="30" text-anchor="middle" class="lab">1 · HumanMessage</text>
+      </g>
+      <g data-step="2">
+        <line x1="632" y1="72" x2="796" y2="72" class="ln-brain flow" marker-end="url(#ah-brain)"/>
+        <text x="714" y="58" text-anchor="middle" class="lab">2 · tool call</text>
+      </g>
+      <g data-step="3">
+        <line x1="798" y1="125" x2="634" y2="125" class="ln-tool flow" marker-end="url(#ah-tool)"/>
+        <text x="714" y="152" text-anchor="middle" class="lab">3 · ToolMessage</text>
+        <text x="714" y="176" text-anchor="middle" class="tx">2 and 3 may repeat</text>
+      </g>
+      <g data-step="4">
+        <line x1="480" y1="152" x2="480" y2="266" class="ln-brain flow" marker-end="url(#ah-brain)"/>
+        <text x="496" y="215" class="lab">4 · no tool calls left → answer</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption><b>The model never runs code.</b> Step 2 is only a <em>request</em>. LangChain runs the function and stores the result as a <button class="kw" data-k="toolmessage">ToolMessage</button>; then the model reads it and decides what to do next.</figcaption>
+  </figure>
+
+  <h3>A tool is a function with a menu card</h3>
+  <div class="prose"><p>To focus purely on the mechanics, the first script's <code>search</code> tool is a placeholder: whatever you ask, it returns the same weather report for Bengaluru. In 0.7 we swap in real search and nothing else changes.</p></div>
+  <div class="annot">
+    <div class="code"><div class="bar"><span class="file">01_agent_with_placeholder_tool.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from langchain.agents import create_agent
+from langchain.tools import tool
+from langchain_core.messages import HumanMessage
+from langchain_openai import ChatOpenAI
+
+@tool
+def search(query: str) -> str:
+    """Look up live information on the internet.
+
+    Use this for anything that changes over time and that you cannot know
+    from memory: today's weather, recent news, current prices, upcoming events.
+
+    Args:
+        query: What to look up, as a short search phrase.
+    """
+    print(f"🔎 search tool called with: {query}")
+    return "Bengaluru right now: 24°C, light drizzle, humidity 78%"
+
+llm = ChatOpenAI(model=OPENAI_MODEL)
+agent = create_agent(model=llm, tools=[search])
+
+result = agent.invoke({"messages": [HumanMessage(content=QUESTION)]})
+print_agent_trace(result)</code></pre></div>
+    <ol>
+      <li><b>@tool</b> This <button class="kw" data-k="decorator">decorator</button> turns an ordinary function into something an agent can call.</li>
+      <li><b>search, query: str, -&gt; str</b> The name and <button class="kw" data-k="type-hints">type hints</button> become the tool's name and input schema: one text argument called <code>query</code>.</li>
+      <li><b>The docstring</b> Becomes the tool's description. It's written for the <em>model</em>: say clearly when the tool helps. The model decides whether and how to call it from this alone.</li>
+      <li><b>create_agent(model, tools)</b> Builds the loop in one line.</li>
+      <li><b>{"messages": [HumanMessage(...)]}</b> An agent's input is a chat-shaped list of messages. <button class="kw" data-k="humanmessage">HumanMessage</button> means "typed by the user".</li>
+      <li><b>result</b> A dict whose <code>"messages"</code> list is the whole conversation, tool calls included.</li>
+    </ol>
+  </div>
+  <div class="callout analogy">
+    <h5><span class="ico">✦</span>Think of it like this</h5>
+    <p>The model is a customer in a restaurant who can't enter the kitchen. <code>@tool</code> prints a menu card: the dish name, what you need to say when ordering, and when it's a good choice. The customer only ever <em>orders</em>; the kitchen (LangChain) cooks and brings the plate back.</p>
+  </div>
+  <div class="callout code-tie">
+    <h5><span class="ico">✓</span>Test a tool without an agent</h5>
+    <p><code>search.invoke({"query": "anything at all"})</code> calls it directly. <code>search.name</code> is <code>"search"</code> and <code>search.description</code> is the docstring text the model sees.</p>
+  </div>
+</section>
+
+<section class="sec" id="trace" aria-labelledby="trace-h">
+  <div class="sec-head"><span class="sec-num">0.6</span><h2 id="trace-h">Reading an agent run</h2></div>
+  <p class="lede"><code>print(result)</code> dumps the run as one giant unreadable line. The helper <code>agent_trace_printer.py</code> prints the same information one message per line, so you can see the loop.</p>
+  <div class="code term"><div class="bar"><span class="file">uv run python 01_agent_with_placeholder_tool.py</span></div><pre>🔎 search tool called with: Bengaluru weather now
+
+The agent produced 4 messages:
+  [0] HumanMessage : What's the weather like in Bengaluru right now?
+  [1] AIMessage    : 🛠  tool call → search({'query': 'Bengaluru weather now'})
+  [2] ToolMessage  : (search) Bengaluru right now: 24°C, light drizzle, humidity 78%
+  [3] AIMessage    : It's about 24°C in Bengaluru right now, with light drizzle and 78% humidity — keep an umbrella handy!
+
+FINAL ANSWER:
+It's about 24°C in Bengaluru right now, with light drizzle and 78% humidity — keep an umbrella handy!</pre></div>
+  <ul class="log trail" aria-label="What each message means">
+    <li class="msg"><span class="idx">[0]</span><span class="who">HumanMessage</span>The question you asked.</li>
+    <li class="plan"><span class="idx">[1]</span><span class="who">AIMessage</span>The model <em>decides</em> to call a tool. Its text is empty and its <code>tool_calls</code> list holds the request. Notice the model wrote the query "Bengaluru weather now" itself.</li>
+    <li class="act"><span class="idx">[2]</span><span class="who">ToolMessage</span>LangChain <em>ran</em> the tool and added the result.</li>
+    <li class="done"><span class="idx">[3]</span><span class="who">AIMessage</span>No tool calls this time, so it's the final answer.</li>
+  </ul>
+  <div class="annot" style="margin-top:2rem">
+    <div class="code"><div class="bar"><span class="file">agent_trace_printer.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">def _one_line(text: str, limit: int = 160) -> str:
+    flat = " ".join(str(text).split())
+    if len(flat) <= limit:
+        return flat
+    return f"{flat[:limit]} … (+{len(flat) - limit} chars)"
+
+def print_agent_trace(result: dict) -> None:
+    messages = result["messages"]
+    for index, message in enumerate(messages):
+        kind = type(message).__name__
+        tool_calls = getattr(message, "tool_calls", None) or []
+        if tool_calls:
+            for call in tool_calls:
+                print(f"  [{index}] {kind:<13}: 🛠  tool call → {call['name']}({_one_line(call['args'], 120)})")
+        elif kind == "ToolMessage":
+            print(f"  [{index}] {kind:<13}: ({message.name}) {_one_line(message.text)}")
+        else:
+            print(f"  [{index}] {kind:<13}: {_one_line(message.text)}")
+    print(messages[-1].text)</code></pre></div>
+    <ol>
+      <li><b>_one_line()</b> Squashes text onto one line and cuts it at 160 characters, so long search results don't flood the terminal.</li>
+      <li><b>type(message).__name__</b> The class name: <code>HumanMessage</code>, <code>AIMessage</code> or <code>ToolMessage</code>.</li>
+      <li><b>getattr(..., "tool_calls", None) or []</b> Only AI messages have <code>tool_calls</code>; this safely gives an empty list for the rest.</li>
+      <li><b>for call in tool_calls</b> One AI message can request several tools at once, so each gets its own line with the same index.</li>
+      <li><b>messages[-1].text</b> The final answer is simply the text of the last message.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec" id="tavily-sdk" aria-labelledby="tsdk-h">
+  <div class="sec-head"><span class="sec-num">0.7</span><h2 id="tsdk-h">Real search: your own Tavily tool</h2></div>
+  <p class="lede">Same agent, same tool name, same docstring. The only change is the inside of <code>search</code>: instead of a hard-coded string it calls <button class="kw" data-k="tavily">Tavily</button>, a search API built for LLMs.</p>
+  <div class="annot">
+    <div class="code"><div class="bar"><span class="file">02_agent_with_tavily_sdk_tool.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from tavily import TavilyClient
+
+tavily = TavilyClient()          # reads TAVILY_API_KEY from the environment
+
+@tool
+def search(query: str) -> dict:
+    """Look up live information on the internet.
+    ... same docstring as Script 01 ...
+    """
+    print(f"🔎 search tool called with: {query}")
+    return tavily.search(query=query)
+
+question = " ".join(sys.argv[1:]) or DEFAULT_QUESTION
+result = agent.invoke({"messages": [HumanMessage(content=question)]})</code></pre></div>
+    <ol>
+      <li><b>TavilyClient()</b> The vendor's <button class="kw" data-k="sdk">SDK</button>. The variable must be named exactly <code>TAVILY_API_KEY</code>; the SDK looks it up itself.</li>
+      <li><b>-&gt; dict</b> Tavily returns JSON (query, results with title, URL, snippet and score). LangChain turns the dict into text for the model automatically.</li>
+      <li><b>sys.argv[1:]</b> Any words typed after the script name become the question, so you can ask anything.</li>
+    </ol>
+  </div>
+  <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">uv run python 02_agent_with_tavily_sdk_tool.py        # default: Bengaluru tech meetups
+uv run python 02_agent_with_tavily_sdk_tool.py "What's the weather like in Bengaluru right now?"</code></pre></div>
+  <div class="prose"><p>The default question asks for three upcoming AI or developer meetups in Bengaluru with date, venue and link. Watch the trail: the model may call <code>search</code> <strong>several times in parallel</strong> with different queries, for example "upcoming AI meetups Bengaluru" and "developer meetups Bangalore this month", before it answers. Live results change every day.</p></div>
+  <div class="callout note">
+    <h5><span class="ico">i</span>Writing your own wrapper</h5>
+    <p>This is the "wrap a vendor SDK in your own <code>@tool</code>" pattern. You control exactly what the model sees, but the tool only offers what you wrote: here, a single <code>query</code> argument. Tip: <code>tavily.search(query=query, max_results=5)</code> trims the results.</p>
+  </div>
+</section>
+
+<section class="sec" id="tavily-builtin" aria-labelledby="tb-h">
+  <div class="sec-head"><span class="sec-num">0.8</span><h2 id="tb-h">The ready-made TavilySearch tool</h2></div>
+  <p class="lede">Tavily also publishes an official LangChain <button class="kw" data-k="integration">integration</button>. Using it deletes our custom function and gives the model a much richer menu card.</p>
+  <div class="code"><div class="bar"><span class="file">03_agent_with_builtin_tavily_tool.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from langchain_tavily import TavilySearch
+
+search_tool = TavilySearch()          # also reads TAVILY_API_KEY
+agent = create_agent(model=llm, tools=[search_tool])
+
+print(f"Tool name the LLM sees: {search_tool.name}")   # → tavily_search</code></pre></div>
+  <div class="code term"><div class="bar"><span class="file">sample trail (live results change)</span></div><pre>  [1] AIMessage    : 🛠  tool call → tavily_search({'query': 'upcoming AI developer meetups Bengaluru',
+                                                     'time_range': 'month', 'topic': 'general'})
+  [2] ToolMessage  : (tavily_search) {"query": "upcoming AI developer meetups Bengaluru", "results": [...</pre></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th></th><th>Your own tool (0.7)</th><th>TavilySearch (0.8)</th></tr></thead>
+      <tbody>
+        <tr><td>Code you maintain</td><td>A function and docstring</td><td>One line</td></tr>
+        <tr><td>Tool name</td><td><code>search</code></td><td><code>tavily_search</code></td></tr>
+        <tr><td>Arguments the model may set</td><td><code>query</code> only</td><td><code>query</code>, <code>include_domains</code>, <code>exclude_domains</code>, <code>search_depth</code>, <code>time_range</code>, <code>topic</code>, <code>start_date</code>, <code>end_date</code> and more</td></tr>
+        <tr><td>When the vendor's API changes</td><td>You update it</td><td>The vendor updates it</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose"><p>Notice the model chose <code>time_range='month'</code> and <code>topic='general'</code> on its own, because the vendor's description told it those options exist. Rule of thumb: <strong>if a well-maintained integration exists, prefer it over writing your own wrapper.</strong></p></div>
+</section>
+
+<section class="sec" id="structured" aria-labelledby="so-h">
+  <div class="sec-head"><span class="sec-num">0.9</span><h2 id="so-h">Structured output</h2></div>
+  <p class="lede">Free text is great for people but painful for programs: which part of this paragraph is the link? With <code>response_format</code>, the agent must also return its answer as data that matches a schema you define.</p>
+  <div class="annot">
+    <div class="code"><div class="bar"><span class="file">04_agent_with_structured_output.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from pydantic import BaseModel, Field
+
+class Source(BaseModel):
+    """A web page the answer is based on."""
+    title: str = Field(description="Short title of the page, e.g. the event name")
+    url: str = Field(description="Full link to the page, starting with https://")
+
+class AgentAnswer(BaseModel):
+    """The agent's final reply: a readable answer plus the pages it used."""
+    answer: str = Field(description="The answer to the user's question, in plain text")
+    sources: list[Source] = Field(default_factory=list,
+                                  description="Every web page used to write the answer")
+
+agent = create_agent(model=llm, tools=[TavilySearch()], response_format=AgentAnswer)
+
+result = agent.invoke({"messages": [HumanMessage(content=QUESTION)]})
+structured: AgentAnswer = result["structured_response"]
+for source in structured.sources:
+    print(source.title, source.url)</code></pre></div>
+    <ol>
+      <li><b>BaseModel</b> A <button class="kw" data-k="pydantic">Pydantic</button> class describes the shape of the data you want back, and validates it.</li>
+      <li><b>Field(description=...)</b> Like tool docstrings, class docstrings and field descriptions are sent to the model. They're instructions.</li>
+      <li><b>list[Source]</b> Schemas can nest: an answer holds a list of sources, each with a title and URL.</li>
+      <li><b>default_factory=list</b> An empty list if the agent cites nothing, instead of an error.</li>
+      <li><b>response_format=AgentAnswer</b> The only change compared with Script 03.</li>
+      <li><b>result["structured_response"]</b> A new key holding a validated <code>AgentAnswer</code>. The usual <code>"messages"</code> trail is still there.</li>
+    </ol>
+  </div>
+
+  <h3>How LangChain enforces the schema</h3>
+  <figure class="fig">
+    <div class="scroll-hint">Swipe sideways to see the full diagram</div>
+    <div class="scroll">
+    <svg viewBox="0 0 1100 300" role="img" aria-label="create_agent with response_format goes one of two ways. ProviderStrategy: the schema is passed to the provider's API, which guarantees matching JSON; used with OpenAI and Anthropic. ToolStrategy: the model gets an extra answer tool whose arguments are the schema. Both end in result structured_response, an AgentAnswer object.">
+      <rect x="20" y="95" width="300" height="110" rx="16" class="agent"/>
+      <text x="170" y="140" text-anchor="middle" class="code on-agent">create_agent(...,</text>
+      <text x="170" y="166" text-anchor="middle" class="code on-agent">response_format=AgentAnswer)</text>
+      <rect x="420" y="20" width="320" height="110" rx="14" class="data"/>
+      <text x="580" y="58" text-anchor="middle" class="t">ProviderStrategy</text>
+      <text x="580" y="86" text-anchor="middle" class="ts">schema sent to the provider's API,</text>
+      <text x="580" y="108" text-anchor="middle" class="ts">which guarantees matching JSON</text>
+      <rect x="420" y="170" width="320" height="110" rx="14" class="tool"/>
+      <text x="580" y="208" text-anchor="middle" class="t">ToolStrategy</text>
+      <text x="580" y="236" text-anchor="middle" class="ts">an extra "answer" tool whose</text>
+      <text x="580" y="258" text-anchor="middle" class="ts">arguments are the schema</text>
+      <rect x="820" y="95" width="260" height="110" rx="14" class="data"/>
+      <text x="950" y="140" text-anchor="middle" class="code">structured_response</text>
+      <text x="950" y="168" text-anchor="middle" class="ts">AgentAnswer(answer, sources)</text>
+      <path d="M322 135 C 370 135 370 75 416 75" class="ln-data" marker-end="url(#ah-data)"/>
+      <path d="M322 165 C 370 165 370 225 416 225" class="ln-tool" marker-end="url(#ah-tool)"/>
+      <path d="M742 75 C 780 75 780 135 816 135" class="ln-data" marker-end="url(#ah-data)"/>
+      <path d="M742 225 C 780 225 780 165 816 165" class="ln-tool" marker-end="url(#ah-tool)"/>
+      <text x="370" y="62" text-anchor="middle" class="tx">native support</text>
+      <text x="370" y="252" text-anchor="middle" class="tx">no native support</text>
+    </svg>
+    </div>
+    <figcaption><b>LangChain picks the strategy for you.</b> <b>ProviderStrategy</b> is used for providers with native structured output (OpenAI, Anthropic, xAI and others). <b>ToolStrategy</b> works with any tool-calling model. Force one with <code>ToolStrategy(AgentAnswer)</code> or <code>ProviderStrategy(AgentAnswer)</code> from <code>langchain.agents.structured_output</code>.</figcaption>
+  </figure>
+  <div class="code term"><div class="bar"><span class="file">sample output</span></div><pre>============================================================
+STRUCTURED RESPONSE
+============================================================
+type: AgentAnswer
+answer:
+  Here are 3 upcoming meetups in Bengaluru:
+  1) &lt;meetup name&gt; — &lt;date&gt; — &lt;venue&gt;
+  ...
+sources (3):
+  - &lt;meetup 1 title&gt;
+    https://www.meetup.com/...</pre></div>
+  <div class="callout warn">
+    <h5><span class="ico">!</span>Don't parse the last message yourself</h5>
+    <p>With ProviderStrategy the last AIMessage holds the answer as JSON text; with ToolStrategy the last message is a ToolMessage saying "Returning structured response: …". Either way, read <code>result["structured_response"]</code>. Now your code can loop over <code>.sources</code>, for example to show each meetup link as a button, with no parsing at all.</p>
+  </div>
+  <div class="callout code-tie">
+    <h5><span class="ico">↻</span>Optional variation</h5>
+    <p>Structured output works with any tool. Copy the <code>TavilyClient()</code> line and your own <code>search</code> function from Script 02 into this file and set <code>tools = [search]</code>.</p>
+  </div>
+</section>
+
+<section class="sec" id="trouble" aria-labelledby="trouble-h">
+  <div class="sec-head"><span class="sec-num">0.10</span><h2 id="trouble-h">When things go wrong</h2></div>
+  <p class="lede">Most first-run errors are about keys, models or the local server. Find your message here.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td><code>OPENAI_API_KEY is missing</code></td><td>You haven't created <code>.env</code>. Run <code>cp .env.example .env</code> and paste your key.</td></tr>
+        <tr><td><code>AuthenticationError</code> / 401</td><td>The key is wrong or revoked. Create a new one in the OpenAI dashboard.</td></tr>
+        <tr><td><code>model ... does not exist</code></td><td>Your account can't use the default model. Set <code>OPENAI_MODEL=</code> in <code>.env</code> to one it can.</td></tr>
+        <tr><td>Ollama <code>ConnectionError</code></td><td>The Ollama app isn't running. Start it, or run <code>ollama serve</code>.</td></tr>
+        <tr><td><code>model 'gemma3:270m' not found</code></td><td>Run <code>ollama pull gemma3:270m</code>.</td></tr>
+        <tr><td><code>MissingAPIKeyError</code> / Tavily 401</td><td><code>TAVILY_API_KEY</code> is missing or misspelled in <code>.env</code>.</td></tr>
+        <tr><td>The agent answers without searching</td><td>Make the tool docstring more explicit, or ask something that clearly needs fresh data.</td></tr>
+        <tr><td>Meetup results look old</td><td>Live search varies. Add a month to the question, for example "… in Bengaluru in November".</td></tr>
+        <tr><td><code>KeyError: 'structured_response'</code></td><td>You're running Script 03; only Script 04 sets <code>response_format</code>.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose"><p>Optional tidy-up for your code: <code>uv run black .</code> then <code>uv run isort .</code></p></div>
+</section>
+
+<section class="sec" id="recap" aria-labelledby="recap-h">
+  <div class="sec-head"><span class="sec-num">0.11</span><h2 id="recap-h">Recap and self-check</h2></div>
+  <p class="lede">You've revised the two foundations every lesson builds on: a chain that turns a prompt into an answer, and an agent that loops over tool calls until it can answer.</p>
+  <div class="prose">
+    <p>Keys live in <code>.env</code> and reach the SDKs through environment variables. A chain is <code>prompt | llm</code>; swapping <code>ChatOpenAI</code> for <code>ChatOllama</code> changes one line. The answer comes back as an <code>AIMessage</code>: read <code>.text</code>, count cost in <code>usage_metadata</code>, and watch <code>tool_calls</code>. An agent adds tools described by their name, type hints and docstring; LangChain runs them, and the trail of Human, AI, Tool and AI messages shows every step. A vendor tool like <code>TavilySearch</code> offers the model richer options, and <code>response_format</code> turns the final answer into a validated Pydantic object.</p>
+  </div>
+
+  <h3>From this revision to Lesson 1</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Idea</th><th>Here (LangChain)</th><th>In Lesson 1 (Strands on Bedrock)</th></tr></thead>
+      <tbody>
+        <tr><td>The model</td><td><code>ChatOpenAI(model=...)</code></td><td><code>BedrockModel(model_id=...)</code></td></tr>
+        <tr><td>Building an agent</td><td><code>create_agent(model, tools)</code></td><td><code>Agent(model=model, tools=[...])</code></td></tr>
+        <tr><td>Defining a tool</td><td><code>@tool</code> + type hints + docstring</td><td>The same: Strands' <code>@tool</code></td></tr>
+        <tr><td>Token usage</td><td><code>response.usage_metadata</code></td><td><code>response.metrics.accumulated_usage</code></td></tr>
+        <tr><td>The loop ends when</td><td>The AIMessage has no <code>tool_calls</code></td><td>The stop reason is <code>end_turn</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Self-check</h3>
+  <div class="prose"><p>Ten quick questions. Pick an answer to see why it's right or wrong.</p></div>
+  <div class="quiz" id="quiz"></div>
+  <p id="quiz-score" class="pill" style="margin-top:16px">Score: 0 of 10 answered</p>
+
+  <div class="callout code-tie" style="margin-top:2.4rem">
+    <h5><span class="ico">→</span>Up next: Lesson 1, your first AI agent</h5>
+    <p>Same ideas, now on AWS: why a plain LLM isn't enough, RAG, the AWS agentic stack, MCP and A2A, and a Hello World agent with the Strands Agents SDK on Amazon Bedrock. <a href="../your-first-agent/">Open Lesson 1</a>.</p>
+  </div>
+</section>
+
+<section class="sec" id="glossary" aria-labelledby="gloss-h">
+  <div class="sec-head"><span class="sec-num">A–Z</span><h2 id="gloss-h">Glossary</h2></div>
+  <p class="lede">Every underlined word on this page, in one place.</p>
+  <div class="gloss" id="gloss"></div>
+</section>
+
+<!-- awsq:bottom -->
+<nav class="awsq awsq-bottom" aria-label="Bootcamp navigation (bottom)"><div class="awsq-box"><span class="awsq-cap">AI-Infusion-AWS Bootcamp · Part 00 · AWS Revision</span><div class="awsq-row"><span class="awsq-l awsq-prev"><span class="awsq-d">← Previous</span><span class="awsq-t">You're at the start</span></span><a class="awsq-home" href="../../#aws-bootcamp"><b>AWS Bootcamp</b>all lessons</a><a class="awsq-l awsq-next" href="../your-first-agent/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 1 · Your first AI agent</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="cur" href="../part-00-AWS-Revision/" title="Part 00 · AWS Revision" aria-current="page">0</a></li><li><a class="" href="../your-first-agent/" title="Lesson 1 · Your first AI agent">1</a></li><li><a class="" href="../giving-agents-tools/" title="Lesson 2 · Giving agents tools">2</a></li><li><a class="" href="../Agents-that-remember/" title="Lesson 3 · Agents that remember">3</a></li><li><a class="" href="../How-agents-talk/" title="Lesson 4 · How agents talk">4</a></li></ol></div></nav>
+<!-- /awsq:bottom -->
+<footer>
+  <p>Revision notes for the AI-Infusion-AWS Bootcamp, based on the Day 1 practice code from Future with Shivank (AI Harness), sections 1 and 2.</p>
+  <p>Model names, library versions and free-tier limits change often. When something here differs from what you see, the current documentation wins.</p>
+</footer>
+</div><!-- /wrap -->
+</div><!-- /main -->
+</div><!-- /shell -->
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- Theme ---------------- */
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}}
+const saved=store("fws-theme");
+if(saved==="light"||saved==="dark")document.documentElement.setAttribute("data-theme",saved);
+$("#themeBtn").addEventListener("click",()=>{
+  const cur=document.documentElement.getAttribute("data-theme");
+  const sysDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark=cur?cur==="dark":sysDark;
+  const next=isDark?"light":"dark";
+  document.documentElement.setAttribute("data-theme",next);store("fws-theme",next);
+});
+
+/* ---------------- Menu (mobile) ---------------- */
+const side=$("#side"),menuBtn=$("#menuBtn");
+menuBtn.addEventListener("click",()=>{const o=side.classList.toggle("open");menuBtn.setAttribute("aria-expanded",o);});
+$$("#toc a").forEach(a=>a.addEventListener("click",()=>{side.classList.remove("open");menuBtn.setAttribute("aria-expanded","false");}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){side.classList.remove("open");hideTip();}});
+document.addEventListener("click",e=>{if(side.classList.contains("open")&&!side.contains(e.target)&&e.target!==menuBtn)side.classList.remove("open");});
+
+/* ---------------- Scrollspy + progress ---------------- */
+const links=$$("#toc a");
+const targets=links.map(a=>document.getElementById(a.getAttribute("href").slice(1))).filter(Boolean);
+const where=$("#where"),prog=$("#progress");
+function onScroll(){
+  const h=document.documentElement;const max=h.scrollHeight-h.clientHeight;
+  prog.style.width=(max>0?(h.scrollTop/max*100):0)+"%";
+  let cur=0;const y=110;
+  targets.forEach((t,i)=>{if(t.getBoundingClientRect().top<=y)cur=i;});
+  links.forEach((a,i)=>{a.classList.toggle("active",i===cur);a.classList.toggle("done",i<cur&&!a.parentElement.classList.contains("sub"));});
+  const a=links[cur];if(a){const n=a.querySelector(".n").textContent.trim();const t=a.querySelectorAll("span")[1].textContent;where.textContent=(n==="·"?"":n+"  ")+t;}
+}
+window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+
+/* ---------------- Glossary ---------------- */
+const G={
+ "api-key":["API key","A secret string that proves who you are to a service such as OpenAI or Tavily. Anyone holding it can spend your credits, so keep it out of code and screenshots."],
+ "env-file":[".env file","A plain text file of KEY=value lines kept next to your code but listed in .gitignore, so secrets never reach git. load_dotenv() reads it."],
+ "env-var":["Environment variable","A named value the operating system hands to every program it starts. SDKs read their keys from fixed names such as OPENAI_API_KEY."],
+ "uv":["uv","A fast Python project tool. uv sync creates the virtual environment and installs the exact locked versions; uv run runs a command inside it."],
+ "venv":["Virtual environment","A private folder of Python libraries for one project, so different projects don't clash over versions."],
+ "prompt-template":["PromptTemplate","A prompt with {placeholders} that LangChain fills in at run time, so the same instructions work on any input."],
+ "placeholder":["Placeholder","A {name} in a template that gets replaced by real text when the chain runs. The keys you pass to invoke() must match."],
+ "chat-model":["Chat model","A Python object that talks to an LLM, such as ChatOpenAI or ChatOllama. All of them share the same interface."],
+ "runnable":["Runnable / RunnableSequence","LangChain's common building block: anything you can .invoke(). Joining runnables with | makes a RunnableSequence."],
+ "lcel":["LCEL","LangChain Expression Language: building chains with the pipe operator, so the output of one block flows into the next."],
+ "temperature":["Temperature","A setting for how random the model's wording is. 0 asks for the most predictable answer."],
+ "ollama":["Ollama","A free app that downloads open-weights models and serves them on your own machine at localhost:11434. No key, no cost."],
+ "open-weights":["Open-weights model","A model whose trained weights are published, so anyone can download and run it locally. Gemma, Qwen and Llama are examples."],
+ "aimessage":["AIMessage","The object a chat model returns: the answer (.text), raw content, tool_calls, usage_metadata, response_metadata and an id."],
+ "token":["Token","The unit LLMs read and write: roughly three-quarters of an English word. Prices and limits are counted in tokens."],
+ "responses-api":["Responses API","OpenAI's newer API. Its replies can be a list of content blocks, which is why .content may be a list and .text is safer."],
+ "langsmith":["LangSmith","LangChain's tracing service. With LANGSMITH_TRACING=true and a key in .env, every run is recorded with no code changes."],
+ "trace":["Trace","A recorded run showing each step, its inputs and outputs, latency, tokens and cost."],
+ "tool":["Tool","A function an agent may call. The model sees only its name, input schema and description, and asks for it; the framework runs it."],
+ "agent":["Agent","An LLM that decides which tools to call, in a loop, until it can answer. Agent = LLM + tools."],
+ "agent-loop":["Agent loop","Ask the model; if it requests a tool, run it and send back the result; repeat until it answers in plain text. Also called the ReAct loop."],
+ "decorator":["Decorator","A line starting with @ placed above a function to add behaviour. @tool turns a function into an agent tool."],
+ "type-hints":["Type hints","Annotations like query: str that say what type a value should be. LangChain turns them into the tool's input schema."],
+ "docstring":["Docstring","The text in triple quotes at the top of a function. For a tool it's the description the model reads to decide when to call it."],
+ "humanmessage":["HumanMessage","A message typed by the user. An agent's input is a list of messages, starting with one of these."],
+ "toolmessage":["ToolMessage","The message LangChain adds after running a tool. It holds the tool's result, which the model reads next."],
+ "tavily":["Tavily","A web search API built for LLMs. Free tier: 1,000 credits a month. Its key must be named TAVILY_API_KEY."],
+ "sdk":["SDK","Software development kit: a vendor's library for calling its service from code, such as TavilyClient."],
+ "integration":["Integration","A ready-made LangChain component published by a vendor, such as langchain_tavily.TavilySearch. Less code for you, kept up to date by them."],
+ "structured-output":["Structured output","Making the model return data that matches a schema, instead of free text, so programs can use it without parsing."],
+ "pydantic":["Pydantic","A Python library for describing data shapes as classes (BaseModel) and validating that data fits them."],
+ "json":["JSON","A simple text format for structured data: {curly braces} for objects, [square brackets] for lists. The common language of APIs."]
+};
+const tip=document.createElement("div");tip.className="tip";tip.setAttribute("role","tooltip");tip.id="kw-tip";document.body.appendChild(tip);
+let tipFor=null;
+function showTip(el){
+  const d=G[el.dataset.k];if(!d)return;
+  tip.innerHTML="<b>"+esc(d[0])+"</b>"+esc(d[1]);
+  tip.classList.add("show");tipFor=el;el.setAttribute("aria-describedby","kw-tip");
+  const r=el.getBoundingClientRect();const tw=Math.min(340,window.innerWidth-24);
+  tip.style.maxWidth=tw+"px";
+  let left=r.left+window.scrollX+r.width/2-tw/2;left=Math.max(12+window.scrollX,Math.min(left,window.scrollX+window.innerWidth-tw-12));
+  tip.style.left=left+"px";
+  const th=tip.offsetHeight;
+  let top=r.bottom+window.scrollY+8;
+  if(r.bottom+th+16>window.innerHeight)top=r.top+window.scrollY-th-8;
+  tip.style.top=top+"px";
+}
+function hideTip(){tip.classList.remove("show");if(tipFor)tipFor.removeAttribute("aria-describedby");tipFor=null;}
+$$(".kw").forEach(el=>{
+  el.setAttribute("type","button");
+  el.addEventListener("mouseenter",()=>showTip(el));
+  el.addEventListener("mouseleave",hideTip);
+  el.addEventListener("focus",()=>showTip(el));
+  el.addEventListener("blur",hideTip);
+  el.addEventListener("click",e=>{e.preventDefault();if(tipFor===el&&tip.classList.contains("show"))hideTip();else showTip(el);});
+});
+window.addEventListener("scroll",()=>{if(tipFor&&!tipFor.matches(":hover"))hideTip();},{passive:true});
+const gl=$("#gloss");
+Object.keys(G).sort((a,b)=>G[a][0].localeCompare(G[b][0])).forEach(k=>{
+  const d=document.createElement("div");d.innerHTML="<b>"+esc(G[k][0])+"</b><p>"+esc(G[k][1])+"</p>";gl.appendChild(d);
+});
+
+/* ---------------- Syntax highlight + copy ---------------- */
+const PYK="def|return|import|from|as|for|in|if|else|elif|try|except|with|class|lambda|None|True|False|and|or|not|async|await|while|pass|raise";
+function hl(src,lang){
+  let re;
+  if(lang==="py") re=new RegExp('(#[^\\n]*)|("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\'|f?"(?:\\\\.|[^"\\\\\\n])*"|f?\'(?:\\\\.|[^\'\\\\\\n])*\')|(@\\w+)|\\b('+PYK+')\\b|\\b(\\d+(?:\\.\\d+)?)\\b|\\b([A-Za-z_]\\w*)(?=\\()','g');
+  else if(lang==="json") re=/("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|(-?\b\d+(?:\.\d+)?\b)/g;
+  else if(lang==="sh") re=/(#[^\n]*)|("(?:\\.|[^"\\])*"|'[^']*')|(^|\n|&& |\| )(aws|python3?|pip|cd|cp|uv|ollama|export|source|unzip|jupyter)\b/g;
+  else re=/(#[^\n]*)/g;
+  let out="",last=0,m;
+  while((m=re.exec(src))){
+    out+=esc(src.slice(last,m.index));
+    if(lang==="py"){
+      if(m[1])out+='<span class="tok-c">'+esc(m[1])+'</span>';
+      else if(m[2])out+='<span class="tok-s">'+esc(m[2])+'</span>';
+      else if(m[3])out+='<span class="tok-d">'+esc(m[3])+'</span>';
+      else if(m[4])out+='<span class="tok-k">'+esc(m[4])+'</span>';
+      else if(m[5])out+='<span class="tok-n">'+esc(m[5])+'</span>';
+      else if(m[6])out+='<span class="tok-f">'+esc(m[6])+'</span>';
+    }else if(lang==="json"){
+      if(m[1])out+=(m[2]?'<span class="tok-b">'+esc(m[1])+'</span>'+esc(m[2]):'<span class="tok-s">'+esc(m[1])+'</span>');
+      else if(m[3])out+='<span class="tok-k">'+esc(m[3])+'</span>';
+      else if(m[4])out+='<span class="tok-n">'+esc(m[4])+'</span>';
+    }else if(lang==="sh"){
+      if(m[1])out+='<span class="tok-c">'+esc(m[1])+'</span>';
+      else if(m[2])out+='<span class="tok-s">'+esc(m[2])+'</span>';
+      else out+=esc(m[3]||"")+'<span class="tok-f">'+esc(m[4])+'</span>';
+    }else{out+='<span class="tok-c">'+esc(m[1])+'</span>';}
+    last=re.lastIndex;
+  }
+  return out+esc(src.slice(last));
+}
+$$("pre code[class^='lang-']").forEach(c=>{const lang=c.className.replace("lang-","");c.innerHTML=hl(c.textContent,lang);});
+document.addEventListener("click",e=>{
+  const b=e.target.closest(".copy");if(!b)return;
+  const pre=b.closest(".code").querySelector("pre");const txt=pre.innerText;
+  const done=()=>{const o=b.textContent;b.textContent="Copied";setTimeout(()=>b.textContent=o,1400);};
+  try{navigator.clipboard.writeText(txt).then(done,()=>{fallbackCopy(txt);done();});}catch(err){fallbackCopy(txt);done();}
+});
+function fallbackCopy(t){try{const ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();}catch(e){}}
+
+/* helper: pressed state for a chip group */
+function press(group,btn){$$("[aria-pressed]",group).forEach(b=>b.setAttribute("aria-pressed",b===btn?"true":"false"));}
+
+/* ---------------- Swap the model ---------------- */
+(function(){
+  const root=$("#swap");if(!root)return;
+  const M={
+    openai:{file:"02_summary_chain_openai.py",code:'from langchain_openai import ChatOpenAI\n\nllm = ChatOpenAI(temperature=0, model="gpt-5.6-sol")   # cloud, needs OPENAI_API_KEY\nchain = profile_prompt_template | llm                  # unchanged',note:"<b>Cloud, paid per token.</b> Follows the three-part contract: one headline, exactly three bullets, one interview question. <code>response.content</code> is a list of blocks, so read <code>.text</code>."},
+    ollama:{file:"03_summary_chain_ollama.py",code:'from langchain_ollama import ChatOllama\n\nllm = ChatOllama(temperature=0, model="gemma3:270m")  # local, talks to localhost:11434\nchain = profile_prompt_template | llm                  # unchanged',note:"<b>Local, free and private.</b> Comes back fast, but a 270M-parameter model often ignores parts of the instructions: four bullets instead of three, or no interview question. <code>.content</code> is already a string; <code>.text</code> still works."}
+  };
+  function show(k){
+    const m=M[k];$("#swap-file").textContent=m.file;$("#swap-code").innerHTML=hl(m.code,"py");$("#swap-note").innerHTML=m.note;
+    $$("[data-m]",root).forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===k?"true":"false"));
+  }
+  $$("[data-m]",root).forEach(b=>b.addEventListener("click",()=>show(b.dataset.m)));
+  show("openai");
+})();
+
+/* ---------------- Agent loop stepper ---------------- */
+(function(){
+  const svg=$("#loop-svg");if(!svg)return;
+  const msgs=["1 · Your question goes to the model as a HumanMessage.","2 · The model replies with a tool call: search({'query': 'Bengaluru weather now'}).","3 · LangChain runs search() and sends back a ToolMessage with the result.","4 · No more tool calls, so the model writes the final answer. Done."];
+  let i=0;const btn=$("#loop-step"),msg=$("#loop-msg");
+  function render(){
+    svg.classList.toggle("running",i>0);
+    $$("[data-step]",svg).forEach(g=>{const on=+g.dataset.step===i;g.classList.toggle("on",on);$$(".flow",g).forEach(l=>l.classList.toggle("on",on&&!reduce));});
+    msg.textContent=i>0?msgs[i-1]:"Press the button to follow one run.";
+    btn.textContent=i===0?"Step through the loop":(i<4?"Next step":"Start again");
+  }
+  btn.addEventListener("click",()=>{i=i>=4?1:i+1;render();});
+  $("#loop-reset").addEventListener("click",()=>{i=0;render();});
+  render();
+})();
+
+/* ---------------- Quiz ---------------- */
+(function(){
+  const Q=[
+    ["Why do the scripts load keys with load_dotenv() from a .env file?",["It makes the model answer faster","Keys stay out of the code and out of git, and every SDK reads them from environment variables","OpenAI refuses keys typed into code","It encrypts the keys"],1,".env is listed in .gitignore, and load_dotenv() copies each KEY=value line into the environment, where OpenAI, Tavily and LangSmith look for their keys."],
+    ["What does prompt | llm create?",["A Python list of two objects","A RunnableSequence: the filled prompt flows into the model","A shell pipe between two processes","A second copy of the template"],1,"The pipe operator (LCEL) joins runnables. chain.invoke({...}) runs the template first, then the model."],
+    ["To move Script 02 from OpenAI to a local Ollama model, what changes?",["The prompt template","The chain and invoke() call","Only the model object: ChatOpenAI becomes ChatOllama","Everything, local models need a different library for chains"],2,"Every LangChain chat model has the same interface, so the prompt, the chain and invoke() stay identical."],
+    ["Why does every script print response.text instead of response.content?",["content is always empty","On newer OpenAI models content can be a list of content blocks; text is always one plain string","text is faster to compute","content holds the prompt, not the answer"],1,"Through the Responses API, .content may be a list. .text works the same for every provider."],
+    ["Where do you find how many tokens a call used?",["response.id","response.tool_calls","response.usage_metadata","response.type"],2,"usage_metadata holds input, output and total tokens in a provider-independent shape. That's your cost."],
+    ["With @tool, what does the model actually see about your function?",["The full source code","Its name, type hints (input schema) and docstring (description)","Only the return value","Nothing until it's called"],1,"That 'menu card' is all the model knows, which is why the docstring is written for the model."],
+    ["In the agent loop, who runs the search function?",["The LLM, on OpenAI's servers","LangChain, after the model requests it in a tool call","Tavily decides when to run it","The user, by pressing Enter"],1,"The model only requests a call. LangChain executes the function and adds a ToolMessage with the result."],
+    ["The placeholder run prints 4 messages. What's the order?",["Human, Tool, AI, AI","AI, Human, Tool, AI","Human, AI (tool call), Tool, AI (answer)","Human, AI, AI, Tool"],2,"Question, the model's tool request, the tool's result, then the final answer with no tool calls."],
+    ["What's the main gain from swapping your own Tavily wrapper for TavilySearch()?",["It's the only way to search the web","Less code to maintain and a richer menu card: the model can set time_range, topic, include_domains and more","It doesn't need an API key","It always returns exactly three results"],1,"The vendor-maintained tool documents extra arguments, and the model used them on its own (time_range='month')."],
+    ["When does LangChain use ToolStrategy for response_format?",["Always","When the model has no native structured output: it adds an extra 'answer' tool whose arguments are the schema","Only with Tavily tools","When the schema has no fields"],1,"Providers with native support (OpenAI, Anthropic, xAI) get ProviderStrategy. Either way you read result[\"structured_response\"]."]
+  ];
+  const root=$("#quiz");let answered=0,right=0;
+  Q.forEach((q,qi)=>{
+    const d=document.createElement("div");d.className="q";
+    d.innerHTML="<p>"+(qi+1)+". "+esc(q[0])+"</p><div class='opts'></div><div class='why'></div>";
+    const opts=d.querySelector(".opts");
+    q[1].forEach((o,oi)=>{const b=document.createElement("button");b.type="button";b.textContent=o;b.addEventListener("click",()=>{
+      if(d.classList.contains("answered"))return;d.classList.add("answered");answered++;
+      if(oi===q[2]){right++;b.classList.add("right");}else{b.classList.add("wrong");opts.children[q[2]].classList.add("right");}
+      d.querySelector(".why").innerHTML=(oi===q[2]?"<b style='color:var(--tool-ink)'>Correct.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> ")+esc(q[3]);
+      $("#quiz-score").textContent="Score: "+right+" of "+answered+" answered"+(answered===Q.length?(right>=8?". Great work, you're ready for Lesson 1.":". Revisit the parts you missed, then try Lesson 1."):"");
+    });opts.appendChild(b);});
+    root.appendChild(d);
+  });
+})();
+
+})();
+
+</script>
+</body>
+</html>
