@@ -106,6 +106,8 @@
 </style><!-- aiseq:mobilefix -->
 <style>@media (max-width:640px){table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}td,th,dt,dd,code{overflow-wrap:anywhere}.route-inner{overflow-x:auto}.decode dl{grid-template-columns:minmax(0,1fr)}.decode dt{white-space:normal}}</style>
 <!-- /aiseq:mobilefix -->
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- aiseq:top -->
@@ -228,16 +230,30 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
     </div>
 
     <h3>0.2 · Connect your laptop</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>RUN aws configure
+    ASK for the Access Key ID          // paste the key id
+    ASK for the Secret Access Key      // paste the secret; it is stored in ~/.aws/credentials
+    ASK for the default region         // type us-east-1
+    ASK for the output format          // press Enter to leave it blank</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">terminal</span><button class="copy">COPY</button></div>
 <pre>aws configure
 <span class="c"># AWS Access Key ID     → paste the key id</span>
 <span class="c"># AWS Secret Access Key → paste the secret</span>
 <span class="c"># Default region name   → us-east-1</span>
 <span class="c"># Default output format → (press Enter, leave blank)</span></pre></div>
+      </details>
+    </div>
 
     <p>Check it worked:</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>RUN aws sts get-caller-identity   // prints your Account, UserId and Arn if the credentials work</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">terminal</span><button class="copy">COPY</button></div>
 <pre>aws sts get-caller-identity</pre></div>
+      </details>
+    </div>
     <p>Success prints your <code class="inl">Account</code>, <code class="inl">UserId</code>, and <code class="inl">Arn</code>. If you get <code class="inl">InvalidClientTokenId</code>, the key is wrong or deactivated — create a fresh one and run <code class="inl">aws configure</code> again.</p>
 
     <h3>0.3 · Enable the models in Bedrock</h3>
@@ -255,10 +271,17 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
     </table>
 
     <p>Verify from the terminal which Anthropic models are live in your account:</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>RUN aws bedrock list-foundation-models --region us-east-1   // ask Bedrock which models exist
+SET names = each modelId that contains 'anthropic.claude'   // the --query filter
+PRINT names as a table</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">terminal</span><button class="copy">COPY</button></div>
 <pre>aws bedrock list-foundation-models --region us-east-1 \
   --query <span class="s">"modelSummaries[?contains(modelId,'anthropic.claude')].modelId"</span> \
   --output table</pre></div>
+      </details>
+    </div>
 
     <div class="note warn">
       <div class="t">The single most common error you will hit</div>
@@ -282,20 +305,35 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
 └── shivank3/             <span class="c"># capstone project</span></pre></div>
 
     <h3>0.5 · Install the packages</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal · from the project folder</div><pre>RUN ./setup.sh   // macOS / Linux: install the packages the project needs
+RUN setup.bat    // Windows: the same job</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">terminal · from the project folder</span><button class="copy">COPY</button></div>
 <pre><span class="c"># macOS / Linux</span>
 ./setup.sh
 
 <span class="c"># Windows</span>
 setup.bat</pre></div>
+      </details>
+    </div>
 
     <p>Or do it manually if you prefer:</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal · manual install</div><pre>RUN python3 --version           // must be 3.10 or higher
+RUN python3 -m venv .venv       // create an isolated environment in .venv
+RUN source .venv/bin/activate   // turn it on (Windows: .venv\Scripts\activate)
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt   // install the packages the project lists</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">terminal · manual install</span><button class="copy">COPY</button></div>
 <pre>python3 --version          <span class="c"># must be 3.10 or higher</span>
 python3 -m venv .venv
 <span class="k">source</span> .venv/bin/activate   <span class="c"># Windows: .venv\Scripts\activate</span>
 pip install --upgrade pip
 pip install -r requirements.txt</pre></div>
+      </details>
+    </div>
 
     <div class="note info">
       <div class="t">If you're in conda (your prompt shows <code class="inl">(base)</code>)</div>
@@ -304,11 +342,18 @@ pip install -r requirements.txt</pre></div>
 
     <h3>0.6 · Run the readiness check</h3>
     <p>This is the single most useful command in the whole project. It verifies Python, packages, credentials, region, Bedrock access, <strong>and makes a real model call</strong> — so if it passes, every example will run.</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 00_check_setup.py</div><pre>RUN source .venv/bin/activate   // turn on the project's virtual environment
+SET AWS_DEFAULT_REGION = us-east-1   // tells the AWS tools which region to use
+RUN python 00_check_setup.py   // checks Python, packages and credentials, then makes one real model call</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
 <pre>source .venv/bin/activate
 export AWS_DEFAULT_REGION=us-east-1
 python 00_check_setup.py</pre>
+    </div>
+      </details>
     </div>
 
 
@@ -493,6 +538,26 @@ python 00_check_setup.py</pre>
       <div class="t">The one-line distinction to drill</div>
       <p><strong>RAG answers questions. Agents accomplish goals.</strong> RAG gives the model better information; an agent gives it the ability to act, check the result, and try again.</p>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">A RAG system answers a question from a knowledge base. Which change turns it into an agent?</p>
+        <ol class="lk-opts">
+          <li>It stores its documents in a vector database.<div class="lk-why">A vector database is only how the knowledge is stored for search. A system that only retrieves is still RAG.</div></li>
+          <li data-correct>It can call tools, check the result, and try again until the goal is met.<div class="lk-why">The page's distinction: RAG answers questions, while agents accomplish goals by acting, checking, and retrying.</div></li>
+          <li>It uses a larger model than a basic chatbot.<div class="lk-why">The page defines an agent by its tools and reasoning loop, not by the size of the model.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">In the travel-planner example, what makes the final recommendation the agent's decision rather than a lookup?</p>
+        <ol class="lk-opts">
+          <li>It reads the historical weather from a knowledge base.<div class="lk-why">Fetching the weather is one RAG step. On its own, that is still retrieval.</div></li>
+          <li>It copies the answer from a single API response.<div class="lk-why">The answer is not one API response. The agent combines several sources.</div></li>
+          <li data-correct>It combines the weather, a live forecast and the user's preferences into one judgement.<div class="lk-why">The page calls that synthesis the decision-making that separates an agent from simple retrieval.</div></li>
+        </ol>
+      </div>
+    </div>
   </section>
 
   <section id="s4">
@@ -673,6 +738,26 @@ python 00_check_setup.py</pre>
       <div class="t">The sentence that makes agents click</div>
       <p>"A chatbot answers once. An agent keeps going until the job is done." The loop <em>is</em> the difference. Everything else is detail.</p>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">The model asks for a tool and the agent runs it. What happens to the tool's result?</p>
+        <ol class="lk-opts">
+          <li data-correct>It is fed back into the agent, which may call the model again.<div class="lk-why">That is the loop from Diagram 9. Results feed back, and the cycle repeats until the task is fully addressed.</div></li>
+          <li>The loop ends and the raw result is returned as the final answer.<div class="lk-why">One tool call does not end the loop. It ends when the agent determines the prompt has been fully addressed.</div></li>
+          <li>The tool is removed from the agent for the rest of the run.<div class="lk-why">The page describes results feeding back into the loop, not tools being removed.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">What tells the agentic loop to stop?</p>
+        <ol class="lk-opts">
+          <li>The model has used every tool at least once.<div class="lk-why">The model picks tools based on the task. It does not have to use all of them.</div></li>
+          <li>The agent has run as many loops as it has tools.<div class="lk-why">The page gives no fixed count. The loop repeats until the task is addressed.</div></li>
+          <li data-correct>The agent determines the prompt has been fully addressed.<div class="lk-why">That is the stop condition on this page. Then the agent compiles everything and returns the result.</div></li>
+        </ol>
+      </div>
+    </div>
   </section>
 
   <section id="s8">
@@ -684,6 +769,17 @@ python 00_check_setup.py</pre>
     </div>
 
     <h3>8.1 · The simplest possible agent — Strands + Nova Lite</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank1/01_hello_world_agent.py</div><pre>CREATE model = a Bedrock model using NOVA_LITE   // Amazon's cheapest model, fine for a first run
+CREATE agent = Agent with that model
+SET response = agent("Hello! Tell me a fun fact about AI agents.")
+PRINT response</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent object that wraps the model and is called like a function.</li>
+        <li><code>BedrockModel</code> <span class="lk-src">from <code>strands.models.bedrock</code></span>: the model object that talks to a model on Amazon Bedrock.</li>
+        <li><code>NOVA_LITE</code> <span class="lk-src">from <code>config</code>, the project's own <code>config.py</code></span>: the model id of Amazon Nova Lite, shared by all the scripts.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank1/01_hello_world_agent.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">from</span> strands <span class="k">import</span> Agent
 <span class="k">from</span> strands.models.bedrock <span class="k">import</span> BedrockModel
@@ -696,6 +792,8 @@ agent = Agent(model=model)
 
 response = agent(<span class="s">"Hello! Tell me a fun fact about AI agents."</span>)
 <span class="f">print</span>(response)</pre></div>
+      </details>
+    </div>
 
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
@@ -706,6 +804,22 @@ response = agent(<span class="s">"Hello! Tell me a fun fact about AI agents."</s
     <h3>8.2 · Same idea in LangGraph, with a tool</h3>
     <p>Strands is not the only framework. This version uses LangGraph and adds a small tool, so you can watch the loop actually loop.</p>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank1/02_hello_world_langgraph.py</div><pre>DEFINE greet(name) as a tool   // the docstring tells the model when to use it
+    RETURN "Hello, " + name + "! Welcome to the world of AI agents."
+
+CREATE llm = a chat model for MODEL_ID, served through Bedrock
+CREATE agent = a ReAct agent with llm and the greet tool   // the loop: model, tool, model
+SET response = the agent's run on "Please greet Alice and Bob."
+FOR EACH message in response
+    PRINT the message type and text   // one line per step, so you can see the loop</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>init_chat_model</code> <span class="lk-src">from <code>langchain.chat_models</code></span>: builds the chat model object for Bedrock.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>langchain.tools</code></span>: the decorator that turns <code>greet</code> into a tool.</li>
+        <li><code>create_react_agent</code> <span class="lk-src">from <code>langgraph.prebuilt</code></span>: builds the agent that loops between the model and its tools.</li>
+        <li><code>MODEL_ID</code> <span class="lk-src">from <code>config</code>, the project's own <code>config.py</code></span>: the model id used for the chat model.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank1/02_hello_world_langgraph.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">from</span> langchain.chat_models <span class="k">import</span> init_chat_model
 <span class="k">from</span> langchain.tools <span class="k">import</span> tool
@@ -737,6 +851,8 @@ response = agent.invoke(
 <span class="c"># Print every step so you can see the loop</span>
 <span class="k">for</span> message <span class="k">in</span> response[<span class="s">"messages"</span>]:
     <span class="f">print</span>(<span class="s">f"{message.type}: {message.text}"</span>)</pre></div>
+      </details>
+    </div>
 
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
@@ -750,6 +866,26 @@ response = agent.invoke(
     <div class="note info">
       <div class="t">Note on models — already handled for you</div>
       <p>Older tutorials pin <code class="inl">anthropic.claude-3-5-haiku-20241022-v1:0</code>, which AWS has since retired. <strong>These files already use the current model</strong> via <code class="inl">config.py</code>, so there is nothing to patch. If a model is retired in future, run <code class="inl">python 01_list_models.py</code>, pick a live one, and change the single line in <code class="inl">config.py</code> — every example picks it up.</p>
+    </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">The LangGraph run prints an empty <code>ai:</code> line before the tool output. What does that mean?</p>
+        <ol class="lk-opts">
+          <li>The Bedrock connection failed, so the model returned nothing.<div class="lk-why">The <code>tool:</code> lines that follow show that the request reached the model and the tool ran.</div></li>
+          <li>The model is answering from its training data, not from the tool.<div class="lk-why">The page says the empty <code>ai:</code> line is the model choosing a tool, so it is not an answer from training data.</div></li>
+          <li data-correct>The model chose to call the greet tool instead of answering in text.<div class="lk-why">That is the agentic loop from Diagram 9, visible in your terminal output.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">You run <code>python shivank1/02_hello_world_langgraph.py</code> from inside <code>shivank1/</code> and get <code>ModuleNotFoundError: No module named 'config'</code>. What is the fix?</p>
+        <ol class="lk-opts">
+          <li data-correct>Run it from the project root, the folder that contains <code>config.py</code>.<div class="lk-why">The scripts import shared settings from <code>config.py</code>, so they need to run from that folder.</div></li>
+          <li>Install a package called <code>config</code> with pip.<div class="lk-why"><code>config.py</code> is a file in this project, not a package to install. The problem is where you run from.</div></li>
+          <li>Delete the <code>from config</code> import line.<div class="lk-why">The script uses <code>MODEL_ID</code> from <code>config.py</code>, so deleting that import breaks the model choice instead of fixing the path.</div></li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -836,6 +972,20 @@ response = agent.invoke(
     <h2>From function to tool</h2>
     <p>This is the most important idea in this module. Start with an ordinary Python function that checks whether a server is up:</p>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · plain python — the agent cannot use this</div><pre>DEFINE check_server_status(server_url):
+    TRY
+        SET response = an HTTP GET of server_url, waiting at most 5 seconds
+        RETURN "Server is up. Status code: " + the response status code
+    ON ERROR (any requests exception)
+        RETURN "Server is down or unreachable"
+
+SET status = check_server_status("https://staging.myapp.com")
+PRINT status   // e.g. "Server is up. Status code: 200"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>requests</code> <span class="lk-src">third-party package, installed with pip</span>: sends the HTTP GET request and provides the exception that is caught.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">plain python — the agent cannot use this</span><button class="copy">COPY</button></div>
 <pre><span class="k">import</span> requests
 
@@ -851,6 +1001,8 @@ response = agent.invoke(
 status = check_server_status(<span class="s">"https://staging.myapp.com"</span>)
 <span class="f">print</span>(status)
 <span class="c"># "Server is up. Status code: 200"</span></pre></div>
+      </details>
+    </div>
 
     <p>Ask the agent <em>"Is the staging server running?"</em> and it replies that it has no ability to check server status. <strong>The agent cannot magically discover your function.</strong> That is the gap.</p>
 
@@ -862,6 +1014,20 @@ status = check_server_status(<span class="s">"https://staging.myapp.com"</span>)
       <tr><td>A proper docstring</td><td>Describes what it does, so the agent knows <em>when</em> to use it</td></tr>
     </table>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/01_function_to_tool.py</div><pre>DEFINE check_server_status(server_url: text) -> text as a tool   // 1. the @tool decorator, 2. the type hints, 3. the docstring
+    // docstring: what the tool does, its server_url argument and what it returns
+    TRY
+        SET response = an HTTP GET of server_url, waiting at most 5 seconds
+        RETURN "Server is up. Status code: " + the response status code
+    ON ERROR (any requests exception)
+        RETURN "Server is down or unreachable"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: imported here for the next snippet; not used in this block.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that makes the function available to an agent.</li>
+        <li><code>requests</code> <span class="lk-src">third-party package, installed with pip</span>: sends the HTTP GET request and provides the exception that is caught.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/01_function_to_tool.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">from</span> strands <span class="k">import</span> Agent, tool
 <span class="k">import</span> requests
@@ -881,10 +1047,18 @@ status = check_server_status(<span class="s">"https://staging.myapp.com"</span>)
         <span class="k">return</span> <span class="s">f"Server is up. Status code: {response.status_code}"</span>
     <span class="k">except</span> requests.exceptions.RequestException:
         <span class="k">return</span> <span class="s">"Server is down or unreachable"</span></pre></div>
+      </details>
+    </div>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · give it to the agent</div><pre>CREATE agent = Agent with the check_server_status tool
+SET response = agent("Is the staging server running? Check https://httpbin.org/get")</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">give it to the agent</span><button class="copy">COPY</button></div>
 <pre>agent = Agent(tools=[check_server_status])
 response = agent(<span class="s">"Is the staging server running? Check https://httpbin.org/get"</span>)</pre></div>
+      </details>
+    </div>
 
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
@@ -895,6 +1069,26 @@ response = agent(<span class="s">"Is the staging server running? Check https://h
       <p><strong>The docstring is not a comment — it is the user manual the model reads.</strong> The model decides whether to call your tool based on that description alone. Vague docstring, unreliable agent. Deliberately break one: change the docstring to <code class="inl">"Does a thing."</code> and watch the agent stop calling it. That single experiment will teach you more than any amount of reading.</p>
     </div>
     <p>In short: <em>this pattern works for any function. Add <code class="inl">@tool</code>, give it to your Agent, and the agent can now execute it.</em></p>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">You change a tool's docstring to "Does a thing." What is the most likely result?</p>
+        <ol class="lk-opts">
+          <li>The file stops with a SyntaxError when it runs.<div class="lk-why">A docstring is just a string. Changing its wording does not break the Python syntax.</div></li>
+          <li>The agent prints the docstring as its answer.<div class="lk-why">The docstring is never printed. The model reads it to decide when to call the tool.</div></li>
+          <li data-correct>The agent may stop calling the tool, because the docstring is how it decides when to use it.<div class="lk-why">The page's rule: a vague docstring makes an unreliable agent. The model decides from the description alone.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">Why does the function use type hints, such as <code>server_url: str</code>?</p>
+        <ol class="lk-opts">
+          <li>Python will not run a function that has no type hints.<div class="lk-why">Type hints are optional in Python. Here their job is to tell the agent what to expect.</div></li>
+          <li data-correct>They tell the agent what data types to expect.<div class="lk-why">The page's table says exactly this. The hints describe each input so the agent knows what to pass.</div></li>
+          <li>They make the requests call run faster.<div class="lk-why">Type hints do not change how fast the request runs. Their job is to describe the inputs to the agent.</div></li>
+        </ol>
+      </div>
+    </div>
   </section>
 
   <section id="s11">
@@ -902,6 +1096,21 @@ response = agent(<span class="s">"Is the staging server running? Check https://h
     <h2>Your first tool-enabled agent — the tip calculator</h2>
     <p>A practical, self-contained example from Module 2. Nothing external to configure.</p>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/01_function_to_tool.py</div><pre>DEFINE calculate_tip(bill_amount, tip_percentage, num_people = 1) as a tool
+    SET tip = bill_amount * (tip_percentage / 100)
+    SET total = bill_amount + tip
+    SET per_person = total / num_people
+    RETURN bill, tip, total and per_person   // tip, total and per_person rounded to 2 decimals
+
+CREATE agent = Agent with the calculate_tip tool
+SET response = agent("The bill is $85. What's a 20% tip, and how much does each person pay if we're splitting it 4 ways?")
+PRINT the text of the response message</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that is given the tip tool.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that turns <code>calculate_tip</code> into a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/01_function_to_tool.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">from</span> strands <span class="k">import</span> Agent, tool
 
@@ -929,12 +1138,21 @@ agent = Agent(tools=[calculate_tip])
 
 response = agent(<span class="s">"The bill is $85. What's a 20% tip, and how much does each person pay if we're splitting it 4 ways?"</span>)
 <span class="f">print</span>(response.message[<span class="s">'content'</span>][<span class="s">0</span>][<span class="s">'text'</span>])</pre></div>
+      </details>
+    </div>
 
     <p>Then show that the agent understands <em>intent</em>, not keywords — all three of these work without any extra code:</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/02_tip_calculator.py</div><pre>CALL agent("What's a 15% tip on $42?")
+CALL agent("Bill is $120, we want to tip 18%, split between 3 people")
+CALL agent("Calculate tip for $67.50 at 20%")   // three different phrasings, same tool</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/02_tip_calculator.py</span><button class="copy">COPY</button></div>
 <pre>agent(<span class="s">"What's a 15% tip on $42?"</span>)
 agent(<span class="s">"Bill is $120, we want to tip 18%, split between 3 people"</span>)
 agent(<span class="s">"Calculate tip for $67.50 at 20%"</span>)</pre></div>
+      </details>
+    </div>
 
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
@@ -951,6 +1169,24 @@ agent(<span class="s">"Calculate tip for $67.50 at 20%"</span>)</pre></div>
     <h2>When one tool isn't enough</h2>
     <p>The scenario: you ask a sales assistant to <em>"pull last quarter's sales data and email a summary to the team."</em> That is not one task — it is three: query the database, analyse the numbers, send an email.</p>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/03_multi_tool_sales.py</div><pre>DEFINE get_sales_data(quarter) as a tool
+    RETURN revenue 1250000, deals 47 and the quarter   // sample numbers, not a real database
+
+DEFINE analyze_sales(revenue, deals, quarter) as a tool
+    SET avg_deal = revenue / deals
+    RETURN "Q" + quarter + ": " + revenue + " revenue, " + deals + " deals, " + avg_deal + " avg deal size"
+
+DEFINE send_email(to, subject, body) as a tool
+    RETURN "Email sent to " + to   // no real email is sent
+
+CREATE agent = Agent with get_sales_data, analyze_sales and send_email
+SET response = agent("Pull last quarter's sales data and email a summary to the team")   // the agent decides the order</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that is given the three tools.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that turns each function into a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/03_multi_tool_sales.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">from</span> strands <span class="k">import</span> Agent, tool
 
@@ -973,6 +1209,8 @@ agent(<span class="s">"Calculate tip for $67.50 at 20%"</span>)</pre></div>
 agent = Agent(tools=[get_sales_data, analyze_sales, send_email])
 
 response = agent(<span class="s">"Pull last quarter's sales data and email a summary to the team"</span>)</pre></div>
+      </details>
+    </div>
 
     <figure>
       <svg viewBox="0 0 700 190" role="img" aria-label="Agent chaining three tools in sequence">
@@ -1020,6 +1258,16 @@ response = agent(<span class="s">"Pull last quarter's sales data and email a sum
     <p>You don't have to write everything. <code class="inl">strands_tools</code> ships ready-made tools — import and go.</p>
 
     <h3>13.1 · Calculator</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/05_prebuilt_tools.py</div><pre>CREATE agent = Agent with the calculator tool and the system prompt "You are a helpful math assistant."
+ASK agent "What's 42 raised to the power of 9?"
+ASK agent "Solve the equation x^2 + 5x + 6 = 0"
+ASK agent "What's the derivative of sin(x) * cos(x)?"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that gets the tool and the system prompt.</li>
+        <li><code>calculator</code> <span class="lk-src">from <code>strands_tools</code></span>: a ready-made maths tool, so you do not write one.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/05_prebuilt_tools.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">from</span> strands <span class="k">import</span> Agent
 <span class="k">from</span> strands_tools <span class="k">import</span> calculator
@@ -1032,6 +1280,8 @@ agent = Agent(
 agent(<span class="s">"What's 42 raised to the power of 9?"</span>)
 agent(<span class="s">"Solve the equation x^2 + 5x + 6 = 0"</span>)
 agent(<span class="s">"What's the derivative of sin(x) * cos(x)?"</span>)</pre></div>
+      </details>
+    </div>
     <p>Note this also introduces the <strong>system prompt</strong> — standing instructions that shape the agent's behaviour across every request.</p>
 
     <div class="runbox">
@@ -1040,6 +1290,22 @@ agent(<span class="s">"What's the derivative of sin(x) * cos(x)?"</span>)</pre><
     </div>
     <h3>13.2 · Combining several pre-built tools</h3>
     <p>Fetch data from the web, do maths on it, and write a file — one request, three tools.</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/06_multi_prebuilt_tools.py</div><pre>CREATE agent = Agent with http_request, calculator and file_write, plus the system prompt "You help with data analysis tasks."
+SET the environment variable BYPASS_TOOL_CONSENT = "true"   // turns off the approval prompts for these tools
+ASK agent to
+    fetch stock data from the Yahoo Finance chart API for AAPL (interval 1d, range 5d)
+    extract the latest closing prices
+    calculate the average price over the period
+    save the results to stock_summary.txt</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>os</code> <span class="lk-src">Python standard library</span>: sets the <code>BYPASS_TOOL_CONSENT</code> environment variable.</li>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that is given the three tools.</li>
+        <li><code>http_request</code> <span class="lk-src">from <code>strands_tools</code></span>: a ready-made tool that fetches data from a URL.</li>
+        <li><code>calculator</code> <span class="lk-src">from <code>strands_tools</code></span>: a ready-made tool that does the maths.</li>
+        <li><code>file_write</code> <span class="lk-src">from <code>strands_tools</code></span>: a ready-made tool that writes a file.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/06_multi_prebuilt_tools.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">import</span> os
 <span class="k">from</span> strands <span class="k">import</span> Agent
@@ -1058,6 +1324,8 @@ agent(<span class="s">"""</span>
 <span class="s">calculate the average price over the period,</span>
 <span class="s">and save the results to stock_summary.txt</span>
 <span class="s">"""</span>)</pre></div>
+      </details>
+    </div>
 
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
@@ -1067,6 +1335,26 @@ agent(<span class="s">"""</span>
       <div class="t">Explain BYPASS_TOOL_CONSENT before running it</div>
       <p>Some tools are sensitive — they write files or touch cloud resources — so Strands <strong>pauses and asks permission</strong> before running them. Setting <code class="inl">BYPASS_TOOL_CONSENT="true"</code> turns that prompt off so the cell runs unattended. Teach it as a real safety feature: in production you often <em>want</em> a human approving actions. If a cell seems to hang with <code class="inl">[*]</code>, it is waiting for your <code class="inl">y</code> at a hidden prompt.</p>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">A notebook cell sits on <code>[*]</code> and never finishes. What is the most likely cause?</p>
+        <ol class="lk-opts">
+          <li>The Bedrock model has been retired.<div class="lk-why">A retired model gives a <code>ResourceNotFoundException</code> error, not a cell stuck on <code>[*]</code>.</div></li>
+          <li data-correct>A tool is waiting for your <code>y</code> at a hidden consent prompt.<div class="lk-why">The page says <code>[*]</code> means a tool is waiting for consent. Type <code>y</code>, or set <code>BYPASS_TOOL_CONSENT</code> in an earlier cell.</div></li>
+          <li>The calculator tool ran out of memory.<div class="lk-why">The page ties <code>[*]</code> to the consent prompt, not to memory use.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">Why does the page treat the consent prompt as a safety feature?</p>
+        <ol class="lk-opts">
+          <li>It encrypts the output of each tool.<div class="lk-why">The consent prompt is about approval, not encryption.</div></li>
+          <li>It makes sensitive tools run faster.<div class="lk-why">Speed is not the point. The prompt is about a person approving actions first.</div></li>
+          <li data-correct>It keeps a person approving actions that write files or touch cloud resources.<div class="lk-why">Some tools are sensitive, so Strands pauses and asks. In production you often want a human approving actions.</div></li>
+        </ol>
+      </div>
+    </div>
   </section>
 
   <section id="s14">
@@ -1074,6 +1362,14 @@ agent(<span class="s">"""</span>
     <h2>AWS integration with <code class="inl">use_aws</code></h2>
     <p>One tool, many services. <code class="inl">use_aws</code> translates plain English into AWS API calls.</p>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/07_use_aws.py</div><pre>CREATE agent = Agent with the use_aws tool and the system prompt "You are an AWS assistant that helps manage cloud resources."
+ASK agent "List all S3 buckets in my account"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that gets the tool and the system prompt.</li>
+        <li><code>use_aws</code> <span class="lk-src">from <code>strands_tools</code></span>: a ready-made tool that can call many AWS services.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/07_use_aws.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">from</span> strands <span class="k">import</span> Agent
 <span class="k">from</span> strands_tools <span class="k">import</span> use_aws
@@ -1084,14 +1380,25 @@ agent = Agent(
 )
 
 agent(<span class="s">"List all S3 buckets in my account"</span>)</pre></div>
+      </details>
+    </div>
 
     <p>The same single tool handles completely different services — Other examples:</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · one tool, three services</div><pre>// DynamoDB
+ASK agent "Look up customer ID 12345 in the DynamoDB customers table and update their email to newemail@example.com"
+
+// Lambda
+ASK agent "Invoke the Lambda function 'order-processor' with order ID 67890"</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">one tool, three services</span><button class="copy">COPY</button></div>
 <pre><span class="c"># DynamoDB</span>
 agent(<span class="s">"Look up customer ID 12345 in the DynamoDB customers table and update their email to newemail@example.com"</span>)
 
 <span class="c"># Lambda</span>
 agent(<span class="s">"Invoke the Lambda function 'order-processor' with order ID 67890"</span>)</pre></div>
+      </details>
+    </div>
 
     <div class="note info">
       <div class="t">Before you run this</div>
@@ -1115,6 +1422,25 @@ agent(<span class="s">"Invoke the Lambda function 'order-processor' with order I
     <h2>Building custom tools</h2>
     <p>When community tools don't fit — an internal API, a proprietary database, something new — you write your own. For example: an online store checking inventory.</p>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/04_custom_tool_inventory.py</div><pre>DEFINE check_inventory(product_id) as a tool
+    SET inventory = {PROD-123: 15, PROD-456: 0, PROD-789: 8}   // stands in for a real database
+    SET quantity = inventory[product_id], or 0 if the id is unknown
+    IF quantity &gt; 0 THEN
+        RETURN "Product " + product_id + " is in stock. We have " + quantity + " units available."
+    ELSE
+        RETURN "Product " + product_id + " is currently out of stock."
+
+CREATE agent = Agent with the check_inventory tool
+ASK agent "Is PROD-123 in stock?"
+ASK agent "Do we have PROD-456 available?"
+ASK agent "Check inventory for PROD-789"
+ASK agent "Can I order PROD-123 right now?"   // four phrasings, same tool</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that is given the tool.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that turns <code>check_inventory</code> into a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/04_custom_tool_inventory.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">from</span> strands <span class="k">import</span> Agent, tool
 
@@ -1146,6 +1472,8 @@ agent(<span class="s">"Is PROD-123 in stock?"</span>)
 agent(<span class="s">"Do we have PROD-456 available?"</span>)
 agent(<span class="s">"Check inventory for PROD-789"</span>)
 agent(<span class="s">"Can I order PROD-123 right now?"</span>)</pre></div>
+      </details>
+    </div>
 
     <p>Note the mock dictionary: in production you'd replace it with real database queries or an API call. The <em>agent-facing</em> part — decorator, type hints, docstring — stays identical either way.</p>
 
@@ -1168,6 +1496,32 @@ agent(<span class="s">"Can I order PROD-123 right now?"</span>)</pre></div>
     <p>The story: your agent has five tools, each opening its own database connection. Your DBA messages: <em>"Why is your agent opening 50 database connections per minute?"</em> Each tool call opens and closes a connection; multiply by concurrent users and the database drowns.</p>
     <p><strong>The fix:</strong> group related tools in a class so they share one connection.</p>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/08_class_based_tools.py</div><pre>DEFINE class InventoryTools
+    ON CREATE (__init__)
+        SET self.products = three products (PROD-123, PROD-456, PROD-789), each with a name, quantity and price   // shared data store; in production: a database connection
+
+    DEFINE check_stock(product_id) as a tool
+        SET product = the product with that id
+        IF there is no product THEN
+            RETURN "Product " + product_id + " not found"
+        RETURN the name + ": " + the quantity + " units at $" + the price
+
+    DEFINE update_stock(product_id, quantity) as a tool
+        IF product_id is in self.products THEN
+            SET that product's quantity = quantity
+            RETURN "Updated " + product_id + " to " + quantity + " units"
+        RETURN "Product " + product_id + " not found"
+
+CREATE inventory = one InventoryTools   // one instance, shared state
+CREATE agent = Agent with inventory.check_stock and inventory.update_stock
+ASK agent "Check stock for PROD-123"
+ASK agent "Update PROD-456 stock to 25 units, then confirm the new level"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that is given the two tool methods.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that turns each method into a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/08_class_based_tools.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">from</span> strands <span class="k">import</span> Agent, tool
 
@@ -1212,6 +1566,8 @@ agent = Agent(tools=[inventory.check_stock, inventory.update_stock])
 
 agent(<span class="s">"Check stock for PROD-123"</span>)
 agent(<span class="s">"Update PROD-456 stock to 25 units, then confirm the new level"</span>)</pre></div>
+      </details>
+    </div>
 
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
@@ -1220,6 +1576,29 @@ agent(<span class="s">"Update PROD-456 stock to 25 units, then confirm the new l
     <h3>16.2 · Slow sequential calls → async tools</h3>
     <p>If three warehouse lookups take 2 seconds each, doing them one after another costs 6 seconds. Make the tool <code class="inl">async</code> and they run in parallel.</p>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank2/09_async_tools.py</div><pre>DEFINE check_warehouse_inventory(product_id, warehouse) as an async tool
+    WAIT 2 seconds   // simulates a slow API call
+    SET data = the stock of PROD-123 and PROD-456 in the east, west and central warehouses
+    SET quantity = data[warehouse][product_id], or 0 if missing
+    RETURN warehouse, product_id and quantity
+
+DEFINE async main()
+    CREATE agent = Agent with the check_warehouse_inventory tool
+    SET start = the current time
+    SET response = WAIT for agent.invoke_async("Can we ship 100 units of PROD-123? Check all warehouses: east, west, and central.")
+    SET elapsed = the current time - start
+    PRINT the text of the response message
+    PRINT "Total time: " + elapsed + "s (sequential would be ~6s)"
+
+WAIT for main()   // top-level await, as in a notebook</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>asyncio</code> <span class="lk-src">Python standard library</span>: provides <code>asyncio.sleep</code> for the simulated delay.</li>
+        <li><code>time</code> <span class="lk-src">Python standard library</span>: measures how long the whole run takes.</li>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that is given the async tool.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that turns the async function into a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank2/09_async_tools.py</span><button class="copy">COPY</button></div>
 <pre><span class="k">import</span> asyncio
 <span class="k">import</span> time
@@ -1260,6 +1639,8 @@ agent(<span class="s">"Update PROD-456 stock to 25 units, then confirm the new l
     <span class="f">print</span>(<span class="s">f"\nTotal time: {elapsed:.1f}s (sequential would be ~6s)"</span>)
 
 <span class="k">await</span> main()</pre></div>
+      </details>
+    </div>
 
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
@@ -1268,6 +1649,26 @@ agent(<span class="s">"Update PROD-456 stock to 25 units, then confirm the new l
     <div class="note ok">
       <div class="t">Great demo moment</div>
       <p>The printed timing is the lesson: roughly 2 seconds instead of 6. Run it yourself — you <em>see</em> concurrency instead of just reading about it. (The bare <code class="inl">await main()</code> works in a Jupyter cell; in a plain script use <code class="inl">asyncio.run(main())</code>.)</p>
+    </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">Three warehouse lookups take 2 seconds each. Why does the async version finish in about 2 seconds?</p>
+        <ol class="lk-opts">
+          <li>Each lookup gets faster on its own.<div class="lk-why">Async does not speed up each lookup. Each one still waits 2 seconds, but the waits overlap.</div></li>
+          <li data-correct>The waits overlap, so the lookups run in parallel instead of one after another.<div class="lk-why">Run one after another, the lookups cost about 6 seconds. Async lets them run at the same time.</div></li>
+          <li>The agent skips the warehouses that are not named in the request.<div class="lk-why">The request names east, west and central. Async changes how the calls run, not which ones are made.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">What does <code>await asyncio.sleep(2)</code> stand for in <code>check_warehouse_inventory</code>?</p>
+        <ol class="lk-opts">
+          <li data-correct>A delay that simulates a slow API call.<div class="lk-why">The code comment says so: the sleep is a stand-in for a real warehouse API call.</div></li>
+          <li>A prompt that asks you to confirm the lookup.<div class="lk-why">No prompt appears in this code. The sleep is a pause, not a question.</div></li>
+          <li>A timeout that cancels the lookup after 2 seconds.<div class="lk-why">Nothing is cancelled. The lookup returns its data after the wait.</div></li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -1292,6 +1693,35 @@ agent(<span class="s">"Update PROD-456 stock to 25 units, then confirm the new l
     </table>
 
     <h3>Starter code</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank3/travel_assistant.py</div><pre>DEFINE get_weather_forecast(city, days) as a tool   // mock data for now, to be swapped for a real weather API
+    RETURN city, days, and the high, low and conditions for that city
+DEFINE suggest_packing_list(high_c, low_c, days, conditions) as a tool
+    SET items = days + 1 sets of clothes, toiletries, phone charger
+    IF high_c &gt;= 30 THEN ADD light cotton clothing, sunscreen, sunglasses and a water bottle
+    IF low_c &lt;= 15 THEN ADD warm jacket and thermal layer
+    ELSE IF low_c &lt;= 22 THEN ADD light jacket for evenings
+    IF conditions mention rain or showers THEN ADD umbrella and quick-dry footwear
+    IF conditions mention snow THEN ADD gloves, woollen cap and waterproof boots
+    RETURN items
+DEFINE estimate_trip_cost(city, days, travellers = 1) as a tool
+    SET stay = the nightly rate for city x days   // default rate if the city is unknown
+    SET food = 1200 x days x travellers
+    SET local_travel = 800 x days
+    RETURN each amount, and total = stay + food + local_travel
+
+CREATE model = a Bedrock model, Claude Haiku 4.5
+CREATE agent = Agent with the model, the three custom tools, calculator and the travel system prompt
+IF this file is run directly THEN
+    ASK agent "I'm going to Goa for 3 days with 2 friends. My budget is 20000 rupees. What should I pack, and does it fit my budget?"
+    PRINT the answer</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that holds the model and the tools.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that makes each function a tool.</li>
+        <li><code>BedrockModel</code> <span class="lk-src">from <code>strands.models.bedrock</code></span>: the model object that calls Claude on Amazon Bedrock.</li>
+        <li><code>calculator</code> <span class="lk-src">from <code>strands_tools</code></span>: a ready-made tool for the budget maths.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="code-bar"><span class="dot"><i></i><i></i><i></i></span><span class="label">shivank3/travel_assistant.py</span><button class="copy">COPY</button></div>
 <pre><span class="s">"""Capstone: Travel Assistant Agent (Modules 1 & 2)."""</span>
 
@@ -1390,13 +1820,21 @@ agent = Agent(
         <span class="s">"What should I pack, and does it fit my budget?"</span>
     )
     <span class="f">print</span>(response)</pre></div>
+      </details>
+    </div>
 
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · shivank3/travel_assistant.py</div><pre>RUN python shivank3/travel_assistant.py   // asks the Goa question that is written inside the file
+RUN python shivank3/travel_assistant.py "I'm going to Manali for 4 days, budget 15000"   // the file never reads command-line arguments, so this runs the same Goa question</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
 <pre>python shivank3/travel_assistant.py
 
 # or ask your own question:
 python shivank3/travel_assistant.py "I&#39;m going to Manali for 4 days, budget 15000"</pre>
+    </div>
+      </details>
     </div>
 
 
@@ -1424,6 +1862,12 @@ python shivank3/travel_assistant.py "I&#39;m going to Manali for 4 days, budget 
     <p>Copy-paste reference. Run all of these from the project root — the folder containing <code class="inl">config.py</code>.</p>
 
     <h3>Setup (once)</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · setup.sh and 00_check_setup.py</div><pre>RUN ./setup.sh   // macOS / Linux (Windows: setup.bat)
+RUN source .venv/bin/activate
+SET AWS_DEFAULT_REGION = us-east-1
+RUN python 00_check_setup.py   // verifies everything and makes a real model call</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
 <pre>./setup.sh                       # macOS / Linux  (Windows: setup.bat)
@@ -1431,8 +1875,27 @@ source .venv/bin/activate
 export AWS_DEFAULT_REGION=us-east-1
 python 00_check_setup.py         # verifies everything, makes a real model call</pre>
     </div>
+      </details>
+    </div>
 
     <h3>Every example, in learning order</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · every example script</div><pre>// Module 1 · first agents
+RUN python shivank1/01_hello_world_agent.py   // simplest agent, no tools
+RUN python shivank1/02_hello_world_langgraph.py   // with a tool: watch the loop
+// Module 2 · tools
+RUN python shivank2/01_function_to_tool.py   // the core idea: @tool
+RUN python shivank2/02_tip_calculator.py   // first useful tool agent
+RUN python shivank2/03_multi_tool_sales.py   // three tools, the agent picks the order
+RUN python shivank2/04_custom_tool_inventory.py   // build your own tool
+RUN python shivank2/05_prebuilt_tools.py   // community tools and a system prompt
+RUN python shivank2/06_multi_prebuilt_tools.py   // combining several tools
+RUN python shivank2/07_use_aws.py   // one tool, many AWS services
+RUN python shivank2/08_class_based_tools.py   // shared-resource pattern
+RUN python shivank2/09_async_tools.py   // parallel tools: 2s, not 6s
+// Module 3 · capstone
+RUN python shivank3/travel_assistant.py</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
 <pre># ---- Module 1 · first agents ----
@@ -1453,14 +1916,24 @@ python shivank2/09_async_tools.py              # parallel tools: 2s not 6s
 # ---- Module 3 · capstone ----
 python shivank3/travel_assistant.py</pre>
     </div>
+      </details>
+    </div>
 
     <h3>Helpers</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · troubleshooting commands</div><pre>RUN python 00_check_setup.py   // run whenever something breaks
+RUN python 01_list_models.py   // when a model is retired, pick a new one
+RUN aws sts get-caller-identity   // are my credentials alive?
+RUN env | grep AWS   // what credentials are actually set?</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="runbox">
       <div class="rl"><span>▶ Run it</span><button class="copy">COPY</button></div>
 <pre>python 00_check_setup.py     # run whenever something breaks
 python 01_list_models.py     # when a model is retired, pick a new one
 aws sts get-caller-identity  # are my credentials alive?
 env | grep AWS               # what credentials are actually set?</pre>
+    </div>
+      </details>
     </div>
   </section>
 

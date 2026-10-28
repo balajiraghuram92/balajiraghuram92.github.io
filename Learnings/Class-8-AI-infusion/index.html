@@ -322,6 +322,8 @@ details.qa .a p:last-child{margin-bottom:0}
 :not(pre) > code{overflow-wrap:anywhere}
 
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- aiseq:top -->
@@ -690,6 +692,35 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
     <p class="kicker">Milestones 2–4 · tools.py</p>
     <h2>Company policy, written as <em>constants</em></h2>
     <p>Each calculator takes the shipment value and the report text and returns <code>{"amount", "reasoning"}</code>. The amount drives the escalation decision. The reasoning travels into both the email and the manager's note, so the humans downstream can see <em>why</em>.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · tools.py</div><pre>SET DELAY_BASE_RATE = 5% of the shipment value, URGENT_MULTIPLIER = 2
+SET URGENT_SIGNALS, SEVERE_DAMAGE_KEYWORDS and MINOR_DAMAGE_KEYWORDS = lists of words
+
+DEFINE delay_compensation(shipment_value, report_text):
+    SET text = report_text in lower case
+    SET urgent = TRUE IF any urgent signal appears in text
+    SET rate = DELAY_BASE_RATE, doubled when urgent
+    SET amount = shipment_value × rate, rounded to 2 decimals
+    RETURN a dict with amount and reasoning
+
+DEFINE damage_compensation(shipment_value, report_text):
+    SET text = report_text in lower case
+    IF any severe keyword appears in text THEN
+        SET rate = 100%
+    ELSE IF any minor keyword appears in text THEN
+        SET rate = 25%
+    ELSE
+        SET rate = 50%          // unclear severity: a deliberate policy choice
+    SET amount = shipment_value × rate, rounded to 2 decimals
+    RETURN a dict with amount and reasoning
+
+DEFINE lost_compensation(shipment_value, report_text):
+    SET amount = shipment_value, rounded to 2 decimals
+    RETURN a dict with amount and reasoning
+
+IF this file is run directly THEN
+    PRINT each calculator on known inputs     // prove each one alone, no LLM</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>tools.py</b> · milestones 2–4 · python tools.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># Company policy, written as code. The LLM never computes money.</span>
 DELAY_BASE_RATE = 0.05                 <span class="c-dim"># 5% of shipment value</span>
 URGENT_MULTIPLIER = 2
@@ -734,11 +765,35 @@ MINOR_DAMAGE_KEYWORDS = [<span class="c-str">"scratch"</span>, <span class="c-st
     print(damage_compensation(400, <span class="c-str">"The vase was shattered"</span>))               <span class="c-dim"># 400.0</span>
     print(damage_compensation(400, <span class="c-str">"small scratch on the lid"</span>))             <span class="c-dim"># 100.0</span>
     print(lost_compensation(1250, <span class="c-str">"never arrived"</span>))                         <span class="c-dim"># 1250.0</span></code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>Every rate is a named constant at the top</b>When finance changes the delay rate from 5% to 7%, it's a one-line diff in a reviewed pull request, not a prompt edit that silently changes every future payout.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>Severity from wording: crude on purpose</b>“Shattered” → 100%, “scratch” → 25%, anything else → 50%. Keyword rules will misjudge some reports. But they misjudge <em>consistently</em> and visibly, and the 50% default for unclear severity is an explicit policy choice, not an accident.</span></div>
       <div class="anno"><span class="n">3</span><span class="t"><b>Check severe before minor</b>“Crushed box, a few scratches on the casing” contains both. The first matching branch wins, so the order of the <code>if</code>s is itself a rule: the worse reading takes priority.</span></div>
       <div class="anno"><span class="n">4</span><span class="t"><b>A dict, not an f-string</b>The pipeline needs <code>amount</code> as a number to compare with a threshold, and the summary needs it to add up totals. A sentence like “Refund $40 because…” would have to be parsed back. That's why the brief insisted on structured returns.</span></div>
+    </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">A report says only: <code>The parcel was damaged in transit.</code> Which rate does <code>damage_compensation</code> use?</p>
+        <ol class="lk-opts">
+          <li>25%, the minor rate<div class="lk-why">The minor rate applies only when a minor keyword such as “scratch” or “dent” appears. This report has none of them.</div></li>
+          <li>100%, the severe rate<div class="lk-why">The severe rate needs a word such as “shattered” or “crushed”. “Damaged” is not on that list.</div></li>
+          <li data-correct>50%, the default for unclear severity<div class="lk-why">No severe or minor keyword matches, so the final else branch applies. The page calls this default an explicit policy choice.</div></li>
+          <li>0%, because no keyword matched<div class="lk-why">The calculator never returns zero for damage. A report with no matching keyword gets the 50% default.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">Why does <code>delay_compensation</code> convert the report to lower case before it searches for urgent words?</p>
+        <ol class="lk-opts">
+          <li>Python cannot search upper-case text<div class="lk-why">Python searches upper-case text without trouble. The lower-case step is about matching, not about what Python allows.</div></li>
+          <li data-correct>So that “URGENT” matches the lower-case entries in <code>URGENT_SIGNALS</code><div class="lk-why">Every signal in the list is written in lower case. Without this step, “URGENT” would never match “urgent”.</div></li>
+          <li>So the rounded amount comes out the same<div class="lk-why">The amount depends on the shipment value and the rate. The letter case of the report does not change it.</div></li>
+          <li>Because the LLM always returns lower-case words<div class="lk-why">This calculator does not call the LLM at all. It receives the raw report text.</div></li>
+        </ol>
+      </div>
     </div>
   </div>
 </section>
@@ -779,12 +834,42 @@ MINOR_DAMAGE_KEYWORDS = [<span class="c-str">"scratch"</span>, <span class="c-st
     <p class="kicker">Ask 1 · chains.py</p>
     <h2>Three chains, one model, three <em>jobs</em></h2>
     <p>All three chains use the same LLM object. What makes them behave differently is the system prompt. Each chain is LangChain's expression language, <code>prompt | llm | parser</code>: fill the template, call the model, and turn the reply into a plain string.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · llm.py</div><pre>RUN load_dotenv()          // reads GROQ_API_KEY from .env into the environment
+CREATE llm = a ChatGroq model "openai/gpt-oss-20b", temperature 0   // as repeatable as the model allows</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: reads the <code>.env</code> file and copies each line into the environment.</li>
+    <li><code>ChatGroq</code> <span class="lk-src">from <code>langchain_groq</code>, package langchain-groq</span>: the chat model class that sends requests to models hosted by Groq.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>llm.py</b> · the one model object</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> dotenv <span class="c-key">import</span> load_dotenv
 <span class="c-key">from</span> langchain_groq <span class="c-key">import</span> ChatGroq
 
 load_dotenv()   <span class="c-dim"># reads GROQ_API_KEY from .env</span>
 
 llm = ChatGroq(model=<span class="c-str">"openai/gpt-oss-20b"</span>, temperature=0)</code></pre></div>
+  </details>
+</div>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · chains.py</div><pre>USE the one shared llm object from llm.py          // the same model for all three chains
+
+SET classify_chain = fill the prompt, CALL the model, keep the reply as plain text
+    system: reply with exactly ONE word: delayed, damaged, lost or unknown
+    human:  the report text
+
+SET escalate_chain = fill the prompt, CALL the model, keep the reply as plain text
+    system: write 2-3 sentences for a manager, end with a request for approval, do not change the amount
+    human:  report, category, proposed compensation, reasoning
+
+SET draft_email_chain = fill the prompt, CALL the model, keep the reply as plain text
+    system: write a short, polite customer email of 3-4 sentences, never state a different amount
+    human:  report, category, compensation, reasoning</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>StrOutputParser</code> <span class="lk-src">from <code>langchain_core.output_parsers</code>, package langchain-core</span>: turns the model's reply into a plain string.</li>
+    <li><code>ChatPromptTemplate</code> <span class="lk-src">from <code>langchain_core.prompts</code>, package langchain-core</span>: builds the system and human messages, with <code>{placeholders}</code> to fill.</li>
+    <li><code>llm</code> <span class="lk-src">from <code>llm</code></span>: the one shared model object from <code>llm.py</code>.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>chains.py</b> · ask 1 · the three LLM jobs</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> langchain_core.output_parsers <span class="c-key">import</span> StrOutputParser
 <span class="c-key">from</span> langchain_core.prompts <span class="c-key">import</span> ChatPromptTemplate
 
@@ -822,11 +907,35 @@ email_prompt = ChatPromptTemplate.from_messages([
               <span class="c-str">"Compensation: ${amount}\nReasoning: {reasoning}"</span>),
 ])
 draft_email_chain = email_prompt | llm | StrOutputParser()</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>System vs human messages</b>The system message says how to behave (“reply with that single word only”). The human message is the data (<code>{report_text}</code>). Keeping the data out of the instructions makes the prompt reusable and keeps the instructions harder to override with a cleverly worded report.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>“Exactly one word… nothing else”</b>The classification prompt is the most important prompt in the system. A one-word answer is easy to check in code. A sentence like “This appears to be a delay issue” is not.</span></div>
       <div class="anno"><span class="n">3</span><span class="t"><b>The amount is an input to the writers</b>Both writing prompts receive <code>{amount}</code> and are told not to change it. The model narrates a number it was given; it never produces one.</span></div>
       <div class="anno"><span class="n">4</span><span class="t"><b><code>temperature=0</code></b>Classification should be as repeatable as a model allows. The more detailed the system prompt, the better the output, and the tighter the instructions, the less there is to vary.</span></div>
+    </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem"><code>escalate_chain</code> and <code>draft_email_chain</code> both receive <code>amount</code>. What is the model supposed to do with it?</p>
+        <ol class="lk-opts">
+          <li data-correct>Narrate the amount it was given, without changing it<div class="lk-why">The model narrates a number it was given. It never produces one, and both prompts forbid changing it.</div></li>
+          <li>Recalculate the amount from the report text<div class="lk-why">The model is never asked to work out money. Code computes the amount before either chain runs.</div></li>
+          <li>Round it to a friendlier number<div class="lk-why">Both prompts tell the model not to change the amount, so rounding it would break the instruction.</div></li>
+          <li>Ignore it and write about the category only<div class="lk-why">The amount is an input to both writing prompts, and the email must not state any other amount.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">The classify prompt has a <code>{report_text}</code> placeholder in its human message. What happens to it when the chain runs?</p>
+        <ol class="lk-opts">
+          <li>The model is asked to rewrite the placeholder<div class="lk-why">The placeholder is not a request. It is replaced by the value you pass in.</div></li>
+          <li>Its value is stored in the system message, so the model follows it<div class="lk-why">The human message holds the data and the system message holds the instructions. The placeholder sits in the human message.</div></li>
+          <li>Nothing, because placeholders only work in f-strings<div class="lk-why">This is a LangChain template, not an f-string. The chain fills it at run time from the input dict.</div></li>
+          <li data-correct>The template fills it with the report text before the model sees anything<div class="lk-why">The input dict's <code>report_text</code> value is inserted into the human message, and then the filled prompt goes to the model.</div></li>
+        </ol>
+      </div>
     </div>
   </div>
 </section>
@@ -836,6 +945,43 @@ draft_email_chain = email_prompt | llm | StrOutputParser()</code></pre></div>
     <p class="kicker">Ask 1 · pipeline.py</p>
     <h2>Where every piece meets</h2>
     <p><code>process_exception()</code> is the only function that knows about all the others. It takes exactly the three things the form collects and returns one flat dict with everything the UI, the log and the summary need.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · pipeline.py</div><pre>SET PREMIUM_ESCALATION_THRESHOLD = $100, STANDARD_ESCALATION_THRESHOLD = $200
+SET CALCULATORS = "delayed" to delay_compensation, "damaged" to damage_compensation, "lost" to lost_compensation
+
+DEFINE process_exception(report_text, shipment_value, customer_tier):
+    SET log = empty list
+    // 1. The LLM classifies, and that is ALL it decides
+    SET raw = the classifier's reply, with spaces and the final full stop removed, in lower case
+    SET category = raw IF raw is a key in CALCULATORS, ELSE "unknown"
+    ADD "classified as ..." to log
+    // 2. Code computes the money
+    IF category is "unknown" THEN
+        SET comp = amount 0, with a reason saying it could not be classified
+    ELSE
+        SET comp = CALCULATORS[category](shipment_value, report_text)
+    ADD the amount and reasoning to log
+    // 3. Code decides who signs off
+    SET threshold = $100 IF tier is premium, ELSE $200
+    SET needs_approval = TRUE IF category is "unknown" OR amount is more than threshold
+    ADD the tier, the threshold and ESCALATE or auto-resolve to log
+    // 4. The LLM writes the words for the chosen path
+    IF needs_approval THEN
+        SET message = escalate_chain(report, category, amount, reasoning)
+        ADD "drafted internal escalation note" to log
+    ELSE
+        SET message = draft_email_chain(report, category, amount, reasoning)
+        ADD "drafted customer email" to log
+    RETURN one flat dict: the inputs, category, amount, reasoning, needs_approval, drafted message and log</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>classify_chain</code> <span class="lk-src">from <code>chains</code></span>: the classifier chain, which returns one category word.</li>
+    <li><code>escalate_chain</code> <span class="lk-src">from <code>chains</code></span>: writes the manager note for cases that need approval.</li>
+    <li><code>draft_email_chain</code> <span class="lk-src">from <code>chains</code></span>: writes the customer email for cases that auto-resolve.</li>
+    <li><code>delay_compensation</code> <span class="lk-src">from <code>tools</code></span>: the calculator for delayed shipments.</li>
+    <li><code>damage_compensation</code> <span class="lk-src">from <code>tools</code></span>: the calculator for damaged shipments.</li>
+    <li><code>lost_compensation</code> <span class="lk-src">from <code>tools</code></span>: the calculator for lost shipments.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>pipeline.py</b> · milestones 5–6 · the wiring</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> chains <span class="c-key">import</span> classify_chain, escalate_chain, draft_email_chain
 <span class="c-key">from</span> tools <span class="c-key">import</span> delay_compensation, damage_compensation, lost_compensation
 
@@ -888,6 +1034,8 @@ CALCULATORS = {
         <span class="c-str">"compensation_amount"</span>: comp[<span class="c-str">"amount"</span>], <span class="c-str">"compensation_reasoning"</span>: comp[<span class="c-str">"reasoning"</span>],
         <span class="c-str">"needs_approval"</span>: needs_approval, <span class="c-str">"drafted_message"</span>: message, <span class="c-str">"log"</span>: log,
     }</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>Normalise, then check against an allowed set</b><code>.strip().lower().strip(".")</code> turns “Delayed.” into <code>delayed</code>. Anything still not a known category becomes <code>unknown</code>. The model's reply is <em>untrusted input</em>, and this line is the guard.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>A dispatch dict instead of if/elif</b><code>CALCULATORS[category]</code> picks the function. Adding a new category, say “wrong item”, means one calculator and one dict entry.</span></div>
@@ -937,6 +1085,28 @@ CALCULATORS = {
       <p><q>Premium customers escalate above $100, standard above $200. Isn't that backwards? Shouldn't premium customers get paid faster?</q></p>
       <p>Both readings came up during the session, and both are defensible. A <strong>lower</strong> premium threshold puts a human on high-value relationships sooner. A <strong>higher</strong> one auto-pays them more generously. One alternative even escalated every premium case regardless of amount, because “I don't want to lose that customer.” Which is right is a business decision, not an engineering one. That's exactly why it lives in two named constants a product owner can read and change, rather than in a prompt.</p>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">The classifier says <code>delayed</code>. A standard customer reports a delay on a $5,000 shipment with no urgent words. What happens?</p>
+        <ol class="lk-opts">
+          <li>Auto-resolves at $250<div class="lk-why">$250 is above the standard threshold of $200, so the case cannot auto-resolve.</div></li>
+          <li data-correct>Escalates to a manager at $250<div class="lk-why">5% of $5,000 is $250. That is above the $200 standard threshold, so a manager has to approve it.</div></li>
+          <li>Auto-resolves at $40<div class="lk-why">$40 is the demo case, an $800 shipment. This shipment is $5,000, so the amount is different.</div></li>
+          <li>Escalates at $0<div class="lk-why">$0 is the amount for unknown reports. This one is classified as delayed, so the delay calculator sets the amount.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">A manager asks why a case escalated. Which field holds the step-by-step answer?</p>
+        <ol class="lk-opts">
+          <li><code>category</code>, which holds the raw model reply<div class="lk-why"><code>category</code> holds the cleaned-up category. The raw reply appears only inside one log line.</div></li>
+          <li><code>drafted_message</code>, which the LLM wrote<div class="lk-why">The drafted message is the text the manager or customer reads. It does not record the checks.</div></li>
+          <li><code>compensation_reasoning</code> only<div class="lk-why">That field explains the rate and the amount. It does not record the threshold or the escalation decision.</div></li>
+          <li data-correct><code>log</code>, a list that each step appends a line to<div class="lk-why">Each step appends a line in the order it ran, so the reason for the escalation is already written down.</div></li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -945,6 +1115,25 @@ CALCULATORS = {
     <p class="kicker">Ask 2 · session.py</p>
     <h2>A daily log that can actually be <em>summed</em></h2>
     <p>Same idea as the interview coach's memory. A plain Python list stands in for a database, and each entry is the full structured result of <code>process_exception()</code>, never a concatenated string. Because the entries have keys, the summary is a few lines of arithmetic.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · session.py</div><pre>SET daily_log = empty list          // one dict per processed exception, a DB table in real life
+
+DEFINE record(final_state):
+    ADD final_state to daily_log
+
+DEFINE generate_daily_summary():
+    IF daily_log is empty THEN
+        RETURN "No exceptions processed yet today."
+    SET total = sum of compensation_amount over all entries
+    SET escalation_rate = entries that needed approval ÷ all entries × 100
+    SET by_category = total compensation for each category
+    SET costliest = the category with the largest total in by_category
+    SET lines = a heading with the number of exceptions
+    FOR EACH entry in daily_log:
+        ADD one line: category, amount, ESCALATED or auto-resolved
+    ADD total compensation, escalation rate and costliest category
+    RETURN the lines, joined with new lines</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>session.py</b> · ask 2 · real aggregation</span><button class="copy" type="button">COPY</button></div><pre><code>daily_log = []   <span class="c-dim"># one structured dict per processed exception (a DB table in real life)</span>
 
 
@@ -974,6 +1163,8 @@ CALCULATORS = {
               <span class="c-str">f"Escalation rate: {escalation_rate:.0f}%"</span>,
               <span class="c-str">f"Costliest category: {costliest} (${by_category[costliest]:,.2f})"</span>]
     <span class="c-key">return</span> <span class="c-str">"\n"</span>.join(lines)</code></pre></div>
+  </details>
+</div>
     <div class="kv">
       <div><dt>Total compensation</dt><dd>sum of <code>compensation_amount</code></dd></div>
       <div><dt>Escalation rate</dt><dd>escalated ÷ processed × 100</dd></div>
@@ -984,6 +1175,28 @@ CALCULATORS = {
       <span class="tag">Production reality</span>
       <p>In production, <code>daily_log</code> is a table and <code>record()</code> is an insert. Two things change when you make that move. Records need a <strong>timestamp</strong>, because “daily” has to mean a date and not “since the server restarted”. And they need an <strong>id</strong>, so that processing the same report twice is detectable. Paying twice is the failure Class 9 is built around.</p>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">The day has 4 exceptions and 1 of them is escalated. What escalation rate does <code>generate_daily_summary</code> print?</p>
+        <ol class="lk-opts">
+          <li>0.25%<div class="lk-why">The formula multiplies by 100 as well. 1 ÷ 4 is 0.25, and × 100 makes it 25.</div></li>
+          <li>400%<div class="lk-why">The division is the wrong way round. The formula is escalated ÷ processed, so it is 1 ÷ 4, not 4 ÷ 1.</div></li>
+          <li data-correct>25%<div class="lk-why">The formula is escalated ÷ processed × 100, so 1 ÷ 4 × 100 = 25. The output is shown with no decimals.</div></li>
+          <li>75%<div class="lk-why">75% is the share that auto-resolved. The escalation rate counts only the escalated cases.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">What does <code>max(by_category, key=by_category.get)</code> return?</p>
+        <ol class="lk-opts">
+          <li data-correct>The category whose total compensation is highest<div class="lk-why"><code>by_category</code> maps each category to its summed compensation. <code>max</code> with <code>key=by_category.get</code> returns the key with the largest value.</div></li>
+          <li>The category that appears most often<div class="lk-why">The code adds up money, not rows. <code>by_category</code> stores total compensation per category, not a count.</div></li>
+          <li>The largest single payout<div class="lk-why">That would need a max over the amounts in <code>daily_log</code>. This line takes the largest total per category.</div></li>
+          <li>The dict with the highest total<div class="lk-why"><code>max</code> returns a key, not a dict. The printed line then uses that key to look up its total.</div></li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -991,6 +1204,36 @@ CALCULATORS = {
   <div class="col">
     <p class="kicker">Ask 3 · the interface</p>
     <h2>A form, an outcome, a log</h2>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · app.py</div><pre>DEFINE on_submit(report_text, shipment_value, customer_tier):
+    IF report_text is blank THEN
+        RETURN "Please paste an exception report first", the current log, and the report text unchanged
+    SET result = process_exception(report_text, shipment_value, customer_tier)
+    CALL record(result)
+    SET status = "Escalated to manager" IF needs_approval, ELSE "Auto-resolved"
+    SET outcome = status, category, amount with reasoning, drafted message and steps
+    RETURN outcome, the triage log, and an empty report box
+
+DEFINE format_triage_log():
+    FOR EACH entry in daily_log, numbered from 1:
+        ADD one line: status, category, amount and tier
+    RETURN the lines, or "Nothing processed yet." when the log is empty
+
+CREATE demo = a Gradio page titled "Shipment Exception Desk"
+    ADD the report box, next to a column with the value box and the tier choice
+    ADD the "Process exception" button, SEND the three inputs to on_submit
+    ADD the outcome panel, the triage log and the "Generate daily summary" button
+    SEND the summary button to generate_daily_summary, shown in the summary box
+IF this file is run directly THEN
+    RUN demo.launch()</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>gradio</code> (as <code>gr</code>) <span class="lk-src">package gradio</span>: builds the web page from text boxes, buttons and Markdown panels.</li>
+    <li><code>process_exception</code> <span class="lk-src">from <code>pipeline</code></span>: runs the whole exception flow for one report.</li>
+    <li><code>daily_log</code> <span class="lk-src">from <code>session</code></span>: the list of processed exceptions that the triage log is printed from.</li>
+    <li><code>record</code> <span class="lk-src">from <code>session</code></span>: adds one result to <code>daily_log</code>.</li>
+    <li><code>generate_daily_summary</code> <span class="lk-src">from <code>session</code></span>: builds the daily summary text.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>app.py</b> · ask 3 · python app.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> gradio <span class="c-key">as</span> gr
 
 <span class="c-key">from</span> pipeline <span class="c-key">import</span> process_exception
@@ -1041,6 +1284,8 @@ CALCULATORS = {
 
 <span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
     demo.launch()</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>Validate before you spend</b>An empty report returns immediately with a message. Otherwise you'd pay for an LLM call to classify nothing, and get <span class="v drop">unknown</span> plus an escalation for your trouble.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>The UI only formats</b><code>on_submit</code> calls the pipeline, records the result and renders it. No business logic lives in <code>app.py</code>, so swapping Gradio for Streamlit or a REST API touches one file.</span></div>
@@ -1048,6 +1293,22 @@ CALCULATORS = {
     </div>
 
     <h3>Terminal test</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · main.py</div><pre>SET SAMPLES = three cases, each with a report, a shipment value and a tier
+
+FOR EACH report, value, tier in SAMPLES:
+    SET r = process_exception(report, value, tier)
+    CALL record(r)
+    PRINT ESCALATE or AUTO, the category and the amount
+    PRINT each step in the log, one per line
+    PRINT the drafted message
+PRINT generate_daily_summary()          // totals for all three runs</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>process_exception</code> <span class="lk-src">from <code>pipeline</code></span>: runs the whole exception flow for one report.</li>
+    <li><code>record</code> <span class="lk-src">from <code>session</code></span>: adds each result to the daily log.</li>
+    <li><code>generate_daily_summary</code> <span class="lk-src">from <code>session</code></span>: builds the summary printed at the end.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>main.py</b> · milestones 5–6 · python main.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> pipeline <span class="c-key">import</span> process_exception
 <span class="c-key">from</span> session <span class="c-key">import</span> record, generate_daily_summary
 
@@ -1066,9 +1327,25 @@ SAMPLES = [
     print(r[<span class="c-str">"drafted_message"</span>])
 
 print(<span class="c-str">"\n"</span> + generate_daily_summary())</code></pre></div>
+  </details>
+</div>
 
     <h3>The triage check</h3>
     <p>Four reports, one per category, each with the outcome <em>your</em> rules should produce. If you change the thresholds or rates, update the expectations. The scenarios encode your policy, not the instructor's.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · triage_check.py</div><pre>SET SCENARIOS = four cases, each with a report, value, tier, expected category and expected escalation
+SET passed = 0
+
+FOR EACH scenario in SCENARIOS:
+    SET r = process_exception(report, value, tier)
+    SET ok = TRUE IF category matches the expected category AND escalation matches the expected escalation
+    ADD ok to passed          // 1 for a pass, 0 for a fail
+    PRINT PASS or FAIL, the expected and got values, and the amount
+PRINT passed, the total number of scenarios, and "scenarios behave as designed"</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>process_exception</code> <span class="lk-src">from <code>pipeline</code></span>: the flow under test, run once per scenario.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>triage_check.py</b> · milestone 8 · python triage_check.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> pipeline <span class="c-key">import</span> process_exception
 
 <span class="c-dim"># label, report, value, tier, expected category, expected escalation</span>
@@ -1092,6 +1369,8 @@ passed = 0
           <span class="c-str">f"  got {r['category']}/{'esc' if r['needs_approval'] else 'auto'}"</span>
           <span class="c-str">f"  ${r['compensation_amount']:,.2f}"</span>)
 print(<span class="c-str">f"\n{passed}/{len(SCENARIOS)} scenarios behave as designed"</span>)</code></pre></div>
+  </details>
+</div>
     <div class="calc"><i>expected output with the rules on this page</i>
 <b>PASS</b>  routine delay   expected delayed/auto  got delayed/auto  $40.00
 <b>PASS</b>  severe damage   expected damaged/esc  got damaged/esc  $450.00
@@ -1100,6 +1379,28 @@ print(<span class="c-str">f"\n{passed}/{len(SCENARIOS)} scenarios behave as desi
 
 4/4 scenarios behave as designed</div>
     <p>A failure here has two possible causes: the model classified differently, or your rules computed differently. The printed <code>got</code> category tells you which. If the category matches but the escalation doesn't, the bug is in your code.</p>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">A reviewer asks where the compensation rules live in this project. Which answer is right?</p>
+        <ol class="lk-opts">
+          <li>In <code>on_submit</code>, which doubles the rate for urgent reports<div class="lk-why"><code>on_submit</code> only validates the input, calls the pipeline, records the result and renders it. The doubling is in <code>tools.py</code>.</div></li>
+          <li data-correct>In <code>tools.py</code>, with the thresholds in <code>pipeline.py</code>. <code>app.py</code> only formats<div class="lk-why">The calculators in <code>tools.py</code> set the amount, and the pipeline compares it with the threshold. The UI only shows the result.</div></li>
+          <li>In the Gradio number box, which holds the shipment value<div class="lk-why">The number box only collects the shipment value. It does not compute anything.</div></li>
+          <li>In the prompts, which are told the rates<div class="lk-why">The prompts never receive a rate. They receive the amount, and the model is not asked to compute compensation.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">What is the expected-outcome column in <code>SCENARIOS</code> for?</p>
+        <ol class="lk-opts">
+          <li>It trains the classifier on the four categories<div class="lk-why">Nothing in the script trains or changes the model. The script only compares results with these values.</div></li>
+          <li>It replaces the calculators, so they are not needed<div class="lk-why">The scenarios test the calculators through the pipeline. They do not replace them.</div></li>
+          <li data-correct>It states the result your rules should give, so a failure shows that something changed<div class="lk-why">A scenario fails when its category or escalation differs from the stated value. The printed <code>got</code> value shows which one.</div></li>
+          <li>It sets the amount the email should state<div class="lk-why">Only the category and the escalation are compared. The amounts are printed for you to check, not compared.</div></li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 

@@ -1,0 +1,60 @@
+/* Learn kit: pseudo code + imports + "View code" toggle, and MCQ quizzes.
+   Shared by every lesson page. Colours come from the page's own tokens where
+   they exist, and from currentColor otherwise, so it follows light/dark themes. */
+
+.lk-code{margin:1.2rem 0;display:grid;gap:10px}
+.lk-label{font:700 .72rem/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin:0 0 6px}
+
+.lk-pseudo{border:1px solid color-mix(in srgb,currentColor 18%,transparent);border-left:4px solid color-mix(in srgb,currentColor 45%,transparent);border-radius:10px;padding:12px 14px;background:color-mix(in srgb,currentColor 4%,transparent)}
+.lk-pseudo pre,.lk-pseudo .lk-pseudo-body{margin:0;padding:0;background:none;border:0;box-shadow:none;color:inherit;white-space:pre-wrap;overflow-wrap:anywhere;font:500 .9rem/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.lk-pseudo b.lk-kw{font-weight:800;letter-spacing:.02em}
+.lk-pseudo .lk-cm{opacity:.62;font-style:italic}
+
+.lk-imports{border:1px dashed color-mix(in srgb,currentColor 22%,transparent);border-radius:10px;padding:10px 14px}
+.lk-imports ul{margin:0;padding:0 0 0 1.1rem;display:grid;gap:4px}
+.lk-imports li{font-size:.95rem;line-height:1.5}
+.lk-imports code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em}
+.lk-imports .lk-src{font-size:.82em;opacity:.7;margin-left:4px}
+.lk-imports .lk-src::before{content:"("}
+.lk-imports .lk-src::after{content:")"}
+
+.lk-reveal{border-radius:10px}
+.lk-reveal>summary{display:inline-flex;align-items:center;gap:8px;cursor:pointer;list-style:none;user-select:none;padding:7px 14px;border-radius:999px;border:1.5px solid color-mix(in srgb,currentColor 35%,transparent);font:700 .85rem/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.04em}
+.lk-reveal>summary::-webkit-details-marker{display:none}
+.lk-reveal>summary::before{content:"▸";transition:transform .15s}
+.lk-reveal[open]>summary::before{transform:rotate(90deg)}
+.lk-reveal>summary:hover{border-color:currentColor}
+.lk-reveal>summary:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.lk-reveal>summary .lk-hide{display:none}
+.lk-reveal[open]>summary .lk-show{display:none}
+.lk-reveal[open]>summary .lk-hide{display:inline}
+.lk-reveal[open]>summary{margin-bottom:10px}
+.lk-reveal>:not(summary){margin-top:0}
+
+/* MCQ */
+.lk-quiz{margin:1.8rem 0;display:grid;gap:14px;max-width:52rem}
+.lk-quiz>.lk-quiz-title{margin:0;font-size:1.05rem}
+.lk-q{border:1px solid color-mix(in srgb,currentColor 18%,transparent);border-radius:12px;padding:14px 16px;background:color-mix(in srgb,currentColor 3%,transparent)}
+.lk-q .lk-stem{margin:.1rem 0 .7rem;font-weight:700}
+.lk-q .lk-opts{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.lk-q .lk-opts>li{margin:0;padding:0;list-style:none}
+.lk-q .lk-opts>li::before{content:none}
+.lk-q .lk-why{display:none}
+.lk-q .lk-opt{width:100%;text-align:left;border:1.5px solid color-mix(in srgb,currentColor 22%,transparent);background:transparent;color:inherit;border-radius:10px;padding:9px 12px;font:inherit;font-size:1rem;line-height:1.45;cursor:pointer;display:flex;gap:10px}
+.lk-q .lk-opt .lk-letter{font-weight:800;opacity:.65;flex:none}
+.lk-q .lk-opt:hover:not([disabled]){border-color:currentColor}
+.lk-q .lk-opt[disabled]{cursor:default}
+.lk-q .lk-opt.lk-right{border-color:#2e9e5b;background:color-mix(in srgb,#2e9e5b 14%,transparent)}
+.lk-q .lk-opt.lk-wrong{border-color:#d0463b;background:color-mix(in srgb,#d0463b 12%,transparent)}
+.lk-q .lk-feedback{margin-top:12px;font-size:.98rem;line-height:1.55;display:none}
+.lk-q.lk-answered .lk-feedback{display:grid;gap:6px}
+.lk-q .lk-feedback p{margin:0}
+.lk-q .lk-ok{color:#2e9e5b;font-weight:800}
+.lk-q .lk-no{color:#d0463b;font-weight:800}
+.lk-quiz .lk-score{font-size:.92rem;opacity:.8;margin:0}
+.lk-quiz .lk-reset{justify-self:start;border:1.5px solid color-mix(in srgb,currentColor 30%,transparent);background:transparent;color:inherit;border-radius:999px;padding:5px 12px;font:600 .82rem/1.2 inherit;cursor:pointer}
+
+@media print{
+  .lk-reveal>summary{display:none}
+  .lk-reveal>:not(summary){display:block!important}
+}

@@ -331,6 +331,8 @@ footer .sig{margin-top:34px;padding-top:22px;border-top:1px solid #3a2f26;font-f
   .sec-num{width:44px;height:44px;font-size:18px}
 }
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- aiseq:top -->
@@ -504,6 +506,26 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
   </div>
   <div class="note"><div class="ico">💡</div><div><b>This is a real engineering choice</b><p>A support bot wants <em>temperature ≈ 0.2</em> (consistent). A brainstorming tool wants <em>≈ 1.0</em> (varied). You'll set this on day one of any real project — including today's.</p></div></div>
 
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A support bot must give the same answer to the same question every time. Which temperature fits best?</p>
+      <ol class="lk-opts">
+        <li>About 1.0, so the answers stay varied<div class="lk-why">At a high temperature, surprising words become more likely, so the answers vary more. That is the opposite of what a support bot needs.</div></li>
+        <li>About 0.7, the balanced middle setting<div class="lk-why">0.7 is only the balanced default in the demo. A support bot needs a lower value to keep its answers steady.</div></li>
+        <li data-correct>About 0.2, so the model keeps picking its most likely words<div class="lk-why">A low temperature focuses the choice on the most likely next tokens, which gives consistent answers.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The word <code>"unbelievableness"</code> is split into several tokens. Why is that useful?</p>
+      <ol class="lk-opts">
+        <li>Rare words are stored as one token, which keeps them cheap<div class="lk-why">Rare words are chopped into several pieces, not stored whole. Splitting is what lets one fixed vocabulary cover every word.</div></li>
+        <li data-correct>The model can build any word, even one it never saw, from familiar pieces<div class="lk-why">The model knows pieces such as "un", "believ", "able" and "ness", so it can handle a word it never saw in training.</div></li>
+        <li>The model stops reading after the first token<div class="lk-why">The model reads the whole sequence of tokens. Splitting a word does not cut it short.</div></li>
+      </ol>
+    </div>
+  </div>
+
   <h3>One more truth: the model has <em>no memory</em></h3>
   <p>Between calls, an LLM forgets everything. Anything it should "know" in a conversation must be <strong>re-sent every time</strong>, inside a limited <strong>context window</strong> (measured in tokens). This one fact quietly explains a huge amount of AI engineering.</p>
 
@@ -512,6 +534,27 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
     <div class="tk"><div class="e">🎯</div><b>Predicts next token</b><p>All abilities emerge from this loop.</p></div>
     <div class="tk"><div class="e">🌡️</div><b>Temperature</b><p>Low = focused, high = creative.</p></div>
     <div class="tk"><div class="e">🪟</div><b>No memory</b><p>You resend context each time.</p></div>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">You ask a follow-up question in a chat. Why must your code send the earlier messages again?</p>
+      <ol class="lk-opts">
+        <li data-correct>The model has no memory between calls, so the context has to be re-sent<div class="lk-why">An LLM forgets everything between calls. Anything it should know must be re-sent every time.</div></li>
+        <li>The model keeps the chat in memory, so it only needs the new message<div class="lk-why">That is the opposite of how it works. An LLM has no memory between calls.</div></li>
+        <li>Resending the history only helps the user, not the model<div class="lk-why">The model is the one that needs the history. Without it, the model cannot know what a follow-up such as "make it shorter" refers to.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What is the context window measured in?</p>
+      <ol class="lk-opts">
+        <li>Number of chat messages<div class="lk-why">Messages are made of many tokens, so the limit is counted in tokens, not messages.</div></li>
+        <li>Characters of text<div class="lk-why">Characters are not the unit. Tokens are, and one token is roughly 4 characters.</div></li>
+        <li>Seconds of conversation<div class="lk-why">The window has nothing to do with time. It limits how many tokens the model can see at once.</div></li>
+        <li data-correct>Tokens<div class="lk-why">The context window is limited in tokens, the same unit the model reads and bills in.</div></li>
+      </ol>
+    </div>
   </div>
 </div></section>
 
@@ -535,6 +578,26 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
   <div class="wow"><span class="star">🤯</span><div><b>Why this changes everything</b><p>You just did what the model does <strong>billions of times</strong>. To guess "coffee", it had to quietly learn grammar, context, what baristas do, what's hot, what fits in a cup… <em>Understanding emerges as a side-effect of getting really good at fill-in-the-blank.</em> That's the whole secret behind ChatGPT.</p></div></div>
 
   <div class="note"><div class="ico">⚠️</div><div><b>Keep it honest (mention this)</b><p>Because it learned by predicting plausible text, an LLM can sometimes produce confident-sounding <em>wrong</em> answers — called <strong>hallucinations</strong>. A big part of our job as AI engineers is designing around that (e.g. feeding it real documents — we'll see that later). Trust, but verify.</p></div></div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Nobody labelled the internet's text for this model. Where does the answer come from during training?</p>
+      <ol class="lk-opts">
+        <li>Humans write a correct answer for every sentence<div class="lk-why">That is the old, slow way the page contrasts with. Self-supervision needs no human labels.</div></li>
+        <li data-correct>The text itself: a word is hidden, and the real word is already known from the source<div class="lk-why">The answer is already in the text, so the internet becomes its own teacher.</div></li>
+        <li>A fixed list of rules that engineers write by hand<div class="lk-why">The model learns from text by predicting words, not from hand-written rules.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why can an LLM sound confident and still give a wrong answer?</p>
+      <ol class="lk-opts">
+        <li>It looks each fact up in a database that may be out of date<div class="lk-why">The model does not look facts up. It generates the most plausible next tokens.</div></li>
+        <li>It has a random error switch that flips some answers<div class="lk-why">Wrong answers do not come from a random switch. They come from predicting plausible text.</div></li>
+        <li data-correct>It was trained to predict plausible text, and plausible text is not always true<div class="lk-why">Because it learned by predicting likely text, it can produce confident wrong answers, called hallucinations.</div></li>
+      </ol>
+    </div>
+  </div>
 </div></section>
 
 <!-- 4. WHAT CAN YOU BUILD -->
@@ -584,6 +647,26 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
     <div class="cos"><span>GitHub Copilot</span><span>Harvey · legal</span><span>Klarna · support</span><span>Khan Academy · tutoring</span><span>Perplexity · search</span></div>
   </div>
   <p style="text-align:center"><strong>Today we build a 📥 Info-Aggregation tool</strong> — an AI Website Summarizer. Simple, genuinely useful, and very shareable.</p>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A coding tool, a legal-document reader and a support chatbot look different. What do they share under the hood?</p>
+      <ol class="lk-opts">
+        <li>Each one has its own AI model, trained from scratch<div class="lk-why">The page says you do not build the AI. You connect to a model and use it through an API.</div></li>
+        <li data-correct>They connect to a model, give it the right context, get a useful answer and wrap it in a UI<div class="lk-why">That is the same pattern for all of them, so learning it once makes each of these buildable.</div></li>
+        <li>A fixed set of if-else rules, with no model at all<div class="lk-why">These products run on a language model. They are not lists of hand-written rules.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What does "multimodal" add to a foundation model?</p>
+      <ol class="lk-opts">
+        <li>A separate model for each use case<div class="lk-why">Multimodal is the opposite. One general-purpose model handles several kinds of input and output.</div></li>
+        <li>A rule that every answer must be in markdown<div class="lk-why">Output format is set in the prompt. It is not what makes a model multimodal.</div></li>
+        <li data-correct>The ability to take in and produce more than text, such as images, audio and video<div class="lk-why">Multimodal models can see, hear and speak as well as read and write text.</div></li>
+      </ol>
+    </div>
+  </div>
 </div></section>
 
 <!-- 6. CONNECT -->
@@ -621,19 +704,46 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
 
   <h4>③ Put the key in a <code>.env</code> file (never in your code)</h4>
   <p>Create a file literally named <code>.env</code> in your project folder, and paste your key inside. Your code reads it from there — so the secret never appears in the code you share.</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · .env</div><pre>// lines that start with # are comments and are ignored
+SET OPENAI_API_KEY = your secret key   // one NAME=value line per setting</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>.env</span></div>
 <pre><span class="cm"># .env  — keep this file private! Add it to .gitignore</span>
 OPENAI_API_KEY<span class="op">=</span>sk-proj-xxxxxxxxxxxxxxxxxxxxxxxx</pre></div>
+    </details>
+  </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · load_key.py — read it in your code</div><pre>// one-time setup: pip install python-dotenv
+CALL load_dotenv()   // read every KEY=value line in .env into the environment</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: reads the <code>.env</code> file and copies each line into the environment.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>load_key.py — read it in your code</span></div>
 <pre><span class="cm"># pip install python-dotenv</span>
 <span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
 load_dotenv()                 <span class="cm"># loads everything from .env</span>
 
 <span class="cm"># now OpenAI() finds the key automatically — no key in your code 🎉</span></pre></div>
+    </details>
+  </div>
   <div class="note"><div class="ico">🔐</div><div><b>The one habit that saves careers</b><p>Add <code>.env</code> to your <code>.gitignore</code> so it's never uploaded to GitHub. Leaked keys get found by bots in minutes and can run up real bills. Secrets live in <code>.env</code>, never in code.</p></div></div>
 
   <h3>Now — the 6 lines that actually talk to the AI</h3>
   <p>With setup done, calling an LLM is just an <strong>API call</strong> — like fetching the weather, except the reply is intelligence. Here's the whole thing:</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · first_call.py</div><pre>CALL load_dotenv()                // read .env into the environment
+CREATE client = OpenAI()          // the client picks up the API key from the environment
+SEND to client.chat.completions.create:
+    model = "gpt-4o-mini"
+    messages = [system: "You are a witty travel guide.", user: "Suggest one thing to do in Bangalore."]
+PRINT the content of the first reply</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: reads the <code>.env</code> file and copies each line into the environment.</li>
+      <li><code>OpenAI</code> <span class="lk-src">from <code>openai</code></span>: the client class that sends requests to OpenAI's models.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>first_call.py</span></div>
 <pre><span class="cm"># pip install python-dotenv</span>
 <span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
@@ -654,6 +764,8 @@ response <span class="op">=</span> client.chat.completions.<span class="fn">crea
 
 
 <span class="cm"># now OpenAI() finds the key automatically — no key in your code 🎉</span></pre></div>
+    </details>
+  </div>
 
   <h3>The 3 "roles" — the entire grammar of chat models</h3>
   <div class="flow">
@@ -682,6 +794,35 @@ response <span class="op">=</span> client.chat.completions.<span class="fn">crea
   </div>
 
   <div class="note"><div class="ico">🔐</div><div><b>Golden rule</b><p>Never paste your API key into shared/public code — it's a password to your wallet. Keep it in a <code>.env</code> file or environment variable, on the server side only.</p></div></div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">According to the page, where should your secret API key live?</p>
+      <ol class="lk-opts">
+        <li>Typed straight into the Python file, so it is always found<div class="lk-why">Shared or uploaded code would reveal the key. Secrets do not belong in the code.</div></li>
+        <li>In a public README, so teammates can copy it<div class="lk-why">The key is a password. Anyone who reads a public README would see it.</div></li>
+        <li data-correct>In a .env file or environment variable on the server side, never in shared code<div class="lk-why">The code reads the key from .env, so the secret never appears in the code you share.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">You added <code>.env</code> to your <code>.gitignore</code>. What problem does that prevent?</p>
+      <ol class="lk-opts">
+        <li>Your code running more slowly<div class="lk-why">A .gitignore rule controls what gets uploaded. It has nothing to do with speed.</div></li>
+        <li>Being charged twice for the same API call<div class="lk-why">Billing depends on how much you use the API. The .gitignore entry is about uploads.</div></li>
+        <li>The model forgetting earlier messages in a chat<div class="lk-why">That is the model's lack of memory, which is a separate idea. A .gitignore entry does not affect it.</div></li>
+        <li data-correct>Your .env file being uploaded to GitHub, where bots find leaked keys within minutes<div class="lk-why">Listing .env in .gitignore keeps the file out of GitHub, so the key is not exposed.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">In <code>first_call.py</code>, where does <code>OpenAI()</code> get the API key from?</p>
+      <ol class="lk-opts">
+        <li>From a key written into the code as a string<div class="lk-why">The code contains no key. That is the point of the .env setup.</div></li>
+        <li data-correct>From the environment, which <code>load_dotenv()</code> fills from your .env file<div class="lk-why"><code>load_dotenv()</code> copies the values from .env into the environment, and <code>OpenAI()</code> reads the key from there.</div></li>
+        <li>From the <code>base_url</code> address in the code<div class="lk-why"><code>base_url</code> only sets which server to call. It does not hold a key.</div></li>
+      </ol>
+    </div>
+  </div>
   <div class="industry">
     <div class="tag">🏭 Industry spotlight · the model is swappable</div>
     <h4>Same code, different brains</h4>
@@ -691,6 +832,20 @@ response <span class="op">=</span> client.chat.completions.<span class="fn">crea
 
   <h3>Bonus: the <em>same</em> code on a free, blazing-fast model (Groq + Llama)</h3>
   <p>Don't want to add billing yet? <strong>Groq</strong> gives you a free API key and runs open models like Meta's <strong>Llama</strong> incredibly fast. Because Groq speaks the same "language" as OpenAI, you change just <em>two things</em> — the key and one line — and everything else stays identical:</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · groq_call.py</div><pre>CALL load_dotenv()                          // read .env into the environment
+SET api_key = environment variable GROQ_API_KEY
+CREATE client = OpenAI(api_key, base_url)   // same client, pointed at the Groq server instead of OpenAI
+SEND to client.chat.completions.create:
+    model = "llama-3.3-70b-versatile"       // a free Llama model on Groq
+    messages = [system: "You are a witty travel guide.", user: "Suggest one thing to do in Bangalore."]
+PRINT the content of the first reply</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>os</code> <span class="lk-src">Python standard library</span>: gives access to environment variables, here <code>GROQ_API_KEY</code>.</li>
+      <li><code>OpenAI</code> <span class="lk-src">from <code>openai</code></span>: the same client class as before, here pointed at Groq's address.</li>
+      <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: reads the <code>.env</code> file and copies each line into the environment.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>groq_call.py</span></div>
 <pre><span class="cm"># pip install openai   (yes — the same library!)</span>
 <span class="kw">import</span> os
@@ -712,6 +867,8 @@ response <span class="op">=</span> client.chat.completions.<span class="fn">crea
     ],
 )
 <span class="fn">print</span>(response.choices[<span class="nm">0</span>].message.content)</pre></div>
+    </details>
+  </div>
   <div class="def"><div class="lab">where to get the key</div><p>Sign up free at <code>console.groq.com</code> → <em>API Keys</em> → Create key, then add it to your <code>.env</code> as <code>GROQ_API_KEY=gsk_...</code>. <strong>Notice how little changed</strong> — just the key, the <code>base_url</code>, and the model name. The whole point of AI Engineering: the brain is swappable.</p></div>
 </div></section>
 
@@ -738,6 +895,26 @@ response <span class="op">=</span> client.chat.completions.<span class="fn">crea
 
   <h3>Step 1 — Grab the page text (the "scraper")</h3>
   <div class="note"><div class="ico">📦</div><div><b>Treat this one as a black box</b><p>You do <strong>not</strong> need to understand a single line below. This is plain web-scraping (not AI), and there's a library for it. All it does: <em>take a URL → return the page's readable text as a string.</em> That's it. Copy it, trust it, move on — the AI magic is in Step 2.</p></div></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · scraper.py</div><pre>SET HEADERS = browser-style details such as User-Agent   // makes the request look like a normal browser
+DEFINE fetch_website_contents(url):
+    IF url does not start with http or https THEN
+        SET url = url with "https" added in front   // the user forgot the scheme
+    TRY
+        Get the page at url, using HEADERS, waiting at most 15 seconds
+        raise an error if the HTTP status shows a failure
+    ON ERROR (any request problem)
+        RETURN "Could not fetch the website. Error: " + the error
+    SET soup = the page's HTML, parsed
+    SET title = the page title, or "No title found"
+    Remove the script, style, nav, footer, header, img and input tags
+    SET text = all remaining text, one piece per line, trimmed
+    RETURN "Title: " + title, then "Page contents:" and the text</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>requests</code> <span class="lk-src">third-party package <code>requests</code></span>: sends the request that downloads the web page.</li>
+      <li><code>BeautifulSoup</code> <span class="lk-src">from <code>bs4</code>, package beautifulsoup4</span>: parses the page's HTML so the code can read its title and text.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>scraper.py</span></div>
 <pre><span class="cm"># pip install requests beautifulsoup4</span>
 <span class="kw">import</span> requests
@@ -770,7 +947,25 @@ HEADERS <span class="op">=</span> {
 
     text <span class="op">=</span> soup.<span class="fn">get_text</span>(separator<span class="op">=</span><span class="st">"\n"</span>, strip<span class="op">=</span><span class="kw">True</span>)
     <span class="kw">return</span> <span class="st">f"Title: {title}\n\nPage contents:\n{text}"</span></pre></div>
+    </details>
+  </div>
   <h3>Step 2 — The brain (prompt + LLM call)</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · summarizer.py</div><pre>CALL load_dotenv()                  // read .env into the environment
+CREATE client = OpenAI()            // the client picks up the API key from the environment
+SET system_prompt = the instructions: a short, friendly summary, ignore navigation menus, respond in markdown
+DEFINE summarize(url):
+    SET website = fetch_website_contents(url)
+    SEND to client.chat.completions.create:
+        model = "gpt-4o-mini"
+        messages = [system: system_prompt, user: "Summarize this website:" + website]
+    RETURN the content of the first reply</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>OpenAI</code> <span class="lk-src">from <code>openai</code></span>: the client class that sends requests to OpenAI's models.</li>
+      <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: reads the <code>.env</code> file and copies each line into the environment.</li>
+      <li><code>fetch_website_contents</code> <span class="lk-src">from <code>scraper</code>, your own file scraper.py</span>: the function from Step 1 that returns the page text.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>summarizer.py</span></div>
 <pre><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
 <span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
@@ -793,10 +988,45 @@ Respond in markdown."""</span>
         ],
     )
     <span class="kw">return</span> response.choices[<span class="nm">0</span>].message.content</pre></div>
+    </details>
+  </div>
   <div class="note"><div class="ico">🪄</div><div><b>The "wow" lever — change the personality</b><p>Edit one line of the <code>system_prompt</code> — "give a <em>snarky, humorous</em> summary" or "explain it to a 10-year-old" or "respond in Hindi" — and the whole app behaves differently. <strong>That's prompt engineering, and you just learned it.</strong> Try the personality buttons in the live demo below 👇</p></div></div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The URL cannot be fetched. What does <code>fetch_website_contents()</code> do?</p>
+      <ol class="lk-opts">
+        <li>It raises an error and stops the whole app<div class="lk-why">The request error is caught inside the function, so the app does not stop.</div></li>
+        <li data-correct>It returns a text message that begins "Could not fetch the website"<div class="lk-why">The except block returns an error message as a string, so the rest of the app keeps running.</div></li>
+        <li>It keeps retrying until the site answers<div class="lk-why">There is no retry loop. It makes one request, with a 15-second timeout.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Which change makes the summary sound different, as the page describes?</p>
+      <ol class="lk-opts">
+        <li>Change the URL the scraper visits<div class="lk-why">The URL decides which page is read, not how the summary sounds.</div></li>
+        <li>Delete the <code>load_dotenv()</code> line<div class="lk-why">That breaks the key loading. It does not change the tone of the summary.</div></li>
+        <li data-correct>Edit one line of the <code>system_prompt</code>, such as asking for an explanation for a 10-year-old<div class="lk-why">The system prompt sets the rules and personality for the model, so changing it changes the output style.</div></li>
+      </ol>
+    </div>
+  </div>
 
   <h3>Step 3 — The face (Gradio = a web app in 4 lines)</h3>
   <p>Nobody will run your Python script. <strong>Gradio turns your function into a shareable web app</strong> — no HTML, no CSS, no JavaScript:</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · app.py</div><pre>// one-time setup: pip install gradio
+CREATE a web page with gr.Interface:
+    fn = summarize                  // your function runs each time the user submits
+    inputs = one text box labelled "Website URL"
+    outputs = a Markdown box labelled "Summary"
+    title = "🔎 AI Website Summarizer"
+RUN launch with share on            // also creates a public link you can send to others</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>gradio</code> (as <code>gr</code>) <span class="lk-src">third-party package <code>gradio</code></span>: builds the web page and its input and output boxes from Python.</li>
+      <li><code>summarize</code> <span class="lk-src">from <code>summarizer</code>, your own file summarizer.py</span>: the function that does the summarising.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>app.py</span></div>
 <pre><span class="cm"># pip install gradio</span>
 <span class="kw">import</span> gradio <span class="kw">as</span> gr
@@ -808,9 +1038,16 @@ gr.<span class="fn">Interface</span>(
     outputs<span class="op">=</span>gr.<span class="fn">Markdown</span>(label<span class="op">=</span><span class="st">"Summary"</span>),
     title<span class="op">=</span><span class="st">"🔎 AI Website Summarizer"</span>,
 ).<span class="fn">launch</span>(share<span class="op">=</span><span class="kw">True</span>)   <span class="cm"># share=True → a public link you can post! 🎉</span></pre></div>
+    </details>
+  </div>
 
   <h3>Step 4 — Run it on your machine 👇</h3>
   <p>Save the three files (<code>scraper.py</code>, <code>summarizer.py</code>, <code>app.py</code>) and your <code>.env</code> in one folder. Then open the terminal in Cursor (<em>Terminal → New Terminal</em>) and run:</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · bash — your project folder</div><pre>RUN pip install openai gradio requests beautifulsoup4 python-dotenv   // install everything you need, one time
+RUN python app.py   // launch the app
+// Gradio then prints two links: a local one (127.0.0.1, port 7860) and a public *.gradio.live one to share</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="term">
     <div class="tbar"><i></i><i></i><i></i><span>bash — your project folder</span></div>
 <pre><span class="cmt"># 1. install everything you need (one time)</span>
@@ -822,6 +1059,8 @@ gr.<span class="fn">Interface</span>(
 <span class="cmt"># 3. Gradio prints two links:</span>
 <span class="ok">Running on local URL:  http://127.0.0.1:7860</span>
 <span class="ok">Running on public URL: https://a1b2c3.gradio.live</span>   <span class="cmt"># ← share this!</span></pre>
+  </div>
+    </details>
   </div>
   <div class="run-steps">
     <div class="rs"><div><b>Open the local link</b><p>Click <code>http://127.0.0.1:7860</code> — your app opens in the browser. This is your app running on <em>your</em> computer.</p></div></div>

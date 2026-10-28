@@ -301,6 +301,8 @@ footer .sig{margin-top:34px;padding-top:22px;border-top:1px solid #3a2f26;font-f
   .phone{transform:none}
 }
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- aiseq:top -->
@@ -418,6 +420,25 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
     <div class="piece"><div class="e">🎓</div><b>3. Fine-tuning</b><p>Actually re-train on examples. Powerful, costly, rarely needed. Reach for it last.</p></div>
   </div>
   <div class="note"><div class="ico">🧭</div><div><b>Why this matters today</b><p>Chains, tools, agents — it's all still <strong>option 1, organised cleverly</strong>. Nothing new to fear. Let's build.</p></div></div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A support bot must always sound like your brand, and you have no training data. Which way should you try first?</p>
+      <ol class="lk-opts">
+        <li>Fine-tuning, because it changes how the model talks<div class="lk-why">Fine-tuning re-trains the model on examples. It is powerful but costly, so the page says to reach for it last.</div></li>
+        <li data-correct>Prompting, because clear instructions are free and instant<div class="lk-why">Prompting needs no training. Telling the model the tone you want in the prompt is the first thing to try.</div></li>
+        <li>RAG, because it hands the model your documents<div class="lk-why">RAG gives the model documents to answer from. It does not set a tone.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Your bot must answer from 500 internal PDFs that change every week. Which way fits best?</p>
+      <ol class="lk-opts">
+        <li>Prompting alone, because it is the free option<div class="lk-why">Prompting steers how the model answers. It does not give the model facts from your files.</div></li>
+        <li>Fine-tuning, so the model memorizes the PDFs<div class="lk-why">Re-training on every weekly change is costly, and the page says to reach for fine-tuning last.</div></li>
+        <li data-correct>RAG, so the model reads your documents at question-time<div class="lk-why">RAG hands the model your documents when a question is asked, so answers follow the latest files.</div></li>
+      </ol>
+    </div>
+  </div>
 </div></section>
 
 <!-- BLOCK 10 -->
@@ -429,8 +450,13 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
   <div class="analogy teal"><div class="ico">🧰</div><div><b>One-line intuition</b><p>The raw OpenAI call is a Lego brick. LangChain is the box of connectors that snaps bricks into machines.</p></div></div>
 
   <h4>Install it</h4>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · bash</div><pre>RUN pip install langchain langchain-openai   // download the packages into your Python</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="term"><div class="tbar"><i></i><i></i><i></i><span>bash</span></div>
 <pre><span class="pr">$</span> pip install langchain langchain-openai</pre></div>
+  </details>
+</div>
 
   <h3>First: the 3 new words, in plain English</h3>
   <p>LangChain code uses three names that look scary. They aren't. Read these <em>before</em> we touch code — each one is a thing you already understand:</p>
@@ -490,6 +516,27 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
 
   <h3>The same chain, in real code — decoded line by line</h3>
   <p>Rebuilding your Class 1 summarizer the LangChain way. The numbered comments match the decoder below — nothing here is mystery code:</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · summarizer_langchain.py</div><pre>LOAD every KEY=value line from .env into the environment
+CREATE prompt = a reusable prompt with a {website} blank, asking for a short, friendly summary
+CREATE model = the gpt-4o-mini chat model, with temperature 0.3   // focused, not wildly creative
+CREATE parser = a step that keeps only the text of the reply
+CREATE chain = prompt, then model, then parser
+
+DEFINE summarize(url):
+    SET page = fetch_website_contents(url)   // reuse the Class 1 scraper
+    RUN chain with website = page
+    RETURN the summary text
+
+PRINT summarize(the anthropic.com URL)</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>ChatOpenAI</code> <span class="lk-src">from <code>langchain_openai</code>, package langchain-openai</span>: the same GPT model from Class 1, wrapped so LangChain can use it.</li>
+      <li><code>ChatPromptTemplate</code> <span class="lk-src">from <code>langchain_core.prompts</code>, package langchain-core</span>: builds the reusable prompt with the <code>{website}</code> blank.</li>
+      <li><code>StrOutputParser</code> <span class="lk-src">from <code>langchain_core.output_parsers</code>, package langchain-core</span>: opens the model's reply and keeps just the text.</li>
+      <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: reads the <code>.env</code> file into the environment.</li>
+      <li><code>fetch_website_contents</code> <span class="lk-src">from <code>scraper</code>, your Class 1 file</span>: gets the text of the website to summarize.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>summarizer_langchain.py</span></div>
 <pre><span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
 <span class="kw">from</span> langchain_core.prompts <span class="kw">import</span> ChatPromptTemplate
@@ -511,6 +558,8 @@ chain <span class="op">=</span> prompt <span class="op">|</span> model <span cla
     <span class="kw">return</span> chain.<span class="fn">invoke</span>({<span class="st">"website"</span>: <span class="fn">fetch_website_contents</span>(url)})   <span class="cm"># ⑤</span>
 
 <span class="fn">print</span>(<span class="fn">summarize</span>(<span class="st">"https://anthropic.com"</span>))</pre></div>
+  </details>
+</div>
   <div class="decode">
     <div class="dhead">🔍 decoder — what each numbered line does</div>
     <div class="drow"><div class="dn">①</div><p><code>from_template(...)</code> turns my text into a <strong>reusable prompt</strong>. The <code>{website}</code> part is the blank — it will be filled in later, just like the playground above.</p></div>
@@ -527,6 +576,19 @@ chain <span class="op">=</span> prompt <span class="op">|</span> model <span cla
     <div class="nw b"><span class="w">HumanMessage / AIMessage</span><b>= labelled chat bubbles</b><p>Just a way to store "the human said X" and "the AI replied Y" — the same user/assistant roles from Class 1, as Python objects.</p></div>
     <div class="nw p"><span class="w">MessagesPlaceholder</span><b>= a parking spot for history</b><p>A blank in your prompt that holds <em>a list of past messages</em> instead of one word. "Insert the whole conversation so far, right here."</p></div>
   </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · memory_demo.py</div><pre>CREATE prompt = a system message "You are a friendly tutor.", then a history placeholder, then the human message "{question}"
+CREATE chain = prompt, then model   // model is the ChatOpenAI from the summarizer above
+SET history = [user says "My name is Aarav.", AI replies "Hi Aarav!"]
+PRINT the content of chain run with history and question "What's my name?"
+// in a chat, the history must be re-sent on every call. The model keeps nothing itself.</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>ChatPromptTemplate</code> <span class="lk-src">from <code>langchain_core.prompts</code>, package langchain-core</span>: builds the prompt from a list of messages.</li>
+      <li><code>MessagesPlaceholder</code> <span class="lk-src">from <code>langchain_core.prompts</code>, package langchain-core</span>: a slot that holds the whole past conversation.</li>
+      <li><code>HumanMessage</code> <span class="lk-src">from <code>langchain_core.messages</code>, package langchain-core</span>: a stored user message, here "My name is Aarav."</li>
+      <li><code>AIMessage</code> <span class="lk-src">from <code>langchain_core.messages</code>, package langchain-core</span>: a stored assistant reply, here "Hi Aarav!"</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>memory_demo.py</span></div>
 <pre><span class="kw">from</span> langchain_core.prompts <span class="kw">import</span> ChatPromptTemplate, MessagesPlaceholder
 <span class="kw">from</span> langchain_core.messages <span class="kw">import</span> HumanMessage, AIMessage
@@ -541,7 +603,36 @@ chain <span class="op">=</span> prompt <span class="op">|</span> model
 history <span class="op">=</span> [<span class="fn">HumanMessage</span>(<span class="st">"My name is Aarav."</span>), <span class="fn">AIMessage</span>(<span class="st">"Hi Aarav!"</span>)]
 <span class="fn">print</span>(chain.<span class="fn">invoke</span>({<span class="st">"history"</span>: history, <span class="st">"question"</span>: <span class="st">"What's my name?"</span>}).content)
 <span class="cm"># → "Your name is Aarav."  ✅ it "remembered" — because WE re-sent the history</span></pre></div>
+  </details>
+</div>
   <div class="note"><div class="ico">💡</div><div><b>De-mystify this for them</b><p>The model didn't magically remember. <strong>We re-sent the old messages</strong>, and the placeholder slotted them in. All "chatbot memory" everywhere is exactly this trick. (One thing: this invoke returns the <em>package</em> — that's why we wrote <code>.content</code>. Add <code>| parser</code> to the chain and you wouldn't need it. See how the pieces connect?)</p></div></div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">In <code>chain = prompt | model | parser</code>, what does the parser do?</p>
+      <ol class="lk-opts">
+        <li>It fills the <code>{website}</code> blank with the page text<div class="lk-why">That is the prompt's job. The parser runs last and only works on the model's reply.</div></li>
+        <li data-correct>It opens the model's reply and returns just the text<div class="lk-why">The model returns an AIMessage package. The parser unwraps it, so you get a plain string.</div></li>
+        <li>It calls the model a second time<div class="lk-why">The model runs once in this chain. The parser only handles the reply it gets back.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The memory demo answers "Your name is Aarav." Why does it know the name?</p>
+      <ol class="lk-opts">
+        <li>The model stored the name from the last call<div class="lk-why">Models forget between calls. The code has to send the earlier messages again.</div></li>
+        <li>The temperature setting keeps facts in memory<div class="lk-why">Temperature only changes how varied the replies are. It does not add memory.</div></li>
+        <li data-correct>The code re-sends the earlier messages, and the placeholder puts them in the prompt<div class="lk-why">MessagesPlaceholder holds the history list. Re-sending the history is the whole memory trick.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The memory demo ends with <code>.content</code>. What changes if you add <code>| parser</code> to the chain?</p>
+      <ol class="lk-opts">
+        <li data-correct>You can drop <code>.content</code>, because the parser already returns plain text<div class="lk-why">The parser opens the AIMessage package for you, so the result is already the string.</div></li>
+        <li>The chain stops calling the model<div class="lk-why">The parser comes after the model, so the model still runs. Only the output changes.</div></li>
+        <li>The history is sent twice<div class="lk-why">Adding a parser does not touch the history. It only changes what comes out of the chain.</div></li>
+      </ol>
+    </div>
+  </div>
   <div class="note"><div class="ico">🎙️</div><div><b>Speaker note</b><p>Run the summarizer live and change the template in front of them ("now make it snarky"). The target feeling: <em>"oh — it's just my Class 1 code, tidied up."</em></p></div></div>
 </div></section>
 
@@ -562,6 +653,21 @@ history <span class="op">=</span> [<span class="fn">HumanMessage</span>(<span cl
   </div>
 
   <h4>Step 1 — the tool is just a Python function</h4>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · agent.py · part 1</div><pre>LOAD every KEY=value line from .env into the environment
+CREATE client = the OpenAI connection, which reads the key from the environment
+SET PRICES = shoes 799, hat 399, bag 1420, shorts 1299, pants 1699   // stands in for a database
+
+DEFINE get_price(item):
+    PRINT "tool called: get_price(item)"   // so you can see the tool run
+    SET price = the PRICES entry for item in lowercase, or "unknown" if missing
+    RETURN "₹" + price</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>json</code> <span class="lk-src">Python standard library</span>: reads the model's tool request, which arrives as JSON text (used in part 3).</li>
+      <li><code>OpenAI</code> <span class="lk-src">from <code>openai</code>, package openai</span>: the client that sends your messages to the model.</li>
+      <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: reads the <code>.env</code> file into the environment.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>agent.py · part 1</span></div>
 <pre><span class="kw">import</span> json
 <span class="kw">from</span> openai <span class="kw">import</span> OpenAI
@@ -574,10 +680,39 @@ PRICES <span class="op">=</span> {<span class="st">"shoes"</span>: <span class="
 <span class="kw">def</span> <span class="fn">get_price</span>(item):
     <span class="kw">print</span>(<span class="st">f"🔧 tool called: get_price({item})"</span>)     <span class="cm"># so you SEE it happen</span>
     <span class="kw">return</span> <span class="st">f"₹{PRICES.get(item.lower(), 'unknown')}"</span></pre></div>
+  </details>
+</div>
   <p style="font-size:14px;color:var(--ink-soft)">Two tiny notes for the Python: <code>PRICES</code> is an ordinary dict standing in for a database, and <code>.get(item, 'unknown')</code> means "look it up, and if it's not there, say <em>unknown</em> instead of crashing." That's the entire tool — <strong>any function you can write can become an agent's tool.</strong></p>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A customer types <code>SHOES</code>. What does <code>get_price</code> return?</p>
+      <ol class="lk-opts">
+        <li>₹unknown, because the keys are case-sensitive<div class="lk-why">The code lowercases the input first, so SHOES becomes shoes and is found.</div></li>
+        <li data-correct>₹799, because the input is lowercased before the lookup<div class="lk-why"><code>item.lower()</code> makes the lookup ignore capital letters.</div></li>
+        <li>An error, because <code>.get()</code> crashes on unfamiliar keys<div class="lk-why">Shoes is in the list, so nothing fails. <code>.get()</code> returns a default instead of crashing.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">A customer asks for <code>socks</code>, which the shop does not have. What does <code>get_price</code> return?</p>
+      <ol class="lk-opts">
+        <li data-correct>The text ₹unknown, with no crash<div class="lk-why">The default <code>'unknown'</code> is used when the item is missing, and the ₹ sign is still added.</div></li>
+        <li>None, so nothing is printed<div class="lk-why">A default of <code>'unknown'</code> was given, so the function returns that text, not <code>None</code>.</div></li>
+        <li>An error that stops the agent<div class="lk-why">The page says <code>.get()</code> is there to avoid crashing. The default is the point.</div></li>
+      </ol>
+    </div>
+  </div>
 
   <h4>Step 2 — describe the tool so the model knows it exists</h4>
   <p>The model can't see your Python. You hand it a <strong>menu card describing the tool</strong> — written as a dict (the nested braces look busy, but it's only four facts). Decoder below:</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · agent.py · part 2</div><pre>SET tools = a list holding one tool card
+    type: "function"
+    name: "get_price"   // must match the Python function name
+    description: "Get the price of a shop item the user asks about."   // the model reads this to decide when to use it
+    parameters: one required text input called item</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>agent.py · part 2</span></div>
 <pre>tools <span class="op">=</span> [{
     <span class="st">"type"</span>: <span class="st">"function"</span>,                                      <span class="cm"># ①</span>
@@ -591,6 +726,8 @@ PRICES <span class="op">=</span> {<span class="st">"shoes"</span>: <span class="
         },
     },
 }]</pre></div>
+  </details>
+</div>
   <div class="decode">
     <div class="dhead">🔍 decoder — the menu card, four facts</div>
     <div class="drow"><div class="dn">①</div><p><strong>What kind of tool?</strong> A function. (That's the only kind you'll use for a long time — just write this line as-is.)</p></div>
@@ -601,6 +738,26 @@ PRICES <span class="op">=</span> {<span class="st">"shoes"</span>: <span class="
   <div class="note"><div class="ico">✍️</div><div><b>The non-obvious insight</b><p>Line ③ is <strong>prompt engineering in disguise</strong>. A vague description ("does stuff with items") → the model misuses the tool. A clear one → it behaves. Your words steer the machine, even inside JSON.</p></div></div>
 
   <h4>Step 3 — the loop: think → maybe call tool → answer</h4>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · agent.py · part 3</div><pre>DEFINE agent(user_message):
+    SET messages = [the user's message]
+    ASK the model with messages and tools
+    SET msg = the model's reply
+
+    IF the model asked for a tool (msg.tool_calls) THEN
+        ADD msg to messages
+        FOR EACH call in msg.tool_calls:
+            SET args = the call's arguments, decoded from JSON
+            SET result = get_price(args["item"])   // our Python runs the tool, not the model
+            ADD result to messages with role "tool"
+        ASK the model again with all the messages
+        SET msg = the new reply
+
+    RETURN msg.content
+
+PRINT agent("How much are the shoes?")       // the tool runs, the answer is ₹799
+PRINT agent("Hi! What can you help with?")   // no tool, the model just chats</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>agent.py · part 3</span></div>
 <pre><span class="kw">def</span> <span class="fn">agent</span>(user_message):
     messages <span class="op">=</span> [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: user_message}]
@@ -623,6 +780,8 @@ PRICES <span class="op">=</span> {<span class="st">"shoes"</span>: <span class="
 
 <span class="fn">print</span>(<span class="fn">agent</span>(<span class="st">"How much are the shoes?"</span>))      <span class="cm"># → tool fires → "₹799"</span>
 <span class="fn">print</span>(<span class="fn">agent</span>(<span class="st">"Hi! What can you help with?"</span>))   <span class="cm"># → no tool → just chats</span></pre></div>
+  </details>
+</div>
   <div class="decode">
     <div class="dhead">🔍 decoder — the loop, step by step</div>
     <div class="drow"><div class="dn">1</div><p>We send the user's message <em>plus our tools menu</em>. The model now knows a tool exists and may ask to use it.</p></div>
@@ -651,6 +810,34 @@ PRICES <span class="op">=</span> {<span class="st">"shoes"</span>: <span class="
 
   <div class="wow"><span class="star">🤯</span><div><b><code>if msg.tool_calls</code> is the entire secret</b><p>The model asked to run <code>get_price("shoes")</code> <em>on its own</em>. Give it ten tools and it picks among them. You now understand how Cursor, support bots, and every "AI agent" headline actually works — same pattern, bigger toolbox.</p></div></div>
 
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">In the agent loop, who actually runs <code>get_price</code>?</p>
+      <ol class="lk-opts">
+        <li>The model runs it inside its reply, then reports the answer<div class="lk-why">The model never runs code. It only asks for a tool call.</div></li>
+        <li>Gradio runs it on every message<div class="lk-why">Gradio is only the chat window you add later in the project. The loop in <code>agent()</code> decides when a tool runs.</div></li>
+        <li data-correct>Your Python code, after the model asks for it<div class="lk-why">The model asks through <code>msg.tool_calls</code>. Your code calls the function and sends the result back.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What does <code>msg.tool_calls</code> tell the code?</p>
+      <ol class="lk-opts">
+        <li data-correct>Whether the model asked to run a tool, and which tool with what input<div class="lk-why">If it is set, the code runs the tool. If it is empty, the code skips straight to the answer.</div></li>
+        <li>The price of every item in the shop<div class="lk-why">Prices live in the <code>PRICES</code> dict. <code>tool_calls</code> is about the model's request.</div></li>
+        <li>The full list of tools you defined<div class="lk-why">That list is the menu you send in. <code>tool_calls</code> only appears in the model's reply.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does the description in the tools menu matter?</p>
+      <ol class="lk-opts">
+        <li>It is only a comment for people reading the code<div class="lk-why">The model reads it. It is how the model decides whether to call the tool.</div></li>
+        <li data-correct>The model reads it to decide when to use the tool<div class="lk-why">A vague description leads to misuse, and a clear one makes the agent behave.</div></li>
+        <li>It must match the Python function's name exactly<div class="lk-why">That is the <code>name</code> field. The description is free text for the model to read.</div></li>
+      </ol>
+    </div>
+  </div>
+
   <h3 id="game">🎮 Quick game: think like the agent</h3>
   <p>Before you trust the agent, prove you understand it. For each question, predict: <strong>will the model call the tool or answer directly?</strong> Get 5 in a row:</p>
   <div class="game">
@@ -675,6 +862,17 @@ PRICES <span class="op">=</span> {<span class="st">"shoes"</span>: <span class="
     <div class="sec-time">Block 12 · ~25 min · 🏁 THE BUILD</div>
     <h2>Project:<br>Smart Shop Assistant</h2></div></div>
   <p class="big-p">Same <code>agent()</code> from Block 11 — we give it a face. Gradio has a ready-made <strong>chat interface</strong>, so this takes four lines:</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · app.py</div><pre>DEFINE chat(message, history):   // Gradio passes in the new message and the chat so far
+    RETURN agent(message)          // the same agent from Block 11
+
+CREATE a chat window with chat as its function, titled "🛍️ Smart Shop Assistant"
+RUN it with share on, so you also get a public link</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>gradio</code> (as <code>gr</code>) <span class="lk-src">third-party package, pip install gradio</span>: builds the web chat page.</li>
+      <li><code>agent</code> <span class="lk-src">from <code>agent</code>, your own agent.py</span>: the function from Block 11 that answers each message.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>app.py</span></div>
 <pre><span class="kw">import</span> gradio <span class="kw">as</span> gr
 <span class="kw">from</span> agent <span class="kw">import</span> agent              <span class="cm"># the function you just wrote</span>
@@ -683,22 +881,51 @@ PRICES <span class="op">=</span> {<span class="st">"shoes"</span>: <span class="
     <span class="kw">return</span> <span class="fn">agent</span>(message)
 
 gr.<span class="fn">ChatInterface</span>(fn<span class="op">=</span>chat, title<span class="op">=</span><span class="st">"🛍️ Smart Shop Assistant"</span>).<span class="fn">launch</span>(share<span class="op">=</span><span class="kw">True</span>)  <span class="cm"># ②</span></pre></div>
+  </details>
+</div>
   <div class="decode">
     <div class="dhead">🔍 decoder</div>
     <div class="drow"><div class="dn">①</div><p>Gradio's chat box calls your function for you, handing it the user's new <code>message</code> and the chat <code>history</code> (a list of past turns). We only need the message today; <em>your homework hint:</em> pass <code>history</code> into the agent and it gains memory — exactly the trick from the memory section.</p></div>
     <div class="drow"><div class="dn">②</div><p><code>ChatInterface</code> = a ready-made chat UI (bubbles, input box, send button) around any function. <code>share=True</code> = also give me a public link.</p></div>
   </div>
   <h4>Run it</h4>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · bash — your project folder</div><pre>RUN pip install openai gradio python-dotenv   // install the packages, once
+RUN python app.py   // start the app
+// Gradio prints a local link and a public link. The public one is the shareable agent.</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="term"><div class="tbar"><i></i><i></i><i></i><span>bash — your project folder</span></div>
 <pre><span class="pr">$</span> pip install openai gradio python-dotenv
 <span class="pr">$</span> python app.py
 
 <span class="ok">Running on local URL:  http://127.0.0.1:7860</span>
 <span class="ok">Running on public URL: https://shop-xyz.gradio.live</span>   <span class="cmt"># ← your shareable agent!</span></pre></div>
+  </details>
+</div>
   <div class="run-steps">
     <div class="rs"><div><b>Ask a price question</b><p>"How much are the pants?" — watch your terminal print <code>🔧 tool called: get_price(pants)</code>. Your agent used its tool!</p></div></div>
     <div class="rs"><div><b>Then ask small talk</b><p>"What's your return policy?" — no tool fires. It's <em>deciding</em>, not following a script.</p></div></div>
     <div class="rs"><div><b>Record that contrast</b><p>15 seconds: one tool question, one chat question, terminal visible. That's your LinkedIn clip.</p></div></div>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">You ask "What's your return policy?" and no 🔧 line appears. Why?</p>
+      <ol class="lk-opts">
+        <li>The tool crashed silently<div class="lk-why">A crash would show an error. Here the model simply chose to answer.</div></li>
+        <li data-correct>The model decided no tool fits this question, so it answered directly<div class="lk-why">The model chooses when to call tools. A question with no matching tool gets a plain answer.</div></li>
+        <li>Gradio only sends price questions to the agent<div class="lk-why">Gradio sends every message to <code>chat()</code>. The model is the one that decides about tools.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The homework hint says the agent can gain memory. What does that take?</p>
+      <ol class="lk-opts">
+        <li>A bigger model number<div class="lk-why">Model size does not add memory. The hint is about passing the chat history in.</div></li>
+        <li data-correct>Passing <code>history</code> into the agent so it can see past turns<div class="lk-why">Re-sending past turns is the memory trick from the LangChain section.</div></li>
+        <li>Turning off <code>share=True</code><div class="lk-why"><code>share=True</code> only creates the public link. It does not affect memory.</div></li>
+      </ol>
+    </div>
   </div>
 
   <h3>Try the working agent 👇</h3>

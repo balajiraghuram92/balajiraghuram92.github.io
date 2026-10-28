@@ -133,6 +133,8 @@ footer span{color:#9a8a78}
   .bar-row .word{width:90px}
 }
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- aiseq:top -->
@@ -229,6 +231,27 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
         </div>
       </div>
     </div>
+    <div style="padding:0 24px 24px">
+      <div class="lk-quiz">
+        <h4 class="lk-quiz-title">Check your understanding</h4>
+        <div class="lk-q">
+          <p class="lk-stem">Why does the page say tokens are used instead of whole words?</p>
+          <ol class="lk-opts">
+            <li>Whole words would make every sentence longer<div class="lk-why">Whole words usually make text shorter than tokens do. The real problem is the size of the vocabulary.</div></li>
+            <li data-correct>A fixed set of sub-word chunks can build every word, including new ones<div class="lk-why">The model cannot store every word in the world, but it can build any word from a fixed set of chunks.</div></li>
+            <li>Tokens are the only units a computer can store<div class="lk-why">Computers store text in many ways. Tokens are a design choice made for the model.</div></li>
+          </ol>
+        </div>
+        <div class="lk-q">
+          <p class="lk-stem">You type <code>cat</code>, then <code>unbelievableness</code>. What will the tokenizer do?</p>
+          <ol class="lk-opts">
+            <li>Both split into several tokens, since every word gets chopped<div class="lk-why">Common short words usually stay as one token. Only rare or long words get chopped.</div></li>
+            <li>Both stay as one token, since the vocabulary is very large<div class="lk-why">The vocabulary is fixed and limited. That is exactly why rare words get split.</div></li>
+            <li data-correct><code>cat</code> stays one token, and <code>unbelievableness</code> splits into several pieces<div class="lk-why">Common words stay whole. Rare or long words are built from smaller chunks, as in the example above.</div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -262,6 +285,27 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
         <div class="note" style="margin-top:18px">
           <div class="ico">💡</div>
           <div><b>This is a real engineering choice</b><p>A support chatbot → temperature ≈ 0.2 (consistent). A creative writing tool → temperature ≈ 1.0 (varied). You set this on day one of any real project.</p></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 24px 24px">
+      <div class="lk-quiz">
+        <h4 class="lk-quiz-title">Check your understanding</h4>
+        <div class="lk-q">
+          <p class="lk-stem">You are building a brainstorming tool that should give varied ideas. Which change to the temperature helps most?</p>
+          <ol class="lk-opts">
+            <li data-correct>Raise it, so less likely words get a bigger share<div class="lk-why">A higher temperature flattens the probabilities, so surprising words are picked more often.</div></li>
+            <li>Set it to 0, so the model always picks the top word<div class="lk-why">Zero gives the most focused, repeatable choice. That is the opposite of varied ideas.</div></li>
+            <li>Leave it alone, since temperature does not change the choice<div class="lk-why">Temperature reshapes the probabilities. It is a real setting, not a cosmetic one.</div></li>
+          </ol>
+        </div>
+        <div class="lk-q">
+          <p class="lk-stem">At a temperature of 0.1, what does the probability chart look like?</p>
+          <ol class="lk-opts">
+            <li>All words get about the same probability<div class="lk-why">That is where a very high temperature moves the chart, not a low one.</div></li>
+            <li data-correct>The most likely word takes most of the share, so the answer is focused<div class="lk-why">A low temperature lets the top word dominate, which gives focused, repeatable answers.</div></li>
+            <li>The least likely word gets the biggest share<div class="lk-why">A low temperature favours the most likely words, not the least likely.</div></li>
+          </ol>
         </div>
       </div>
     </div>
@@ -365,6 +409,25 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
       <div class="note" style="margin-top:16px">
         <div class="ico">🤯</div>
         <div><b>Why this is the whole secret</b><p>To guess "coffee", the model quietly learned grammar, context, what baristas do, and what fits in a cup. <em>Understanding emerges as a side-effect of getting very good at fill-in-the-blank.</em></p></div>
+      </div>
+      <div class="lk-quiz" style="margin-top:16px">
+        <h4 class="lk-quiz-title">Check your understanding</h4>
+        <div class="lk-q">
+          <p class="lk-stem">In "The barista handed me a hot cup of ___", why does "bicycle" fail, even though it is a noun?</p>
+          <ol class="lk-opts">
+            <li>It is the wrong part of speech, since the blank needs a verb<div class="lk-why">A cup of ___ needs a noun, and bicycle is a noun. Grammar is not the problem here.</div></li>
+            <li>The sentence is too long for the word to fit<div class="lk-why">Length is not the issue. The blank is about what fits in a cup.</div></li>
+            <li data-correct>It does not fit the meaning: a cup holds a drink, not a vehicle<div class="lk-why">Grammar alone would accept a noun. The context is what rules out "bicycle".</div></li>
+          </ol>
+        </div>
+        <div class="lk-q">
+          <p class="lk-stem">Why does this training need no human labels?</p>
+          <ol class="lk-opts">
+            <li>The model sees the answer before each guess<div class="lk-why">If the answer were shown first, there would be nothing to learn. The guess comes first, and the real word checks it.</div></li>
+            <li data-correct>The hidden word is already in the text, so the text checks each guess<div class="lk-why">The internet becomes its own teacher: the original sentence is the answer key.</div></li>
+            <li>Humans label a few examples, and the model copies them<div class="lk-why">Self-supervision means the labels come from the text itself, not from people.</div></li>
+          </ol>
+        </div>
       </div>
     </div>
   </div>

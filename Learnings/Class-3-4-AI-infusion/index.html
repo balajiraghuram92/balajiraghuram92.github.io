@@ -381,6 +381,8 @@ footer .sig{margin-top:34px;padding-top:22px;border-top:1px solid #3a2f26;font-f
   .vmap{transform:none}
 }
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- aiseq:top -->
@@ -554,6 +556,25 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
   </div>
 
   <div class="wow"><span class="star">✨</span><div><b>The unlock that surprises everyone</b><p>You are <em>not</em> retraining the model. The model stays exactly the same as Class 1's <code>gpt-4o-mini</code>. We're only changing <strong>what goes into the prompt</strong>. RAG is, at its core, very fancy <em>prompt engineering</em> — automated.</p></div></div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A user asks about a policy the model was never trained on. How does RAG still get the answer right?</p>
+      <ol class="lk-opts">
+        <li>The model is retrained on the policy text overnight<div class="lk-why">RAG never retrains the model. The model stays exactly the same, and only the prompt changes.</div></li>
+        <li>The model reads the whole database and memorises it<div class="lk-why">Indexing stores the chunks and their vectors in a database. The model's own knowledge does not change.</div></li>
+        <li data-correct>The question is embedded, the closest chunks are found, and they go into the prompt<div class="lk-why">That is the querying phase. The retrieved text is what lets the model answer from your data.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why is RAG usually the first thing to try before fine-tuning?</p>
+      <ol class="lk-opts">
+        <li>Fine-tuning gives citations automatically, so RAG adds nothing<div class="lk-why">A fine-tuned model still cannot cite its sources on its own.</div></li>
+        <li data-correct>Fine-tuning is slow to redo when data changes, and it still cannot cite sources<div class="lk-why">RAG is faster and cheaper to update, and each answer can point to the chunk it came from.</div></li>
+        <li>Fine-tuning removes hallucinations completely, so RAG only helps speed<div class="lk-why">A fine-tuned model can still hallucinate, which is why RAG grounds answers in real text.</div></li>
+      </ol>
+    </div>
+  </div>
 </div></section>
 
 <!-- BLOCK 16 · EMBEDDINGS -->
@@ -637,6 +658,22 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
 
   <h3>How do we actually get an embedding? One function call.</h3>
   <p>You don't have to train anything — somebody else already did. Open-source models from Hugging Face (<code>sentence-transformers</code>) or APIs from OpenAI / Cohere give you embeddings in one line:</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · embeddings.py</div><pre>CREATE model = SentenceTransformer("all-MiniLM-L6-v2")   // free and fast, gives 384 numbers per text
+SET vec = model.encode("A cat is sleeping on the couch")   // the embedding: a list of 384 numbers
+PRINT the shape of vec
+PRINT the first 5 numbers of vec
+
+SET v1 = model.encode("A cat is sleeping on the couch")
+SET v2 = model.encode("A kitten is napping on the sofa")
+SET similarity = dot(v1, v2) / (norm(v1) * norm(v2))   // cosine similarity
+PRINT similarity</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>SentenceTransformer</code> <span class="lk-src">from <code>sentence_transformers</code>, package sentence-transformers</span>: loads a pre-trained embedding model by name.</li>
+      <li><code>dot</code> <span class="lk-src">from <code>numpy</code></span>: multiplies two vectors pair by pair and adds the results.</li>
+      <li><code>norm</code> <span class="lk-src">from <code>numpy.linalg</code></span>: returns the length of a vector.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>embeddings.py</span></div>
 <pre><span class="cm"># pip install sentence-transformers</span>
 <span class="kw">from</span> sentence_transformers <span class="kw">import</span> SentenceTransformer
@@ -655,6 +692,8 @@ v1 <span class="op">=</span> model.<span class="fn">encode</span>(<span class="s
 v2 <span class="op">=</span> model.<span class="fn">encode</span>(<span class="st">"A kitten is napping on the sofa"</span>)
 similarity <span class="op">=</span> <span class="fn">dot</span>(v1, v2) <span class="op">/</span> (<span class="fn">norm</span>(v1) <span class="op">*</span> <span class="fn">norm</span>(v2))   <span class="cm"># cosine</span>
 <span class="fn">print</span>(similarity)       <span class="cm"># → 0.87 (very similar 🎉)</span></pre></div>
+    </details>
+  </div>
   <div class="decode">
     <div class="dhead">🔍 decoder</div>
     <div class="drow"><div class="dn">①</div><p><strong>all-MiniLM-L6-v2</strong> is a tiny but excellent open-source embedding model — runs on your laptop, no API key needed. For production, look at <code>BAAI/bge-large-en-v1.5</code> (best English) or OpenAI's <code>text-embedding-3-small</code> (paid, very good multilingual).</p></div>
@@ -662,6 +701,26 @@ similarity <span class="op">=</span> <span class="fn">dot</span>(v1, v2) <span c
   </div>
 
   <div class="note"><div class="ico">🎙️</div><div><b>Speaker note · how to pitch this section</b><p>This is the "physics" of RAG. Don't rush. Spend a full 5 minutes letting them play with the meter and the king-queen equation. Once they internalize <em>"similar meaning = nearby vector"</em>, everything else in this class is bookkeeping.</p></div></div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">One pair of sentences has a cosine similarity of 0.91, and another pair has 0.12. Which statement is correct?</p>
+      <ol class="lk-opts">
+        <li>The 0.12 pair is more similar, because its score is closer to zero<div class="lk-why">Zero means no relation, not a match. A higher cosine means a smaller angle and a closer meaning.</div></li>
+        <li data-correct>The 0.91 pair points in almost the same direction, so its meaning is much closer<div class="lk-why">A score near 1 means the angle between the two vectors is small. That is what similar meaning looks like.</div></li>
+        <li>The 0.91 pair is only more similar if both sentences are the same length<div class="lk-why">Cosine similarity ignores length. Only the angle between the two vectors counts.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">In the embedding code, why is the dot product divided by <code>norm(v1) * norm(v2)</code>?</p>
+      <ol class="lk-opts">
+        <li data-correct>So that only the angle between the vectors counts, not how long they are<div class="lk-why">Dividing by the lengths cancels out the size of each vector. What is left is the cosine of the angle.</div></li>
+        <li>To turn the score into a percentage from 0 to 100<div class="lk-why">The score is a cosine, which ranges from -1 to +1. It is not converted to a percentage.</div></li>
+        <li>To make the score always fall between 0 and 10 for easy reading<div class="lk-why">The division keeps the score between -1 and +1. A range of 0 to 10 is not what it produces.</div></li>
+      </ol>
+    </div>
+  </div>
 
   <div class="takeaways">
     <div class="tk"><div class="e">📍</div><b>Vectors = coordinates</b><p>Every chunk of text gets a point in space.</p></div>
@@ -716,6 +775,14 @@ similarity <span class="op">=</span> <span class="fn">dot</span>(v1, v2) <span c
   </div>
 
   <h3>One line of real code</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · chunk.py</div><pre>CREATE splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)   // about 800 characters per chunk, adjacent chunks share 100
+SET chunks = splitter.split_text(your_long_document)
+PRINT the number of chunks</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>RecursiveCharacterTextSplitter</code> <span class="lk-src">from <code>langchain_text_splitters</code>, package langchain-text-splitters</span>: cuts long text into pieces, preferring paragraph and sentence breaks.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>chunk.py</span></div>
 <pre><span class="kw">from</span> langchain_text_splitters <span class="kw">import</span> RecursiveCharacterTextSplitter
 
@@ -726,7 +793,28 @@ splitter <span class="op">=</span> <span class="fn">RecursiveCharacterTextSplitt
 
 chunks <span class="op">=</span> splitter.<span class="fn">split_text</span>(your_long_document)
 <span class="fn">print</span>(<span class="fn">len</span>(chunks))    <span class="cm"># → e.g. 47 chunks ready to embed</span></pre></div>
+    </details>
+  </div>
   <div class="note"><div class="ico">💡</div><div><b>Why <code>chunk_overlap</code>?</b><p>If your question's answer sits exactly at a chunk boundary, you'd miss it. Overlap (50–100 chars) makes sure every sentence appears in at least one chunk fully. Cheap insurance.</p></div></div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A key sentence sits exactly on the boundary between two chunks, and <code>chunk_overlap</code> is 0. What is the likely problem?</p>
+      <ol class="lk-opts">
+        <li data-correct>Neither chunk holds the whole sentence, so retrieval may miss the answer<div class="lk-why">With no overlap, the sentence is split and each half lives in a different chunk. Overlap exists to prevent exactly this.</div></li>
+        <li>The model joins the two halves automatically when it writes the answer<div class="lk-why">Nothing joins chunks at answer time. The model only sees the chunks that were retrieved.</div></li>
+        <li>The two chunks' vectors are averaged, so the full sentence is kept<div class="lk-why">Each chunk is embedded on its own. The vectors are not merged, so the split stays split.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Raising <code>chunk_size</code> from 200 to 1,500 characters usually does what?</p>
+      <ol class="lk-opts">
+        <li>Improves precision, because each chunk becomes more focused<div class="lk-why">Bigger chunks bring more surrounding text along. The answer is then buried in more fluff, which lowers precision.</div></li>
+        <li>Makes embeddings unnecessary, since long chunks can be matched by keyword<div class="lk-why">Chunk size does not remove the need for embeddings. Meaning-based search still works on one vector per chunk.</div></li>
+        <li data-correct>Raises recall, since the answer is more likely to sit inside one chunk, but adds more unrelated text<div class="lk-why">Big chunks favour recall and small chunks favour precision. Chunk size is usually the first knob to tune.</div></li>
+      </ol>
+    </div>
+  </div>
 </div></section>
 
 <!-- BLOCK 18 · VECTOR DB -->
@@ -771,6 +859,19 @@ chunks <span class="op">=</span> splitter.<span class="fn">split_text</span>(you
   <p class="big-p">We've talked about every piece. Now we wire them up. This is the whole pattern — every RAG system you'll see in production is just a fancier version of <em>this</em>.</p>
 
   <h3>Step 1 — Index your documents (once)</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · index.py</div><pre>SET docs = a list of 4 sample sentences about returns, shipping, corporate orders and office hours
+CREATE splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+SET chunks = splitter.create_documents(docs)   // wraps each piece of text as a document
+CREATE embedder = HuggingFaceEmbeddings("all-MiniLM-L6-v2")   // free, runs on your machine
+CREATE db = Chroma.from_documents(chunks, embedder, save to "./chroma_db")   // embeds every chunk, then stores it on disk
+PRINT "Indexed " + number of chunks + " chunks"</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>RecursiveCharacterTextSplitter</code> <span class="lk-src">from <code>langchain_text_splitters</code>, package langchain-text-splitters</span>: cuts the documents into chunks of about 500 characters.</li>
+      <li><code>HuggingFaceEmbeddings</code> <span class="lk-src">from <code>langchain_huggingface</code>, package langchain-huggingface</span>: wraps a free embedding model that runs locally.</li>
+      <li><code>Chroma</code> <span class="lk-src">from <code>langchain_chroma</code>, package langchain-chroma</span>: a vector database that stores the chunks and their vectors in a folder.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>index.py</span></div>
 <pre><span class="kw">from</span> langchain_text_splitters <span class="kw">import</span> RecursiveCharacterTextSplitter
 <span class="kw">from</span> langchain_huggingface <span class="kw">import</span> HuggingFaceEmbeddings
@@ -795,8 +896,30 @@ embedder <span class="op">=</span> <span class="fn">HuggingFaceEmbeddings</span>
 db <span class="op">=</span> Chroma.<span class="fn">from_documents</span>(chunks, embedder, persist_directory<span class="op">=</span><span class="st">"./chroma_db"</span>)
 
 <span class="fn">print</span>(<span class="st">f"Indexed </span>{<span class="fn">len</span>(chunks)}<span class="st"> chunks 🎉"</span>)</pre></div>
+    </details>
+  </div>
 
   <h3>Step 2 — Ask a question (every time)</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · rag.py</div><pre>LOAD the .env file into the environment   // load_dotenv()
+CREATE embedder = HuggingFaceEmbeddings("all-MiniLM-L6-v2")   // the same model used for indexing
+CREATE db = Chroma opened from "./chroma_db", using embedder
+CREATE model = ChatOpenAI("gpt-4o-mini", temperature 0)   // low randomness, steadier answers
+CREATE prompt = a template with {context} and {question} slots, saying to answer ONLY from the context
+DEFINE rag_answer(question):
+    SET chunks = db.similarity_search(question, k=3)   // the 3 nearest chunks
+    SET context = the text of each chunk, joined with blank lines
+    SET chain = prompt | model
+    RETURN the text of chain.invoke(context, question)
+PRINT rag_answer("How long do I have to return something?")</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>HuggingFaceEmbeddings</code> <span class="lk-src">from <code>langchain_huggingface</code>, package langchain-huggingface</span>: the free local embedding model, the same one used when indexing.</li>
+      <li><code>Chroma</code> <span class="lk-src">from <code>langchain_chroma</code>, package langchain-chroma</span>: opens the vector store saved in the chroma_db folder.</li>
+      <li><code>ChatOpenAI</code> <span class="lk-src">from <code>langchain_openai</code>, package langchain-openai</span>: the chat model that writes the final answer.</li>
+      <li><code>ChatPromptTemplate</code> <span class="lk-src">from <code>langchain_core.prompts</code>, package langchain-core</span>: builds a prompt with named slots that get filled in.</li>
+      <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: copies the .env file into the environment.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>rag.py</span></div>
 <pre><span class="kw">from</span> langchain_huggingface <span class="kw">import</span> HuggingFaceEmbeddings
 <span class="kw">from</span> langchain_chroma <span class="kw">import</span> Chroma
@@ -829,6 +952,8 @@ Question: {question}
 
 <span class="fn">print</span>(<span class="fn">rag_answer</span>(<span class="st">"How long do I have to return something?"</span>))
 <span class="cm"># → "30 days from the purchase date."  ✅ from your data, not a guess</span></pre></div>
+    </details>
+  </div>
 
   <div class="decode">
     <div class="dhead">🔍 decoder — the 8 numbered steps</div>
@@ -857,6 +982,25 @@ Question: {question}
   </div>
 
   <div class="wow"><span class="star">🎯</span><div><b>Take a moment — this <em>is</em> the canonical pattern</b><p>That's it. Every RAG system in the world — from a hobby project to Perplexity — is a variant of these 8 lines. From here we're just making it <em>better</em>: smarter retrieval, smarter prompts, multiple passes. The core never changes.</p></div></div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Why does <code>rag_answer</code> paste the retrieved chunks into the prompt, instead of sending only the question?</p>
+      <ol class="lk-opts">
+        <li>The model cannot read a plain question without context around it<div class="lk-why">The model reads plain questions fine. The chunks are added so the answer comes from your text.</div></li>
+        <li data-correct>So the answer is based on your documents, not on guesses from training data<div class="lk-why">The chunks are the evidence. The prompt asks the model to answer from them, and that grounding is the point of RAG.</div></li>
+        <li>To shorten the prompt, since the chunks replace the question<div class="lk-why">The chunks are added on top of the question, so the prompt gets longer, not shorter.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What happens if none of the 3 retrieved chunks contains the answer?</p>
+      <ol class="lk-opts">
+        <li>The <code>similarity_search</code> call returns nothing, so the code crashes<div class="lk-why"><code>similarity_search</code> always returns the k nearest chunks, even weak matches. Nothing crashes.</div></li>
+        <li>The model fills the gap from its training data, because the prompt gives it no rule<div class="lk-why">The prompt does give a rule. It says to answer only from the context.</div></li>
+        <li data-correct>The prompt tells the model to say "I don't know", so it should not guess<div class="lk-why">That one line is the main guard against hallucination in this RAG setup.</div></li>
+      </ol>
+    </div>
+  </div>
 </div></section>
 
 <!-- BLOCK 20 · RERANK & HYBRID -->
@@ -933,6 +1077,17 @@ Question: {question}
   </div>
 
   <p>The code to add reranking is laughably short:</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · rerank.py</div><pre>CREATE reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")   // free and fast
+DEFINE retrieve_with_rerank(question, top_k = 3):
+    SET candidates = db.similarity_search(question, k=25)   // 25 cheap candidates from the vector store
+    SET pairs = one (question, chunk text) pair for each candidate
+    SET scores = reranker.predict(pairs)   // one relevance score per pair
+    RETURN the top_k candidates, sorted by score from highest to lowest</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>CrossEncoder</code> <span class="lk-src">from <code>sentence_transformers</code>, package sentence-transformers</span>: a model that reads the query and a document together and gives one score. It is accurate but slow.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>rerank.py</span></div>
 <pre><span class="kw">from</span> sentence_transformers <span class="kw">import</span> CrossEncoder
 
@@ -943,6 +1098,8 @@ reranker <span class="op">=</span> <span class="fn">CrossEncoder</span>(<span cl
     pairs <span class="op">=</span> [(question, c.page_content) <span class="kw">for</span> c <span class="kw">in</span> candidates]
     scores <span class="op">=</span> reranker.<span class="fn">predict</span>(pairs)                          <span class="cm"># cross-encoder scores each pair</span>
     <span class="kw">return</span> [c <span class="kw">for</span> _, c <span class="kw">in</span> <span class="fn">sorted</span>(<span class="fn">zip</span>(scores, candidates), reverse<span class="op">=</span><span class="kw">True</span>)[:top_k]]</pre></div>
+    </details>
+  </div>
 
   <h3>Problem 2: sometimes you need the <em>exact word</em></h3>
   <p>Pure semantic search ignores keywords. Ask "what's the price of <strong>SKU-4429</strong>?" and the embedding doesn't care about that specific code — it just sees "price" and "product". For codes, names, IDs, dates — <strong>keyword search beats semantic</strong> hands down. The fix isn't to pick one or the other. It's to use <em>both</em>, with very different strengths.</p>
@@ -1011,6 +1168,33 @@ reranker <span class="op">=</span> <span class="fn">CrossEncoder</span>(<span cl
     <p>Reranking + hybrid search are the two single biggest quality wins in RAG. Add them and you go from "demo works" to "production works". Almost every benchmark in the MTEB leaderboard uses some combination. You now know the playbook.</p>
     <div class="cos"><span>BM25 + Vector</span><span>Cross-encoder rerank</span><span>Reciprocal rank fusion</span><span>Cohere Rerank API</span></div>
   </div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Why does <code>retrieve_with_rerank</code> run the cross-encoder on only 25 candidates, not on the whole database?</p>
+      <ol class="lk-opts">
+        <li>Cross-encoders cannot score more than 25 pairs in one call<div class="lk-why">There is no such limit. The problem is cost: each pair needs a full model pass.</div></li>
+        <li>The 25 vector-search results are always already in the correct order<div class="lk-why">Vector search can rank the best chunk low, for example at 20. Fixing that order is exactly what the reranker is for.</div></li>
+        <li data-correct>A cross-encoder runs a full model pass per (query, document) pair, which is far too slow for millions of chunks<div class="lk-why">So the fast vector search narrows the field first, and the slow, accurate reranker only sees the shortlist.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">A user searches for the product code SKU-4429. Which search is best placed to find that exact code?</p>
+      <ol class="lk-opts">
+        <li>Vector search, since embeddings capture every exact string in a document<div class="lk-why">Embeddings capture meaning, so a made-up code gets little weight. That is the blind spot of vector search.</div></li>
+        <li data-correct>BM25 keyword search, since it matches the exact characters of the code<div class="lk-why">Keyword search is strong at codes, IDs and names, where the exact text matters.</div></li>
+        <li>Cross-encoder reranking alone, since it reads the query and document together<div class="lk-why">Reranking only reorders the candidates it is given. If the chunk with that code was never retrieved, it is never scored.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">In hybrid search, document X is #1 in BM25 and #40 in vector search. Document Y is #2 in both lists. Under reciprocal rank fusion, which ends higher?</p>
+      <ol class="lk-opts">
+        <li data-correct>Document Y, because its ranks in both lists add up to a higher total<div class="lk-why">RRF turns each rank into a score and adds them. Y is strong in both lists, so it beats X's one first place plus one weak rank.</div></li>
+        <li>Document X, because first place in one list is worth more than second place in two<div class="lk-why">RRF does not let one first place win outright. A weak rank in the other list pulls X's total down.</div></li>
+        <li>Document X, because vector search is always trusted more than BM25<div class="lk-why">Hybrid search treats both lists the same. Neither one is trusted more by default.</div></li>
+      </ol>
+    </div>
+  </div>
 </div></section>
 
 <!-- BLOCK 21 · MINI PROJECT -->
@@ -1034,6 +1218,21 @@ reranker <span class="op">=</span> <span class="fn">CrossEncoder</span>(<span cl
   </div>
 
   <h4>Step 1 — Load the PDF &amp; index it once</h4>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · pdf_chat.py · part 1</div><pre>DEFINE build_index(pdf_path):
+    SET pages = read the PDF at pdf_path   // one document per page
+    SET splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
+    SET chunks = splitter.split_documents(pages)   // each chunk keeps its page number
+    SET embedder = HuggingFaceEmbeddings("all-MiniLM-L6-v2")
+    SET db = Chroma.from_documents(chunks, embedder)   // kept in memory, not saved to disk
+    RETURN db</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>PyPDFLoader</code> <span class="lk-src">from <code>langchain_community.document_loaders</code>, package langchain-community</span>: reads a PDF and gives one document per page, with the page number in its metadata.</li>
+      <li><code>RecursiveCharacterTextSplitter</code> <span class="lk-src">from <code>langchain_text_splitters</code>, package langchain-text-splitters</span>: cuts the pages into chunks of about 800 characters.</li>
+      <li><code>HuggingFaceEmbeddings</code> <span class="lk-src">from <code>langchain_huggingface</code>, package langchain-huggingface</span>: the free local embedding model.</li>
+      <li><code>Chroma</code> <span class="lk-src">from <code>langchain_chroma</code>, package langchain-chroma</span>: a vector store that holds the chunks and their vectors.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>pdf_chat.py · part 1</span></div>
 <pre><span class="cm"># pip install langchain langchain-openai langchain-chroma langchain-huggingface \
 #             langchain-community pypdf sentence-transformers gradio python-dotenv</span>
@@ -1050,8 +1249,25 @@ reranker <span class="op">=</span> <span class="fn">CrossEncoder</span>(<span cl
     embedder <span class="op">=</span> <span class="fn">HuggingFaceEmbeddings</span>(model_name<span class="op">=</span><span class="st">"all-MiniLM-L6-v2"</span>)
     db       <span class="op">=</span> Chroma.<span class="fn">from_documents</span>(chunks, embedder)         <span class="cm"># ③ in-memory store</span>
     <span class="kw">return</span> db</pre></div>
+    </details>
+  </div>
 
   <h4>Step 2 — Answer with retrieval + citations</h4>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · pdf_chat.py · part 2</div><pre>LOAD the .env file into the environment   // load_dotenv()
+CREATE model = ChatOpenAI("gpt-4o-mini", temperature 0)
+CREATE prompt = a template that says to answer ONLY from the context, to say "I couldn't find that in the document" when the answer is missing, and to end with a Sources line
+DEFINE ask(db, question):
+    SET chunks = db.similarity_search(question, k=4)   // the 4 nearest chunks
+    SET context = each chunk written as "[page N] text", joined with blank lines   // N is the stored page number + 1
+    SET chain = prompt | model
+    RETURN the text of chain.invoke(context, question)</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>ChatOpenAI</code> <span class="lk-src">from <code>langchain_openai</code>, package langchain-openai</span>: the OpenAI chat model that writes the answer.</li>
+      <li><code>ChatPromptTemplate</code> <span class="lk-src">from <code>langchain_core.prompts</code>, package langchain-core</span>: builds a prompt with named slots that get filled in.</li>
+      <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: copies the .env file into the environment.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>pdf_chat.py · part 2</span></div>
 <pre><span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
 <span class="kw">from</span> langchain_core.prompts <span class="kw">import</span> ChatPromptTemplate
@@ -1077,8 +1293,26 @@ Question: {question}
         <span class="st">f"[page </span>{c.metadata[<span class="st">'page'</span>]<span class="op">+</span><span class="nm">1</span>]}<span class="st">] </span>{c.page_content}<span class="st">"</span> <span class="kw">for</span> c <span class="kw">in</span> chunks)
     chain <span class="op">=</span> prompt <span class="op">|</span> model
     <span class="kw">return</span> chain.<span class="fn">invoke</span>({<span class="st">"context"</span>: context, <span class="st">"question"</span>: question}).content</pre></div>
+    </details>
+  </div>
 
   <h4>Step 3 — Give it a face with Gradio</h4>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · pdf_chat.py · part 3</div><pre>SET state = {"db": None}   // keeps the index between messages
+DEFINE upload(pdf):
+    SET state["db"] = build_index(the uploaded file's name)   // re-index on every new PDF
+    RETURN "PDF indexed! Ask me anything about it."
+DEFINE chat(message, history):
+    IF state["db"] is None THEN
+        RETURN "Please upload a PDF first"
+    RETURN ask(state["db"], message)
+CREATE a page titled "Chat with your PDF" with a PDF upload box, a status line and a chat window
+when a file is uploaded, CALL upload and show its result in the status line
+RUN the page with share on   // creates a public link</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>gradio</code> (as <code>gr</code>) <span class="lk-src">pip package gradio</span>: builds the web page with the upload box, status line and chat window.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i><span>pdf_chat.py · part 3</span></div>
 <pre><span class="kw">import</span> gradio <span class="kw">as</span> gr
 
@@ -1101,6 +1335,8 @@ state <span class="op">=</span> {<span class="st">"db"</span>: <span class="kw">
     gr.<span class="fn">ChatInterface</span>(fn<span class="op">=</span>chat)
 
 demo.<span class="fn">launch</span>(share<span class="op">=</span><span class="kw">True</span>)                   <span class="cm"># share=True → public link!</span></pre></div>
+    </details>
+  </div>
 
   <div class="decode">
     <div class="dhead">🔍 decoder · the 3 small choices that matter</div>
@@ -1110,11 +1346,17 @@ demo.<span class="fn">launch</span>(share<span class="op">=</span><span class="k
   </div>
 
   <h4>Run it</h4>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · bash — your project folder</div><pre>RUN python pdf_chat.py   // start the app
+// Gradio then prints a local link and a public *.gradio.live link to share</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="term"><div class="tbar"><i></i><i></i><i></i><span>bash — your project folder</span></div>
 <pre><span class="pr">$</span> python pdf_chat.py
 
 <span class="ok">Running on local URL:  http://127.0.0.1:7860</span>
 <span class="ok">Running on public URL: https://abcd12.gradio.live</span>   <span class="cmt"># ← share this on LinkedIn!</span></pre></div>
+    </details>
+  </div>
 
   <div class="run-steps">
     <div class="rs"><div><b>Upload <em>any</em> PDF</b><p>Your resume, the Indian Constitution, your company's HR policy, last quarter's earnings call transcript. Anything text-based.</p></div></div>
@@ -1149,6 +1391,25 @@ demo.<span class="fn">launch</span>(share<span class="op">=</span><span class="k
     <h4>You just built the most-shipped AI app of 2024–26</h4>
     <p>"Chat with [your docs / your PDF / your codebase / your Notion]" is the single most common AI feature on the market today — and almost all of them are this exact pattern with a fancier UI. ChatGPT's "Browse my files", Claude Projects, Cursor's <code>@codebase</code>, Glean, Notion AI — every one of them. You now own the recipe.</p>
     <div class="cos"><span>Notion AI</span><span>Glean</span><span>Claude Projects</span><span>Cursor @docs</span><span>Perplexity Spaces</span></div>
+  </div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Why does <code>ask()</code> put the page number in front of each chunk before it goes into the prompt?</p>
+      <ol class="lk-opts">
+        <li data-correct>So the model can cite the page each answer came from, as the Sources line asks<div class="lk-why">The page number comes from the chunk metadata. Putting it in the prompt is how the model knows what to cite.</div></li>
+        <li>So the embedding model can search by page number<div class="lk-why">Search runs on the chunk text and its vector. The page number is only used in the prompt, for citations.</div></li>
+        <li>So Gradio can show a progress bar for each page<div class="lk-why">Gradio only draws the upload box, status line and chat window. Page numbers go into the prompt, not the interface.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The user uploads a second PDF. What happens to the index of the first PDF?</p>
+      <ol class="lk-opts">
+        <li>Both indexes are kept, and every question searches both<div class="lk-why"><code>state</code> holds one database. Each upload replaces it, so only the newest PDF is searched.</div></li>
+        <li data-correct>It is replaced, because upload runs <code>build_index</code> again and stores the new index in <code>state</code><div class="lk-why"><code>state["db"]</code> is overwritten, so the old index is dropped.</div></li>
+        <li>It is saved to <code>./chroma_db</code> so it can be reopened later<div class="lk-why"><code>build_index</code> does not set a persist directory, so the index lives in memory and is not saved to disk.</div></li>
+      </ol>
+    </div>
   </div>
 </div></section>
 

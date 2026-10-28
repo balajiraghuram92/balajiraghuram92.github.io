@@ -334,6 +334,8 @@ footer{padding:48px 0 80px;color:var(--muted);font-size:.95rem;border-top:1px so
 .code .bar .file{min-width:0;overflow-wrap:anywhere}
 .code .bar .copy{flex:none}
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- Shared arrowheads for every diagram on the page -->
@@ -496,8 +498,14 @@ a.awsq-home:hover{background:var(--card-2);text-decoration:none}
   <section id="setup" aria-labelledby="setup-h">
     <h3 id="setup-h">Set up once</h3>
     <div class="prose"><p>Each section folder is its own small project. <button class="kw" data-k="uv">uv</button> reads the project file, creates a <button class="kw" data-k="venv">virtual environment</button> and installs the exact locked versions, so everyone in the class runs the same code.</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal, in each section folder</div><pre>RUN uv sync                      // create .venv and install the locked versions
+RUN cp .env.example .env         // copy the template, then paste your keys into .env</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">terminal, in each section folder</span><button class="copy">Copy</button></div><pre><code class="lang-sh">uv sync                      # create .venv, install locked versions
 cp .env.example .env         # then paste your keys into .env</code></pre></div>
+      </details>
+    </div>
     <div class="tbl-wrap">
       <table>
         <thead><tr><th>Script</th><th>What it shows</th><th>Needs</th></tr></thead>
@@ -523,6 +531,15 @@ cp .env.example .env         # then paste your keys into .env</code></pre></div>
   <div class="prose">
     <p>A <button class="kw" data-k="env-file">.env file</button> is a plain text file of <code>KEY=value</code> lines. It's listed in <code>.gitignore</code>, so it never reaches GitHub. Every SDK (OpenAI, LangSmith, Tavily) looks for its key in an <button class="kw" data-k="env-var">environment variable</button> with a fixed name, such as <code>OPENAI_API_KEY</code>. <code>load_dotenv()</code> copies each line of <code>.env</code> into the environment, and the SDKs find their keys on their own.</p>
   </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · .env (placeholders, never commit the real file)</div><pre>SET OPENAI_API_KEY to your OpenAI key, which starts with sk-
+SET OPENAI_MODEL to gpt-5.6-sol   // optional, this is the default
+SET TAVILY_API_KEY to your Tavily key   // only for the search scripts in section 2
+// optional tracing: sends every call to LangSmith
+SET LANGSMITH_TRACING to true
+SET LANGSMITH_API_KEY to your LangSmith key
+SET LANGSMITH_PROJECT to the name of your project</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">.env (placeholders, never commit the real file)</span><button class="copy">Copy</button></div><pre><code class="lang-sh">OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-5.6-sol          # optional, this is the default
 TAVILY_API_KEY=tvly-...           # section 2 only
@@ -530,8 +547,25 @@ TAVILY_API_KEY=tvly-...           # section 2 only
 LANGSMITH_TRACING=true
 LANGSMITH_API_KEY=lsv2_...
 LANGSMITH_PROJECT=section-01-langchain-foundations</code></pre></div>
+    </details>
+  </div>
 
   <div class="annot">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_hello_world_env_setup.py</div><pre>LOAD every KEY=value line from .env into the environment
+
+DEFINE describe_secret(name):
+    SET value = environment variable called name
+    IF value is empty THEN
+        RETURN "name is missing, copy .env.example to .env"
+    RETURN "name loaded" + first 8 characters + total length   // never the full key
+
+PRINT describe_secret("OPENAI_API_KEY")</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>os</code> <span class="lk-src">Python standard library</span>: gives access to environment variables through <code>os.environ</code>.</li>
+        <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: reads the <code>.env</code> file and copies each line into the environment.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_hello_world_env_setup.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">import os
 from dotenv import load_dotenv
 
@@ -544,6 +578,8 @@ def describe_secret(name: str) -> str:
     return f"{name} loaded ✅  (starts with {value[:8]!r}, {len(value)} characters)"
 
 print(describe_secret("OPENAI_API_KEY"))</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>load_dotenv()</b> Reads <code>.env</code> from this folder (or a parent) into <code>os.environ</code>. A variable already exported in your terminal wins over the file.</li>
       <li><b>os.environ.get(name)</b> Returns the value, or <code>None</code> if it isn't set, so a missing key gives a friendly message instead of a crash.</li>
@@ -557,6 +593,26 @@ LANGSMITH_TRACING = (not set) → tracing is optional, see Script 02</pre></div>
   <div class="callout warn">
     <h5><span class="ico">!</span>Never print a full key</h5>
     <p>Terminal output ends up in screenshots, screen recordings and logs. Print a masked prefix like this script does, and if a key ever leaks, revoke it and make a new one.</p>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Your <code>.env</code> file has <code>OPENAI_API_KEY=sk-file</code>, but you already ran <code>export OPENAI_API_KEY=sk-shell</code> in the terminal. Which key does the script use?</p>
+      <ol class="lk-opts">
+        <li>sk-file, because <code>load_dotenv()</code> always overwrites the environment<div class="lk-why">By default <code>load_dotenv()</code> does not override variables that already exist. It only fills in the missing ones.</div></li>
+        <li data-correct>sk-shell, because a variable already in the environment wins over the file<div class="lk-why"><code>load_dotenv()</code> skips any key that is already set, so the value you exported in the terminal is kept.</div></li>
+        <li>Neither: the script crashes because the key is defined twice<div class="lk-why">Defining a key in two places is allowed. One simply takes priority, and nothing raises an error.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does <code>describe_secret</code> print only <code>value[:8]</code>?</p>
+      <ol class="lk-opts">
+        <li>Python cannot print strings longer than 8 characters<div class="lk-why">Python prints strings of any length. The slice is a deliberate choice.</div></li>
+        <li>The first 8 characters are the whole key<div class="lk-why">Real keys are long, more than 100 characters here. The first 8 are just the prefix, such as <code>sk-proj-</code>.</div></li>
+        <li data-correct>The prefix tells you which kind of key is loaded without exposing the secret<div class="lk-why">Output ends up in screenshots and logs. A short prefix is enough to confirm the key type and is useless to an attacker.</div></li>
+      </ol>
+    </div>
   </div>
 </section>
 
@@ -591,6 +647,14 @@ LANGSMITH_TRACING = (not set) → tracing is optional, see Script 02</pre></div>
 
   <h3>The prompt is a template with an output contract</h3>
   <div class="prose"><p>Every script summarises the same short biography (of Dr A. P. J. Abdul Kalam) from <code>sample_data.py</code>, so cloud and local models can be compared on identical input. The template has one <button class="kw" data-k="placeholder">placeholder</button>, <code>{information}</code>, and a numbered list that tells the model exactly which three parts to return.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_summary_chain_openai.py, the template</div><pre>SET PROFILE_TEMPLATE to this text   // the numbered list is the output contract
+    "Here is a short biography:", then a new line holding {information}
+    "Using only this text, give me:", then three numbered parts
+        1. A one-line headline about this person
+        2. A three-bullet summary a 12-year-old would understand
+        3. One question you would ask them in an interview</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">02_summary_chain_openai.py, the template</span><button class="copy">Copy</button></div><pre><code class="lang-py">PROFILE_TEMPLATE = """Here is a short biography:
 {information}
 
@@ -599,6 +663,8 @@ Using only this text, give me:
 2. A three-bullet summary a 12-year-old would understand
 3. One question you would ask them in an interview
 """</code></pre></div>
+    </details>
+  </div>
   <div class="callout analogy">
     <h5><span class="ico">✦</span>Think of it like this</h5>
     <p>A prompt template is a fill-in-the-blanks form, like a railway reservation slip. The printed parts never change; you only write in the blanks. The numbered list is the "output contract": the wording of the answer changes every run, but its <em>shape</em> (headline, three bullets, one question) stays the same.</p>
@@ -606,6 +672,23 @@ Using only this text, give me:
 
   <h3>Building and running the chain</h3>
   <div class="annot">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_summary_chain_openai.py (core)</div><pre>SET OPENAI_MODEL to the OPENAI_MODEL value from .env, or gpt-5.6-sol if it is not set
+
+DEFINE build_profile_chain(model_name):
+    CREATE profile_prompt_template = PromptTemplate with input variable information and PROFILE_TEMPLATE
+    CREATE llm = ChatOpenAI with temperature 0 and model_name
+    RETURN profile_prompt_template | llm   // the prompt's output feeds the model
+
+SET chain = build_profile_chain(OPENAI_MODEL)
+SET response = chain.invoke with information set to PERSON_INFORMATION
+PRINT response.text</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>PromptTemplate</code> <span class="lk-src">from <code>langchain_core.prompts</code>, package langchain-core</span>: a template with blanks, such as <code>{information}</code>.</li>
+        <li><code>ChatOpenAI</code> <span class="lk-src">from <code>langchain_openai</code>, package langchain-openai</span>: the chat model that calls OpenAI.</li>
+        <li><code>PERSON_INFORMATION</code> <span class="lk-src">from <code>sample_data</code>, your local <code>sample_data.py</code></span>: the biography the chain summarises.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_summary_chain_openai.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from sample_data import PERSON_INFORMATION
@@ -622,6 +705,8 @@ def build_profile_chain(model_name: str):
 chain = build_profile_chain(OPENAI_MODEL)
 response = chain.invoke(input={"information": PERSON_INFORMATION})
 print(response.text)</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>os.getenv("OPENAI_MODEL", ...)</b> The model name lives in <code>.env</code>, so you can switch models without editing code.</li>
       <li><b>input_variables</b> Lists every <code>{placeholder}</code> the template expects.</li>
@@ -645,6 +730,26 @@ What did selling newspapers as a boy teach you that helped you as a scientist?</
   <div class="callout code-tie">
     <h5><span class="ico">↻</span>Try this</h5>
     <p>Replace <code>PERSON_INFORMATION</code> in <code>sample_data.py</code> with a paragraph about anyone you like, a cricketer or your favourite founder, and run it again. Nothing else changes. That's the point of a template.</p>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The template has one placeholder, <code>{information}</code>. Which call runs the chain correctly?</p>
+      <ol class="lk-opts">
+        <li data-correct>chain.invoke({"information": PERSON_INFORMATION})<div class="lk-why">The dict key matches the placeholder name, so the biography fills the blank.</div></li>
+        <li>chain.invoke({"bio": PERSON_INFORMATION})<div class="lk-why">The key must match the placeholder name exactly. <code>bio</code> is not a placeholder in this template.</div></li>
+        <li>chain.invoke(PERSON_INFORMATION)<div class="lk-why">The chain expects a dict of placeholder values, not a plain string.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does the template end with a numbered list?</p>
+      <ol class="lk-opts">
+        <li>It makes the model reply faster, because it skips the explanation<div class="lk-why">The list does not change the speed. It sets the shape of the answer.</div></li>
+        <li>The model only reads numbered lists, so plain sentences would be ignored<div class="lk-why">The model reads the whole prompt. The list works because it names the three parts to return.</div></li>
+        <li data-correct>It is the output contract: the wording changes every run, but the shape stays the same<div class="lk-why">The numbered list tells the model which three parts to return, so every answer has a headline, three bullets and one question.</div></li>
+      </ol>
+    </div>
   </div>
 </section>
 
@@ -704,6 +809,27 @@ What did selling newspapers as a boy teach you that helped you as a scientist?</
     </table>
   </div>
   <div class="annot">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 04_inspect_the_response_object.py (core)</div><pre>DEFINE make_llm(use_local):
+    IF use_local THEN
+        CREATE ChatOllama with temperature 0 and model OLLAMA_MODEL
+        RETURN the model and OLLAMA_MODEL
+    CREATE ChatOpenAI with temperature 0 and model OPENAI_MODEL
+    RETURN the model and OPENAI_MODEL
+
+SET use_local to true when "--local" is in the command-line arguments
+SET llm, model_name = make_llm(use_local)
+SET chain = PromptTemplate.from_template(PROFILE_TEMPLATE) | llm
+SET response = chain.invoke with information set to PERSON_INFORMATION
+
+PRINT response.usage_metadata
+PRINT the keys of response.response_metadata
+PRINT the type name of response.content</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>ChatOllama</code> <span class="lk-src">from <code>langchain_ollama</code>, package langchain-ollama, imported only with <code>--local</code></span>: the chat model that talks to your local Ollama app.</li>
+        <li><code>ChatOpenAI</code> <span class="lk-src">from <code>langchain_openai</code>, package langchain-openai</span>: the cloud chat model, used by default.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">04_inspect_the_response_object.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">def make_llm(use_local: bool):
     if use_local:
         from langchain_ollama import ChatOllama
@@ -719,6 +845,8 @@ response = chain.invoke({"information": PERSON_INFORMATION})
 print(response.usage_metadata)
 print(list(response.response_metadata.keys()))
 print(type(response.content).__name__)</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>make_llm()</b> Returns a cloud or a local model. Both have the same interface, so nothing after this line cares which one it got.</li>
       <li><b>"--local" in sys.argv</b> Run with <code>--local</code> to use Ollama instead of OpenAI.</li>
@@ -748,6 +876,35 @@ content is a          : list  (Responses-API content blocks) — that's why we u
     </ol>
     <div class="prose"><p>In Part B tracing is even more useful: you'll see two model calls with the tool call in between, which is the agent loop made visible.</p></div>
   </section>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">In the sample output, <code>response.tool_calls</code> is <code>[]</code>. Why is it empty?</p>
+      <ol class="lk-opts">
+        <li data-correct>The chain has no tools and the model asked for none, so nothing was requested<div class="lk-why">Nothing in a plain chain can request a tool. The field is only filled when the model asks for one, which happens with the agents in Part B.</div></li>
+        <li>OpenAI models never return tool calls<div class="lk-why">OpenAI models do return tool calls when you give them tools. Here there are none to call.</div></li>
+        <li>LangSmith tracing is switched off<div class="lk-why">Tracing only records a run. It has no effect on what the response object holds.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">In a LangSmith trace, which step shows the filled-in prompt that was actually sent to the model?</p>
+      <ol class="lk-opts">
+        <li>RunnableSequence<div class="lk-why">This is the parent step: one run of your whole chain. It does not show the prompt by itself.</div></li>
+        <li data-correct>PromptTemplate<div class="lk-why">It is a child step that shows the filled-in prompt that was actually sent.</div></li>
+        <li>ChatOpenAI or ChatOllama<div class="lk-why">This step is the model call, with latency, token count and cost.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What do you change to start tracing a script with LangSmith?</p>
+      <ol class="lk-opts">
+        <li>Wrap every chain in a LangSmith decorator in your code<div class="lk-why">Not needed. LangChain notices the <code>LANGSMITH_*</code> lines and traces the calls automatically.</div></li>
+        <li>Replace ChatOpenAI with a LangSmith model class<div class="lk-why">The model stays the same. Tracing is switched on from <code>.env</code>, not from the model.</div></li>
+        <li data-correct>Add the <code>LANGSMITH_*</code> lines to <code>.env</code> and run the script again<div class="lk-why">That is enough. LangChain sends a trace of every call, with no code changes.</div></li>
+        <li>Turn on tracing in the OpenAI dashboard<div class="lk-why">The traces come from LangChain in your script. The OpenAI dashboard does not switch them on.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 
 <section class="sec" id="agent" aria-labelledby="agent-h">
@@ -808,6 +965,22 @@ content is a          : list  (Responses-API content blocks) — that's why we u
   <h3>A tool is a function with a menu card</h3>
   <div class="prose"><p>To focus purely on the mechanics, the first script's <code>search</code> tool is a placeholder: whatever you ask, it returns the same weather report for Bengaluru. In 0.7 we swap in real search and nothing else changes.</p></div>
   <div class="annot">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_agent_with_placeholder_tool.py (core)</div><pre>DEFINE search(query) as a tool   // the docstring tells the model when to use it
+    PRINT "search tool called with" and query
+    RETURN the fixed Bengaluru weather report
+
+SET llm = ChatOpenAI with model OPENAI_MODEL
+CREATE agent = create_agent with model llm and tools [search]
+SET result = agent.invoke with messages [HumanMessage with QUESTION]
+CALL print_agent_trace(result)</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>create_agent</code> <span class="lk-src">from <code>langchain.agents</code></span>: builds the whole agent loop in one line.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>langchain.tools</code></span>: the decorator that turns <code>search</code> into a tool the agent can call.</li>
+        <li><code>HumanMessage</code> <span class="lk-src">from <code>langchain_core.messages</code>, package langchain-core</span>: a message typed by the user.</li>
+        <li><code>ChatOpenAI</code> <span class="lk-src">from <code>langchain_openai</code>, package langchain-openai</span>: the cloud chat model that drives the agent.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_agent_with_placeholder_tool.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_core.messages import HumanMessage
@@ -831,6 +1004,8 @@ agent = create_agent(model=llm, tools=[search])
 
 result = agent.invoke({"messages": [HumanMessage(content=QUESTION)]})
 print_agent_trace(result)</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>@tool</b> This <button class="kw" data-k="decorator">decorator</button> turns an ordinary function into something an agent can call.</li>
       <li><b>search, query: str, -&gt; str</b> The name and <button class="kw" data-k="type-hints">type hints</button> become the tool's name and input schema: one text argument called <code>query</code>.</li>
@@ -847,6 +1022,27 @@ print_agent_trace(result)</code></pre></div>
   <div class="callout code-tie">
     <h5><span class="ico">✓</span>Test a tool without an agent</h5>
     <p><code>search.invoke({"query": "anything at all"})</code> calls it directly. <code>search.name</code> is <code>"search"</code> and <code>search.description</code> is the docstring text the model sees.</p>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Why does 0.5 use a placeholder search tool that returns the same report every time?</p>
+      <ol class="lk-opts">
+        <li>It is faster than real search, so it is used in production<div class="lk-why">The placeholder is for learning the loop. It is not meant for production.</div></li>
+        <li data-correct>It lets you study the agent loop without depending on live web results<div class="lk-why">Live results change, so the placeholder keeps the loop easy to follow. Section 0.7 swaps in real search.</div></li>
+        <li>It is the only tool that works with <code>create_agent</code><div class="lk-why"><code>create_agent</code> accepts any tool. The placeholder is just one example.</div></li>
+        <li>It stops the model from calling tools<div class="lk-why">The model does call it, which is the point. The trail shows that call.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">When does the agent loop stop?</p>
+      <ol class="lk-opts">
+        <li>After the search tool has run once<div class="lk-why">One tool call is not a stop rule. The model may call tools several times.</div></li>
+        <li>When the tool returns an empty result<div class="lk-why">An empty result is still sent back to the model, which then decides what to do next.</div></li>
+        <li data-correct>When the model's reply has no tool calls, so it is plain text<div class="lk-why">That is the stop rule. The reply then becomes the final answer.</div></li>
+      </ol>
+    </div>
   </div>
 </section>
 
@@ -870,6 +1066,26 @@ It's about 24°C in Bengaluru right now, with light drizzle and 78% humidity —
     <li class="done"><span class="idx">[3]</span><span class="who">AIMessage</span>No tool calls this time, so it's the final answer.</li>
   </ul>
   <div class="annot" style="margin-top:2rem">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · agent_trace_printer.py (core)</div><pre>DEFINE _one_line(text, limit = 160):
+    SET flat = text with all whitespace squashed onto one line
+    IF flat has at most limit characters THEN RETURN flat
+    RETURN the first limit characters of flat, plus how many characters were cut
+
+DEFINE print_agent_trace(result):
+    SET messages = result["messages"]
+    FOR EACH message, with its index:
+        SET kind = the class name of message
+        SET tool_calls = message.tool_calls, or an empty list
+        IF tool_calls is not empty THEN
+            FOR EACH call in tool_calls:
+                PRINT index, kind, "tool call" and the call name with its arguments, cut to 120 characters
+        ELSE IF kind is ToolMessage THEN
+            PRINT index, kind, the tool name and the result, on one line
+        ELSE
+            PRINT index, kind and the message text, on one line
+    PRINT the text of the last message   // the final answer</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">agent_trace_printer.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">def _one_line(text: str, limit: int = 160) -> str:
     flat = " ".join(str(text).split())
     if len(flat) <= limit:
@@ -889,6 +1105,8 @@ def print_agent_trace(result: dict) -> None:
         else:
             print(f"  [{index}] {kind:<13}: {_one_line(message.text)}")
     print(messages[-1].text)</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>_one_line()</b> Squashes text onto one line and cuts it at 160 characters, so long search results don't flood the terminal.</li>
       <li><b>type(message).__name__</b> The class name: <code>HumanMessage</code>, <code>AIMessage</code> or <code>ToolMessage</code>.</li>
@@ -903,6 +1121,20 @@ def print_agent_trace(result: dict) -> None:
   <div class="sec-head"><span class="sec-num">0.7</span><h2 id="tsdk-h">Real search: your own Tavily tool</h2></div>
   <p class="lede">Same agent, same tool name, same docstring. The only change is the inside of <code>search</code>: instead of a hard-coded string it calls <button class="kw" data-k="tavily">Tavily</button>, a search API built for LLMs.</p>
   <div class="annot">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_agent_with_tavily_sdk_tool.py (core)</div><pre>LOAD TavilyClient from the tavily package
+SET tavily = TavilyClient()   // reads TAVILY_API_KEY from the environment
+
+DEFINE search(query) as a tool, with the same docstring as Script 01
+    PRINT "search tool called with" and query
+    RETURN the Tavily search results for query
+
+SET question = the words typed after the script name, or DEFAULT_QUESTION if there are none
+SET result = agent.invoke with the question as a HumanMessage</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>TavilyClient</code> <span class="lk-src">from <code>tavily</code>, package tavily-python</span>: Tavily's search SDK. It finds its key in <code>TAVILY_API_KEY</code>.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_agent_with_tavily_sdk_tool.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from tavily import TavilyClient
 
 tavily = TavilyClient()          # reads TAVILY_API_KEY from the environment
@@ -917,30 +1149,70 @@ def search(query: str) -> dict:
 
 question = " ".join(sys.argv[1:]) or DEFAULT_QUESTION
 result = agent.invoke({"messages": [HumanMessage(content=question)]})</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>TavilyClient()</b> The vendor's <button class="kw" data-k="sdk">SDK</button>. The variable must be named exactly <code>TAVILY_API_KEY</code>; the SDK looks it up itself.</li>
       <li><b>-&gt; dict</b> Tavily returns JSON (query, results with title, URL, snippet and score). LangChain turns the dict into text for the model automatically.</li>
       <li><b>sys.argv[1:]</b> Any words typed after the script name become the question, so you can ask anything.</li>
     </ol>
   </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>RUN uv run python 02_agent_with_tavily_sdk_tool.py   // no question typed: uses the default question
+RUN uv run python 02_agent_with_tavily_sdk_tool.py "your question"   // the words after the script name become the question</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">uv run python 02_agent_with_tavily_sdk_tool.py        # default: Bengaluru tech meetups
 uv run python 02_agent_with_tavily_sdk_tool.py "What's the weather like in Bengaluru right now?"</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p>The default question asks for three upcoming AI or developer meetups in Bengaluru with date, venue and link. Watch the trail: the model may call <code>search</code> <strong>several times in parallel</strong> with different queries, for example "upcoming AI meetups Bengaluru" and "developer meetups Bangalore this month", before it answers. Live results change every day.</p></div>
   <div class="callout note">
     <h5><span class="ico">i</span>Writing your own wrapper</h5>
     <p>This is the "wrap a vendor SDK in your own <code>@tool</code>" pattern. You control exactly what the model sees, but the tool only offers what you wrote: here, a single <code>query</code> argument. Tip: <code>tavily.search(query=query, max_results=5)</code> trims the results.</p>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Moving from the placeholder in 0.5 to real search, which part of the code changes?</p>
+      <ol class="lk-opts">
+        <li>The agent: <code>create_agent</code> must be replaced with a new agent class<div class="lk-why">The agent code stays the same. Only the inside of <code>search</code> changes.</div></li>
+        <li data-correct>Only the inside of <code>search</code>: it now calls Tavily, and the name and docstring stay the same<div class="lk-why">The model still sees the same tool name and description, so the agent code is untouched.</div></li>
+        <li>The question: the model must receive the search results inside the prompt<div class="lk-why">The results come back through the tool as a <code>ToolMessage</code>. The question you type does not change.</div></li>
+        <li>The model: it must be switched to one that can browse the web<div class="lk-why">The same model keeps working. It only needs a tool to call.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What happens when you type words after the script name, such as a question in quotes?</p>
+      <ol class="lk-opts">
+        <li>The script ignores them and always runs the default question<div class="lk-why">The script reads these words from <code>sys.argv[1:]</code> and uses them as the question.</div></li>
+        <li>They are sent to Tavily as a separate search key<div class="lk-why">They become the question the model answers. Tavily gets the query the model writes.</div></li>
+        <li data-correct>They become the question the agent answers, instead of the default<div class="lk-why">The line <code>" ".join(sys.argv[1:]) or DEFAULT_QUESTION</code> uses your words when you give any.</div></li>
+      </ol>
+    </div>
   </div>
 </section>
 
 <section class="sec" id="tavily-builtin" aria-labelledby="tb-h">
   <div class="sec-head"><span class="sec-num">0.8</span><h2 id="tb-h">The ready-made TavilySearch tool</h2></div>
   <p class="lede">Tavily also publishes an official LangChain <button class="kw" data-k="integration">integration</button>. Using it deletes our custom function and gives the model a much richer menu card.</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · 03_agent_with_builtin_tavily_tool.py (core)</div><pre>LOAD TavilySearch from the langchain_tavily package
+SET search_tool = TavilySearch()   // also reads TAVILY_API_KEY
+CREATE agent = create_agent with model llm and tools [search_tool]
+PRINT "Tool name the LLM sees:" and search_tool.name   // prints tavily_search</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>TavilySearch</code> <span class="lk-src">from <code>langchain_tavily</code>, package langchain-tavily</span>: Tavily's ready-made search tool for LangChain.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">03_agent_with_builtin_tavily_tool.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from langchain_tavily import TavilySearch
 
 search_tool = TavilySearch()          # also reads TAVILY_API_KEY
 agent = create_agent(model=llm, tools=[search_tool])
 
 print(f"Tool name the LLM sees: {search_tool.name}")   # → tavily_search</code></pre></div>
+    </details>
+  </div>
   <div class="code term"><div class="bar"><span class="file">sample trail (live results change)</span></div><pre>  [1] AIMessage    : 🛠  tool call → tavily_search({'query': 'upcoming AI developer meetups Bengaluru',
                                                      'time_range': 'month', 'topic': 'general'})
   [2] ToolMessage  : (tavily_search) {"query": "upcoming AI developer meetups Bengaluru", "results": [...</pre></div>
@@ -956,12 +1228,51 @@ print(f"Tool name the LLM sees: {search_tool.name}")   # → tavily_search</code
     </table>
   </div>
   <div class="prose"><p>Notice the model chose <code>time_range='month'</code> and <code>topic='general'</code> on its own, because the vendor's description told it those options exist. Rule of thumb: <strong>if a well-maintained integration exists, prefer it over writing your own wrapper.</strong></p></div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">In 0.7 you wrapped the Tavily SDK in your own <code>@tool</code>. What is the benefit of that, compared with the ready-made <code>TavilySearch</code>?</p>
+      <ol class="lk-opts">
+        <li data-correct>You control exactly what the model sees, but the tool only offers what you wrote<div class="lk-why">That is the trade-off: here the model sees one <code>query</code> argument and nothing else. The ready-made tool offers more.</div></li>
+        <li>The vendor keeps it up to date when their API changes<div class="lk-why">That is the benefit of the ready-made integration. With your own wrapper, you update it yourself.</div></li>
+        <li>The model can set extra arguments such as <code>time_range</code><div class="lk-why">That needs the vendor's richer description. Your own tool offers only <code>query</code>.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What name does the model see for the tool in Script 03, and what changes in your code compared with Script 02?</p>
+      <ol class="lk-opts">
+        <li><code>search</code>, and you still write the <code>@tool</code> function<div class="lk-why">That is Script 02. In Script 03 the tool is <code>TavilySearch</code> and has its own name.</div></li>
+        <li data-correct><code>tavily_search</code>, and the custom function is replaced by one line<div class="lk-why">The ready-made tool carries the name <code>tavily_search</code>, so you delete the function and docstring and pass <code>TavilySearch()</code> to <code>create_agent</code>.</div></li>
+        <li><code>tavily_search</code>, and you must also rewrite the agent loop<div class="lk-why">The agent code is the same <code>create_agent(model, tools)</code> call. Only the tool in the list changes.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 
 <section class="sec" id="structured" aria-labelledby="so-h">
   <div class="sec-head"><span class="sec-num">0.9</span><h2 id="so-h">Structured output</h2></div>
   <p class="lede">Free text is great for people but painful for programs: which part of this paragraph is the link? With <code>response_format</code>, the agent must also return its answer as data that matches a schema you define.</p>
   <div class="annot">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 04_agent_with_structured_output.py (core)</div><pre>DEFINE class Source: a web page the answer is based on
+    title: text, a short title such as the event name
+    url: text, the full link, starting with https://
+
+DEFINE class AgentAnswer: the agent's final reply
+    answer: text, the answer in plain words
+    sources: a list of Source, empty when nothing is cited
+
+CREATE agent = create_agent with model llm, the TavilySearch tool and response_format AgentAnswer
+SET result = agent.invoke with the question as a HumanMessage
+SET structured = result["structured_response"]   // a validated AgentAnswer
+FOR EACH source in structured.sources:
+    PRINT source.title and source.url</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>BaseModel</code> <span class="lk-src">from <code>pydantic</code></span>: the base class that describes a data shape and checks it.</li>
+        <li><code>Field</code> <span class="lk-src">from <code>pydantic</code></span>: adds a description to a field, which the model reads as an instruction.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">04_agent_with_structured_output.py (core)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from pydantic import BaseModel, Field
 
 class Source(BaseModel):
@@ -981,6 +1292,8 @@ result = agent.invoke({"messages": [HumanMessage(content=QUESTION)]})
 structured: AgentAnswer = result["structured_response"]
 for source in structured.sources:
     print(source.title, source.url)</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>BaseModel</b> A <button class="kw" data-k="pydantic">Pydantic</button> class describes the shape of the data you want back, and validates it.</li>
       <li><b>Field(description=...)</b> Like tool docstrings, class docstrings and field descriptions are sent to the model. They're instructions.</li>
@@ -1038,6 +1351,28 @@ sources (3):
   <div class="callout code-tie">
     <h5><span class="ico">↻</span>Optional variation</h5>
     <p>Structured output works with any tool. Copy the <code>TavilyClient()</code> line and your own <code>search</code> function from Script 02 into this file and set <code>tools = [search]</code>.</p>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Why read <code>result["structured_response"]</code> instead of parsing the last message yourself?</p>
+      <ol class="lk-opts">
+        <li>The last message is always the user's question<div class="lk-why">The last message is a reply from the model or a tool, not the question.</div></li>
+        <li>The result has no messages list, so this is the only field left<div class="lk-why">The <code>messages</code> trail is still there. The structured answer is a separate key next to it.</div></li>
+        <li data-correct>It is already a validated <code>AgentAnswer</code> object, so you need no parsing<div class="lk-why">The last message is text, or a tool message, that you would have to parse yourself. The structured key already holds the checked object.</div></li>
+        <li>The agent deletes the messages when it finishes<div class="lk-why">The messages list is kept. The structured answer is added to the result beside it.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What does <code>Field(description=...)</code> do in the schema?</p>
+      <ol class="lk-opts">
+        <li data-correct>It is sent to the model as an instruction for filling that field<div class="lk-why">Like tool docstrings, field descriptions are read by the model when it writes the answer.</div></li>
+        <li>It checks that the URL opens in a browser<div class="lk-why"><code>Field</code> does not open links. The description is text for the model.</div></li>
+        <li>It sets the default value of the field<div class="lk-why">A default comes from an argument such as <code>default_factory</code>, not from the description.</div></li>
+        <li>It is only a comment for you, and the model never sees it<div class="lk-why">The description is sent to the model, so it shapes the answer.</div></li>
+      </ol>
+    </div>
   </div>
 </section>
 
@@ -1313,7 +1648,7 @@ function press(group,btn){$$("[aria-pressed]",group).forEach(b=>b.setAttribute("
     q[1].forEach((o,oi)=>{const b=document.createElement("button");b.type="button";b.textContent=o;b.addEventListener("click",()=>{
       if(d.classList.contains("answered"))return;d.classList.add("answered");answered++;
       if(oi===q[2]){right++;b.classList.add("right");}else{b.classList.add("wrong");opts.children[q[2]].classList.add("right");}
-      d.querySelector(".why").innerHTML=(oi===q[2]?"<b style='color:var(--tool-ink)'>Correct.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> ")+esc(q[3]);
+      d.querySelector(".why").innerHTML=(oi===q[2]?"<b style='color:var(--tool-ink)'>Correct.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> You picked “"+esc(o)+"”. The correct answer is <b>“"+esc(q[1][q[2]])+"”</b>. ")+esc(q[3]);
       $("#quiz-score").textContent="Score: "+right+" of "+answered+" answered"+(answered===Q.length?(right>=8?". Great work, you're ready for Lesson 1.":". Revisit the parts you missed, then try Lesson 1."):"");
     });opts.appendChild(b);});
     root.appendChild(d);

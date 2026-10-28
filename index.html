@@ -340,6 +340,8 @@ details.qa .a p:last-child{margin-bottom:0}
 .steps li{counter-increment:s; background:var(--surface); border:1px solid var(--rule); border-radius:2px; padding:12px 14px 12px 50px; position:relative; font-size:15px; margin:0}
 .steps li::before{content:counter(s); position:absolute; left:14px; top:12px; width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--surface); font-family:var(--mono); font-size:11.5px; font-weight:600; display:grid; place-items:center}
 </style>
+<link rel="stylesheet" href="assets/learn-kit.css">
+<script src="assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- awsb:hub -->
@@ -760,13 +762,46 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
     <p class="lede">WSL2 runs a real Ubuntu Linux inside Windows. The lessons' commands (<code>source .venv/bin/activate</code>, <code>./setup.sh</code>, Docker) then work exactly as written, with no Windows-specific variants.</p>
 
     <h3>1 · Install WSL2 and Ubuntu (Windows, once)</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · windows.ps1</div><pre>// Windows PowerShell as administrator, once per machine
+RUN wsl --install -d Ubuntu-24.04     // install WSL2 and Ubuntu 24.04, then restart when asked
+RUN wsl --update                      // get the latest WSL kernel
+RUN wsl -l -v                         // check that Ubuntu-24.04 shows VERSION 2</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>windows.ps1</b> · Windows PowerShell as administrator</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># Windows PowerShell, "Run as administrator" - once per machine</span>
 wsl --install -d Ubuntu-24.04     <span class="c-dim"># installs WSL2 + Ubuntu 24.04 (ships Python 3.12); restart when asked</span>
 wsl --update                      <span class="c-dim"># latest WSL kernel</span>
 wsl -l -v                         <span class="c-dim"># Ubuntu-24.04 must show VERSION 2</span></code></pre></div>
+  </details>
+</div>
     <p>After the restart, open “Ubuntu 24.04” from the Start menu and create a Linux username and password. Everything from here on runs <strong>inside Ubuntu</strong>.</p>
 
     <h3>2 · Python, a venv and every package (Ubuntu, once)</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · ubuntu_setup.sh</div><pre>// Inside Ubuntu (WSL), once
+RUN sudo apt update, then sudo apt upgrade -y        // refresh the package lists, then upgrade
+RUN sudo apt install -y python3, python3-venv, python3-pip, python-is-python3, build-essential, git, curl, unzip
+RUN python --version                                 // expect Python 3.12.x
+RUN git config --global core.autocrlf input          // keep Linux line endings in repos
+
+// Work in the Linux file system, not /mnt/c: file access there is much faster
+RUN mkdir -p ~/ai-infusion, then cd into it
+// put requirements.txt, .env.example, providers.py and check_setup.py in that folder
+
+// One virtual environment for all lessons
+RUN python -m venv .venv
+RUN source .venv/bin/activate                        // run this in every new terminal
+RUN pip install --upgrade pip
+
+// CPU-only PyTorch first, which skips the multi-GB CUDA download
+RUN pip install torch from the CPU-only wheel index
+RUN pip install -r requirements.txt
+
+// Keys
+RUN cp .env.example .env, then open .env in nano and fill in the keys you use
+APPEND .env, .venv/ and __pycache__/ to .gitignore   // keep real keys and the venv out of git
+RUN python check_setup.py                            // add --models to test embeddings and the cross-encoder</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>ubuntu_setup.sh</b> · Ubuntu terminal</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># Inside Ubuntu (WSL) - once</span>
 sudo apt update &amp;&amp; sudo apt upgrade -y
 sudo apt install -y python3 python3-venv python3-pip python-<span class="c-key">is</span>-python3 build-essential git curl unzip
@@ -791,6 +826,8 @@ cp .env.example .env &amp;&amp; nano .env
 printf <span class="c-str">".env\n.venv/\n__pycache__/\n"</span> &gt;&gt; .gitignore
 
 python check_setup.py                     <span class="c-dim"># add --models to test embeddings + cross-encoder</span></code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b><code>python-is-python3</code></b>Ubuntu only installs <code>python3</code>. This package makes plain <code>python</code> work too, so commands from the lessons run unchanged.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>Stay out of <code>/mnt/c</code></b>Your Windows drive is visible at <code>/mnt/c</code>, but file access across the boundary is many times slower, which hurts <code>pip install</code> and git especially. Keep projects in <code>~/</code>. VS Code and Windows Explorer can still open them (<code>\\wsl$\Ubuntu-24.04\home\&lt;you&gt;</code>).</span></div>
@@ -805,12 +842,23 @@ python check_setup.py                     <span class="c-dim"># add --models to 
     <p>Install Docker Desktop for Windows. In <em>Settings → General</em>, keep “Use the WSL 2 based engine” on, and in <em>Settings → Resources → WSL integration</em>, enable <strong>Ubuntu-24.04</strong>. Check from Ubuntu with <code>docker run hello-world</code>. Don't also install Docker inside Ubuntu with apt; Docker Desktop provides the <code>docker</code> command there.</p>
 
     <h3>5 · AWS CLI (Lesson 6)</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · aws_cli.sh</div><pre>// Lesson 6 only, inside Ubuntu (WSL)
+RUN curl to download the AWS CLI v2 zip, saved as awscliv2.zip
+RUN unzip awscliv2.zip, then sudo ./aws/install      // install the CLI from the unzipped folder
+DELETE the aws folder and awscliv2.zip               // tidy up the installer files
+RUN aws --version                                    // check that the CLI is installed
+RUN aws configure                                    // enter your access keys and a region (us-east-1 for Lesson 6)
+RUN aws sts get-caller-identity                      // print your account id when the keys work</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>aws_cli.sh</b> · Ubuntu terminal</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># Lesson 6 only - AWS CLI v2 inside Ubuntu (WSL)</span>
 curl <span class="c-str">"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"</span> -o awscliv2.zip
 unzip awscliv2.zip &amp;&amp; sudo ./aws/install &amp;&amp; rm -rf aws awscliv2.zip
 aws --version
 aws configure                    <span class="c-dim"># region: us-east-1, as in Lesson 6</span>
 aws sts get-caller-identity      <span class="c-dim"># prints your account id when the keys work</span></code></pre></div>
+  </details>
+</div>
 
     <h3>WSL gotchas, solved</h3>
     <div class="tablewrap">
@@ -827,6 +875,34 @@ aws sts get-caller-identity      <span class="c-dim"># prints your account id wh
         </tbody>
       </table>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">Why do the lessons ask for WSL2 and Ubuntu, rather than plain Windows PowerShell?</p>
+        <ol class="lk-opts">
+          <li>Python cannot run on Windows at all<div class="lk-why">Python runs fine on Windows. The issue is that the lessons' commands are written for Linux.</div></li>
+          <li data-correct>WSL2 runs a real Linux, so the lesson commands work exactly as written<div class="lk-why">The lessons use Linux commands such as <code>source .venv/bin/activate</code>. Inside Ubuntu they run unchanged, with no Windows-specific variants.</div></li>
+          <li>Ubuntu runs the AI models faster than Windows does<div class="lk-why">The page's reason is that the commands match the lessons, not speed.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">You ran <code>source .venv/bin/activate</code> in one Ubuntu terminal. You open a second terminal, and a script fails with <code>ModuleNotFoundError</code> for a package you installed. What is the likeliest cause?</p>
+        <ol class="lk-opts">
+          <li data-correct>The second terminal did not activate the venv, so Python is not using the environment that has the package<div class="lk-why">Activation applies to one terminal only. The page says to run the activate command in every new terminal.</div></li>
+          <li>The venv folder is shared by every terminal, so the package install must have failed<div class="lk-why">The folder is shared, but a terminal uses it only after activation. A new terminal needs the activate command too.</div></li>
+          <li>Packages installed in Ubuntu can only be used from Windows<div class="lk-why">Packages installed in Ubuntu are used by Ubuntu. Windows is not involved in this error.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">Why does the page tell you to keep projects in <code>~/</code> rather than under <code>/mnt/c</code>?</p>
+        <ol class="lk-opts">
+          <li>Linux cannot read Windows folders at all<div class="lk-why">Linux can read <code>/mnt/c</code>. The problem is speed, not access.</div></li>
+          <li>The <code>/mnt/c</code> folder is read-only inside Ubuntu<div class="lk-why">You can write to <code>/mnt/c</code>. It is just much slower across the Windows boundary.</div></li>
+          <li data-correct>File access across the Windows boundary is much slower, which hurts <code>pip install</code> and git<div class="lk-why">The page says file access under <code>/mnt/c</code> is far slower. Under <code>~/</code> it is far faster, and VS Code and Explorer can still open the folder.</div></li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -835,6 +911,21 @@ aws sts get-caller-identity      <span class="c-dim"># prints your account id wh
     <p class="kicker">requirements.txt</p>
     <h2>One shopping list for all ten lessons</h2>
     <p><code>requirements.txt</code> is a plain list of packages, one per line, that <code>pip install -r requirements.txt</code> installs in one go. It's how a project says “this is what I need to run”. Anyone, including Docker in Lesson 5, can rebuild the same environment from it.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · requirements.txt</div><pre>// one package name per line; text after # is a comment; comment out a group you do not need yet
+// core, every lesson
+FOR EACH of openai, anthropic, python-dotenv, gradio, requests, beautifulsoup4: install it
+// LangChain, lessons 2, 3-4 and 8
+FOR EACH of langchain, langchain-core, langchain-openai, langchain-groq, langchain-text-splitters: install it
+// RAG, lessons 3-4: embeddings, cross-encoder and vector DB (the heaviest group, it pulls in PyTorch)
+FOR EACH of langchain-community, langchain-huggingface, langchain-chroma, sentence-transformers, pypdf, numpy: install it
+// tool-calling projects, lessons 7 and 9-10
+INSTALL groq
+// serving, lesson 5
+FOR EACH of fastapi, uvicorn, scikit-learn, pandas, joblib, chromadb: install it
+// agents on AWS, lesson 6
+FOR EACH of boto3, strands-agents, strands-agents-tools, langgraph, langchain-aws: install it</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>requirements.txt</b> · grouped by lesson</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># AI Infusion - one environment for Lessons 1-10 (Python 3.12 recommended, 3.10 minimum)</span>
 <span class="c-dim"># Install:  pip install -r requirements.txt</span>
 <span class="c-dim"># Comment out a group you don't need yet. RAG is the heaviest (it pulls in PyTorch).</span>
@@ -879,6 +970,8 @@ strands-agents
 strands-agents-tools
 langgraph
 langchain-aws</code></pre></div>
+  </details>
+</div>
     <h3>How to work with it</h3>
     <div class="tablewrap">
       <table>
@@ -905,6 +998,15 @@ langchain-aws</code></pre></div>
     <p class="kicker">Keys &amp; providers</p>
     <h2>One <code>.env</code>, one switch, one check</h2>
     <h3>1 · Keys live in <code>.env</code>, never in code</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · .env.example</div><pre>// copy this file to .env, then fill in only the keys you use
+// .env must be in .gitignore, so real keys are never committed
+SET OPENAI_API_KEY = (empty until you add a key)
+SET ANTHROPIC_API_KEY = (empty until you add a key)
+SET GROQ_API_KEY = (empty until you add a key)
+SET DEEPINFRA_API_KEY = (empty until you add a key)
+// Lesson 6 uses aws configure instead, which stores keys in ~/.aws/credentials</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>.env.example</b> · copy to .env</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># Copy to .env  (cp .env.example .env)  and fill in only the keys you use.</span>
 <span class="c-dim"># .env must be listed in .gitignore - never commit real keys.</span>
 OPENAI_API_KEY=
@@ -912,10 +1014,42 @@ ANTHROPIC_API_KEY=
 GROQ_API_KEY=
 DEEPINFRA_API_KEY=
 <span class="c-dim"># Lesson 6 (AWS) uses `aws configure`, which stores keys in ~/.aws/credentials instead.</span></code></pre></div>
+  </details>
+</div>
     <p>Get keys from each provider's console: <a href="https://console.groq.com/keys">Groq</a> (free tier, the easiest start), <a href="https://platform.openai.com/api-keys">OpenAI</a>, <a href="https://platform.claude.com/">Claude</a>, and <a href="https://deepinfra.com/">DeepInfra</a>. <code>load_dotenv()</code> reads the file at the start of each script, as in every lesson since Lesson 1.</p>
 
     <h3>2 · Switch providers by changing one word</h3>
     <p>Lesson 1 showed that the OpenAI SDK talks to Groq if you change <code>base_url</code>. DeepInfra works the same way. Claude uses Anthropic's own SDK. This helper puts all four behind one function:</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · providers.py</div><pre>LOAD every KEY=value line from .env into the environment   // runs when this file is imported
+CREATE OPENAI_COMPATIBLE: one entry per provider
+    openai: key OPENAI_API_KEY, no base URL (the default), model gpt-4o-mini
+    groq: key GROQ_API_KEY, Groq's base URL, model openai/gpt-oss-20b
+    deepinfra: key DEEPINFRA_API_KEY, DeepInfra's base URL, model deepseek-ai/DeepSeek-V4-Flash
+SET CLAUDE_MODEL = claude-opus-5-5
+
+DEFINE ask(provider, prompt):
+    IF provider is claude THEN
+        IMPORT anthropic
+        CREATE client = anthropic.Anthropic()   // reads ANTHROPIC_API_KEY by itself
+        CALL client.beta.messages.create with CLAUDE_MODEL, max_tokens 1024, the server-side fallback beta, fallbacks set to default, and the prompt   // fallbacks retries on another model if this one declines
+        IF response.stop_reason is refusal THEN
+            RETURN "(declined)"
+        RETURN the first text block in response.content, or "" if there is none
+    SET cfg = OPENAI_COMPATIBLE[provider]
+    CREATE client = OpenAI(api_key from the environment variable named in cfg, base_url from cfg)   // raises an error if that variable is not set
+    CALL client.chat.completions.create with cfg model, max_tokens 512, and the prompt
+    RETURN the message content of the first choice
+
+IF this file is run directly THEN
+    PRINT ask("groq", "Explain an embedding in one sentence.")</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>os</code> <span class="lk-src">Python standard library</span>: gives access to environment variables through <code>os.environ</code>.</li>
+    <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: reads the <code>.env</code> file into the environment.</li>
+    <li><code>OpenAI</code> <span class="lk-src">from <code>openai</code></span>: the client for OpenAI, and for Groq and DeepInfra through their <code>base_url</code>.</li>
+    <li><code>anthropic</code> <span class="lk-src">Anthropic's SDK, package <code>anthropic</code></span>: the Claude client, imported only in the Claude branch.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>providers.py</b> · one function, four providers</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> os
 
 <span class="c-key">from</span> dotenv <span class="c-key">import</span> load_dotenv
@@ -958,6 +1092,8 @@ CLAUDE_MODEL = <span class="c-str">"claude-opus-5-5"</span>
 
 <span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
     print(ask(<span class="c-str">"groq"</span>, <span class="c-str">"Explain an embedding in one sentence."</span>))</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>Three providers, one client class</b>OpenAI, Groq and DeepInfra all speak the OpenAI API format. Only the key, base URL and model id differ, so they live in a dictionary.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>Claude has its own SDK</b><code>anthropic.Anthropic()</code> reads <code>ANTHROPIC_API_KEY</code> by itself. Its reply is a list of content blocks, so the code picks the text block. <code>fallbacks="default"</code> asks the API to retry on another Claude model if the first one declines the request.</span></div>
@@ -965,6 +1101,41 @@ CLAUDE_MODEL = <span class="c-str">"claude-opus-5-5"</span>
     </div>
 
     <h3>3 · Check the whole setup in one command</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · check_setup.py</div><pre>LOAD every KEY=value line from .env with load_dotenv()
+SET ok = Python is 3.10 or newer
+PRINT OK or FAIL, with the Python version   // 3.12 is recommended
+
+FOR EACH group of modules (core, LangChain, RAG, tool-calling, serving, AWS agents):
+    SET missing = the modules in the group that cannot be found
+    PRINT OK, or MISS with the names in missing
+
+IF the openai module cannot be found THEN
+    STOP with "Install the packages first: pip install -r requirements.txt"
+IMPORT ask from providers
+
+FOR EACH provider and its key name (openai, groq, deepinfra, claude):
+    IF that key is empty in the environment THEN
+        PRINT skip, and continue with the next provider
+    TRY
+        SET reply = ask(provider, "Reply with the single word: ready")
+        PRINT OK, then the first 40 characters of reply
+    ON ERROR
+        PRINT FAIL, the error type and the first line of the message   // usually a wrong key or a retired model id
+
+IF "--models" is in the command-line arguments THEN
+    IMPORT CrossEncoder and SentenceTransformer
+    CREATE the all-MiniLM-L6-v2 embedding model, encode "hello world", PRINT its shape
+    CREATE the ms-marco cross-encoder, score one question and passage, PRINT the score</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>importlib.util</code> <span class="lk-src">Python standard library</span>: <code>find_spec</code> checks whether a module is installed, without importing it.</li>
+    <li><code>os</code> <span class="lk-src">Python standard library</span>: <code>os.getenv</code> reads each key from the environment.</li>
+    <li><code>sys</code> <span class="lk-src">Python standard library</span>: gives the Python version and the command-line arguments.</li>
+    <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: loads <code>.env</code> before the checks run.</li>
+    <li><code>ask</code> <span class="lk-src">from <code>providers</code>, the helper file above</span>: calls each provider with one short prompt.</li>
+    <li><code>CrossEncoder</code> and <code>SentenceTransformer</code> <span class="lk-src">from <code>sentence_transformers</code>, package sentence-transformers</span>: the local models, imported only when <code>--models</code> is given.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>check_setup.py</b> · python check_setup.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> importlib.util
 <span class="c-key">import</span> os
 <span class="c-key">import</span> sys
@@ -1012,6 +1183,8 @@ KEYS = {<span class="c-str">"openai"</span>: <span class="c-str">"OPENAI_API_KEY
     print(<span class="c-str">f"OK   embeddings    -&gt; shape {vectors.shape}"</span>)
     score = CrossEncoder(<span class="c-str">"cross-encoder/ms-marco-MiniLM-L6-v2"</span>).predict([(<span class="c-str">"what is RAG?"</span>, <span class="c-str">"RAG retrieves documents."</span>)])
     print(<span class="c-str">f"OK   cross-encoder -&gt; score {float(score[0]):.2f}"</span>)</code></pre></div>
+  </details>
+</div>
     <div class="calc"><i>$ python check_setup.py   (example: only a Groq key set yet)</i>
 <b>OK  </b> Python 3.12.3
 <b>OK  </b> core (all lessons)

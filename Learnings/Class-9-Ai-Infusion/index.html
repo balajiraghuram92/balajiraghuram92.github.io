@@ -329,6 +329,8 @@ kbd{font-family:var(--mono); font-size:.82em; border:1px solid var(--rule-2); bo
 #bench .toolout{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
 .bench-row select{width:auto; min-width:52px; padding:5px 6px; margin:0; font-size:13px}
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- aiseq:top -->
@@ -548,6 +550,27 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
       <p>A rule that says “do not use pronouns” tells the model what <em>not</em> to do without telling it what to do instead. Name the operation — this is <strong>co-reference resolution</strong>, a task the model already knows by name — and give it the order's line items to resolve against. A prohibition produces refusals; a procedure produces work.</p>
     </div>
   </div>
+  <div class="col">
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A customer writes "The delivery guy was rude when I asked him about it." Which statement matches the design on this page?</p>
+      <ol class="lk-opts">
+        <li>Extraction drops it, because no evidence can confirm it<div class="lk-why">Extraction does not check evidence. It keeps any statement about something that happened to this order, and whether evidence supports it is decided later, at judgement.</div></li>
+        <li data-correct>Extraction keeps it as a grievance, and judgement later rules on it against the evidence<div class="lk-why">It is a claim about an event, so it belongs in the pipeline. Having no evidence matters at judgement, not at extraction.</div></li>
+        <li>Extraction judges it, so the extraction prompt has to decide whether it is true<div class="lk-why">The extraction prompt says "Do NOT judge whether the grievance is true". Judging is the bench's job.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The extraction prompt turns "Two of the four were missing" into "2 of the 4 Hyderabadi Biryani units ordered were not delivered". Why?</p>
+      <ol class="lk-opts">
+        <li>So the model can work out the refund amount from the sentence<div class="lk-why">The model never computes money. Pricing is code that looks up the order's prices, so the model only names the item and the quantity.</div></li>
+        <li>Because the prompt forbids pronouns, so the model may not use them at all<div class="lk-why">A rule like that only tells the model what not to do. The prompt gives a procedure instead: resolve each reference against the order's line items.</div></li>
+        <li data-correct>So each grievance is self-contained and can be judged on its own<div class="lk-why">Each grievance must make sense without the rest of the complaint. The references are resolved against the order before any judge sees the text.</div></li>
+      </ol>
+    </div>
+  </div>
+  </div>
 </section>
 
 <section id="rulings">
@@ -607,6 +630,27 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
       <p><strong>Do not trust the confidence score.</strong> It is a number the model generated, not a calibrated probability. Show it to your ops team, log it, chart it — but never branch a payout on it. Branch on the <em>vote split</em>, which you computed yourself and can defend.</p>
       <p><strong>The synthesis prompt must say “treat all verdicts as final.”</strong> Without that line, the model re-litigates the bench's ruling while writing the summary — quietly turning a 1–2 <span class="v esc">escalate</span> into an <span class="v up">upheld</span> because the complaint <em>reads</em> sympathetic. One sentence in the prompt is what makes the majority actually be the majority.</p>
     </div>
+  </div>
+  <div class="col">
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The bench is split three ways on one grievance: one judge says UPHELD, one says REJECTED and one says ESCALATE. What is the verdict?</p>
+      <ol class="lk-opts">
+        <li data-correct>ESCALATE, because no ruling has a majority, so a human decides<div class="lk-why">Each ruling gets one vote, so none has more than half of the votes. The code's rule for that case is ESCALATE.</div></li>
+        <li>REJECTED, because refusing is the safer choice<div class="lk-why">The design never rejects when unsure. A wrong refusal costs a customer, so the uncertain case goes to a human.</div></li>
+        <li>UPHELD, because one judge found the evidence supports it<div class="lk-why">One vote is not a majority. Upholding on a single judge is the very mistake the bench exists to prevent.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">A judge reports a confidence of 0.31. Which number should decide whether money moves automatically?</p>
+      <ol class="lk-opts">
+        <li>The average confidence of the judges who agreed<div class="lk-why">Confidence is a number the model generated, not a calibrated probability. Never branch a payout on it.</div></li>
+        <li data-correct>The vote split, which the code counts itself<div class="lk-why">A split like 2-1 is counted in plain code and can be defended. Confidence is logged and charted, but no payout decision reads it.</div></li>
+        <li>Whichever judge answered first<div class="lk-why">The judges are independent and none is treated as the leader. Counting in code decides, not the order of replies.</div></li>
+      </ol>
+    </div>
+  </div>
   </div>
 </section>
 
@@ -959,6 +1003,27 @@ settlement      <i>1.0 sec</i>
       <p>The person on the other end. A journalist submitting an article will accept “come back in two minutes.” A customer who just got the wrong dinner will not — every extra second on that spinner is a support ticket you are about to receive anyway. <strong>The architecture is identical; the latency budget is a product decision, not an engineering one.</strong></p>
     </div>
   </div>
+  <div class="col">
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A complaint has eight grievances and K is 3. Using the page's formula, how many LLM calls does the dispute take, and where does the growth happen?</p>
+      <ol class="lk-opts">
+        <li>24 calls, because the extract and settle calls do not count<div class="lk-why">The formula is 1 + N × K + 1. Extraction and settlement are real LLM calls, and each one counts.</div></li>
+        <li data-correct>26 calls, and all the growth is in stage 3, judging<div class="lk-why">1 + (8 × 3) + 1 = 26. Extraction and settlement stay at one call each, so only the judging stage grows.</div></li>
+        <li>14 calls, because the cost does not depend on the complaint<div class="lk-why">The 14 in the case study comes from its four grievances. Each extra grievance adds K more judging calls.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why must extraction finish before any judging starts?</p>
+      <ol class="lk-opts">
+        <li data-correct>Until extraction returns, the system does not know how many grievances there are, so it cannot size the fan-out<div class="lk-why">Judging fans out to N grievances times K judges. The count is unknown until extraction is done, so judging has to wait.</div></li>
+        <li>Settlement has to write the customer message before the judges vote<div class="lk-why">Settlement is the last stage. It writes the message from the final rulings, so it cannot run first.</div></li>
+        <li>The judges cannot read the complaint text until the refund cap is checked<div class="lk-why">The cap is checked after judging and tallying. The judges do not wait for it, and the cap is not an input to them.</div></li>
+      </ol>
+    </div>
+  </div>
+  </div>
 </section>
 
 <section id="capacity">
@@ -1142,6 +1207,27 @@ settlement      <i>1.0 sec</i>
       <span class="tag">Production reality</span>
       <p>The API does two things — write the row, then enqueue the id. If the write succeeds and the enqueue fails, you have a dispute stored that no worker will ever touch, stuck on <code>RECEIVED</code> forever while a customer refreshes. Fix it with a <strong>transactional outbox</strong>, or run CDC off the disputes table so the database write <em>is</em> the queue event.</p>
     </div>
+  </div>
+  <div class="col">
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A worker takes a job that needs 30 seconds. The visibility timeout is 10 seconds, and the worker does not acknowledge the message in time. What happens?</p>
+      <ol class="lk-opts">
+        <li>The message is deleted, so the job stops halfway through<div class="lk-why">A message is removed only when the worker acknowledges it in time. Receiving it does not delete it; it is hidden until the timeout ends.</div></li>
+        <li data-correct>The queue makes the message visible again, so a second worker can start the same dispute while the first is still running<div class="lk-why">Nothing crashed. The deadline was shorter than the job, and the page's example refunds ₹689 three times.</div></li>
+        <li>Nothing, because the queue retries only after an error is raised<div class="lk-why">A queue here does not wait for an error. Silence past the deadline is enough for the message to be requeued.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The API writes the dispute row, then enqueues its id. The write succeeds but the enqueue fails. What is the risk?</p>
+      <ol class="lk-opts">
+        <li>A 429 comes back and the customer has to submit again<div class="lk-why">A 429 is the model provider's "too many requests" reply. It is not what happens when the database write succeeds and the queue step fails.</div></li>
+        <li>The workers process the dispute twice, once from the row and once from the message<div class="lk-why">Workers poll the queue, not the table. A row without a queued id is never picked up, so two runs are not the risk here.</div></li>
+        <li data-correct>The dispute stays at RECEIVED forever, because no worker ever sees its id<div class="lk-why">The row exists, but its id never reaches the queue, so the customer keeps refreshing. A transactional outbox, or CDC on the table, closes that gap.</div></li>
+      </ol>
+    </div>
+  </div>
   </div>
 </section>
 
@@ -1521,14 +1607,30 @@ Amount:    {{refund_amount}}</code></pre>
 ├── pipeline.py        <i># step 8 · resolve_dispute()</i>
 ├── bench_check.py     <i># step 9 · end-to-end proof</i>
 └── app.py             <i># step 10 · Gradio</i></div>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · requirements.txt</div><pre>RUN pip install groq             // the Groq SDK, which talks to the model
+RUN pip install gradio           // the web UI that app.py starts
+RUN pip install python-dotenv    // reads the .env file for llm.py</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>requirements.txt</b> · three packages</span><button class="copy" type="button">COPY</button></div><pre><code>groq
 gradio
 python-dotenv</code></pre></div>
+  </details>
+</div>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · setup.sh</div><pre>RUN python -m venv .venv                 // create the .venv folder with its own Python
+RUN source .venv/bin/activate            // use it in this terminal (Windows: .venv\Scripts\activate)
+RUN pip install -r requirements.txt      // install the packages listed in that file
+SAVE "GROQ_API_KEY=your_key_here" as the .env file   // this replaces any old .env; put your real key here
+RUN a one-line check: ask llm.call to say hi in three words, at temperature 0   // milestone 0</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>setup.sh</b> · terminal · run from the project folder</span><button class="copy" type="button">COPY</button></div><pre><code>python -m venv .venv
 source .venv/bin/activate          <span class="c-dim"># Windows: .venv\Scripts\activate</span>
 pip install -r requirements.txt
 echo <span class="c-str">"GROQ_API_KEY=your_key_here"</span> &gt; .env
 python -c <span class="c-str">"from llm import call; print(call('Say hi in three words', 0))"</span></code></pre></div>
+  </details>
+</div>
     <p>The last line is your milestone-0 proof: if the model answers, the key, the network and the package are all fine. It needs <code>llm.py</code> from step 3, so come back and run it then if you're building strictly in order.</p>
   </div>
 </section>
@@ -1538,6 +1640,20 @@ python -c <span class="c-str">"from llm import call; print(call('Say hi in three
     <p class="kicker">Step 1 · no LLM</p>
     <h2>The evidence, and why we <em>freeze</em> it</h2>
     <p>In production the evidence comes from several services and keeps changing: ratings move, bills are edited, reconciliation runs overnight. Here it's one dictionary with exactly the fields from Part 1's case. Pay attention to what <em>isn't</em> in it.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · evidence.py</div><pre>SET ORDERS = one order, ORD-1840, with its line items, fees, times, weight and partner rating   // no field records packaging condition
+SET SAMPLE_COMPLAINT = the customer's paragraph, joined from its parts
+
+DEFINE snapshot(order_id):
+    // freeze the evidence once: every judge on every grievance sees this copy
+    SET frozen = a deep copy of ORDERS[order_id]
+    SET frozen["snapshot_taken_at"] = the current time, to the second
+    RETURN frozen</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>copy</code> <span class="lk-src">Python standard library</span>: makes the deep copy that freezes the order.</li>
+    <li><code>datetime</code> <span class="lk-src">from <code>datetime</code>, Python standard library</span>: gives the time the snapshot was taken.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>evidence.py</b> · step 1</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> copy
 <span class="c-key">from</span> datetime <span class="c-key">import</span> datetime
 
@@ -1576,6 +1692,8 @@ SAMPLE_COMPLAINT = (
     frozen = copy.deepcopy(ORDERS[order_id])
     frozen[<span class="c-str">"snapshot_taken_at"</span>] = datetime.now().isoformat(timespec=<span class="c-str">"seconds"</span>)
     <span class="c-key">return</span> frozen</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>Prices add up to the case study</b>4 × ₹320 + ₹360 + ₹60 + ₹91 + ₹49 delivery = ₹1,840. When the arithmetic is internally consistent, you can check every later result by hand.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>The missing field is deliberate</b>Nothing records packaging condition. That's why the raita grievance <em>should</em> escalate, and the eval in step 6 checks that it does.</span></div>
@@ -1593,6 +1711,27 @@ $ python -c "from evidence import snapshot; print(snapshot('ORD-1840')['delivere
     <h2>Write the money rules <em>before</em> the model</h2>
     <p class="lede">Everything here decides money, and none of it needs an API key. That's exactly why it comes first.</p>
     <h3>Pricing: rupees come from the order</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · pricing.py</div><pre>SET ITEM_CATEGORIES = MISSING_ITEM, WRONG_ITEM, QUALITY, PACKAGING
+
+DEFINE find_item(name, evidence):
+    IF name is empty THEN RETURN None
+    SET name = name in lowercase
+    FOR EACH item in the order's line items:
+        IF one name contains the other THEN RETURN item
+    RETURN None
+
+DEFINE price(grievance, evidence):
+    // rupees owed if upheld; None means code cannot price it, so a human does
+    IF category is LATE_DELIVERY THEN RETURN the order's delivery fee
+    IF category is PARTNER_CONDUCT THEN RETURN 0   // an ops matter, not a refund
+    IF category is one of ITEM_CATEGORIES THEN
+        SET item = find_item(the named item, evidence)
+        IF item is None THEN RETURN None
+        SET qty = the quantity given (1 if none), kept between 1 and the quantity ordered
+        RETURN qty times the item's unit price
+    RETURN None   // BILLING and unknown categories: always a human</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>pricing.py</b> · step 2 · F5</span><button class="copy" type="button">COPY</button></div><pre><code>ITEM_CATEGORIES = {<span class="c-str">"MISSING_ITEM"</span>, <span class="c-str">"WRONG_ITEM"</span>, <span class="c-str">"QUALITY"</span>, <span class="c-str">"PACKAGING"</span>}
 
 
@@ -1621,6 +1760,8 @@ $ python -c "from evidence import snapshot; print(snapshot('ORD-1840')['delivere
         qty = max(1, min(int(qty), item[<span class="c-str">"quantity"</span>]))   <span class="c-dim"># never refund more than was ordered</span>
         <span class="c-key">return</span> qty * item[<span class="c-str">"unit_price"</span>]
     <span class="c-key">return</span> <span class="c-key">None</span>                                       <span class="c-dim"># BILLING, UNKNOWN: always a human</span></code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b><code>None</code> means “a human prices this”</b>Billing disputes, unknown categories and items that aren't on the order all return <code>None</code>. The pipeline turns an upheld-but-unpriceable grievance into an escalation. Code never guesses a number.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>Quantity is clamped</b>If the model extracts “9 biryanis missing” from an order of 4, <code>min(qty, ordered)</code> caps it. A mis-extraction or a lying customer can't push the refund past what was bought.</span></div>
@@ -1628,6 +1769,19 @@ $ python -c "from evidence import snapshot; print(snapshot('ORD-1840')['delivere
     </div>
 
     <h3>The bench: a vote is a <code>Counter</code></h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · bench.py</div><pre>DEFINE tally(rulings):
+    // a failed judge call is not a vote, so the grievance stays unresolved
+    IF rulings is empty or any judge call failed THEN RETURN None
+    SET votes = the ruling of each judge, as letters like U,E,E
+    SET winner, count = the most common ruling and how many judges gave it
+    IF count is not more than half of the votes THEN SET winner = ESCALATE   // no majority
+    SET confidence = average confidence of the judges who agreed with winner   // logged only, never branched on
+    RETURN winner, the votes, the split like 2-1, and the confidence</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>Counter</code> <span class="lk-src">from <code>collections</code>, Python standard library</span>: counts how many judges gave each ruling.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>bench.py</b> · step 2 · F4</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> collections <span class="c-key">import</span> Counter
 
 
@@ -1647,6 +1801,8 @@ $ python -c "from evidence import snapshot; print(snapshot('ORD-1840')['delivere
         <span class="c-dim"># logged and charted, never branched on: it is a number the model made up</span>
         <span class="c-str">"confidence"</span>: round(sum(agreeing) / len(agreeing), 2) <span class="c-key">if</span> agreeing <span class="c-key">else</span> 0.0,
     }</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>A failed call is not a vote</b>If any judge call failed, the grievance is <em>unresolved</em>, never <span class="v rej">rejected</span>. That's the asymmetry from Part 1 in one <code>return None</code>.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>“Strict majority” in one line</b><code>count * 2 &lt;= len(votes)</code> catches U, R, E: three different rulings, so no majority, so <span class="v esc">escalate</span>.</span></div>
@@ -1655,6 +1811,34 @@ $ python -c "from evidence import snapshot; print(snapshot('ORD-1840')['delivere
     </div>
 
     <h3>Prove it, still with no API key</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · check_rules.py</div><pre>SET ev = a frozen snapshot of order ORD-1840
+DEFINE r(ruling, confidence): RETURN a judge result with that ruling and confidence
+SET U, R, E = UPHELD, REJECTED, ESCALATE
+
+// the bench: counting, no model
+Check: three UPHELD votes give UPHELD
+Check: U, E, E gives ESCALATE                  // one UPHELD against two ESCALATE
+Check: U, U, R gives a split of 2-1            // the split is kept
+Check: U, R, E gives ESCALATE                  // no majority at all
+Check: a failed call makes the result None     // a failed call is not a vote
+
+// the price list: code, no model
+Check: a late delivery is worth 49
+Check: 2 biryanis are worth 640
+Check: 9 biryanis are capped at the 4 ordered, so 1280
+Check: raita packaging is worth 60
+Check: partner conduct is worth 0
+Check: a Pizza that is not on the order gives None
+Check: billing gives None
+
+PRINT "all 12 rule checks passed - no API key needed"</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>tally</code> <span class="lk-src">from <code>bench</code>, the local file bench.py</span>: counts the rulings into a verdict.</li>
+    <li><code>snapshot</code> <span class="lk-src">from <code>evidence</code>, the local file evidence.py</span>: freezes the sample order, so the checks use fixed data.</li>
+    <li><code>price</code> <span class="lk-src">from <code>pricing</code>, the local file pricing.py</span>: the price list being checked.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>check_rules.py</b> · step 2 · python check_rules.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> bench <span class="c-key">import</span> tally
 <span class="c-key">from</span> evidence <span class="c-key">import</span> snapshot
 <span class="c-key">from</span> pricing <span class="c-key">import</span> price
@@ -1685,12 +1869,35 @@ assert price({<span class="c-str">"category"</span>: <span class="c-str">"QUALIT
 assert price({<span class="c-str">"category"</span>: <span class="c-str">"BILLING"</span>}, ev) <span class="c-key">is</span> <span class="c-key">None</span>
 
 print(<span class="c-str">"all 12 rule checks passed - no API key needed"</span>)</code></pre></div>
+  </details>
+</div>
     <div class="calc"><i>$ python check_rules.py</i>
 <b>all 12 rule checks passed - no API key needed</b></div>
     <div class="room">
       <span class="tag">Why this order matters</span>
       <p>If step 8 later refunds the wrong amount, you already <em>know</em> pricing and tallying are correct. So the bug is in extraction (wrong item or quantity) or judging (wrong ruling). Two suspects instead of five, and no tokens spent finding out.</p>
     </div>
+  </div>
+  <div class="col">
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The model extracts "biryani" with quantity 9, but the order has 4 biryanis at ₹320 each. What does <code>price()</code> return for this MISSING_ITEM grievance?</p>
+      <ol class="lk-opts">
+        <li>₹2,880, because the customer asked for nine<div class="lk-why">The quantity is not trusted above what was ordered, so the refund cannot reach 9 × ₹320.</div></li>
+        <li>0, because a quantity above the order is rejected outright<div class="lk-why">Nothing is rejected at pricing. The quantity is clamped to what was ordered, so the grievance is still priced.</div></li>
+        <li data-correct>₹1,280, because the quantity is capped at the 4 biryanis ordered<div class="lk-why"><code>min(qty, ordered)</code> stops a mis-extraction or a lying customer from pushing the refund past what was bought. <code>check_rules.py</code> asserts 1280.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The extraction returns an item called "Pizza", which is not on the order, for a QUALITY grievance. What does <code>price()</code> return?</p>
+      <ol class="lk-opts">
+        <li data-correct>None, which means a human prices it<div class="lk-why">None tells the pipeline that code cannot price this grievance. An upheld grievance with no price becomes an escalation, not a payment.</div></li>
+        <li>0, so the grievance is dropped with no refund<div class="lk-why">Zero is reserved for partner conduct, which is an ops matter. A missing item is not priced at zero.</div></li>
+        <li>The unit price of the closest item on the order<div class="lk-why">The code never guesses. <code>find_item</code> looks for a name match, and when none is found the price is None.</div></li>
+      </ol>
+    </div>
+  </div>
   </div>
 </section>
 
@@ -1699,6 +1906,43 @@ print(<span class="c-str">"all 12 rule checks passed - no API key needed"</span>
     <p class="kicker">Step 3 · the model's only door</p>
     <h2>One wrapper for every LLM call</h2>
     <p>Every call in the project goes through these three functions, so retry, backoff, jitter and JSON parsing are written once.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · llm.py</div><pre>LOAD every KEY=value line from .env into the environment
+SET client = a Groq client, using the GROQ_API_KEY environment variable
+SET MODEL = "openai/gpt-oss-20b"
+SET MAX_RETRIES = 4
+
+DEFINE call(prompt, temperature):
+    FOR EACH attempt from 0 to MAX_RETRIES:
+        TRY
+            SEND prompt to MODEL at this temperature
+            RETURN the reply text
+        ON ERROR a rate limit (429) or a network blip:
+            IF this was the last attempt THEN raise the error
+            WAIT 2 to the power of attempt, plus a random 0 to 1 second   // backoff + jitter
+
+DEFINE call_json(prompt, temperature):
+    SET text = call(prompt, temperature), trimmed
+    Remove a leading or trailing markdown fence   // models add them anyway
+    RETURN the text parsed as JSON
+
+DEFINE render(template, values):
+    // {{name}} slots, so the JSON braces inside prompts stay untouched
+    FOR EACH name and value in values:
+        Replace "{{name}}" in the template with the value
+    RETURN the template</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>json</code> <span class="lk-src">Python standard library</span>: turns the model's reply text into Python data.</li>
+    <li><code>os</code> <span class="lk-src">Python standard library</span>: reads the GROQ_API_KEY from the environment.</li>
+    <li><code>random</code> <span class="lk-src">Python standard library</span>: adds the jitter to each retry wait.</li>
+    <li><code>re</code> <span class="lk-src">Python standard library</span>: strips markdown fences from replies.</li>
+    <li><code>time</code> <span class="lk-src">Python standard library</span>: pauses between retries.</li>
+    <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: copies the .env file into the environment.</li>
+    <li><code>Groq</code> <span class="lk-src">from <code>groq</code></span>: the client that sends the requests.</li>
+    <li><code>RateLimitError</code> <span class="lk-src">from <code>groq</code></span>: the 429 error that triggers a retry.</li>
+    <li><code>APIConnectionError</code> <span class="lk-src">from <code>groq</code></span>: the network error that triggers a retry.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>llm.py</b> · step 3</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
 <span class="c-key">import</span> os
 <span class="c-key">import</span> random
@@ -1738,6 +1982,8 @@ MAX_RETRIES = 4
     <span class="c-key">for</span> key, value <span class="c-key">in</span> values.items():
         template = template.replace(<span class="c-str">"{{"</span> + key + <span class="c-str">"}}"</span>, str(value))
     <span class="c-key">return</span> template</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>Backoff plus jitter, exactly as in Part 1</b><code>2 ** attempt</code> waits 1, 2, 4, 8 seconds. <code>random.uniform(0, 1)</code> is the jitter that stops forty workers retrying in lockstep. Only rate limits and network errors are retried. A bad request fails immediately, because retrying it would just fail again more slowly.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>Models wrap JSON in fences anyway</b>The prompt says “no markdown fences”, and sometimes the model adds them. The regex strips them before <code>json.loads</code>. Defend in code; don't just ask nicely in the prompt.</span></div>
@@ -1755,6 +2001,16 @@ MAX_RETRIES = 4
       <li><strong>Extraction</strong> now asks for <code>item</code> and <code>quantity</code> (from F5). The model still doesn't judge or price anything.</li>
       <li><strong>Settlement</strong> now says “do not mention grievances that were REJECTED”. Part 1 called silently dropping g4 a product choice, and a choice only holds if it's written into the prompt.</li>
     </ul>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · prompts.py</div><pre>SET CATEGORIES = the seven categories, from LATE_DELIVERY to BILLING
+
+SET EXTRACT = the extraction prompt, with slots for the complaint and the line items
+    // rules: one checkable grievance each, judge nothing, resolve references, JSON only
+SET JUDGE = the judging prompt, with slots for one grievance and the evidence
+    // rules: UPHELD, REJECTED or ESCALATE; silent evidence means ESCALATE, never REJECTED
+SET SETTLE = the settlement prompt, with slots for the complaint, the rulings and the amount
+    // rules: treat all rulings as final; mention no REJECTED grievance; state only the given amount</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>prompts.py</b> · step 4</span><button class="copy" type="button">COPY</button></div><pre><code>CATEGORIES = [<span class="c-str">"LATE_DELIVERY"</span>, <span class="c-str">"MISSING_ITEM"</span>, <span class="c-str">"WRONG_ITEM"</span>, <span class="c-str">"QUALITY"</span>,
               <span class="c-str">"PACKAGING"</span>, <span class="c-str">"PARTNER_CONDUCT"</span>, <span class="c-str">"BILLING"</span>]
 
@@ -1833,6 +2089,8 @@ Rules:
 Complaint: {{complaint_text}}
 Rulings:   {{verdicts_json}}
 Amount:    {{refund_amount}}"""</span></code></pre></div>
+  </details>
+</div>
   </div>
 </section>
 
@@ -1840,6 +2098,44 @@ Amount:    {{refund_amount}}"""</span></code></pre></div>
   <div class="col">
     <p class="kicker">Step 5 · the three stages</p>
     <h2>Extract, judge, settle: three functions</h2>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · stages.py</div><pre>SET RULINGS = UPHELD, REJECTED, ESCALATE
+
+DEFINE extract_grievances(complaint, evidence):
+    // stage 2: one call at temperature 0, the barrier everything waits on
+    SET raw = call_json of EXTRACT, filled with the complaint and the line items, at temperature 0
+    FOR EACH item g in raw, numbered from 1:
+        ADD a grievance with id g1, g2 and so on, its text, category, item, quantity and span
+        // a category that is not in CATEGORIES becomes UNKNOWN
+    RETURN the grievances
+
+DEFINE judge_grievance(grievance, evidence, judge_index):
+    // stage 3: one of K independent judges, at temperature 0.7
+    SET prompt = JUDGE, filled with the grievance text and the evidence
+    TRY
+        SET ruling = call_json(prompt, 0.7)
+    ON ERROR the reply is not usable JSON THEN
+        SET ruling = an empty result
+    IF the ruling is not one of RULINGS THEN
+        SET ruling = ESCALATE, with confidence 0.0 and "judge output could not be parsed"
+    ADD judge_index to the ruling
+    RETURN the ruling
+
+DEFINE write_settlement(complaint, verdicts, amount):
+    // stage 4: one call at temperature 0.2, writes words about a number it is given
+    SET summary = each grievance text with its ruling
+    RETURN the reply from SETTLE, filled with the complaint, the summary and "Rs" plus the amount, at temperature 0.2</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>json</code> <span class="lk-src">Python standard library</span>: turns the evidence and rulings into JSON text for the prompts.</li>
+    <li><code>call</code> <span class="lk-src">from <code>llm</code>, the local file llm.py</span>: sends one prompt and returns the reply text.</li>
+    <li><code>call_json</code> <span class="lk-src">from <code>llm</code>, the local file llm.py</span>: sends a prompt and parses the reply as JSON.</li>
+    <li><code>render</code> <span class="lk-src">from <code>llm</code>, the local file llm.py</span>: fills the {{slots}} in a prompt.</li>
+    <li><code>CATEGORIES</code> <span class="lk-src">from <code>prompts</code>, the local file prompts.py</span>: the allowed category names.</li>
+    <li><code>EXTRACT</code> <span class="lk-src">from <code>prompts</code>, the local file prompts.py</span>: the extraction prompt.</li>
+    <li><code>JUDGE</code> <span class="lk-src">from <code>prompts</code>, the local file prompts.py</span>: the judging prompt.</li>
+    <li><code>SETTLE</code> <span class="lk-src">from <code>prompts</code>, the local file prompts.py</span>: the settlement prompt.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>stages.py</b> · step 5 · F2, F3, F8</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
 
 <span class="c-key">from</span> llm <span class="c-key">import</span> call, call_json, render
@@ -1887,6 +2183,8 @@ RULINGS = {<span class="c-str">"UPHELD"</span>, <span class="c-str">"REJECTED"</
     <span class="c-key">return</span> call(render(SETTLE, complaint_text=complaint,
                        verdicts_json=json.dumps(summary), refund_amount=<span class="c-str">f"Rs {amount}"</span>),
                 temperature=0.2)</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>Ids come from code: <code>g1</code>, <code>g2</code>…</b>Part 1's schema had the model invent a uuid. Here code numbers the grievances. Ids then stay stable across a resumed run, and the ledger can say “judge 2 on g3 already ruled”.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>Validate the enum</b>A category outside the list becomes <code>UNKNOWN</code>, which pricing refuses to price. A ruling outside UPHELD, REJECTED and ESCALATE becomes ESCALATE. Every model output passes through an allow-list before code acts on it.</span></div>
@@ -1931,6 +2229,26 @@ g4 <b>PARTNER_CONDUCT</b> None None        <i>← "embarrassing" and "refund eve
     </div>
 
     <h3>Eval 1: does extraction split complaints correctly?</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · eval_extract.py</div><pre>SET EVIDENCE = a frozen snapshot of order ORD-1840
+SET CASES = three pairs of a complaint and its expected categories:
+    // the four-grievance case study
+    // "Worst app ever. Never ordering again. Refund me." expects no categories
+    // a cold Paneer Tikka and a double charge expects QUALITY and BILLING
+SET passed = 0
+
+FOR EACH complaint and expected in CASES:
+    SET got = the sorted categories that extract_grievances finds
+    SET ok = got is the same as the sorted expected list
+    ADD 1 to passed when ok
+    PRINT PASS or FAIL, with the expected and the actual categories
+PRINT how many complaints split correctly</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>SAMPLE_COMPLAINT</code> <span class="lk-src">from <code>evidence</code>, the local file evidence.py</span>: the four-grievance complaint from the case study.</li>
+    <li><code>snapshot</code> <span class="lk-src">from <code>evidence</code>, the local file evidence.py</span>: freezes the sample order to test against.</li>
+    <li><code>extract_grievances</code> <span class="lk-src">from <code>stages</code>, the local file stages.py</span>: the extraction stage under test.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>eval_extract.py</b> · step 6 · python eval_extract.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> evidence <span class="c-key">import</span> SAMPLE_COMPLAINT, snapshot
 <span class="c-key">from</span> stages <span class="c-key">import</span> extract_grievances
 
@@ -1950,9 +2268,37 @@ passed = 0
     passed += ok
     print(<span class="c-str">f"{'PASS' if ok else 'FAIL'}  expected {sorted(expected)}\n      got      {got}"</span>)
 print(<span class="c-str">f"\nextraction: {passed}/{len(CASES)} complaints split correctly"</span>)</code></pre></div>
+  </details>
+</div>
     <p>Each case pins a different rule from the extraction prompt: the four-grievance case study, a complaint that is <em>only</em> feelings and demands (so the right answer is zero grievances), and a two-claim complaint where one claim is billing and must later go to a human.</p>
 
     <h3>Eval 2: does the bench rule correctly, and is K=3 worth it?</h3>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · eval_judge.py</div><pre>SET K = 3 judges for each grievance
+SET EVIDENCE = a frozen snapshot of order ORD-1840
+SET GOLDEN = eight grievances, each with the ruling a careful human gives on this evidence
+SET single_ok, bench_ok, false_rejects, false_approvals, unanimous = 0
+
+FOR EACH text and gold in GOLDEN:
+    SET rulings = judge_grievance, run once for each judge index from 0 to K-1
+    SET verdict = tally(rulings)
+    SET single = the first judge's ruling, and bench = the verdict's ruling
+    ADD 1 to single_ok when single is gold
+    ADD 1 to bench_ok when bench is gold
+    ADD 1 to false_rejects when bench is REJECTED but gold is not   // the expensive mistake
+    ADD 1 to false_approvals when bench is UPHELD but gold is not   // money we did not owe
+    ADD 1 to unanimous when all K judges agree
+    PRINT gold, single, bench, the votes and the text
+
+PRINT single-judge accuracy and bench accuracy
+PRINT false rejects, false approvals, the unanimous count and the total LLM calls
+IF false_rejects is more than 0 THEN STOP with "EVAL GATE FAILED"</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>tally</code> <span class="lk-src">from <code>bench</code>, the local file bench.py</span>: counts the three rulings into a verdict.</li>
+    <li><code>snapshot</code> <span class="lk-src">from <code>evidence</code>, the local file evidence.py</span>: freezes the sample order.</li>
+    <li><code>judge_grievance</code> <span class="lk-src">from <code>stages</code>, the local file stages.py</span>: one judge call, the thing being measured.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>eval_judge.py</b> · step 6 · python eval_judge.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">from</span> bench <span class="c-key">import</span> tally
 <span class="c-key">from</span> evidence <span class="c-key">import</span> snapshot
 <span class="c-key">from</span> stages <span class="c-key">import</span> judge_grievance
@@ -1991,6 +2337,8 @@ print(<span class="c-str">f"false rejects {false_rejects}   false approvals {fal
       <span class="c-str">f"unanimous {unanimous}/{n}   LLM calls {n * K}"</span>)
 <span class="c-key">if</span> false_rejects:
     raise SystemExit(<span class="c-str">"EVAL GATE FAILED: the bench refused a claim the evidence supports"</span>)</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>The golden set covers all three rulings</b>Three upheld, three rejected (two of them contradicted by the evidence: “two hours late” vs 85 minutes, “₹99 fee” vs ₹49), and two that the evidence can't speak to, so they should escalate.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>Single judge vs bench, same run</b><code>rulings[0]</code> is what you'd get with K=1. Comparing it with the tally on the same calls shows what the extra two calls bought.</span></div>
@@ -2023,6 +2371,33 @@ false rejects <b>0</b>   false approvals 1   unanimous 6/8   LLM calls 24</div>
     <p class="kicker">Step 7 · memory that survives a crash</p>
     <h2>The ledger: Part 1's four tables, in SQLite</h2>
     <p>The capacity section of Part 1 counted rows in four tables. Here they are as real tables. SQLite is a file, so there's no server to install.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · ledger.py</div><pre>SET DB = open the SQLite file ledger.db, with rows readable by column name
+RUN the SQL that creates the four tables if they do not exist yet
+    // disputes, evidence_snapshots, grievances, judge_rulings
+
+DEFINE _now(): RETURN the current time, to the second
+DEFINE get_dispute(dispute_id): RETURN that row as a dictionary, or None
+DEFINE create_dispute(dispute_id, order_id, complaint):
+    SAVE a row with status RECEIVED, ignored if the id already exists
+DEFINE set_status(dispute_id, status, extra fields):
+    UPDATE the status and the time, plus any extra fields, for this dispute
+DEFINE save_evidence(dispute_id, snapshot):
+    SAVE the snapshot as JSON, ignored if one already exists   // frozen once
+    RETURN get_evidence(dispute_id)
+DEFINE get_evidence(dispute_id): RETURN the saved snapshot, or None
+DEFINE save_grievances(dispute_id, grievances):
+    SAVE each grievance as JSON, replacing any with the same id   // one transaction
+DEFINE get_grievances(dispute_id): RETURN the saved grievances, sorted by id
+DEFINE save_ruling(dispute_id, grievance_id, judge_index, ruling):
+    SAVE one judge's ruling as JSON, replacing any with the same key   // one transaction per save
+DEFINE get_rulings(dispute_id): RETURN every saved ruling, keyed by grievance and judge</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>json</code> <span class="lk-src">Python standard library</span>: stores snapshots, grievances and rulings as JSON text.</li>
+    <li><code>sqlite3</code> <span class="lk-src">Python standard library</span>: the built-in database that keeps the ledger in one file.</li>
+    <li><code>datetime</code> <span class="lk-src">from <code>datetime</code>, Python standard library</span>: gives the time of each status change.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>ledger.py</b> · step 7</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
 <span class="c-key">import</span> sqlite3
 <span class="c-key">from</span> datetime <span class="c-key">import</span> datetime
@@ -2102,6 +2477,20 @@ CREATE TABLE IF NOT EXISTS judge_rulings (
     rows = DB.execute(<span class="c-str">"SELECT grievance_id, judge_index, ruling_json FROM judge_rulings"</span>
                       <span class="c-str">" WHERE dispute_id = ?"</span>, (dispute_id,)).fetchall()
     <span class="c-key">return</span> {(r[0], r[1]): json.loads(r[2]) <span class="c-key">for</span> r <span class="c-key">in</span> rows}</code></pre></div>
+  </details>
+</div>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · payments.py</div><pre>SET _executed = an empty record of idempotency key to amount   // a stand-in for the provider's memory
+
+DEFINE refund(idempotency_key, amount):
+    // the provider refuses to execute the same key twice
+    IF idempotency_key is already in _executed THEN
+        RETURN status duplicate_ignored, with the amount recorded the first time
+    store amount in _executed under idempotency_key
+    RETURN status paid, with amount
+
+DEFINE payouts(): RETURN a copy of _executed</pre></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>payments.py</b> · step 7 · F9</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># Stand-in for the payment provider. Real ones (Razorpay, Stripe) accept an</span>
 <span class="c-dim"># idempotency key and refuse to execute the same key twice - so does this.</span>
 _executed = {}
@@ -2116,12 +2505,35 @@ _executed = {}
 
 <span class="c-key">def</span> payouts() -&gt; dict:
     <span class="c-key">return</span> dict(_executed)</code></pre></div>
+  </details>
+</div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>One row per judge call in <code>judge_rulings</code></b>The primary key is (dispute, grievance, judge). That key is what lets a crashed run resume: anything already in the table is never asked again.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b><code>INSERT OR IGNORE</code> on evidence</b>A retry can't overwrite the snapshot with a fresher one, so the evidence is frozen at the database level too.</span></div>
       <div class="anno"><span class="n">3</span><span class="t"><b><code>with DB:</code> is a transaction</b>Each save either fully happens or doesn't happen. A crash halfway through a write leaves no half-row.</span></div>
       <div class="anno"><span class="n">4</span><span class="t"><b>Two layers of “never pay twice”</b>The ledger refuses to re-run a settled dispute, and the payment provider refuses to execute the same idempotency key twice. If either layer has a bug, the other still holds. That's why Part 1 passed the key to the payments API as well.</span></div>
     </div>
+  </div>
+  <div class="col">
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The <code>evidence_snapshots</code> table is written with <code>INSERT OR IGNORE</code>. What does that guarantee when a retry runs?</p>
+      <ol class="lk-opts">
+        <li data-correct>The first frozen snapshot stays, and a retry cannot replace it with a fresher copy<div class="lk-why"><code>dispute_id</code> is the primary key, so a second save for the same dispute is ignored. The evidence stays frozen in the database too.</div></li>
+        <li>Each complaint is stored only once across all disputes<div class="lk-why">The key is <code>dispute_id</code>, not the complaint text. The ignore rule applies only to one dispute's snapshot.</div></li>
+        <li>Reads from the table are faster than with a plain INSERT<div class="lk-why"><code>INSERT OR IGNORE</code> decides what gets written, not how quickly rows are read.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">A worker crashes in the middle of <code>save_ruling</code>. What state does <code>judge_rulings</code> end up in?</p>
+      <ol class="lk-opts">
+        <li>A half-written row, which must be repaired by hand before the retry<div class="lk-why">The <code>with DB:</code> block makes each save a transaction, so a half-written row is never left behind.</div></li>
+        <li data-correct>Either the whole ruling is saved or none of it is, so the retry judges that slot again<div class="lk-why">The <code>with DB:</code> block is a transaction. Only completed saves are kept, and the retry asks again for any slot that has no saved row.</div></li>
+        <li>The whole table is rolled back, including the rulings saved earlier<div class="lk-why">Each save is its own transaction. Rulings that were saved before the crash stay in the table.</div></li>
+      </ol>
+    </div>
+  </div>
   </div>
 </section>
 
@@ -2130,6 +2542,57 @@ _executed = {}
     <p class="kicker">Step 8 · wire it</p>
     <h2><code>resolve_dispute()</code>: the twenty lines, for real</h2>
     <p>Put this next to Part 1's <a href="#loop">pseudocode with five landmines</a>. The numbered comments follow the same stages, and every landmine has a line that defuses it.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · pipeline.py</div><pre>SET K = 3 judges per grievance, PARALLELISM = 4 calls at a time, AUTO_APPROVE_CAP = 2000 rupees, PARTIAL_SETTLE_MIN = 0.6
+
+DEFINE dispute_key(complaint, order_id):
+    RETURN the first 16 characters of the SHA-256 hash of order_id and the trimmed complaint
+
+DEFINE resolve_dispute(complaint, order_id):
+    SET dispute_id = dispute_key(complaint, order_id)
+    // 1. never pay twice: a SETTLED or ESCALATED dispute is returned as it was
+    IF the ledger already has this dispute as SETTLED or ESCALATED THEN RETURN it, marked replayed
+    CREATE the dispute in the ledger with status RECEIVED
+    // 2. freeze the evidence once; a resumed run reuses the same copy
+    SET evidence = the saved snapshot, or a new snapshot saved now
+    SET status = INTAKE
+    // 3. extraction is the barrier; it is saved so a crash never extracts again
+    SET grievances = the saved grievances, or extract_grievances and save them
+    IF there are none THEN ESCALATE with "Nothing checkable found"
+    SET status = JUDGING
+    // 4. judge: N × K calls, PARALLELISM at a time, skipping slots already ruled
+    RUN judge_grievance for each missing grievance and judge index, PARALLELISM at a time
+    SAVE each ruling as soon as it arrives; a failed call stays unresolved
+    // 5. tally and price: plain code, no model
+    FOR EACH grievance:
+        SET v = tally of its K rulings
+        SET amount = price(grievance, evidence)
+        IF it is UPHELD but amount is None THEN SET ruling = ESCALATE
+    SAVE the grievances with their verdicts and amounts to the ledger
+    SET refund = total of the UPHELD amounts, and held = total of the ESCALATE and unresolved amounts
+    SET status = TALLIED
+    // 6. hard rules decide whether money moves automatically
+    IF refund is over AUTO_APPROVE_CAP THEN ESCALATE and RETURN
+    IF resolved grievances are under 60% of all THEN ESCALATE and RETURN
+    // 7. settle: the model writes the words, code writes the cheque
+    SET message = write_settlement(complaint, resolved, refund)
+    IF refund is more than 0 THEN CALL payments.refund with dispute_id as the idempotency key
+    SET status = SETTLED, with the message
+    RETURN the dispute</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>hashlib</code> <span class="lk-src">Python standard library</span>: builds the SHA-256 hash that becomes the dispute id.</li>
+    <li><code>ThreadPoolExecutor</code> <span class="lk-src">from <code>concurrent.futures</code>, Python standard library</span>: runs the judge calls in parallel.</li>
+    <li><code>as_completed</code> <span class="lk-src">from <code>concurrent.futures</code>, Python standard library</span>: hands back each judge call as soon as it finishes.</li>
+    <li><code>ledger</code> <span class="lk-src">the local file ledger.py</span>: the saved state of each dispute.</li>
+    <li><code>payments</code> <span class="lk-src">the local file payments.py</span>: the payout stand-in that refuses a repeated key.</li>
+    <li><code>tally</code> <span class="lk-src">from <code>bench</code>, the local file bench.py</span>: counts the rulings into a verdict.</li>
+    <li><code>snapshot</code> <span class="lk-src">from <code>evidence</code>, the local file evidence.py</span>: freezes the order when the dispute first arrives.</li>
+    <li><code>price</code> <span class="lk-src">from <code>pricing</code>, the local file pricing.py</span>: looks up the rupees for each grievance.</li>
+    <li><code>extract_grievances</code> <span class="lk-src">from <code>stages</code>, the local file stages.py</span>: stage 2, the extraction call.</li>
+    <li><code>judge_grievance</code> <span class="lk-src">from <code>stages</code>, the local file stages.py</span>: stage 3, one judge call.</li>
+    <li><code>write_settlement</code> <span class="lk-src">from <code>stages</code>, the local file stages.py</span>: stage 4, the customer message.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>pipeline.py</b> · step 8 · the whole system</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> hashlib
 <span class="c-key">from</span> concurrent.futures <span class="c-key">import</span> ThreadPoolExecutor, as_completed
 
@@ -2217,6 +2680,8 @@ PARTIAL_SETTLE_MIN = 0.6    <span class="c-dim"># pay now if &gt;= 60% of grieva
         payments.refund(idempotency_key=dispute_id, amount=refund)
     ledger.set_status(dispute_id, <span class="c-str">"SETTLED"</span>, message=message)
     <span class="c-key">return</span> ledger.get_dispute(dispute_id)</code></pre></div>
+  </details>
+</div>
     <div class="tablewrap">
       <table>
         <thead><tr><th style="width:12%">Comment</th><th style="width:34%">Part 1 idea</th><th>The line that does it</th></tr></thead>
@@ -2245,6 +2710,35 @@ PARTIAL_SETTLE_MIN = 0.6    <span class="c-dim"># pay now if &gt;= 60% of grieva
     <p class="kicker">Step 9 · prove the whole thing</p>
     <h2>Replay it, break it, check the money</h2>
     <p><code>bench_check.py</code> runs the case study end to end, then attacks the two guarantees that matter most: <em>never pay twice</em> and <em>an outage doesn't mean a rejection</em>.</p>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · bench_check.py</div><pre>IF ledger.db exists THEN DELETE it   // start from an empty ledger, before ledger is imported
+SET checks = an empty record of named results
+
+// 1. the happy path from the case study
+SET r = resolve_dispute(SAMPLE_COMPLAINT, "ORD-1840")
+Record each check: status is SETTLED, refund is 689, held is 60, and the PARTNER_CONDUCT grievance is REJECTED
+
+// 2. idempotency: the customer hits submit again
+SET again = resolve_dispute(SAMPLE_COMPLAINT, "ORD-1840")
+Record each check: the second result is replayed, and payouts holds exactly one payment of 689
+
+// 3. chaos: the provider fails every judge call on one grievance
+REPLACE pipeline.judge_grievance with flaky_judge, which raises a timeout for PACKAGING grievances and otherwise calls the real judge
+SET r2 = resolve_dispute(SAMPLE_COMPLAINT plus " Please sort it out.", "ORD-1840")
+Record each check: status is SETTLED, and the held amount is 60, not rejected
+
+FOR EACH name and ok in checks:
+    PRINT PASS or FAIL, then the name
+PRINT how many checks passed</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>os</code> <span class="lk-src">Python standard library</span>: checks for and deletes the old ledger file.</li>
+    <li><code>ledger</code> <span class="lk-src">the local file ledger.py</span>: reads the saved grievances during the checks.</li>
+    <li><code>payments</code> <span class="lk-src">the local file payments.py</span>: reads the payouts record to count the payments.</li>
+    <li><code>pipeline</code> <span class="lk-src">the local file pipeline.py</span>: its judge function is swapped out for the outage test.</li>
+    <li><code>SAMPLE_COMPLAINT</code> <span class="lk-src">from <code>evidence</code>, the local file evidence.py</span>: the case-study complaint.</li>
+    <li><code>resolve_dispute</code> <span class="lk-src">from <code>pipeline</code>, the local file pipeline.py</span>: runs the whole dispute.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>bench_check.py</b> · step 9 · python bench_check.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> os
 
 <span class="c-key">if</span> os.path.exists(<span class="c-str">"ledger.db"</span>):          <span class="c-dim"># start from an empty ledger (before ledger is imported)</span>
@@ -2289,6 +2783,8 @@ checks[<span class="c-str">"outage: unresolved raita held, not rejected"</span>]
 <span class="c-key">for</span> name, ok <span class="c-key">in</span> checks.items():
     print((<span class="c-str">"PASS "</span> <span class="c-key">if</span> ok <span class="c-key">else</span> <span class="c-str">"FAIL "</span>) + name)
 print(<span class="c-str">f"\n{sum(checks.values())}/{len(checks)} checks passed"</span>)</code></pre></div>
+  </details>
+</div>
     <div class="calc"><i>$ python bench_check.py</i>
 <b>PASS</b> settled without a human
 <b>PASS</b> refund is Rs 689 (49 + 640)
@@ -2313,6 +2809,29 @@ print(<span class="c-str">f"\n{sum(checks.values())}/{len(checks)} checks passed
   <div class="col">
     <p class="kicker">Step 10 · the face</p>
     <h2>A Gradio app in thirty lines</h2>
+<div class="lk-code">
+  <div class="lk-pseudo"><div class="lk-label">Pseudo code · app.py</div><pre>DEFINE on_submit(complaint, order_id):
+    SET result = resolve_dispute(complaint, order_id)
+    SET rows = one row per grievance saved in the ledger: id, text, category, votes, ruling or UNRESOLVED, amount
+    SET header = the status, the refund, the amount held and the dispute id
+    IF the result was replayed THEN add "replayed - no new payment" to the header
+    RETURN header, rows and the customer message
+
+CREATE the Gradio page titled "The Refund Bench":
+    ADD a text box for the complaint, filled with SAMPLE_COMPLAINT
+    ADD a dropdown of the orders, set to ORD-1840
+    ADD a "Resolve dispute" button, a status line, a read-only table and a message box
+    WHEN the button is clicked, CALL on_submit and show its three results
+
+IF this file is run directly THEN START the page</pre></div>
+  <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+    <li><code>gradio</code> <span class="lk-src">third-party package</span> (as <code>gr</code>): builds the web page from Python objects.</li>
+    <li><code>ledger</code> <span class="lk-src">the local file ledger.py</span>: reads the grievance rows for the table.</li>
+    <li><code>ORDERS</code> <span class="lk-src">from <code>evidence</code>, the local file evidence.py</span>: the order list for the dropdown.</li>
+    <li><code>SAMPLE_COMPLAINT</code> <span class="lk-src">from <code>evidence</code>, the local file evidence.py</span>: pre-fills the complaint box.</li>
+    <li><code>resolve_dispute</code> <span class="lk-src">from <code>pipeline</code>, the local file pipeline.py</span>: the whole flow behind the button.</li>
+  </ul></div>
+  <details class="lk-reveal"><summary>View code</summary>
 <div class="file"><div class="file-bar"><span><b>app.py</b> · step 10 · python app.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> gradio <span class="c-key">as</span> gr
 
 <span class="c-key">import</span> ledger
@@ -2344,6 +2863,8 @@ print(<span class="c-str">f"\n{sum(checks.values())}/{len(checks)} checks passed
 
 <span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
     demo.launch()</code></pre></div>
+  </details>
+</div>
     <p>The app only formats what the pipeline returns. Press the button twice and the header says <em>replayed - no new payment</em>, which is F9 visible in the UI. All the business logic stays in <code>pipeline.py</code>, so replacing Gradio with a REST endpoint (Part 1's “thin API”) touches only this file.</p>
   </div>
 </section>

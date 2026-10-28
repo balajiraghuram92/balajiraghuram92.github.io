@@ -371,6 +371,8 @@ footer{padding:48px 0 80px;color:var(--muted);font-size:.95rem;border-top:1px so
   body{background:#fff}
 }
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- Shared arrowheads for every diagram on the page -->
@@ -555,6 +557,22 @@ a.awsq-home:hover{background:var(--card-2);text-decoration:none}
         </tbody>
       </table>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>// MCP basics: no AWS and no LLM needed
+RUN cd mcp-basics, then pip install -r requirements.txt
+RUN python client.py   // the client starts server.py itself
+
+// Strands + MCP
+RUN cd ../mcp-with-strands-agent, then pip install -r requirements.txt
+RUN python agent_with_local_mcp.py
+RUN python agent_with_aws_docs_mcp.py
+
+// A2A: three terminals
+RUN cd ../a2a-travel-agents, then pip install -r requirements.txt
+RUN python weather_agent_server.py      // terminal 1
+RUN python flights_agent_server.py      // terminal 2
+RUN python travel_orchestrator.py       // terminal 3</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh"># MCP basics (no AWS needed)
 cd mcp-basics && pip install -r requirements.txt && python client.py
 
@@ -568,6 +586,8 @@ cd ../a2a-travel-agents && pip install -r requirements.txt
 python weather_agent_server.py      # terminal 1
 python flights_agent_server.py      # terminal 2
 python travel_orchestrator.py       # terminal 3</code></pre></div>
+      </details>
+    </div>
     <div class="callout note"><h5><span class="ico">i</span>Library versions matter here</h5><p>The MCP labs pin <code>mcp[cli]&gt;=1.23.0,&lt;2.0.0</code> because version 2 renamed FastMCP and changed client APIs; this code targets the 1.x line. The A2A lab pins <code>a2a-sdk&gt;=0.3.0,&lt;0.4.0</code> and installs Strands with its <code>[a2a]</code> extra.</p></div>
     <div class="tbl-wrap">
       <table>
@@ -714,6 +734,25 @@ python travel_orchestrator.py       # terminal 3</code></pre></div>
     </div>
     <figcaption><b>A tangle vs a hub.</b> Without MCP, agents maintain a separate integration for each tool. With MCP, one standard, reusable connection layer reaches all of them the same way.</figcaption>
   </figure>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">An app uses 3 models and 4 tools. How many connections does each approach need?</p>
+      <ol class="lk-opts">
+        <li>7 without MCP and 12 with MCP<div class="lk-why">It's the other way round. Without MCP every model wires to every tool (3 × 4 = 12). With MCP each side connects once (3 + 4 = 7).</div></li>
+        <li data-correct>12 without MCP and 7 with MCP<div class="lk-why">Without MCP, each of the 3 models needs its own connection to each of the 4 tools: 3 × 4 = 12. With MCP, each model and each tool connects once: 3 + 4 = 7.</div></li>
+        <li>3 without MCP and 4 with MCP<div class="lk-why">Those are the counts of models and tools. The connections are the pairs between them.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">A fourth tool is added to an MCP setup. What new work does it need?</p>
+      <ol class="lk-opts">
+        <li>Three new connections, one to each model<div class="lk-why">That is the traditional cost. With MCP, the new tool connects once, to MCP.</div></li>
+        <li>No connection at all, because models find tools automatically<div class="lk-why">Discovery happens over a connection. The new tool still has to connect to MCP so that it can be discovered.</div></li>
+        <li data-correct>One new connection, to MCP<div class="lk-why">Every model already speaks MCP, so the new tool only has to join that one shared layer.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 
 <section class="sec" id="mcp-how" aria-labelledby="mh-h">
@@ -863,6 +902,33 @@ python travel_orchestrator.py       # terminal 3</code></pre></div>
       <p>MCP defines an <button class="kw" data-k="authorization">authorisation</button> framework for HTTP-based transports, built on <button class="kw" data-k="oauth">OAuth 2.1</button>. Servers reached over HTTP should follow it. Servers using stdio should <em>not</em>; they take any credentials they need from the environment instead, such as environment variables set when the client starts them. Clients and servers may also agree their own custom authentication and authorisation.</p>
     </div>
   </section>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Which part does the user actually interact with?</p>
+      <ol class="lk-opts">
+        <li data-correct>The host, such as a code editor or AI assistant<div class="lk-why">The host owns the user experience: the interface, session memory and prompt orchestration.</div></li>
+        <li>The MCP server, because it holds the data<div class="lk-why">The server exposes tools, resources and prompts. It does not handle the user's experience.</div></li>
+        <li>The MCP client, which talks to each server<div class="lk-why">Clients are protocol-level components inside the host, each with a one-to-one link to a single server. Users do not interact with them directly.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Which lifecycle stage closes the connection gracefully, letting ongoing operations finish?</p>
+      <ol class="lk-opts">
+        <li>Initialisation<div class="lk-why">Initialisation is the handshake at the start, where versions and capabilities are agreed.</div></li>
+        <li data-correct>Shutdown<div class="lk-why">The client closes the connection gracefully, lets ongoing operations finish and releases resources.</div></li>
+        <li>Operation<div class="lk-why">Operation is the normal traffic between the handshake and the end. It does not close anything.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What happens during the initialisation stage of an MCP connection?</p>
+      <ol class="lk-opts">
+        <li>The client sends its first tool call<div class="lk-why">Tool calls belong to the operation stage, which comes after the handshake.</div></li>
+        <li>The server shuts down and releases its resources<div class="lk-why">That happens in the shutdown stage, at the end of the connection.</div></li>
+        <li data-correct>The client and server agree on a protocol version and each other's capabilities<div class="lk-why">The handshake comes first. Nothing else may happen until the two sides agree on what they support.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="server-features" aria-labelledby="sf-h">
   <div class="sec-head"><span class="sec-num">5.3</span><h2 id="sf-h">MCP server features</h2></div>
@@ -930,6 +996,14 @@ python travel_orchestrator.py       # terminal 3</code></pre></div>
       <p>A server can expose collections and documents as <button class="kw" data-k="resource">resources</button>, which clients fetch, filter or search on demand. Clients send <code>resources/list</code> to discover them (and <code>resources/templates/list</code> for templates, covered below) and <code>resources/read</code> to get their contents.</p>
       <p>Every resource has a unique <button class="kw" data-k="uri">URI</button> (for example <code>file:///path/to/document.md</code>) and can declare a <button class="kw" data-k="mime">MIME type</button>, a standard label that tells the client what kind of content it is (Markdown, JSON, PDF…) and how to handle it. For example, a server could share a course directory like this:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · a resource description</div><pre>DEFINE a resource description with these fields:
+    uri = "file:///data/student-directory.json"   // where the data lives
+    name = "courseDirectory"
+    title = "Course Directory"
+    description = "List of courses and instructors in a program"
+    mimeType = "application/json"   // tells the client how to read the content</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">a resource description</span><button class="copy">Copy</button></div><pre><code class="lang-json">{
   "uri": "file:///data/student-directory.json",
   "name": "courseDirectory",
@@ -937,6 +1011,8 @@ python travel_orchestrator.py       # terminal 3</code></pre></div>
   "description": "List of courses and instructors in a program",
   "mimeType": "application/json"
 }</code></pre></div>
+      </details>
+    </div>
     <h4>Resource templates</h4>
     <div class="prose"><p><button class="kw" data-k="resource-template">Resource templates</button> expose <em>parameterised</em> resources through URI templates. The client fills in the variables to ask for specific data. For example, <code>travel://activities/{city}/{category}</code> covers many cities and categories, and <code>travel://activities/barcelona/museums</code> asks for one. In this section's lab, <code>greeting://{name}</code> works the same way.</p></div>
 
@@ -994,6 +1070,12 @@ python travel_orchestrator.py       # terminal 3</code></pre></div>
       <p>MCP <button class="kw" data-k="prompt-template">prompts</button> are predefined instruction templates a server exposes. They standardise recurring interactions and save you rewriting the same instructions. Each can have variables that the client fills in at run time; the client fetches the prompt from the server and passes the completed text to the model.</p>
       <p>Prompts can be versioned and updated centrally without changing client code. They're <strong>explicitly chosen</strong> by the user or client; they never run on their own. And they can be context-aware, referring to available resources and tools to build richer workflows. Here's a template for a student study assistant:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · a prompt template description</div><pre>DEFINE a prompt template named "generateStudyPlan":
+    title = "Generate Study Plan"
+    description = "Create a personalized study plan for a student based on their course and exam date"
+    arguments = course (required) and examDate (required)   // the client fills these in at run time</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">a prompt template description</span><button class="copy">Copy</button></div><pre><code class="lang-json">{
   "name": "generateStudyPlan",
   "title": "Generate Study Plan",
@@ -1003,6 +1085,8 @@ python travel_orchestrator.py       # terminal 3</code></pre></div>
     { "name": "examDate", "description": "Date of the upcoming exam", "required": true }
   ]
 }</code></pre></div>
+      </details>
+    </div>
     <figure class="fig">
       <div class="scroll-hint">Swipe sideways to see the full diagram</div>
       <div class="scroll">
@@ -1099,12 +1183,19 @@ python travel_orchestrator.py       # terminal 3</code></pre></div>
   <div class="prose">
     <p>Example: an event planner uses an MCP-powered assistant. The folder <code>file:///Users/planner/conference-2025</code> is the workspace for the current event, so the client defines it as a root:</p>
   </div>
-  <div class="code"><div class="bar"><span class="file">roots the client shares</span><button class="copy">Copy</button></div><pre><code class="lang-json">[
+  <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · roots the client shares</div><pre>SET roots = a list with one root:
+    uri = "file:///Users/planner/conference-2025"   // the workspace folder the server may use
+    name = "2025 Conference Workspace"</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
+    <div class="code"><div class="bar"><span class="file">roots the client shares</span><button class="copy">Copy</button></div><pre><code class="lang-json">[
   {
     "uri": "file:///Users/planner/conference-2025",
     "name": "2025 Conference Workspace"
   }
 ]</code></pre></div>
+      </details>
+    </div>
   <div class="sim" id="sim-roots">
     <div class="sim-head"><span class="tag">Try it</span><h4>What may the server touch?</h4></div>
     <div class="sim-body">
@@ -1160,6 +1251,33 @@ python travel_orchestrator.py       # terminal 3</code></pre></div>
         <tr><td>Client features</td><td>Capabilities clients provide</td><td>Sampling, roots and elicitation</td></tr>
       </tbody>
     </table>
+  </div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A server is halfway through a task and needs a detail it does not have, such as the exam date. Which client feature lets it ask the user?</p>
+      <ol class="lk-opts">
+        <li>Sampling<div class="lk-why">Sampling lets the server use the client's AI model. It does not ask the user anything.</div></li>
+        <li>Roots<div class="lk-why">Roots define which folders a server may work in. They do not ask for missing information.</div></li>
+        <li data-correct>Elicitation<div class="lk-why">The server sends an elicitation request, the client asks the user, and the answer goes back so the server can continue.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">A server's tool would change records in a database. What does MCP expect from the user?</p>
+      <ol class="lk-opts">
+        <li data-correct>To be able to see each tool call and approve it, so the user stays in control<div class="lk-why">Users should be able to see and approve tool calls. That keeps them in control of what happens.</div></li>
+        <li>Nothing, because tool calls run silently and the user does not need to see them<div class="lk-why">MCP expects a human in the loop, so users can see what the tools are doing.</div></li>
+        <li>Nothing, because a trusted server never needs approval<div class="lk-why">Trust in the server does not replace the user's control. The user should be able to see and approve each tool call.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The event planner switches from the 2025 conference to a new project. What keeps the server working in the right folder?</p>
+      <ol class="lk-opts">
+        <li>The server scans the laptop and picks the most recently changed folder<div class="lk-why">The server doesn't go looking on its own. Where it may work is the client's call, shared through roots.</div></li>
+        <li>Nothing changes until the server is restarted with a new config file<div class="lk-why">No restart is needed. Roots can change while the connection stays open.</div></li>
+        <li data-correct>The client updates its roots list and notifies the server<div class="lk-why">Roots belong to the client. When they change, the client sends a notification, and the server can ask for the new list, so it keeps working only where the user is now.</div></li>
+      </ol>
+    </div>
   </div>
 </section>
 
@@ -1239,6 +1357,17 @@ python travel_orchestrator.py       # terminal 3</code></pre></div>
   <div class="prose"><p>And the client exposes <strong>roots</strong>: the folders the server is allowed to work in.</p></div>
 
   <h3><code>server.py</code>, step by step</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · server.py · imports and the server object</div><pre>// FastMCP handles the JSON-RPC messages, registration and transport for you
+IMPORT json
+IMPORT Context and FastMCP from mcp.server.fastmcp
+CREATE mcp = a FastMCP server named "WeatherServer", logging at WARNING   // the name is shown during the handshake</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>json</code> <span class="lk-src">Python standard library</span>: turns the course list into JSON text.</li>
+      <li><code>Context</code> <span class="lk-src">from <code>mcp.server.fastmcp</code>, package mcp</span>: gives a tool access to the connected client, used to ask for its roots.</li>
+      <li><code>FastMCP</code> <span class="lk-src">from <code>mcp.server.fastmcp</code>, package mcp</span>: the high-level helper that builds the MCP server.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">server.py · imports and the server object</span><button class="copy">Copy</button></div><pre><code class="lang-py">"""
 MCP Server — exposes all the MCP primitives over stdio transport:
 
@@ -1260,7 +1389,19 @@ from mcp.server.fastmcp import Context, FastMCP
 
 # The name identifies this server to clients when they connect.
 mcp = FastMCP("WeatherServer", log_level="WARNING")</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p><code>FastMCP</code> is the high-level API from the official MCP Python SDK. It handles the protocol details for you: JSON-RPC messages, capability negotiation, and generating schemas from your type hints. The name <code>"WeatherServer"</code> is how the server introduces itself during the handshake; <code>log_level="WARNING"</code> keeps its own logs quiet.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · server.py · tool: get_weather</div><pre>// @mcp.tool() registers this function as a tool the LLM can call
+DEFINE get_weather(city):   // the docstring becomes the description
+    // fake data for the demo, not a real weather API
+    SET fake_weather = a lookup of city names to weather text (London, Paris, Tokyo, New York, Bangalore)
+    SET result = fake_weather looked up with city in lower case
+    IF result is found THEN
+        RETURN "Weather in " + city + ": " + result
+    RETURN "Sorry, no weather data available for '" + city + "'."</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">server.py · tool: get_weather</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Tool: get_weather ---------------------------------------------------
 # Tools are functions an LLM can call. @mcp.tool() registers the function so
 # it appears in list_tools() and can be invoked with call_tool(). The
@@ -1281,7 +1422,17 @@ def get_weather(city: str) -&gt; str:
     if result:
         return f"Weather in {city}: {result}"
     return f"Sorry, no weather data available for '{city}'."</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p><code>@mcp.tool()</code> registers the function so it appears in <code>tools/list</code> and can be run with <code>tools/call</code>. Just like Strands' <code>@tool</code>, the type hints become the input schema and the docstring becomes the description. The data is fake on purpose (including Bangalore, which the Strands lab asks about); a real server would call a weather API.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · server.py · tool that uses roots</div><pre>// the server asks the connected client for its roots
+DEFINE list_client_roots(ctx):   // ctx gives access to the client session
+    CALL ctx.session.list_roots() and WAIT for the client's answer
+    IF the client shared no roots THEN
+        RETURN "The client did not share any roots."
+    RETURN each root as "name: uri", one per line</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">server.py · tool that uses roots</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Tool that uses a client capability: roots ---------------------------
 # Roots are folders/URIs the *client* says the server may work within.
 # A server can ask the client for its roots at any time.
@@ -1293,7 +1444,14 @@ async def list_client_roots(ctx: Context) -&gt; str:
     if not result.roots:
         return "The client did not share any roots."
     return "\n".join(f"{root.name}: {root.uri}" for root in result.roots)</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p>This tool shows the protocol running <em>backwards</em>. FastMCP injects a <code>Context</code> object (it is hidden from the input schema, which is why <code>list_client_roots</code> shows no arguments in <code>tools/list</code>); <code>ctx.session.list_roots()</code> sends a <code>roots/list</code> request from the server to the client and waits for the answer. Because it waits for a round trip to the client over the pipes, the function is <code>async</code>.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · server.py · resource template: greeting</div><pre>// a resource is read-only data, matched by a URI template
+DEFINE get_greeting(name):   // greeting://{name} fills in name
+    RETURN "Hello, " + name + "! Welcome to the WeatherServer."</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">server.py · resource template: greeting</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Resource: greeting ---------------------------------------------------
 # Resources are data an LLM application can read (like GET endpoints).
 # "greeting://{name}" is a URI template: read_resource("greeting://Developer")
@@ -1303,7 +1461,15 @@ async def list_client_roots(ctx: Context) -&gt; str:
 def get_greeting(name: str) -&gt; str:
     """Return a personalized greeting."""
     return f"Hello, {name}! Welcome to the WeatherServer."</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p>Resources are read-only data endpoints, like GET requests in a REST API. Because the URI contains <code>{name}</code>, this is a <strong>template</strong>: reading <code>greeting://Developer</code> calls the function with <code>name="Developer"</code>.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · server.py · resource: course directory (JSON)</div><pre>// a fixed URI, with a name and a JSON mime type
+SET COURSES = a list of three courses, each with course, instructor and weeks
+DEFINE course_directory():   // served at courses://directory
+    RETURN COURSES as JSON text</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">server.py · resource: course directory (JSON)</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Resource: course directory (structured JSON) -------------------------
 # A fixed URI with a MIME type tells the client how to interpret the content.
 
@@ -1323,7 +1489,16 @@ COURSES = [
 )
 def course_directory() -&gt; str:
     return json.dumps(COURSES, indent=2)</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p>A fixed URI with a name, title, description and <code>mime_type="application/json"</code>, the same shape as the resource description in 5.3, with a custom <code>courses://</code> URI instead of a file path. The function returns the course list as JSON text.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · server.py · prompts</div><pre>// prompts are reusable message templates the client fills in
+DEFINE weather_report(city):
+    RETURN "Please provide a detailed weather report for " + city + ", including temperature, humidity, and forecast."
+DEFINE generate_study_plan(course, exam_date):   // title: Generate Study Plan
+    RETURN "Create a week-by-week study plan for the course '" + course + "'. The exam is on " + exam_date + ". Include revision weeks, practice tests, and one concrete goal per week."</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">server.py · prompts</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Prompts ---------------------------------------------------------------
 # Prompts are reusable templates. Clients call get_prompt(name, arguments)
 # and get back ready-to-send messages.
@@ -1342,16 +1517,44 @@ def generate_study_plan(course: str, exam_date: str) -&gt; str:
         f"The exam is on {exam_date}. Include revision weeks, practice tests, "
         "and one concrete goal per week."
     )</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p><code>@mcp.prompt()</code> registers reusable templates. A client calls <code>get_prompt("weather_report", {"city": "Tokyo"})</code> and gets back ready-to-send messages. <code>generate_study_plan</code> is the lab's version of the study-plan template from 5.3, with a <code>title</code>.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · server.py · start</div><pre>// stdio: read requests from stdin, write replies to stdout
+IF this file is run directly THEN
+    RUN mcp.run(transport="stdio")   // the client starts this script as a subprocess</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">server.py · start</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Start the server ------------------------------------------------------
 # "stdio" = read JSON-RPC messages from stdin, write responses to stdout.
 # The client spawns this script as a subprocess and talks to it through pipes.
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p>stdio means: read JSON-RPC messages from standard input and write responses to standard output. The server can connect to an MCP host (Claude Code, Kiro) or to your own client, which is next.</p></div>
 
   <h3><code>client.py</code>, step by step</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · client.py · imports</div><pre>// starts server.py over stdio and exercises every primitive
+IMPORT asyncio, json, sys
+IMPORT Path from pathlib
+IMPORT mcp.types as types
+IMPORT ClientSession and StdioServerParameters from mcp
+IMPORT stdio_client from mcp.client.stdio
+SET HERE = the folder that holds this file, as a full path</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>asyncio</code> <span class="lk-src">Python standard library</span>: runs the async code with <code>asyncio.run</code>.</li>
+      <li><code>json</code> <span class="lk-src">Python standard library</span>: reads the JSON text of the course resource back into data.</li>
+      <li><code>sys</code> <span class="lk-src">Python standard library</span>: gives <code>sys.executable</code>, the Python that runs the client, so the server uses the same one.</li>
+      <li><code>Path</code> <span class="lk-src">from <code>pathlib</code>, Python standard library</span>: works out the lab folder from this file's location.</li>
+      <li><code>mcp.types</code> (as <code>types</code>) <span class="lk-src">package mcp, the MCP Python SDK</span>: the protocol data types, used to describe roots.</li>
+      <li><code>ClientSession</code> <span class="lk-src">from <code>mcp</code>, package mcp</span>: the MCP client that speaks the protocol for you.</li>
+      <li><code>StdioServerParameters</code> <span class="lk-src">from <code>mcp</code>, package mcp</span>: settings that tell the client how to start the server.</li>
+      <li><code>stdio_client</code> <span class="lk-src">from <code>mcp.client.stdio</code>, package mcp</span>: the transport that starts the server process and manages its pipes.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">client.py · imports</span><button class="copy">Copy</button></div><pre><code class="lang-py">"""
 MCP Client — starts server.py over stdio and exercises every MCP primitive:
 tools, resources, prompts, and roots.
@@ -1374,6 +1577,8 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 HERE = Path(__file__).resolve().parent</code></pre></div>
+    </details>
+  </div>
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Import</th><th>Its job</th></tr></thead>
@@ -1385,6 +1590,13 @@ HERE = Path(__file__).resolve().parent</code></pre></div>
       </tbody>
     </table>
   </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · client.py · roots callback</div><pre>// the client decides which folders the server may use
+DEFINE list_roots(context):   // answers when the server asks for roots
+    RETURN a ListRootsResult with one root:
+        uri = this lab folder, as a file:// address
+        name = "Course workspace"</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">client.py · roots callback</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Roots -----------------------------------------------------------------
 # The client decides which folders the server may work within. When the
 # server asks (list_roots), this callback answers.
@@ -1395,7 +1607,23 @@ async def list_roots(context) -&gt; types.ListRootsResult:
             types.Root(uri=HERE.as_uri(), name="Course workspace"),
         ]
     )</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p>The client decides which folders the server may use. When the server asks (through <code>list_client_roots</code>), this callback answers with one root: the lab folder, named "Course workspace". <code>HERE.as_uri()</code> turns the folder path into a <code>file://</code> URI.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · client.py · connect, handshake, discover</div><pre>DEFINE main():   // the async entry point
+    SET server_params = run python server.py as a subprocess, using the same Python
+    START stdio_client(server_params) to get the read and write streams   // starts the server
+        CREATE ClientSession(streams, list_roots_callback=list_roots)
+            CALL session.initialize()   // agree on protocol version and capabilities
+            // 1. Discover tools
+            CALL session.list_tools() and PRINT each tool name and description
+            // 2. Discover resources, then resource templates
+            CALL session.list_resources() and PRINT each one
+            CALL session.list_resource_templates() and PRINT each one
+            // 3. Discover prompts
+            CALL session.list_prompts() and PRINT each prompt with its arguments</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">client.py · connect, handshake, discover</span><button class="copy">Copy</button></div><pre><code class="lang-py">async def main():
     # Start "python server.py" as a subprocess. sys.executable is the same
     # Python that runs this client, so the server sees the same packages.
@@ -1431,12 +1659,26 @@ async def list_roots(context) -&gt; types.ListRootsResult:
             for p in prompts.prompts:
                 args = ", ".join(a.name for a in (p.arguments or []))
                 print(f"  - {p.name}({args}): {p.description}")</code></pre></div>
+    </details>
+  </div>
   <ol class="steps">
     <li><span class="k c-data">a</span><div><h4><code>StdioServerParameters(...)</code></h4><p>Doesn't start anything yet. It says: when you connect, run <code>server.py</code> with the same Python (<code>sys.executable</code>), so the server sees the same packages.</p></div></li>
     <li><span class="k c-data">b</span><div><h4><code>async with stdio_client(...)</code></h4><p>Starts the server subprocess and hands back raw read/write streams. The <code>async with</code> blocks guarantee clean-up: streams closed, process stopped, even if something fails. That's the <strong>shutdown</strong> stage of the lifecycle.</p></div></li>
     <li><span class="k c-proto">c</span><div><h4><code>ClientSession(..., list_roots_callback=list_roots)</code> and <code>initialize()</code></h4><p>Wraps the streams in the MCP protocol and performs the handshake: versions and capabilities are exchanged. Passing the roots callback is what tells the server "this client supports roots".</p></div></li>
     <li><span class="k c-tool">d</span><div><h4>Discovery</h4><p><code>list_tools()</code>, <code>list_resources()</code>, <code>list_resource_templates()</code> and <code>list_prompts()</code> ask the server "what do you offer?". Fixed resources and URI templates are listed separately.</p></div></li>
   </ol>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · client.py · call tools, read resources</div><pre>// 4. call a tool with a known city
+CALL get_weather with city "London" and PRINT the text of the result
+// 5. call a tool with a city that has no data
+CALL get_weather with city "Berlin" and PRINT the text of the result
+// 6. read a templated resource
+READ greeting://Developer and PRINT its text
+// 7. read the JSON resource
+READ courses://directory
+    SET courses = the text, parsed from JSON
+    FOR EACH course in courses PRINT its name, instructor and weeks</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">client.py · call tools, read resources</span><button class="copy">Copy</button></div><pre><code class="lang-py">            # --- 4. Call a tool (known city) ------------------------------
             print("\n=== Calling get_weather('London') ===")
             result = await session.call_tool("get_weather", {"city": "London"})
@@ -1458,7 +1700,18 @@ async def list_roots(context) -&gt; types.ListRootsResult:
             courses = json.loads(resource.contents[0].text)
             for c in courses:
                 print(f"  - {c['course']} — {c['instructor']} ({c['weeks']} weeks)")</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p><code>call_tool</code> sends <code>tools/call</code> with a name and arguments; <code>result.content</code> is a list of content blocks, so <code>[0].text</code> is the first block's text. Berlin isn't in the fake data, so you'll see the polite "no data" message: tools return errors as normal results. <code>read_resource</code> sends <code>resources/read</code>; the server matches <code>greeting://Developer</code> against the template and fills in the name. The course directory comes back as JSON text, which <code>json.loads</code> turns into Python data.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · client.py · prompts, roots, entry point</div><pre>// 8. get the weather_report prompt for Tokyo
+CALL get_prompt("weather_report", city "Tokyo") and PRINT the message text
+CALL get_prompt("generate_study_plan", course "Machine Learning", exam_date "2026-05-10") and PRINT the message text
+// 9. roots: the server asks the client
+CALL list_client_roots and PRINT the result
+IF this file is run directly THEN
+    RUN asyncio.run(main())   // runs main() and closes the event loop when done</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">client.py · prompts, roots, entry point</span><button class="copy">Copy</button></div><pre><code class="lang-py">            # --- 8. Get prompts -------------------------------------------
             print("\n=== Getting weather_report prompt ===")
             prompt = await session.get_prompt("weather_report", {"city": "Tokyo"})
@@ -1478,11 +1731,19 @@ async def list_roots(context) -&gt; types.ListRootsResult:
 
 if __name__ == "__main__":
     asyncio.run(main())</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p><code>get_prompt</code> fetches a template with arguments; the server fills it in and returns a list of messages. In a real app you'd send those messages to an LLM. The final call triggers the roots round trip. <code>asyncio.run(main())</code> starts an event loop (the scheduler that runs <code>async</code> code and switches between tasks while they wait), runs <code>main()</code>, and closes the loop when done.</p></div>
 
   <h3>Run it</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>RUN pip install -r requirements.txt
+RUN python client.py        // the client starts server.py automatically</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">pip install -r requirements.txt
 python client.py        # starts server.py automatically</code></pre></div>
+    </details>
+  </div>
   <div class="code term"><div class="bar"><span class="file">output</span><span class="illus">real output; your folder path will differ</span></div><div class="term-body"><pre>=== Available Tools ===
   - get_weather: Get the current weather for a given city.
   - list_client_roots: List the workspace roots the connected client has shared with this server.
@@ -1519,6 +1780,33 @@ python client.py        # starts server.py automatically</code></pre></div>
   Result: Course workspace: file:///…/mcp-basics</pre></div></div>
   <div class="prose"><p>Notice that the client never imported the server's functions. Everything it knows (names, descriptions, argument lists) came over the protocol at run time. That's dynamic discovery.</p></div>
   <div class="callout code-tie"><h5><span class="ico">&lt;/&gt;</span>Want a visual tool?</h5><p>If you have Node.js installed, run <code>npx @modelcontextprotocol/inspector python server.py</code> in the <code>mcp-basics</code> folder. The MCP Inspector opens in your browser and lets you click through the server's tools, resources and prompts.</p></div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The client prints the server's tool names without importing any of the server's code. How does it find them?</p>
+      <ol class="lk-opts">
+        <li>It reads <code>server.py</code> as text and searches for <code>@mcp.tool()</code><div class="lk-why">Reading source text would be fragile. The client asks the server directly, so the answer always matches what the server really offers.</div></li>
+        <li data-correct>It asks the server at run time with <code>session.list_tools()</code><div class="lk-why"><code>list_tools</code> sends a <code>tools/list</code> request. The server replies with each tool's name, description and input schema.</div></li>
+        <li>The tool names are typed into <code>client.py</code> by hand<div class="lk-why">That would break as soon as a server added or renamed a tool. Dynamic discovery means the client keeps no copy of the list.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why is <code>list_client_roots</code> written with <code>async</code>?</p>
+      <ol class="lk-opts">
+        <li data-correct>Because it must wait for the client to answer a <code>roots/list</code> request<div class="lk-why">The server sends that request to the client in the middle of a tool call and cannot finish until the reply arrives, so the function awaits it.</div></li>
+        <li>Because every MCP tool has to be async, including <code>get_weather</code><div class="lk-why"><code>get_weather</code> is a plain <code>def</code> and works fine. Only the tool that waits on the client needs <code>async</code>.</div></li>
+        <li>Because async functions run faster than normal ones<div class="lk-why">Speed is not the reason. <code>async</code> lets the function pause while it waits for a reply.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What happens when the <code>async with stdio_client(server_params)</code> block starts?</p>
+      <ol class="lk-opts">
+        <li>It connects to a web address on <code>localhost:8000</code><div class="lk-why">This lab uses stdio, not HTTP. No web address is involved.</div></li>
+        <li>Nothing happens until you start <code>server.py</code> in another terminal<div class="lk-why">The client starts the server itself, using the settings in <code>StdioServerParameters</code>.</div></li>
+        <li data-correct>It starts <code>server.py</code> as a subprocess and returns its read and write streams<div class="lk-why">The session sends JSON-RPC messages into those streams and reads the replies from them.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 
 <section class="sec" id="lab-strands-mcp" aria-labelledby="ls-h">
@@ -1542,14 +1830,46 @@ python client.py        # starts server.py automatically</code></pre></div>
     <figcaption><b>Same pattern, any server.</b> Swap the command that starts the server and the agent gets a completely different toolbox, with no other code changes.</figcaption>
   </figure>
   <div class="prose"><p>Both scripts follow the same pattern:</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · the pattern</div><pre>SET mcp_client = MCPClient(a function that starts an MCP server over stdio)   // opened later, by Strands
+with mcp_client:   // starts the server and keeps the session open
+    SET tools = mcp_client.list_tools_sync()   // discover the server's tools
+    CREATE agent = Agent(tools = tools)
+    ASK agent a question   // the model decides when to call each tool</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">the pattern</span><button class="copy">Copy</button></div><pre><code class="lang-py">mcp_client = MCPClient(lambda: stdio_client(StdioServerParameters(command=..., args=[...])))
 
 with mcp_client:
     tools = mcp_client.list_tools_sync()
     agent = Agent(tools=tools)
     agent("...")</code></pre></div>
+    </details>
+  </div>
 
   <h3>Script 1: an agent using your own MCP server</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · agent_with_local_mcp.py</div><pre>// a Strands agent whose tools come from an MCP server
+SET MODEL_ID = the BEDROCK_MODEL_ID environment variable, or the default Claude Sonnet 4.6 model
+SET REGION = AWS_REGION, else AWS_DEFAULT_REGION, else us-east-1
+SET SERVER = the path to ../mcp-basics/server.py
+SET mcp_client = MCPClient(a function that starts SERVER over stdio, using sys.executable)   // opened later, when Strands is ready
+with mcp_client:   // starts the server and keeps the session open
+    SET tools = mcp_client.list_tools_sync()   // discover the tools over MCP
+    PRINT the name of each tool
+    CREATE agent = Agent(model = BedrockModel(MODEL_ID, REGION), tools = tools)
+    ASK agent "I'm flying from Bangalore to London tomorrow. What's the weather like in both cities?"
+    PRINT a blank line</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>os</code> <span class="lk-src">Python standard library</span>: reads the model ID and region from environment variables.</li>
+      <li><code>sys</code> <span class="lk-src">Python standard library</span>: gives <code>sys.executable</code>, so the server starts with the same Python.</li>
+      <li><code>Path</code> <span class="lk-src">from <code>pathlib</code>, Python standard library</span>: finds <code>server.py</code> in the sibling <code>mcp-basics</code> folder.</li>
+      <li><code>StdioServerParameters</code> <span class="lk-src">from <code>mcp</code>, package mcp</span>: settings for starting the server over stdio.</li>
+      <li><code>stdio_client</code> <span class="lk-src">from <code>mcp</code>, package mcp</span>: opens the stdio connection to the server.</li>
+      <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that decides when to call the tools.</li>
+      <li><code>BedrockModel</code> <span class="lk-src">from <code>strands.models.bedrock</code></span>: the Amazon Bedrock model the agent thinks with.</li>
+      <li><code>MCPClient</code> <span class="lk-src">from <code>strands.tools.mcp</code></span>: wraps the MCP connection so Strands can use the server's tools.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">agent_with_local_mcp.py</span><button class="copy">Copy</button></div><pre><code class="lang-py">"""
 A Strands agent that gets its tools from an MCP server.
 
@@ -1586,6 +1906,8 @@ with mcp_client:
     agent = Agent(model=BedrockModel(model_id=MODEL_ID, region_name=REGION), tools=tools)
     agent("I'm flying from Bangalore to London tomorrow. What's the weather like in both cities?")
     print()</code></pre></div>
+    </details>
+  </div>
   <ol class="steps">
     <li><span class="k">a</span><div><h4><code>SERVER = …/"mcp-basics"/"server.py"</code></h4><p>Reuses the server you just built. <code>Path(__file__).resolve().parent.parent</code> climbs from this script's folder to the section folder.</p></div></li>
     <li><span class="k c-data">b</span><div><h4><code>MCPClient(lambda: stdio_client(...))</code></h4><p>Strands' MCP client. It takes a <em>function</em> that opens the transport (that's what the <code>lambda</code> is), so Strands can open the connection when it's ready, on its own background thread.</p></div></li>
@@ -1603,6 +1925,29 @@ London: 15°C and cloudy. Pack a light jacket for when you land.</pre></div></di
   <div class="prose"><p>The agent's code never mentioned weather. It learned about <code>get_weather</code> over MCP, and Claude decided to call it twice, once per city.</p></div>
 
   <h3>Script 2: an agent using the AWS Documentation MCP server</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · agent_with_aws_docs_mcp.py</div><pre>// a Strands agent that answers from the AWS documentation server
+SET MODEL_ID = the BEDROCK_MODEL_ID environment variable, or the default Claude Sonnet 4.6 model
+SET REGION = AWS_REGION, else AWS_DEFAULT_REGION, else us-east-1
+IF the uvx command is not installed THEN
+    STOP with the message "uvx not found. Install uv first: pip install uv"
+SET mcp_client = MCPClient(a function that runs "uvx awslabs.aws-documentation-mcp-server@latest" over stdio, passing your environment with FASTMCP_LOG_LEVEL = ERROR, startup_timeout = 120)   // the first run downloads the package
+with mcp_client:   // starts the server and keeps the session open
+    SET tools = mcp_client.list_tools_sync()   // discover the documentation tools
+    PRINT the name of each tool
+    CREATE agent = Agent(model = BedrockModel(MODEL_ID, REGION), tools = tools, system_prompt = "Answer AWS questions using the documentation tools. Cite the doc URLs you used.")
+    ASK agent "What is AWS Lambda, and what is the maximum timeout for a Lambda function?"
+    PRINT a blank line</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>os</code> <span class="lk-src">Python standard library</span>: reads the model settings and passes your environment on to the server.</li>
+      <li><code>shutil</code> <span class="lk-src">Python standard library</span>: its <code>which</code> function checks that <code>uvx</code> is installed.</li>
+      <li><code>StdioServerParameters</code> <span class="lk-src">from <code>mcp</code>, package mcp</span>: settings for starting the server (command, arguments and environment).</li>
+      <li><code>stdio_client</code> <span class="lk-src">from <code>mcp</code>, package mcp</span>: opens the stdio connection to the server.</li>
+      <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the agent that decides when to call the documentation tools.</li>
+      <li><code>BedrockModel</code> <span class="lk-src">from <code>strands.models.bedrock</code></span>: the Amazon Bedrock model the agent uses.</li>
+      <li><code>MCPClient</code> <span class="lk-src">from <code>strands.tools.mcp</code></span>: wraps the MCP connection so Strands can use the server's tools.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">agent_with_aws_docs_mcp.py</span><button class="copy">Copy</button></div><pre><code class="lang-py">"""
 A Strands agent connected to the AWS Documentation MCP server.
 
@@ -1654,6 +1999,8 @@ with mcp_client:
     )
     agent("What is AWS Lambda, and what is the maximum timeout for a Lambda function?")
     print()</code></pre></div>
+    </details>
+  </div>
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Line</th><th>Why it's there</th></tr></thead>
@@ -1678,6 +2025,33 @@ Sources:
 - https://docs.aws.amazon.com/lambda/latest/dg/welcome.html
 - https://docs.aws.amazon.com/lambda/latest/dg/configuration-timeout.html</pre></div></div>
   <div class="callout note"><h5><span class="ico">i</span>Why this matters</h5><p>Model knowledge has a cut-off date; documentation doesn't. By plugging in a documentation server, the agent's answers come from current docs, and you wrote zero integration code for it.</p></div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">In <code>agent_with_local_mcp.py</code>, why is the agent created inside the <code>with mcp_client:</code> block?</p>
+      <ol class="lk-opts">
+        <li>Python only allows imports inside a <code>with</code> block<div class="lk-why">The imports sit at the top of the file. A <code>with</code> block has nothing to do with them.</div></li>
+        <li data-correct>Because its tools are live connections that exist only while the MCP session is open<div class="lk-why">The agent calls the server's tools through the session. Outside the block, the connection is closed.</div></li>
+        <li>Because the model must load before the server can start<div class="lk-why">The server starts when the <code>with</code> block opens, and the model is only a setting for the agent.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does <code>agent_with_aws_docs_mcp.py</code> set <code>startup_timeout=120</code>?</p>
+      <ol class="lk-opts">
+        <li>Because the model takes two minutes to answer<div class="lk-why">The timeout applies to starting the server, not to the model's reply.</div></li>
+        <li>Because <code>uvx</code> stops running after two minutes<div class="lk-why">Nothing in the script stops <code>uvx</code> after a fixed time. The setting is about startup only.</div></li>
+        <li data-correct>Because the first run downloads the server package, which can take longer than Strands' default startup limit<div class="lk-why">The page notes that a first download can take 30 seconds or more, which can exceed the default 30-second limit.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does the docs agent answer AWS questions from current documentation instead of only its training data?</p>
+      <ol class="lk-opts">
+        <li data-correct>The documentation server gives it tools to search and read official docs, and the system prompt asks it to use them<div class="lk-why">Its answers come from what the tools return. The prompt also asks it to cite the URLs it used.</div></li>
+        <li>Its training data is hidden from it while it runs<div class="lk-why">The model still has its training. The point is that the tools give it a more current source to answer from.</div></li>
+        <li>The documentation server is a newer model that replaces the agent's model<div class="lk-why">The server is a set of tools, not a model. The agent still uses its Bedrock model to reason and answer.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="a2a" aria-labelledby="a2-h">
   <div class="sec-head"><span class="sec-num">5.8</span><h2 id="a2-h">A2A: agents talking to agents</h2></div>
@@ -1813,6 +2187,12 @@ Sources:
     <div class="card"><h4>Agent B: the remote (server) agent</h4><p>Receives the request and does the work. It hosts its capabilities at a URL and publishes its agent card at <code>/.well-known/agent-card.json</code>. It decides how to fulfil a request: a simple one gets a message straight back; a complex one becomes a <strong>task</strong> it manages until it produces an <strong>artifact</strong> (the result).</p></div>
   </div>
   <div class="prose"><p>Here's a simplified agent card for a weather agent (you'll see a complete one from the lab in 5.11):</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · an agent card</div><pre>SET agent card for "Weather Agent":
+    capabilities: streaming = true, pushNotifications = false   // how it communicates
+    skills: one skill with id "get_weather", name "Get Weather", and a description   // what work it can do
+    url = "https://api.example.com/weather-agent/"   // where requests are sent</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">an agent card</span><button class="copy">Copy</button></div><pre><code class="lang-json">{
   "name": "Weather Agent",
   "capabilities": {
@@ -1828,6 +2208,8 @@ Sources:
   ],
   "url": "https://api.example.com/weather-agent/"
 }</code></pre></div>
+    </details>
+  </div>
   <div class="two">
     <div class="callout word"><h5><span class="ico">?</span>Capabilities</h5><p><em>How</em> this agent communicates: does it support streaming, push notifications…</p></div>
     <div class="callout code-tie"><h5><span class="ico">?</span>Skills</h5><p><em>What work</em> it can do: each skill has an id, name and description (and often tags and examples).</p></div>
@@ -2010,6 +2392,33 @@ Sources:
     </table>
   </div>
   <div class="prose"><p>The lab uses <strong>both</strong> of the first two layers: Strands A2A for the two agent servers (the quickest path from an agent definition to a working A2A server), and the raw A2A SDK for the orchestrator, so you can see the protocol objects directly.</p></div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A remote agent speaks only gRPC, and your client speaks only HTTP with JSON. What happens when they try to talk?</p>
+      <ol class="lk-opts">
+        <li>They talk fine, because A2A messages look the same in every binding<div class="lk-why">The binding is the physical format of the connection. Different bindings are not interchangeable like this.</div></li>
+        <li data-correct>They cannot talk directly, so they must agree on a shared binding, which their agent cards declare<div class="lk-why">Both sides must share a binding. The agent cards say which bindings each agent supports.</div></li>
+        <li>The orchestrator translates the bytes between them automatically<div class="lk-why">The page says agents without a shared binding cannot talk directly. Nothing translates between bindings for them.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">A client asks for work that takes an hour, and it should not sit waiting on one open answer. Which style fits best?</p>
+      <ol class="lk-opts">
+        <li>Synchronous, because it always gives the fastest answer<div class="lk-why">Synchronous means the client waits for the result. That suits quick, short tasks, not hour-long ones.</div></li>
+        <li>Streaming, because the client must keep one connection open for the whole hour<div class="lk-why">Streaming keeps an HTTP connection open while events arrive. For a long job, polling or push avoids holding that connection.</div></li>
+        <li data-correct>Asynchronous: the server returns a task at once, and the client checks back later or gets a push notification<div class="lk-why">The client carries on with other work. It polls with <code>GetTask</code>, or the server calls a webhook when the task changes.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">In A2A, what is the difference between a task and an artifact?</p>
+      <ol class="lk-opts">
+        <li data-correct>A task tracks the work with an ID and a status, and artifacts hold the output it produces<div class="lk-why">That is why <code>GetTask</code> returns the latest status together with whatever artifacts exist so far.</div></li>
+        <li>They are two names for the same output<div class="lk-why">They are different. A task tracks the work, and an artifact holds what the work produces.</div></li>
+        <li>An artifact tracks progress, and a task holds the final answer<div class="lk-why">It is the other way round. The task tracks progress over time, and artifacts hold the output.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="lab-a2a" aria-labelledby="la-h">
   <div class="sec-head"><span class="sec-num">5.11</span><h2 id="la-h">Lab: a travel assistant over A2A</h2></div>
@@ -2050,6 +2459,21 @@ Sources:
   </div>
 
   <h3>The weather agent server</h3>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · weather_agent_server.py · imports and settings</div><pre>// the weather agent is an A2A server, listening on port 9001
+SET MODEL_ID = the BEDROCK_MODEL_ID environment variable, or the default Claude Sonnet 4.6 model
+SET REGION = AWS_REGION, else AWS_DEFAULT_REGION, else us-east-1
+SET logging level = INFO   // so requests show up in the terminal</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>logging</code> <span class="lk-src">Python standard library</span>: prints what happens during each request.</li>
+      <li><code>os</code> <span class="lk-src">Python standard library</span>: reads the model ID and region from environment variables.</li>
+      <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the core agent class, which wraps an LLM with tools.</li>
+      <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that registers a Python function as a tool the LLM can call.</li>
+      <li><code>A2AServer</code> <span class="lk-src">from <code>strands.multiagent.a2a</code></span>: wraps the Strands agent in an HTTP server that speaks A2A.</li>
+      <li><code>AgentSkill</code> <span class="lk-src">from <code>a2a.types</code>, package a2a-sdk</span>: describes one capability in the agent card.</li>
+      <li><code>BedrockModel</code> <span class="lk-src">from <code>strands.models.bedrock</code></span>: the Amazon Bedrock model behind this agent.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">weather_agent_server.py · imports and settings</span><button class="copy">Copy</button></div><pre><code class="lang-py">"""
 Weather Agent — A2A Server on port 9001.
 
@@ -2079,7 +2503,19 @@ REGION = os.getenv("AWS_REGION", os.getenv("AWS_DEFAULT_REGION", "us-east-1"))
 
 # Set up logging so we can see what's happening during requests
 logging.basicConfig(level=logging.INFO)</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p>Note the new import: <code>A2AServer</code> from <code>strands.multiagent.a2a</code>, and <code>AgentSkill</code> from the A2A SDK (<code>a2a.types</code>). The model is set explicitly from <code>BEDROCK_MODEL_ID</code>, as everywhere in this course.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · weather_agent_server.py · fake data and the tool</div><pre>// fake data for the demo, not a real weather API
+SET FAKE_WEATHER = a lookup from ten city names to weather text
+// @tool registers get_weather so the LLM can call it
+DEFINE get_weather(city):   // the docstring tells the LLM when to use it
+    SET result = FAKE_WEATHER looked up with city, trimmed and in lower case
+    IF result is found THEN
+        RETURN "Weather in " + city + ": " + result
+    RETURN "No weather data available for '" + city + "'. Available cities: " + the city names joined with commas</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">weather_agent_server.py · fake data and the tool</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Fake Weather Data ---------------------------------------------------
 # In a real app this would call a weather API.
 # Here we use a dictionary for demo purposes.
@@ -2119,6 +2555,17 @@ def get_weather(city: str) -&gt; str:
         return f"Weather in {city}: {result}"
     # If city not found, tell the user what cities are available
     return f"No weather data available for '{city}'. Available cities: {', '.join(FAKE_WEATHER.keys())}"</code></pre></div>
+    </details>
+  </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · weather_agent_server.py · skills for the agent card</div><pre>// skills are published in the agent card, which clients read first
+SET WEATHER_SKILLS = a list with one AgentSkill:
+    id = "get_weather"
+    name = "Get Weather"
+    description = "Returns current weather conditions (temperature, sky, wind) for a given city", followed by the ten supported cities
+    tags = weather, temperature, forecast, travel   // help clients find the skill
+    examples = three sample questions about the weather</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">weather_agent_server.py · skills for the agent card</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Agent Card Skills ---------------------------------------------------
 # Skills are published in the agent card at /.well-known/agent-card.json.
 # Any A2A client fetches this card first to discover what the agent can do
@@ -2146,7 +2593,20 @@ WEATHER_SKILLS = [
         ],
     ),
 ]</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p><code>AgentSkill</code> describes each capability, or <button class="kw" data-k="agent-skill">skill</button>, with an <code>id</code>, <code>name</code>, <code>description</code>, <code>tags</code> and example prompts. Passed to the server as <code>skills=WEATHER_SKILLS</code>, they appear in the agent card, which clients fetch <em>first</em> to understand what the agent can do. Think of it as an API spec for agents.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · weather_agent_server.py · the Strands agent</div><pre>// the agent combines an LLM, a system prompt and tools
+CREATE weather_agent = Agent(
+    model = BedrockModel(MODEL_ID, REGION)   // the LLM, chosen by BEDROCK_MODEL_ID
+    name = "Weather Agent"   // used in the agent card
+    description = "Provides current weather information for cities around the world."
+    system_prompt = "You are a helpful weather assistant. Use the get_weather tool to look up weather conditions for any city the user asks about. Be concise and friendly."
+    tools = [get_weather]   // functions the LLM may call
+    callback_handler = None   // answers go back over HTTP, so nothing is printed
+)</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">weather_agent_server.py · the Strands agent</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Strands Agent -------------------------------------------------------
 # This is the actual AI agent. It combines:
 #   - An LLM (Amazon Bedrock, chosen by BEDROCK_MODEL_ID)
@@ -2173,7 +2633,16 @@ weather_agent = Agent(
     # Disable streaming callback on the server side (responses are collected, not printed)
     callback_handler=None,
 )</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p>An ordinary Strands agent. Two details matter for A2A: <code>name</code> and <code>description</code> become the agent card's name and description (Strands refuses to build a card if either is empty), and <code>callback_handler=None</code> stops the server printing every response, since answers go back over HTTP instead.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · weather_agent_server.py · serve it over A2A</div><pre>// only runs when this file is run directly
+IF this file is run directly THEN
+    CREATE server = A2AServer(agent = weather_agent, host = "127.0.0.1", port = 9001, skills = WEATHER_SKILLS, version = "1.0.0", enable_a2a_compliant_streaming = True)   // 127.0.0.1 means this machine only
+    PRINT "Weather Agent A2A server starting on http://127.0.0.1:9001"
+    RUN server.serve()   // serves the agent card and accepts A2A messages until Ctrl+C</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">weather_agent_server.py · serve it over A2A</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- A2A Server ----------------------------------------------------------
 # Only runs when you execute this file directly (python weather_agent_server.py).
 # Importing this file from another module won't start the server.
@@ -2204,6 +2673,8 @@ if __name__ == "__main__":
     # Start the uvicorn HTTP server. This is a blocking call —
     # the process stays alive serving requests until you Ctrl+C.
     server.serve()</code></pre></div>
+    </details>
+  </div>
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Argument</th><th>What it does</th></tr></thead>
@@ -2219,6 +2690,17 @@ if __name__ == "__main__":
   </div>
   <div class="callout note"><h5><span class="ico">i</span>Method names in the comments</h5><p>The comment above mentions <code>message/sendStream</code>, and <code>flights_agent_server.py</code> has the same comment. In the A2A SDK version this lab installs (0.3), the streaming method on the wire is called <code>message/stream</code>; the non-streaming one is <code>message/send</code>. The client picks the right one for you, so nothing in the code needs changing.</p></div>
   <div class="prose"><p><code>server.serve()</code> starts a web server (<button class="kw" data-k="uvicorn">uvicorn</button>) and blocks until you press Ctrl+C. Your agent is now a stand-alone HTTP microservice that speaks A2A. Its card, at <code>http://127.0.0.1:9001/.well-known/agent-card.json</code>, looks like this:</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · GET /.well-known/agent-card.json</div><pre>// the JSON document the weather server returns for this URL (abridged)
+SET card = a JSON document with:
+    name = "Weather Agent"
+    description = "Provides current weather information for cities around the world."
+    version = "1.0.0", protocolVersion = "0.3.0", preferredTransport = JSONRPC
+    capabilities: streaming = true   // so clients use SSE streaming
+    skills = one skill, get_weather, with its description, tags and examples
+    defaultInputModes = text, defaultOutputModes = text
+    url = "http://127.0.0.1:9001/"   // where clients send messages</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">GET /.well-known/agent-card.json</span><span class="illus">abridged</span></div><pre><code class="lang-json">{
   "name": "Weather Agent",
   "description": "Provides current weather information for cities around the world.",
@@ -2239,10 +2721,17 @@ if __name__ == "__main__":
   "defaultOutputModes": ["text"],
   "url": "http://127.0.0.1:9001/"
 }</code></pre></div>
+    </details>
+  </div>
   <div class="callout note"><h5><span class="ico">i</span><code>agent=</code> vs <code>agent_factory=</code></h5><p>In recent Strands versions, passing a single <code>agent=</code> is <strong>deprecated</strong> (you may see a <code>DeprecationWarning</code>) in favour of <code>A2AServer(agent_factory=...)</code>, a function that builds a fresh agent per conversation, for servers that many callers use at once. For this one-user demo, <code>agent=</code> still works; every caller simply shares the same agent.</p></div>
 
   <h3>The flights agent server</h3>
   <div class="prose"><p>Same pattern, with two tools and two skills, on port 9002.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · flights_agent_server.py · fake data</div><pre>// fake data, keyed by an (origin, destination) pair
+SET FAKE_FLIGHTS = a lookup from six routes to their lists of flights
+    each flight has an airline, a flight number, depart, arrive and price</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">flights_agent_server.py · fake data</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Fake Flight Data ----------------------------------------------------
 # In a real app this would query a flights API or database.
 # Here we use a dictionary keyed by (origin, destination) tuples.
@@ -2271,6 +2760,25 @@ FAKE_FLIGHTS = {
         {"airline": "SkyWings", "flight": "SW415", "depart": "11:00", "arrive": "15:00", "price": "$210"},
     ],
 }</code></pre></div>
+    </details>
+  </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · flights_agent_server.py · tools</div><pre>// each @tool function is a tool the LLM can call
+DEFINE search_flights(origin, destination):   // the docstring tells the LLM when to use it
+    SET key = (origin, destination), trimmed and in lower case
+    SET flights = FAKE_FLIGHTS looked up with key
+    IF no flights are found THEN
+        RETURN "No flights found from origin to destination", followed by the available routes
+    SET lines = a heading "Flights from origin to destination:"
+    FOR EACH flight in flights ADD one line with airline, flight number, depart, arrive and price
+    RETURN the lines joined with new lines
+
+DEFINE book_flight(flight_number, passenger_name):
+    FOR EACH flight on every route
+        IF its flight number matches flight_number, ignoring case and surrounding spaces THEN
+            RETURN "Booking confirmed!" with the passenger name, airline, flight, times, price and a confirmation number
+    RETURN "Flight " + flight_number + " not found. Please search for available flights first."</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">flights_agent_server.py · tools</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Flight Tools --------------------------------------------------------
 # Each @tool-decorated function becomes a tool the LLM can call.
 # The docstring is what the LLM sees when deciding which tool to use.
@@ -2333,8 +2841,28 @@ def book_flight(flight_number: str, passenger_name: str) -&gt; str:
                     f"Total: {f['price']}. Confirmation #: TRV-{hash(flight_number + passenger_name) % 100000:05d}"
                 )
     return f"Flight {flight_number} not found. Please search for available flights first."</code></pre></div>
+    </details>
+  </div>
   <div class="prose"><p>Routes are keyed by <code>(origin, destination)</code> in lower case, so "New York" and "new york" both work. An unknown route returns the list of available routes, a friendly error the LLM can relay. <code>book_flight</code> searches every route for the flight number and returns a confirmation with a made-up number (built from a <code>hash</code>, so it changes between Python runs).</p></div>
   <details class="callout note"><summary><b>See the rest of <code>flights_agent_server.py</code></b> (skills, agent and server)</summary>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · flights_agent_server.py · skills, agent, server</div><pre>// skills for the agent card: searching and booking
+SET FLIGHTS_SKILLS = a list with two AgentSkill entries:
+    search_flights, named "Search Flights", with tags and examples
+    book_flight, named "Book Flight", with tags and examples
+CREATE flights_agent = Agent(
+    model = BedrockModel(MODEL_ID, REGION)   // the LLM behind the agent
+    name = "Flights Agent"   // used in the agent card
+    description = "Searches for flights between cities and handles bookings."
+    system_prompt = the flight booking instructions: use search_flights and book_flight, be concise
+    tools = [search_flights, book_flight]
+    callback_handler = None   // answers go back over HTTP, so nothing is printed
+)
+IF this file is run directly THEN
+    CREATE server = A2AServer(agent = flights_agent, host = "127.0.0.1", port = 9002, skills = FLIGHTS_SKILLS, version = "1.0.0", enable_a2a_compliant_streaming = True)
+    PRINT "Flights Agent A2A server starting on http://127.0.0.1:9002"
+    RUN server.serve()   // blocks until Ctrl+C</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">flights_agent_server.py · skills, agent, server</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Agent Card Skills ---------------------------------------------------
 # Skills are published in the agent card at /.well-known/agent-card.json.
 # Any A2A client fetches this card first to discover what the agent can do
@@ -2432,10 +2960,37 @@ if __name__ == "__main__":
     print("Flights Agent A2A server starting on http://127.0.0.1:9002")
     # Start the uvicorn HTTP server — blocking call, runs until Ctrl+C
     server.serve()</code></pre></div>
+      </details>
+    </div>
   </details>
 
   <h3>The travel orchestrator (A2A client)</h3>
   <div class="prose"><p>This program has <strong>no LLM</strong>. It just sends A2A messages to the two servers and prints what comes back, so you can see the protocol objects directly.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · travel_orchestrator.py · imports and settings</div><pre>// the A2A client: no LLM, only messages sent to the two servers
+IMPORT the standard modules: sys, asyncio, logging, and uuid4
+IMPORT httpx, the async HTTP client
+IMPORT A2ACardResolver, ClientConfig, ClientFactory, Message, Part, Role and TextPart from the A2A SDK
+SET logging level = INFO
+SET logger = a logger for this module
+SET WEATHER_URL = "http://127.0.0.1:9001"
+SET FLIGHTS_URL = "http://127.0.0.1:9002"
+SET TIMEOUT = 300 seconds   // agents may take a while, because they call an LLM</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>sys</code> <span class="lk-src">Python standard library</span>: reads the command-line arguments in <code>sys.argv</code>.</li>
+      <li><code>asyncio</code> <span class="lk-src">Python standard library</span>: runs the async <code>main</code> function.</li>
+      <li><code>logging</code> <span class="lk-src">Python standard library</span>: shows the A2A protocol activity as INFO lines.</li>
+      <li><code>uuid4</code> <span class="lk-src">from <code>uuid</code>, Python standard library</span>: makes a unique ID for each message.</li>
+      <li><code>httpx</code> <span class="lk-src">the httpx package</span>: the async HTTP client used to talk to the servers.</li>
+      <li><code>A2ACardResolver</code> <span class="lk-src">from <code>a2a.client</code>, package a2a-sdk</span>: fetches an agent card from <code>/.well-known/agent-card.json</code>.</li>
+      <li><code>ClientConfig</code> <span class="lk-src">from <code>a2a.client</code>, package a2a-sdk</span>: sets the client options, such as streaming and the HTTP client.</li>
+      <li><code>ClientFactory</code> <span class="lk-src">from <code>a2a.client</code>, package a2a-sdk</span>: builds an A2A client from an agent card.</li>
+      <li><code>Message</code> <span class="lk-src">from <code>a2a.types</code>, package a2a-sdk</span>: the envelope for one message.</li>
+      <li><code>Part</code> <span class="lk-src">from <code>a2a.types</code>, package a2a-sdk</span>: wraps the content of a message.</li>
+      <li><code>Role</code> <span class="lk-src">from <code>a2a.types</code>, package a2a-sdk</span>: says who sent the message (user or agent).</li>
+      <li><code>TextPart</code> <span class="lk-src">from <code>a2a.types</code>, package a2a-sdk</span>: holds the text itself.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">travel_orchestrator.py · imports and settings</span><button class="copy">Copy</button></div><pre><code class="lang-py">"""
 Travel Orchestrator — A2A client that talks to Weather + Flights agents.
 
@@ -2483,6 +3038,29 @@ FLIGHTS_URL = "http://127.0.0.1:9002"
 
 # Timeout for HTTP requests (5 minutes — agents may take time with LLM calls)
 TIMEOUT = 300</code></pre></div>
+    </details>
+  </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · travel_orchestrator.py · step 1 build a message, step 3 extract text</div><pre>// make_message: the A2A equivalent of typing a question in a chat box
+DEFINE make_message(text):
+    RETURN a Message with:
+        kind = "message"
+        role = user   // the question comes from the user
+        parts = one text part holding text
+        message_id = a new unique ID
+
+// extract_text: the answer lives in the task's artifacts
+DEFINE extract_text(result):
+    IF result has artifacts THEN
+        SET texts = an empty list
+        FOR EACH artifact in result.artifacts
+            FOR EACH part in artifact.parts
+                IF the part has text inside its root THEN ADD that text to texts
+                ELSE IF the part has text THEN ADD that text to texts
+        IF texts is not empty THEN
+            RETURN all the texts joined together
+    RETURN the raw result as a string   // fallback</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">travel_orchestrator.py · step 1 build a message, step 3 extract text</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Helper: Build an A2A Message ----------------------------------------
 # Creates a standard A2A Message object that the server expects.
 # This is the equivalent of a user typing a question in a chat.
@@ -2518,10 +3096,32 @@ def extract_text(result) -&gt; str:
             return "".join(texts)
     # Fallback: return the raw string representation
     return str(result)</code></pre></div>
+    </details>
+  </div>
   <ol class="steps">
     <li><span class="k c-data">1</span><div><h4><code>make_message</code>: build an A2A message</h4><p>A <code>Message</code> with <code>role=Role.user</code>, one text part (<code>Part(TextPart(...))</code>), and a unique <code>message_id</code>. It's the A2A equivalent of a user typing in a chat box.</p></div></li>
     <li><span class="k c-proto">3</span><div><h4><code>extract_text</code>: dig the answer out</h4><p>A2A servers return a <strong>task</strong>; the answer lives in <code>task.artifacts[].parts[]</code>. The SDK wraps each part in a container that can hold any kind of part (text, file or data) and keeps the real part in <code>part.root</code>, so the code checks both shapes and falls back to the raw text if needed.</p></div></li>
   </ol>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · travel_orchestrator.py · step 2 discover and send</div><pre>DEFINE send_a2a_message(base_url, text):   // streaming or sync, chosen from the agent card
+    CREATE hc = an httpx.AsyncClient with timeout TIMEOUT   // closed when the block ends
+    CREATE resolver = A2ACardResolver(hc, base_url)
+    CALL resolver.get_agent_card() and WAIT   // fetches /.well-known/agent-card.json
+    SET use_streaming = true if the card says streaming is true, else false
+    SET mode = "streaming" or "sync", to match
+    log the agent name and the mode
+    CREATE client = ClientFactory(ClientConfig(hc, streaming = use_streaming)).create(card)
+    SET msg = make_message(text)
+    SET final_text = empty
+    FOR EACH event in client.send_message(msg)
+        IF the event has artifacts THEN
+            SET final_text = extract_text(event)
+        ELSE IF the event is a (task, update) pair with artifacts THEN
+            SET final_text = extract_text(task)
+        ELSE IF the event is an intermediate Message THEN
+            skip it, and wait for the final artifacts   // they hold the complete answer
+    RETURN final_text, or "No response received." if it is empty</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">travel_orchestrator.py · step 2 discover and send</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Core: Send a Message to an A2A Agent --------------------------------
 # This is the main A2A client logic. It:
 #   1. Fetches the agent card to discover capabilities
@@ -2573,12 +3173,34 @@ async def send_a2a_message(base_url: str, text: str) -&gt; str:
                 pass
 
         return final_text if final_text else "No response received."</code></pre></div>
+    </details>
+  </div>
   <ol class="steps">
     <li><span class="k c-proto">a</span><div><h4>Fetch the agent card</h4><p><code>A2ACardResolver(...).get_agent_card()</code> downloads <code>/.well-known/agent-card.json</code>: name, skills, capabilities.</p></div></li>
     <li><span class="k c-data">b</span><div><h4>Pick the mode from the card</h4><p>If the card says <code>streaming: true</code>, use streaming (SSE); otherwise a single synchronous response. That's capability negotiation in two lines.</p></div></li>
     <li><span class="k c-tool">c</span><div><h4>Create a client for <em>that</em> agent</h4><p><code>ClientFactory(ClientConfig(...)).create(card)</code> builds a client configured from the card: URL, binding, streaming.</p></div></li>
     <li><span class="k">d</span><div><h4>Send and read the events</h4><p><code>client.send_message(msg)</code> sends the JSON-RPC request and yields events. Both cards in this lab say <code>streaming: true</code>, so it is always <code>message/stream</code> here; against an agent without streaming, the same code would send <code>message/send</code>. A task with artifacts, or a <code>(task, update)</code> pair, carries the answer; intermediate streaming messages are skipped until the final artifacts arrive.</p></div></li>
   </ol>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · travel_orchestrator.py · step 4 the trip summary</div><pre>DEFINE main(city, origin, destination):
+    PRINT a banner: Travel Orchestrator (A2A)
+    // 1. ask the weather agent for conditions at the destination
+    PRINT the question sent to the Weather Agent
+    SET weather = send_a2a_message(WEATHER_URL, "What is the weather in city?") and WAIT
+    PRINT the weather response
+    // 2. ask the flights agent for flights on the route
+    PRINT the question sent to the Flights Agent
+    SET flights = send_a2a_message(FLIGHTS_URL, "Search flights from origin to destination") and WAIT
+    PRINT the flights response
+    // 3. print a combined trip summary
+    PRINT the destination, the weather and the flights
+
+IF this file is run directly THEN
+    IF sys.argv has 4 items (the script plus 3 arguments) THEN
+        RUN asyncio.run(main(city, origin, destination)) with the arguments you gave
+    ELSE
+        RUN asyncio.run(main("London", "New York", "London"))   // the default demo</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">travel_orchestrator.py · step 4 the trip summary</span><button class="copy">Copy</button></div><pre><code class="lang-py"># --- Main: Orchestrate Calls to Both Agents ------------------------------
 # Sends one request to the Weather Agent and one to the Flights Agent,
 # then prints a combined trip summary.
@@ -2620,6 +3242,8 @@ if __name__ == "__main__":
     else:
         # Default demo
         asyncio.run(main("London", "New York", "London"))</code></pre></div>
+    </details>
+  </div>
 
   <h3>What happens on the wire</h3>
   <figure class="fig">
@@ -2646,6 +3270,17 @@ if __name__ == "__main__":
 
   <h3>Run it in three terminals</h3>
   <div class="callout warn"><h5><span class="ico">!</span>Every terminal needs the same setup</h5><p>Each new terminal starts fresh. In all three, <code>cd</code> into <code>section-05-mcp-and-a2a/a2a-travel-agents</code>, activate the course's virtual environment, and make sure your AWS credentials and <code>AWS_REGION</code> are set there too.</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>RUN pip install -r requirements.txt
+// terminal 1
+RUN python weather_agent_server.py
+// terminal 2
+RUN python flights_agent_server.py
+// terminal 3: the default demo, New York to London
+RUN python travel_orchestrator.py
+// or give the city, origin and destination
+RUN python travel_orchestrator.py "Rome" "Paris" "Rome"</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">pip install -r requirements.txt
 
 # Terminal 1
@@ -2659,6 +3294,8 @@ python travel_orchestrator.py
 
 # Or specify city, origin, destination
 python travel_orchestrator.py "Rome" "Paris" "Rome"</code></pre></div>
+      </details>
+    </div>
   <div class="prose"><p>You need AWS credentials with Bedrock access; each agent uses <code>BEDROCK_MODEL_ID</code> (default Claude Sonnet 4.6). Start terminals 1 and 2 first and wait until each shows <code>Uvicorn running on http://127.0.0.1:9001</code> (or <code>:9002</code>). The results print in terminal 3; the grey <code>INFO</code> lines are the protocol at work: fetch the card, decide the mode, POST the message.</p></div>
   <div class="code term"><div class="bar"><span class="file">terminal 3 output</span><span class="illus">illustrative; the agents word their answers freely</span></div><div class="term-body"><pre>============================================================
   Travel Orchestrator (A2A)
@@ -2738,6 +3375,26 @@ Here are the available flights from New York to London: …</pre></div></div>
     <figcaption><b>Different layers, no overlap.</b> A2A lets agents collaborate; MCP lets each agent do its own work with tools and data.</figcaption>
   </figure>
   <div class="prose"><p>To try it, change only the agent in <code>weather_agent_server.py</code>, reusing the <code>MCPClient</code> pattern from Lab 5.7. Recent Strands versions accept an <code>MCPClient</code> directly in <code>tools=[...]</code> and open and close the connection for you:</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · weather_agent_server.py · optional change</div><pre>// the MCP server from Lab 5.6, started as a child process over stdio
+SET SERVER = the path to ../mcp-basics/server.py
+SET mcp_client = MCPClient(a function that starts SERVER over stdio, using sys.executable)
+CREATE weather_agent = Agent(
+    model = BedrockModel(MODEL_ID, REGION)
+    name = "Weather Agent"
+    description = "Provides current weather information for cities around the world."
+    system_prompt = "You are a helpful weather assistant. Be concise and friendly."
+    tools = [mcp_client]   // tools now come over MCP instead of @tool
+    callback_handler = None
+)</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>sys</code> <span class="lk-src">Python standard library</span>: gives <code>sys.executable</code>, so the server starts with the same Python.</li>
+      <li><code>Path</code> <span class="lk-src">from <code>pathlib</code>, Python standard library</span>: finds <code>server.py</code> in the <code>mcp-basics</code> folder.</li>
+      <li><code>StdioServerParameters</code> <span class="lk-src">from <code>mcp</code>, package mcp</span>: settings for starting the server over stdio.</li>
+      <li><code>stdio_client</code> <span class="lk-src">from <code>mcp</code>, package mcp</span>: opens the stdio connection to the server.</li>
+      <li><code>MCPClient</code> <span class="lk-src">from <code>strands.tools.mcp</code></span>: wraps the MCP connection so Strands can use the server's tools.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">weather_agent_server.py · optional change</span><button class="copy">Copy</button></div><pre><code class="lang-py">import sys
 from pathlib import Path
 from mcp import StdioServerParameters, stdio_client
@@ -2757,6 +3414,8 @@ weather_agent = Agent(
     tools=[mcp_client],      # tools now arrive over MCP instead of @tool
     callback_handler=None,
 )</code></pre></div>
+    </details>
+  </div>
   <div class="callout warn"><h5><span class="ico">!</span>The data changes too</h5><p>The MCP server only knows London, Paris, Tokyo, New York and Bangalore, with shorter descriptions ("15°C, cloudy"). Ask the orchestrator for Bangalore and it now works; ask for Rome and the weather agent will say it has no data. This is an experiment for you to try, not part of the course lab.</p></div>
 
   <div class="callout code-tie"><h5><span class="ico">&lt;/&gt;</span>Extend it yourself</h5><p>Give the orchestrator an LLM: create a Strands agent whose tools wrap the two remote agents, for example one small <code>@tool</code> per agent that calls <code>send_a2a_message</code> with that agent's URL. Then it can decide on its own when to check the weather, when to search flights, and even when to call <code>book_flight</code>.</p></div>
@@ -3071,7 +3730,7 @@ function sorter(listSel,scoreSel,items,cats,doneMsg){
     cats.forEach((c,ci)=>{const b=document.createElement("button");b.type="button";b.textContent=c;b.addEventListener("click",()=>{
       if(d.classList.contains("answered"))return;d.classList.add("answered");answered++;
       if(ci===it[1]){right++;b.classList.add("right");}else{b.classList.add("wrong");opts.children[it[1]].classList.add("right");}
-      d.querySelector(".why").innerHTML=(ci===it[1]?"<b style='color:var(--tool-ink)'>Yes.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> ")+esc(it[2]);
+      d.querySelector(".why").innerHTML=(ci===it[1]?"<b style='color:var(--tool-ink)'>Yes.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> The correct answer is <b>"+esc(cats[it[1]])+"</b>. ")+esc(it[2]);
       $(scoreSel).textContent=right+" of "+answered+" right"+(answered===items.length?". "+doneMsg:"");
     });opts.appendChild(b);});
     root.appendChild(d);
@@ -3408,7 +4067,7 @@ sorter("#which-list","#which-score",[
     q[1].forEach((o,oi)=>{const b=document.createElement("button");b.type="button";b.textContent=o;b.addEventListener("click",()=>{
       if(d.classList.contains("answered"))return;d.classList.add("answered");answered++;
       if(oi===q[2]){right++;b.classList.add("right");}else{b.classList.add("wrong");opts.children[q[2]].classList.add("right");}
-      d.querySelector(".why").innerHTML=(oi===q[2]?"<b style='color:var(--tool-ink)'>Correct.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> ")+esc(q[3]);
+      d.querySelector(".why").innerHTML=(oi===q[2]?"<b style='color:var(--tool-ink)'>Correct.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> You picked “"+esc(o)+"”. The correct answer is <b>“"+esc(q[1][q[2]])+"”</b>. ")+esc(q[3]);
       $("#quiz-score").textContent="Score: "+right+" of "+answered+" answered"+(answered===Q.length?(right>=8?". Great work, you're ready for Section 6.":". Revisit the parts you missed, then try Section 6."):"");
     });opts.appendChild(b);});
     root.appendChild(d);

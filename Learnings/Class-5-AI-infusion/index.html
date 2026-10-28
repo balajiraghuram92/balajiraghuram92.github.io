@@ -193,6 +193,8 @@ footer b{color:var(--crane)}
 </style><!-- aiseq:mobilefix -->
 <style>@media (max-width:640px){table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}td,th,dt,dd,code{overflow-wrap:anywhere}.route-inner{overflow-x:auto}.decode dl{grid-template-columns:minmax(0,1fr)}.decode dt{white-space:normal}}</style>
 <!-- /aiseq:mobilefix -->
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- aiseq:top -->
@@ -321,6 +323,12 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
   <div class="card">
     <h3>💻 Mac setup — do this first</h3>
     <p>Open <b>Terminal</b> (press <code>Cmd + Space</code>, type "Terminal", press Enter). If the terminal is new to you: it's just a way to talk to your computer with text instead of clicks. You type a command, press Enter, the computer replies.</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Terminal — install &amp; verify</div><pre>RUN brew install --cask docker   // install Docker Desktop (--cask = a full desktop app)
+RUN docker --version   // check that Docker is installed
+RUN docker compose version   // check that Compose is installed
+RUN docker run hello-world   // download hello-world if needed, then run it as a container</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Terminal — install &amp; verify</span><button class="copybtn">Copy</button></div>
       <pre>brew install --cask docker
@@ -328,6 +336,8 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
 docker --version
 docker compose version
 docker run hello-world</pre>
+    </div>
+      </details>
     </div>
     <div class="decode">
       <div class="d-title">Command decoder — what each piece means</div>
@@ -347,9 +357,14 @@ docker run hello-world</pre>
     <h3>Two Mac traps to know before they hit you</h3>
     <h4>Trap 1: Apple Silicon chips speak a different language</h4>
     <p>M-series Macs (M1/M2/M3/M4) use the <b>ARM64</b> chip architecture; most cloud servers use <b>AMD64 (x86)</b>. Think of it as two languages: an image "written in AMD64" may not run on an ARM Mac. Sometimes an image downloads fine but refuses to start, or prints a platform warning.</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · The fix when you hit a platform error</div><pre>RUN &lt;image-name&gt; as a linux/amd64 container   // pretend to be an AMD64 machine; the Mac translates on the fly</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>The fix when you hit a platform error</span><button class="copybtn">Copy</button></div>
       <pre>docker run --platform linux/amd64 &lt;image-name&gt;</pre>
+    </div>
+      </details>
     </div>
     <div class="decode">
       <div class="d-title">Command decoder</div>
@@ -359,6 +374,26 @@ docker run hello-world</pre>
     </div>
     <h4>Trap 2: zsh and the stuck <code>quote&gt;</code> prompt</h4>
     <p>The Mac terminal uses a shell called <b>zsh</b>. If you paste a command that has a <code>#</code> comment at the end AND that comment contains an apostrophe (like <i>you'll</i>), zsh gets confused and shows <code>quote&gt;</code>, waiting forever. <b>Fix: press Ctrl+C and re-type the command without the comment.</b> Remember this one — it saves ten minutes the first time it happens.</p>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">You build an image, then edit <code>app.py</code> and run a container from the <i>old</i> image without rebuilding. What code does the container run?</p>
+      <ol class="lk-opts">
+        <li>The edited code, because Docker re-reads your project folder when the container starts<div class="lk-why">A container runs the image, not your folder. Your files were copied in at build time.</div></li>
+        <li data-correct>The code exactly as it was when the image was built<div class="lk-why">An image is a photograph, not a mirror. It stays frozen until you build again.</div></li>
+        <li>A mix of old and new code, because Docker patches only the lines you changed<div class="lk-why">Docker does not patch images. The image stays exactly as it was built, and the edit only shows up after a rebuild.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Docker is installed, but every <code>docker</code> command fails with <i>"Cannot connect to the Docker daemon"</i>. What is the most likely cause?</p>
+      <ol class="lk-opts">
+        <li data-correct>Docker Desktop is not open, so its background engine is not running<div class="lk-why">The engine runs inside Docker Desktop. Open the app, wait for the whale icon, then try again.</div></li>
+        <li>Your Python code has a bug, so the daemon refuses the command<div class="lk-why">Docker commands never run your Python code, so a code bug cannot cause this message.</div></li>
+        <li>The hello-world image was never downloaded<div class="lk-why">Docker would download a missing image instead. This error means the command cannot reach Docker itself.</div></li>
+      </ol>
+    </div>
   </div>
 
   <div class="card">
@@ -390,10 +425,16 @@ docker run hello-world</pre>
   <div class="card">
     <h3>📁 Project structure</h3>
     <p>Build the skeleton first:</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Terminal</div><pre>CREATE folder quickbite-eta, then move into it
+CREATE empty files train.py, app.py, requirements.txt, Dockerfile and .dockerignore</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Terminal</span><button class="copybtn">Copy</button></div>
       <pre>mkdir quickbite-eta &amp;&amp; cd quickbite-eta
 touch train.py app.py requirements.txt Dockerfile .dockerignore</pre>
+    </div>
+      </details>
     </div>
     <div class="decode">
       <div class="d-title">Command decoder</div>
@@ -404,6 +445,13 @@ touch train.py app.py requirements.txt Dockerfile .dockerignore</pre>
         <dt>touch</dt><dd>Creates empty files with these names. You'll fill them in next.</dd>
       </dl>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · requirements.txt</div><pre>ADD scikit-learn at exactly version 1.5.2   // trains the model
+ADD pandas at exactly version 2.2.3   // handles data tables
+ADD fastapi at exactly version 0.115.6   // turns Python functions into a web API
+ADD uvicorn at exactly version 0.34.0   // the web server that runs FastAPI
+ADD joblib at exactly version 1.4.2   // saves and loads the model file</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>requirements.txt</span><button class="copybtn">Copy</button></div>
       <pre>scikit-learn==1.5.2
@@ -412,11 +460,34 @@ fastapi==0.115.6
 uvicorn==0.34.0
 joblib==1.4.2</pre>
     </div>
+      </details>
+    </div>
     <div class="plain"><b>In plain words:</b> this file is your shopping list. Python doesn't come with these tools built in, so you list exactly which extra packages you need and <i>exactly which version</i> of each. <b>scikit-learn</b> trains the model, <b>pandas</b> handles data tables, <b>FastAPI</b> turns Python functions into a web API, <b>uvicorn</b> is the web server that actually runs FastAPI, and <b>joblib</b> saves/loads the trained model to a file. Pinning versions with <code>==</code> is like writing "1 cup of rice" in a recipe instead of "some rice" — you get the same dish every time.</div>
   </div>
 
   <div class="card">
     <h3>🤖 train.py — a 60-second model</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · train.py</div><pre>SET the random seed to 42   // same random numbers on every run
+SET n = 5000
+CREATE a table df with n fake orders, each with:
+    distance_km       a random number from 0.5 to 12
+    prep_time_min     a random number from 5 to 30
+    rider_available   a random 0 or 1
+    is_raining        a random 0 or 1
+SET eta_min = 8 + distance_km * 3 + prep_time_min * 0.7 + is_raining * 9 + (1 - rider_available) * 6 + random noise   // the "true" ETA
+SET X = every column of df except eta_min
+SET y = the eta_min column
+CREATE a RandomForestRegressor with 60 trees and random_state 42, then train it on X and y
+SAVE the model to eta_model.pkl
+PRINT "Model saved: eta_model.pkl ✅"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>pandas</code> (as <code>pd</code>) <span class="lk-src">third-party package <code>pandas</code></span>: builds the table of fake orders.</li>
+        <li><code>numpy</code> (as <code>np</code>) <span class="lk-src">third-party package <code>numpy</code></span>: makes the random numbers and the noise.</li>
+        <li><code>joblib</code> <span class="lk-src">third-party package <code>joblib</code></span>: saves the trained model to <code>eta_model.pkl</code>.</li>
+        <li><code>RandomForestRegressor</code> <span class="lk-src">from <code>sklearn.ensemble</code>, package scikit-learn</span>: the model that learns the ETA pattern as an average of 60 trees.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>train.py</span><button class="copybtn">Copy</button></div>
       <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd, numpy <span class="kw">as</span> np, joblib
@@ -440,11 +511,32 @@ model = RandomForestRegressor(n_estimators=60, random_state=42).fit(X, y)
 joblib.dump(model, <span class="str">"eta_model.pkl"</span>)
 <span class="kw">print</span>(<span class="str">"Model saved: eta_model.pkl ✅"</span>)</pre>
     </div>
+      </details>
+    </div>
     <div class="plain"><b>In plain words:</b> you invent 5,000 fake food orders (so the demo is fast and needs no real dataset). For each order you compute a "true" delivery time with a simple formula: rain adds ~9 minutes, no rider available adds ~6, every km adds ~3. Then you train a RandomForest — think of it as <i>60 junior analysts each making a guess, and you take their average</i> — to learn that pattern. Finally <code>joblib.dump</code> saves the trained brain into a single file, <code>eta_model.pkl</code>, so the API can load it later without retraining. The <code>seed(42)</code> line means "use the same randomness every time" so your results match everyone else's.</div>
   </div>
 
   <div class="card">
     <h3>🚀 app.py — FastAPI serving</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · app.py</div><pre>CREATE app = FastAPI titled "QuickBite ETA"
+LOAD the model from eta_model.pkl   // once, when the server starts
+DEFINE Order: distance_km and prep_time_min as numbers, rider_available and is_raining as whole numbers
+
+DEFINE health():   // route GET /
+    RETURN {"status": "QuickBite ETA is live 🛵"}
+
+DEFINE predict(order: Order):   // route POST /predict
+    SET X = the order as a one-row table
+    SET eta = the model's prediction for X, rounded to 1 decimal place
+    RETURN {"eta_minutes": eta, "message": "Your food arrives in {eta} min 🍔"}</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>FastAPI</code> <span class="lk-src">from <code>fastapi</code></span>: creates the web app that the routes are attached to.</li>
+        <li><code>BaseModel</code> <span class="lk-src">from <code>pydantic</code></span>: the base class for the <code>Order</code> form. It checks the type of each field.</li>
+        <li><code>joblib</code> <span class="lk-src">third-party package <code>joblib</code></span>: <code>joblib.load</code> reads the trained model back from <code>eta_model.pkl</code>.</li>
+        <li><code>pandas</code> (as <code>pd</code>) <span class="lk-src">third-party package <code>pandas</code></span>: turns the order into a one-row table for the model.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>app.py</span><button class="copybtn">Copy</button></div>
       <pre><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
@@ -470,12 +562,24 @@ model = joblib.load(<span class="str">"eta_model.pkl"</span>)
     eta = <span class="kw">round</span>(<span class="kw">float</span>(model.predict(X)[0]), 1)
     <span class="kw">return</span> {<span class="str">"eta_minutes"</span>: eta, <span class="str">"message"</span>: <span class="kw">f</span><span class="str">"Your food arrives in {eta} min 🍔"</span>}</pre>
     </div>
+      </details>
+    </div>
     <div class="plain"><b>In plain words:</b> this file is the <i>counter window</i> of your shop. An "API" is just a way for programs to talk to each other over the network — you send a request, you get a response. FastAPI lets you say "when someone sends order details to the address <code>/predict</code>, run this Python function." The <code>Order</code> class is the order form: it declares exactly which fields a request must contain and their types — send text where a number belongs and FastAPI politely rejects it <i>for free</i>. At startup you load the saved model brain from <code>eta_model.pkl</code> once; then every request is: read form → ask model → return the answer as JSON (the universal "key: value" text format APIs speak). The <code>/</code> route is a health check — a doorbell to confirm the shop is open.</div>
   </div>
 
   <div class="card analogy">
     <h3>Dockerfile anatomy — learning to read the recipe</h3>
     <p>This is the <b>most important block</b> in the guide. A Dockerfile is a plain text file (no extension!) with instructions Docker executes top to bottom to produce an image. Map every line to the tiffin analogy:</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Dockerfile</div><pre>begin with the ready-made image python:3.12-slim   // Linux with Python 3.12 already installed
+SET the working folder to /app
+copy requirements.txt into /app   // first, so the pip layer can be cached
+RUN pip install -r requirements.txt   // no download cache kept, so the image stays smaller
+copy the whole project folder into /app   // skips anything listed in .dockerignore
+RUN python train.py   // train now, so eta_model.pkl is baked into the image
+document that the app listens on port 8000   // a label only, it opens nothing
+when a container starts, run uvicorn app:app on host 0.0.0.0, port 8000</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Dockerfile</span><button class="copybtn">Copy</button></div>
       <pre><span class="cmt"># 1. Base image = rent a ready-made kitchen (from Docker Hub)</span>
@@ -500,6 +604,8 @@ model = joblib.load(<span class="str">"eta_model.pkl"</span>)
 <span class="cmt"># 7. What runs the moment the tiffin is opened</span>
 <span class="kw">CMD</span> [<span class="str">"uvicorn"</span>, <span class="str">"app:app"</span>, <span class="str">"--host"</span>, <span class="str">"0.0.0.0"</span>, <span class="str">"--port"</span>, <span class="str">"8000"</span>]</pre>
     </div>
+      </details>
+    </div>
     <div class="decode">
       <div class="d-title">Line-by-line decoder</div>
       <dl>
@@ -519,8 +625,46 @@ model = joblib.load(<span class="str">"eta_model.pkl"</span>)
     <p><b>The rule to remember:</b> if the shopping list hasn't changed, why go back to the store? Code changes daily; dependencies change monthly. <em>Rarely-changing things at the top, frequently-changing things at the bottom.</em> This one trick makes builds 10x faster.</p>
   </div>
 
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Your Dockerfile has <code>COPY . .</code> above <code>RUN pip install -r requirements.txt</code>. You edit one line in <code>app.py</code> and rebuild. What happens?</p>
+      <ol class="lk-opts">
+        <li>Only <code>app.py</code> is rebuilt, and pip reuses its cached install<div class="lk-why">Cache reuse stops at the first changed layer. A changed <code>COPY . .</code> breaks the cache for every layer below it.</div></li>
+        <li>Nothing is rebuilt, because Docker ignores files it has already copied<div class="lk-why">Docker does notice changes in copied files. That is exactly what invalidates the cache.</div></li>
+        <li data-correct>The pip install layer runs again, because the layer above it changed<div class="lk-why">When a layer changes, every layer below it is rebuilt too, so pip installs everything again.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why are <code>requirements.txt</code> and the install step placed <i>before</i> the rest of the code?</p>
+      <ol class="lk-opts">
+        <li>Docker installs packages only from the first <code>COPY</code> line it sees<div class="lk-why">Docker runs the <code>RUN</code> line to install packages. The position of <code>COPY</code> does not decide what gets installed.</div></li>
+        <li data-correct>The package list changes rarely, so the slow install layer stays cached while the code changes<div class="lk-why">Put rarely-changing steps at the top. The pip layer then only rebuilds when <code>requirements.txt</code> changes.</div></li>
+        <li>The container needs <code>requirements.txt</code> at runtime to start uvicorn<div class="lk-why"><code>requirements.txt</code> is only needed while the image is built. The container does not read it when it starts.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Which setting lets connections from outside the container reach the server?</p>
+      <ol class="lk-opts">
+        <li data-correct><code>--host 0.0.0.0</code> in the <code>CMD</code> line<div class="lk-why"><code>0.0.0.0</code> means accept connections from outside the container. Without it, port mapping silently fails.</div></li>
+        <li><code>EXPOSE 8000</code>, because it opens the port on your Mac<div class="lk-why"><code>EXPOSE</code> is only a label. It does not open anything; the <code>-p</code> flag in <code>docker run</code> does that.</div></li>
+        <li><code>WORKDIR /app</code>, because it decides which connections are accepted<div class="lk-why"><code>WORKDIR</code> chooses the folder that commands run in. It has nothing to do with which connections are accepted.</div></li>
+      </ol>
+    </div>
+  </div>
+
   <div class="card">
     <h3>🙈 .dockerignore</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · .dockerignore</div><pre>// COPY . . skips everything listed in this file
+skip __pycache__/ folders and *.pyc files
+skip venv/ and .venv/ folders
+skip the .git/ folder
+skip .env   // keeps secrets out of the image
+skip *.ipynb notebooks
+skip eta_model.pkl   // the image trains its own fresh copy
+skip data/raw/ folder</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>.dockerignore</span><button class="copybtn">Copy</button></div>
       <pre>__pycache__/
@@ -533,11 +677,19 @@ venv/
 eta_model.pkl
 data/raw/</pre>
     </div>
+      </details>
+    </div>
     <div class="plain"><b>In plain words:</b> when Docker sees <code>COPY . .</code>, it grabs <i>everything</i> in the folder — unless it's listed here. Same idea as .gitignore. You exclude: Python's junk cache files, virtual environments (can be 500MB!), git history, secrets (.env), and notebooks. You also exclude <code>eta_model.pkl</code> — if you ever trained locally, you do NOT want that stale local file copied in; the image trains its own fresh copy in step 5. "Only the food goes into the tiffin — not your diary and house keys."</div>
   </div>
 
   <div class="card wow">
     <h3>Milestone #1 — Build, run, predict</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Terminal — the big moment</div><pre>BUILD an image from the Dockerfile in this folder, tagged quickbite-eta:v1
+SHOW all images on this machine
+RUN a container in the background, port 8000 on my Mac to port 8000 inside, named eta-service
+SEND a POST to localhost:8000/predict, with a JSON header and one order as the data</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Terminal — the big moment</span><button class="copybtn">Copy</button></div>
       <pre>docker build -t quickbite-eta:v1 .
@@ -549,6 +701,8 @@ docker run -d -p 8000:8000 --name eta-service quickbite-eta:v1
 curl -X POST http://localhost:8000/predict \
   -H <span class="str">"Content-Type: application/json"</span> \
   -d <span class="str">'{"distance_km": 4.5, "prep_time_min": 15, "rider_available": 1, "is_raining": 1}'</span></pre>
+    </div>
+      </details>
     </div>
     <div class="decode">
       <div class="d-title">Command decoder — slow down and read every line here</div>
@@ -573,6 +727,14 @@ curl -X POST http://localhost:8000/predict \
 
   <div class="card">
     <h3>🛠️ Peek inside the container + your everyday commands</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Terminal — daily-driver commands</div><pre>SHOW the running containers
+SHOW all containers, including stopped ones   // -a
+SHOW the logs of eta-service and follow new lines   // -f; Ctrl+C stops watching, not the container
+RUN bash inside eta-service   // -it: an interactive terminal inside the container
+STOP eta-service   // the container still exists and can be started again
+remove eta-service   // the image is untouched</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Terminal — daily-driver commands</span><button class="copybtn">Copy</button></div>
       <pre>docker ps
@@ -581,6 +743,8 @@ docker logs -f eta-service
 docker exec -it eta-service bash
 docker stop eta-service
 docker rm eta-service</pre>
+    </div>
+      </details>
     </div>
     <div class="decode">
       <div class="d-title">Command decoder</div>
@@ -598,13 +762,40 @@ docker rm eta-service</pre>
   <div class="card trap">
     <h3>The photograph rule in action — try this deliberately</h3>
     <p>Edit the message string in <code>app.py</code>, then restart the container. <b>Nothing changes.</b> Why? The container runs the image — the photograph — and the photo was taken before your edit. The fix is always:</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · After ANY code edit</div><pre>BUILD a fresh image quickbite-eta:v1 from the current code
+remove the old eta-service container, even if it is running   // rm -f
+RUN a new container in the background, port 8000 to port 8000, named eta-service</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>After ANY code edit</span><button class="copybtn">Copy</button></div>
       <pre>docker build -t quickbite-eta:v1 .
 docker rm -f eta-service
 docker run -d -p 8000:8000 --name eta-service quickbite-eta:v1</pre>
     </div>
+      </details>
+    </div>
     <p>Rebuild → remove old container (<code>rm -f</code> = force-remove even if running) → run fresh. Losing ten minutes to a stale image is a rite of passage. Do it once here on purpose and you'll never lose those ten minutes again.</p>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem"><code>docker ps</code> does not list <code>eta-service</code>, but you know it crashed. Which command shows it?</p>
+      <ol class="lk-opts">
+        <li><code>docker images</code>, which lists containers as well<div class="lk-why"><code>docker images</code> lists images, the master tiffins. It does not list containers.</div></li>
+        <li data-correct><code>docker ps -a</code>, which also lists stopped containers<div class="lk-why">Plain <code>ps</code> hides dead containers. The <code>-a</code> flag shows all of them, including the crashed one.</div></li>
+        <li><code>docker build</code>, which checks whether the container is running<div class="lk-why"><code>docker build</code> creates an image from the Dockerfile. It does not report on containers.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">After you change the message in <code>app.py</code>, which sequence makes the new message appear?</p>
+      <ol class="lk-opts">
+        <li><code>docker restart eta-service</code><div class="lk-why">A restart runs the same container, which was made from the old photograph. Nothing is rebuilt.</div></li>
+        <li><code>docker logs -f eta-service</code><div class="lk-why"><code>logs</code> only shows what the container has printed. It does not change the code the container runs.</div></li>
+        <li data-correct>Rebuild the image, remove the old container with <code>rm -f</code>, then run a fresh one<div class="lk-why">Rebuilding takes a new photograph, and the fresh container is made from it. This is the fix from the box above.</div></li>
+      </ol>
+    </div>
   </div>
 
   <div class="card">
@@ -649,12 +840,26 @@ docker run -d -p 8000:8000 --name eta-service quickbite-eta:v1</pre>
 
   <div class="card">
     <h3>📁 Project structure</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Terminal</div><pre>CREATE folder scalergpt, then move into it
+CREATE folder docs
+CREATE empty files app.py, ingest.py, requirements.txt, Dockerfile, docker-compose.yml, .env.example, .dockerignore and .gitignore</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Terminal</span><button class="copybtn">Copy</button></div>
       <pre>mkdir scalergpt &amp;&amp; cd scalergpt
 mkdir docs
 touch app.py ingest.py requirements.txt Dockerfile docker-compose.yml .env.example .dockerignore .gitignore</pre>
     </div>
+      </details>
+    </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · requirements.txt</div><pre>ADD fastapi at exactly version 0.115.6   // the web API
+ADD uvicorn at exactly version 0.34.0   // the web server that runs it
+ADD openai at exactly version 1.59.7   // talks to the OpenAI API
+ADD chromadb-client at exactly version 0.6.3   // the thin client; the database runs in its own container
+ADD python-dotenv at exactly version 1.0.1   // loads .env into the environment</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>requirements.txt</span><button class="copybtn">Copy</button></div>
       <pre>fastapi==0.115.6
@@ -663,6 +868,8 @@ openai==1.59.7
 chromadb-client==0.6.3
 python-dotenv==1.0.1</pre>
     </div>
+      </details>
+    </div>
     <div class="plain"><b>In plain words:</b> note it's <code>chromadb-client</code> — the <i>thin client</i> — not the full <code>chromadb</code> package. The full package IS the database (heavy); the client just <i>talks</i> to a database running elsewhere. Since Chroma will live in its own container, your app only needs the phone, not the whole telephone exchange. This keeps the app image small — the #1 problem with LLM images is size. Drop some <code>.txt</code> or <code>.md</code> notes into <code>docs/</code> — they become the bot's knowledge.</div>
   </div>
 
@@ -670,10 +877,16 @@ python-dotenv==1.0.1</pre>
     <h3>Secrets 101 — the ATM PIN rule</h3>
     <p><b>The golden rule:</b> <i>"Image = ATM card (safe to share). Env var = PIN (inject at runtime, never write it on the card)."</i></p>
     <p>An <b>environment variable</b> is a named value the operating system hands to a program when it starts — like a sticky note passed to the chef as they walk in, rather than printed in the recipe book everyone can read. A <b>.env file</b> is simply a text file of such notes, one per line.</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · .env.example → copy to .env and add your real key</div><pre>// step 1: copy this file to .env, then paste your real key into .env
+SET OPENAI_API_KEY to your real key   // a placeholder in this template; the real key lives only in .env</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>.env.example → copy to .env and add your real key</span><button class="copybtn">Copy</button></div>
       <pre><span class="cmt"># Copy this file:  cp .env.example .env   — then paste your real key.</span>
 OPENAI_API_KEY=sk-paste-your-real-key-here</pre>
+    </div>
+      </details>
     </div>
     <ul>
       <li>No quotes, no spaces around the <code>=</code>. Get a key at platform.openai.com/api-keys. The whole demo costs less than one US cent.</li>
@@ -682,9 +895,77 @@ OPENAI_API_KEY=sk-paste-your-real-key-here</pre>
     </ul>
   </div>
 
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Where should <code>OPENAI_API_KEY</code> live so that it stays out of the image?</p>
+      <ol class="lk-opts">
+        <li>In an <code>ENV OPENAI_API_KEY=...</code> line in the Dockerfile<div class="lk-why">Anyone can read ENV values back with <code>docker history</code>. Secrets never belong in the Dockerfile.</div></li>
+        <li data-correct>In your local <code>.env</code> file, which compose passes in at runtime with <code>env_file</code><div class="lk-why">The key is injected when the container starts. The image itself never contains it.</div></li>
+        <li>In <code>app.py</code> as a plain string, since the code is copied into the image anyway<div class="lk-why">Anything copied into the image can be read later. Keep keys out of code entirely.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why is <code>.env</code> listed in <code>.dockerignore</code>?</p>
+      <ol class="lk-opts">
+        <li>So the key is not printed in the build logs<div class="lk-why">Build logs are not the reason. What matters is what ends up inside the image.</div></li>
+        <li>Docker cannot read <code>.env</code> files, so it would fail to build<div class="lk-why">Docker can read the file. The entry keeps it out of the image instead.</div></li>
+        <li data-correct>So <code>COPY . .</code> does not copy the key into the image, where anyone could read it<div class="lk-why"><code>COPY . .</code> takes everything in the folder unless it is ignored. The key is passed in at runtime instead.</div></li>
+      </ol>
+    </div>
+  </div>
+
   <div class="card">
     <h3>🧠 app.py — RAG with a retry loop ✅ fixed version</h3>
     <p>This is the corrected code. The naive version crashes at startup — the next card explains exactly why, because that bug is the best lesson in the whole guide.</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · app.py</div><pre>CREATE app = FastAPI titled "ScalerGPT"
+SET API_KEY = OPENAI_API_KEY from the environment, with spaces trimmed
+IF API_KEY is empty OR starts with "sk-paste" THEN
+    STOP with "OPENAI_API_KEY missing. Put a real key in .env"   // a clear message, not a traceback
+CREATE llm = an OpenAI client that uses API_KEY
+CREATE openai_ef = an embedding function (text-embedding-3-small) that uses API_KEY   // the thin client has no embedder of its own
+SET CHROMA_HOST = the CHROMA_HOST setting, or localhost
+SET CHROMA_PORT = the CHROMA_PORT setting as a number, or 8000
+
+DEFINE connect_to_chroma():   // Chroma takes a few seconds to boot, so retry
+    REPEAT up to 30 times:
+        TRY:
+            CONNECT to Chroma at CHROMA_HOST:CHROMA_PORT and send a heartbeat
+            PRINT "Connected to chroma at CHROMA_HOST:CHROMA_PORT"
+            RETURN the client
+        ON ERROR:
+            PRINT "Waiting for chroma (attempt N of 30)"
+            WAIT 2 seconds
+    STOP with "Could not reach chroma"
+
+SET chroma = connect_to_chroma()
+SET collection = get or create the "notes" collection, using openai_ef
+
+DEFINE Question: query (text)
+
+DEFINE health():   // route GET /
+    RETURN status, the number of documents indexed, and the Chroma host and port
+
+DEFINE ask(q: Question):   // route POST /ask
+    IF the collection is empty THEN
+        RETURN HTTP 400 with "No documents indexed. Run: docker compose exec app python ingest.py"
+    Retrieve the 3 most similar chunks for the question   // step 1 of RAG
+    Augment the system prompt with those chunks as CONTEXT   // step 2
+    Generate the answer with gpt-4o-mini, using the system prompt and the question   // step 3
+    RETURN the question, the answer, and how many chunks were used</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>os</code> <span class="lk-src">Python standard library</span>: reads environment variables such as <code>OPENAI_API_KEY</code> with <code>os.getenv</code>.</li>
+        <li><code>sys</code> <span class="lk-src">Python standard library</span>: <code>sys.exit</code> stops the program with a clear message when setup fails.</li>
+        <li><code>time</code> <span class="lk-src">Python standard library</span>: <code>time.sleep</code> waits 2 seconds between attempts to reach Chroma.</li>
+        <li><code>chromadb</code> <span class="lk-src">third-party module, installed by the <code>chromadb-client</code> package in requirements.txt</span>: the Chroma client that connects to the database container.</li>
+        <li><code>embedding_functions</code> <span class="lk-src">from <code>chromadb.utils</code></span>: builds the OpenAI embedder that turns text into numbers.</li>
+        <li><code>FastAPI</code> <span class="lk-src">from <code>fastapi</code></span>: creates the web app and its routes.</li>
+        <li><code>HTTPException</code> <span class="lk-src">from <code>fastapi</code></span>: returns an error response with a status code, such as 400.</li>
+        <li><code>OpenAI</code> <span class="lk-src">from <code>openai</code></span>: the client that sends requests to the OpenAI API.</li>
+        <li><code>BaseModel</code> <span class="lk-src">from <code>pydantic</code></span>: the base class for the <code>Question</code> form.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>app.py</span><button class="copybtn">Copy</button></div>
       <pre><span class="kw">import</span> os, sys, time
@@ -755,6 +1036,8 @@ collection = chroma.get_or_create_collection(name=<span class="str">"notes"</spa
     <span class="kw">return</span> {<span class="str">"question"</span>: q.query, <span class="str">"answer"</span>: resp.choices[0].message.content,
             <span class="str">"sources_used"</span>: <span class="kw">len</span>(documents[0])}</pre>
     </div>
+      </details>
+    </div>
     <div class="plain"><b>In plain words:</b> at startup the app does three checks: (1) is the API key present? — if not, exit with a human-readable message instead of a scary traceback; (2) set up the <i>embedder</i> — the machine that converts text to numbers (the thin client doesn't include one, so you hand it OpenAI's); (3) <b>knock on Chroma's door politely</b> — try to connect, and if refused, wait 2 seconds and knock again, up to 30 times, printing progress so you can watch it in the logs. Then <code>/ask</code> is the three-step RAG dance: find the 3 most relevant passages, paste them into the instructions, let GPT write the answer. The <code>if count() == 0</code> guard gives a helpful "you forgot to ingest" message instead of a confusing empty answer.</div>
     <p>You'll also need <code>ingest.py</code> — it reads every file in <code>docs/</code>, splits them into paragraph chunks, and loads them into Chroma, using the same retry pattern.</p>
   </div>
@@ -774,6 +1057,22 @@ collection = chroma.get_or_create_collection(name=<span class="str">"notes"</spa
   <div class="card analogy">
     <h3>docker-compose.yml — the thali order system ✅ fixed version</h3>
     <p>So far you ordered tiffins one at a time — <code>docker run</code> this, <code>docker run</code> that. Compose says: <em>write one menu, then just say "serve the thali."</em> The file format is YAML — a way of writing structured settings where <b>indentation shows what belongs to what</b>, like a neatly indented shopping list. (Careful: YAML is picky — use spaces, never tabs.)</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · docker-compose.yml</div><pre>DEFINE services:
+    app:
+        BUILD the image from this folder's Dockerfile
+        PUBLISH port 8000 on my Mac, port 8000 inside the container
+        LOAD .env as environment variables   // the key is injected at runtime, not baked in
+        SET CHROMA_HOST to chroma, and CHROMA_PORT to 8000   // the internal port
+        START after chroma   // start order only, not readiness
+        RESTART unless stopped
+    chroma:
+        use the ready-made image chromadb/chroma:0.6.3
+        PUBLISH port 8001 on my Mac, port 8000 inside the container   // only so you can reach it from your Mac for debugging
+        STORE its data in the volume chroma_data, at /chroma/chroma
+        RESTART unless stopped
+DEFINE volume chroma_data   // Docker creates and keeps it</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>docker-compose.yml</span><button class="copybtn">Copy</button></div>
       <pre><span class="kw">services</span>:
@@ -801,6 +1100,8 @@ collection = chroma.get_or_create_collection(name=<span class="str">"notes"</spa
 
 <span class="kw">volumes</span>:
   chroma_data:</pre>
+    </div>
+      </details>
     </div>
     <div class="decode">
       <div class="d-title">Line-by-line decoder</div>
@@ -830,8 +1131,36 @@ collection = chroma.get_or_create_collection(name=<span class="str">"notes"</spa
     <p><b>Setting <code>CHROMA_PORT=8001</code> is the single most common bug in this setup</b> — it produces "connection refused" and an exited app container. Say it twice: <em>containers talking to containers use INTERNAL ports. Only your Mac uses the published port.</em></p>
   </div>
 
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The app container and Chroma share a private network. Which <code>CHROMA_PORT</code> should the app use?</p>
+      <ol class="lk-opts">
+        <li>80, the usual web port<div class="lk-why">Chroma does not listen on 80 here. It listens on 8000 inside its own container.</div></li>
+        <li>8001, the port published on your Mac<div class="lk-why">8001 is the gate on your Mac, meant for you when you poke it from outside. The app should use the internal port.</div></li>
+        <li data-correct>8000, the internal port inside Chroma's container<div class="lk-why">Containers talk to each other on internal ports. Only your Mac uses the published port.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">The compose file has <code>depends_on: chroma</code>, yet the app still exited with <i>Connection refused</i>. Why?</p>
+      <ol class="lk-opts">
+        <li><code>depends_on</code> is ignored when a service also has a build section<div class="lk-why"><code>depends_on</code> still sets the start order when a build section is present.</div></li>
+        <li data-correct><code>depends_on</code> waits only until chroma's container has started, not until the database inside is ready<div class="lk-why">A started container is not necessarily a ready service, so the app needs its retry loop.</div></li>
+        <li><code>depends_on</code> needs the services listed in alphabetical order<div class="lk-why">The order of the list does not matter. The problem is readiness, not the order in the file.</div></li>
+      </ol>
+    </div>
+  </div>
+
   <div class="card wow">
     <h3>Milestone #2 — Serve the thali</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Terminal</div><pre>copy .env.example to .env   // then put your real key inside .env
+RUN docker compose up -d --build   // build images if code changed, then start all services in the background
+SHOW docker compose ps -a   // all services, including exited ones
+SHOW docker compose logs for app
+RUN python ingest.py inside the running app container   // docker compose exec: step into the live container
+SEND a POST to localhost:8000/ask, with the question "What is Docker?" as JSON data</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Terminal</span><button class="copybtn">Copy</button></div>
       <pre>cp .env.example .env         <span class="cmt"># then put your REAL key inside .env</span>
@@ -846,6 +1175,8 @@ docker compose exec app python ingest.py
 curl -X POST http://localhost:8000/ask \
   -H <span class="str">"Content-Type: application/json"</span> \
   -d <span class="str">'{"query": "What is Docker?"}'</span></pre>
+    </div>
+      </details>
     </div>
     <div class="decode">
       <div class="d-title">Command decoder</div>
@@ -863,11 +1194,18 @@ curl -X POST http://localhost:8000/ask \
 
   <div class="card wow">
     <h3>Milestone #2.5 — The volume magic trick</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Destroy everything. Data survives.</div><pre>RUN docker compose down   // stop and remove the containers and network; volumes are kept
+RUN docker compose up -d   // create brand-new containers
+SEND a GET to localhost:8000/   // check that docs_indexed is still above 0</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Destroy everything. Data survives.</span><button class="copybtn">Copy</button></div>
       <pre>docker compose down
 docker compose up -d
 curl http://localhost:8000/</pre>
+    </div>
+      </details>
     </div>
     <div class="decode">
       <div class="d-title">Command decoder</div>
@@ -916,6 +1254,13 @@ curl http://localhost:8000/</pre>
 
   <div class="card">
     <h3>📁 Structure + the tools service</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Terminal</div><pre>CREATE folder deskbuddy, then move into it
+CREATE folders agent and tools
+CREATE empty files docker-compose.yml and .env.example
+CREATE empty files agent/app.py, agent/requirements.txt and agent/Dockerfile
+CREATE empty files tools/app.py, tools/requirements.txt and tools/Dockerfile</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Terminal</span><button class="copybtn">Copy</button></div>
       <pre>mkdir deskbuddy &amp;&amp; cd deskbuddy
@@ -924,7 +1269,29 @@ touch docker-compose.yml .env.example
 touch agent/app.py agent/requirements.txt agent/Dockerfile
 touch tools/app.py tools/requirements.txt tools/Dockerfile</pre>
     </div>
+      </details>
+    </div>
     <div class="plain"><b>In plain words:</b> two subfolders = two separate services, each with its OWN code, OWN requirements, OWN Dockerfile. This is the microservice idea made physically visible in the folder structure. Redis needs no folder — it's a ready-made image.</div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · tools/app.py — two simple tools</div><pre>CREATE app = FastAPI titled "DeskBuddy Tools"
+DEFINE Calc: expression (text)
+
+DEFINE calculator(c: Calc):   // route POST /calculator
+    TRY:
+        // demo only: eval can run any code, so use a safe expression parser in production
+        RUN eval on c.expression, with no built-in names available
+        RETURN {"result": the answer}
+    ON ERROR:
+        RETURN {"error": the error message as text}
+
+DEFINE now():   // route GET /datetime
+    RETURN {"now": the current date and time, as ISO text}</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>FastAPI</code> <span class="lk-src">from <code>fastapi</code></span>: creates the tools web app.</li>
+        <li><code>BaseModel</code> <span class="lk-src">from <code>pydantic</code></span>: the base class for <code>Calc</code>, the input that holds the expression.</li>
+        <li><code>datetime</code> <span class="lk-src">Python standard library</span>: gives the current date and time for the clock endpoint.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>tools/app.py — two simple tools</span><button class="copybtn">Copy</button></div>
       <pre><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
@@ -948,11 +1315,32 @@ app = FastAPI(title=<span class="str">"DeskBuddy Tools"</span>)
 <span class="kw">def</span> now():
     <span class="kw">return</span> {<span class="str">"now"</span>: datetime.datetime.now().isoformat()}</pre>
     </div>
+      </details>
+    </div>
     <div class="plain"><b>In plain words:</b> the tools service is just another tiny FastAPI app with two endpoints: a calculator (evaluates a math expression) and a clock. Nothing AI about it — it's a plain worker department. Why does an LLM need a calculator at all? Because LLMs predict text; they're famously unreliable at arithmetic. Giving them a calculator is like giving an eloquent manager an actual accountant. Its Dockerfile is the same 6 lines as always, ending in uvicorn on port 7000. <b>⚠️ Note the comment:</b> <code>eval</code> is fine for a classroom demo and dangerous in production — it can execute arbitrary code. In a real service you'd use a safe expression parser instead.</div>
   </div>
 
   <div class="card">
     <h3>🧠 The agent — the think → act → observe loop</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · agent/app.py — the heart of it</div><pre>CREATE r = a Redis connection, host from REDIS_HOST (default redis), port 6379, returning text instead of bytes
+SET TOOLS_URL = the TOOLS_URL setting, or tools:7000 if it is not set
+
+DEFINE chat(req):   // route POST /chat
+    SET key = "history:" + the session_id
+    LOAD every stored message for key from Redis, decoding each one   // the memory
+    ADD the user's message to history
+    REPEAT up to 5 times:   // the agent loop
+        CALL the model (gpt-4o-mini) with history and the TOOL_DEFS menu
+        SET msg = the model's reply
+        IF msg has no tool calls THEN
+            stop the loop   // no tool needed, so we are done
+        ADD msg to history, leaving out empty fields
+        FOR EACH tool call in msg:   // run each requested tool
+            CALL call_tool with the tool's name and arguments
+            ADD the tool's result to history as JSON
+// the code ends with a comment: save the history back to Redis, then return the final answer</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>agent/app.py — the heart of it</span><button class="copybtn">Copy</button></div>
       <pre>r = redis.Redis(host=os.getenv(<span class="str">"REDIS_HOST"</span>, <span class="str">"redis"</span>), port=6379, decode_responses=<span class="kw">True</span>)
@@ -978,12 +1366,32 @@ TOOLS_URL = os.getenv(<span class="str">"TOOLS_URL"</span>, <span class="str">"h
 
     <span class="cmt"># save memory back to redis, return final answer</span></pre>
     </div>
+      </details>
+    </div>
     <div class="plain"><b>In plain words:</b> the loop is the whole magic of "agents", and it's just 10 lines. Each cycle: (1) show the LLM the full conversation plus a menu of available tools (<code>TOOL_DEFS</code> describes each tool's name and inputs — the menu card); (2) the LLM either answers in words — done, break — or replies "please run calculator with 23*47 for me"; (3) you actually call the tools service over HTTP, paste the result back into the conversation, and go around again so the LLM can see what happened. Max 5 laps so a confused model can't loop forever (a "safety fuse"). Memory: before the loop you load this session's history from Redis; after, you save it back — that's how a follow-up like "now double it" works.</div>
     <p><b>Look at the two addresses:</b> <code>http://tools:7000</code> and <code>host="redis"</code>. Again — service names, not IPs. By project 3 this should feel natural.</p>
   </div>
 
   <div class="card analogy">
     <h3>The full thali — 3-service compose</h3>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · docker-compose.yml</div><pre>DEFINE services:
+    agent:
+        BUILD the image from ./agent
+        PUBLISH port 9000 on my Mac, port 9000 inside the container
+        LOAD .env as environment variables
+        SET TOOLS_URL to the tools service on port 7000, and REDIS_HOST to redis
+        START after tools and redis   // start order only, not readiness
+        RESTART unless stopped
+    tools:
+        BUILD the image from ./tools
+        PUBLISH no port   // nothing outside the private network can reach it
+        RESTART unless stopped
+    redis:
+        use the ready-made image redis:7-alpine
+        STORE its data in the volume agent_memory
+DEFINE volume agent_memory   // Docker creates and keeps it</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>docker-compose.yml</span><button class="copybtn">Copy</button></div>
       <pre><span class="kw">services</span>:
@@ -1012,6 +1420,8 @@ TOOLS_URL = os.getenv(<span class="str">"TOOLS_URL"</span>, <span class="str">"h
 <span class="kw">volumes</span>:
   agent_memory:</pre>
     </div>
+      </details>
+    </div>
     <div class="decode">
       <div class="d-title">What's new here</div>
       <dl>
@@ -1027,6 +1437,14 @@ TOOLS_URL = os.getenv(<span class="str">"TOOLS_URL"</span>, <span class="str">"h
   <div class="card wow">
     <h3>Milestone #3 — The agent in action + memory proof</h3>
     <p>Split your terminal in two. Left: <code>docker compose logs -f</code>. Right: the curls. You'll watch requests ripple across three containers live.</p>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Terminal</div><pre>copy .env.example to .env   // real key inside, same as before
+RUN docker compose up -d --build   // build if needed, then start all services
+SHOW docker compose ps -a
+SEND a POST to localhost:9000/chat, session "demo", asking "What is 23*47, and what time is it right now?"
+SEND a second POST to localhost:9000/chat, same session "demo", asking "Now double that multiplication result"
+SHOW the logs of all services, live   // docker compose logs -f</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="codeblock">
       <div class="cb-head"><span>Terminal</span><button class="copybtn">Copy</button></div>
       <pre>cp .env.example .env         <span class="cmt"># real key inside, same as before</span>
@@ -1043,6 +1461,8 @@ curl -X POST http://localhost:9000/chat \
 
 docker compose logs -f</pre>
     </div>
+      </details>
+    </div>
     <div class="decode">
       <div class="d-title">What to watch for</div>
       <dl>
@@ -1052,6 +1472,34 @@ docker compose logs -f</pre>
       </dl>
     </div>
     <p><b>The point:</b> three services, one command, real memory, proper isolation. And this exact compose file works unchanged on an EC2 instance — <em>same commands, same result</em>. That bridge from laptop to production is Docker's superpower.</p>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Two <code>curl</code> requests use the same <code>session_id</code>. Why can the second answer use the first one?</p>
+      <ol class="lk-opts">
+        <li data-correct>The agent loads earlier messages from Redis under a key built from the session_id<div class="lk-why">Redis keeps each session's history under its own key. The same session_id gives the same key and the same memory.</div></li>
+        <li>Redis sends the old answer again without being asked<div class="lk-why">Redis stores data; it does not push answers. The agent has to read the history and send it to the model.</div></li>
+        <li>The tools service remembers the calculator result from the first request<div class="lk-why">Chat history is kept in Redis, not in the tools service.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does the <code>tools</code> service have no <code>ports</code> section?</p>
+      <ol class="lk-opts">
+        <li>Ports slow down calculator requests, so the section is left out for speed<div class="lk-why">Ports do not slow requests down. The section only decides what can be reached from your Mac.</div></li>
+        <li data-correct>So the outside world cannot reach it, while the agent can still call <code>tools:7000</code> on the private network<div class="lk-why">No published port means no entrance from your Mac. Services on the same compose network reach each other by name.</div></li>
+        <li>Because <code>tools</code> does not need an image, so it has nothing to publish<div class="lk-why">It does have one, from <code>build: ./tools</code>. The missing section only changes network access.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What does <code>for _ in range(5):</code> do in the agent's <code>chat</code> function?</p>
+      <ol class="lk-opts">
+        <li>Stores five messages in Redis before the loop starts<div class="lk-why">Memory is saved once, after the loop finishes, not at the start.</div></li>
+        <li>Sends the same message to five different models<div class="lk-why">The loop repeats the same model call. It never switches models.</div></li>
+        <li data-correct>Caps the think, act, observe loop at five rounds, so a confused model cannot loop forever<div class="lk-why">Each round is one model call, plus any tool calls it asks for. Five rounds is the safety fuse.</div></li>
+      </ol>
+    </div>
   </div>
 
   <div class="card">

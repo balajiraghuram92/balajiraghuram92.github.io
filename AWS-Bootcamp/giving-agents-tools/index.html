@@ -325,6 +325,8 @@ footer{padding:48px 0 80px;color:var(--muted);font-size:.95rem;border-top:1px so
   body{background:#fff}
 }
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- Shared arrowheads for every diagram on the page -->
@@ -534,11 +536,30 @@ a.awsq-home:hover{background:var(--card-2);text-decoration:none}
         </tbody>
       </table>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>RUN cd section-02-agent-tools                 // go to this section's folder
+RUN pip install -r requirements.txt           // install the course libraries
+RUN jupyter lab                               // open the notebooks in the browser</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">cd section-02-agent-tools
 pip install -r requirements.txt
 jupyter lab</code></pre></div>
+      </details>
+    </div>
 
     <div class="prose"><p>Every notebook opens with the same two cells: install the libraries, then choose the model once and keep it in a variable called <code>model</code>.</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · every notebook, setup cell</div><pre>IMPORT os and BedrockModel
+SET MODEL_ID = environment variable BEDROCK_MODEL_ID, or "global.anthropic.claude-sonnet-4-6" if it is not set
+SET REGION = environment variable AWS_REGION, else AWS_DEFAULT_REGION, else "us-east-1"
+SET AWS_REGION in the environment to REGION, unless it is already set
+CREATE model = BedrockModel(MODEL_ID, REGION)   // every lab reuses this one model
+PRINT which model and region are in use</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>os</code> <span class="lk-src">Python standard library</span>: reads and sets environment variables such as <code>AWS_REGION</code>.</li>
+        <li><code>BedrockModel</code> <span class="lk-src">from <code>strands.models.bedrock</code></span>: the model client that sends requests to Amazon Bedrock.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">every notebook, setup cell</span><button class="copy">Copy</button></div><pre><code class="lang-py">import os
 from strands.models.bedrock import BedrockModel
 
@@ -548,6 +569,8 @@ os.environ.setdefault("AWS_REGION", REGION)
 
 model = BedrockModel(model_id=MODEL_ID, region_name=REGION)
 print(f"Using {MODEL_ID} in {REGION}")</code></pre></div>
+      </details>
+    </div>
     <div class="callout note">
       <h5><span class="ico">i</span>Always pass the model</h5>
       <p>Every agent in this section is created with <code>Agent(model=model, ...)</code>. If you leave <code>model</code> out, Strands falls back to its own built-in default, which can change between versions or may not be enabled in your account. Passing it explicitly keeps every lab on the same, known model.</p>
@@ -702,6 +725,19 @@ print(f"Using {MODEL_ID} in {REGION}")</code></pre></div>
     <div class="prose">
       <p>Before building agents, let's turn one ordinary Python function into something an agent can use. Say you already have a function that checks whether your staging server is up:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_building_tools.ipynb: a plain function</div><pre>DEFINE check_server_status_plain(server_url)
+    TRY
+        CALL requests.get(server_url), waiting at most 5 seconds   // a slow server cannot hang the program
+        RETURN "Server is up. Status code: " + the status code
+    ON ERROR (any request failure: down, unreachable, timed out)
+        RETURN "Server is down or unreachable"
+
+PRINT check_server_status_plain(the test URL)</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>requests</code> <span class="lk-src">third-party package</span>: sends the HTTP GET request and returns the server's reply.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_building_tools.ipynb: a plain function</span><button class="copy">Copy</button></div><pre><code class="lang-py">import requests
 
 
@@ -715,10 +751,26 @@ def check_server_status_plain(server_url):
 
 
 print(check_server_status_plain("https://httpbin.org/get"))</code></pre></div>
+      </details>
+    </div>
     <div class="prose">
       <p>It works when <em>you</em> call it. But ask an agent "Is the staging server running?" and it replies something like: <em>"I don't have the ability to check server status. You can use curl or ping."</em> The agent can't magically discover a function sitting in some Python file.</p>
       <p>The fix is called <button class="kw" data-k="function-calling">function calling</button>, also known as <strong>tool use</strong>. To make the function available, add three things: the <code>@tool</code> <button class="kw" data-k="decorator">decorator</button> (tells Strands to offer it to agents), <button class="kw" data-k="type-hints">type hints</button> (tell the agent what data to send) and a clear <button class="kw" data-k="docstring">docstring</button> (tells it what the function does, so it knows when to use it).</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_building_tools.ipynb: the same function as a tool</div><pre>DEFINE check_server_status(server_url) RETURNS text
+    // @tool: the agent can see this function and call it
+    // the docstring tells the agent when to use it
+    TRY
+        CALL requests.get(server_url), waiting at most 5 seconds
+        RETURN "Server is up. Status code: " + the status code
+    ON ERROR (any request failure)
+        RETURN "Server is down or unreachable"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the class that runs the model and its tools together.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that registers a function as a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_building_tools.ipynb: the same function as a tool</span><button class="copy">Copy</button></div><pre><code class="lang-py">from strands import Agent, tool
 
 
@@ -737,6 +789,8 @@ def check_server_status(server_url: str) -> str:  # Type hints
         return f"Server is up. Status code: {response.status_code}"
     except requests.exceptions.RequestException:
         return "Server is down or unreachable"</code></pre></div>
+      </details>
+    </div>
 
     <figure class="fig">
       <div class="scroll-hint">Swipe sideways to see the full diagram</div>
@@ -784,8 +838,15 @@ def check_server_status(server_url: str) -> str:  # Type hints
     <div class="prose">
       <p>Inside, the function makes an HTTP GET request to the URL with a 5-second <button class="kw" data-k="timeout">timeout</button>. If the server answers, it returns the <button class="kw" data-k="status-code">status code</button> (200 means success). If anything fails (server down, network error, timeout), it catches the <button class="kw" data-k="exception">exception</button> and returns a friendly message instead of crashing. Now hand it to an agent:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_building_tools.ipynb</div><pre>CREATE agent = Agent(model, tools = [check_server_status])
+ASK agent: "Is the staging server running? Check the staging URL"
+SAVE the answer in response</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_building_tools.ipynb</span><button class="copy">Copy</button></div><pre><code class="lang-py">agent = Agent(model=model, tools=[check_server_status])
 response = agent("Is the staging server running? Check https://httpbin.org/get")</code></pre></div>
+      </details>
+    </div>
     <div class="prose"><p>The agent now calls <code>check_server_status</code> with the right URL and answers from the real result. This pattern works for any function: add <code>@tool</code>, give it to the agent, and the agent can run it.</p></div>
 
     <div class="sim" id="sim-ingredients">
@@ -803,6 +864,26 @@ response = agent("Is the staging server running? Check https://httpbin.org/get")
         </div>
       </div>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">What does the <code>@tool</code> decorator do to <code>check_server_status</code>?</p>
+        <ol class="lk-opts">
+          <li>It makes the function run faster by caching its result<div class="lk-why">The decorator does not change how the function runs. It only changes how the function is offered to the agent.</div></li>
+          <li data-correct>It registers the function so the agent can see it and call it<div class="lk-why">The decorator tells Strands to offer the function to the agent as a tool. Without it, the agent has no way to call the function.</div></li>
+          <li>It sends the whole source code of the function to the model<div class="lk-why">The model is shown the name, the description and the input schema. The function body is never shown.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">You delete the docstring from <code>check_server_status</code>. What is the most likely effect?</p>
+        <ol class="lk-opts">
+          <li>The function stops working when the agent calls it<div class="lk-why">The body still runs. The docstring is only text, so removing it does not break the function.</div></li>
+          <li>The try and except block is removed as well<div class="lk-why">The docstring and the body are separate parts of the function. Deleting one does not remove the other.</div></li>
+          <li data-correct>The model loses the description of when to use the tool<div class="lk-why">The docstring becomes the description the model sees. Without it, the model has less guidance on when to call the tool.</div></li>
+        </ol>
+      </div>
+    </div>
   </section>
 
   <section id="many-tools" aria-labelledby="many-h">
@@ -810,6 +891,23 @@ response = agent("Is the staging server running? Check https://httpbin.org/get")
     <div class="prose">
       <p>Real requests usually need several steps. Imagine a sales assistant and the request: <em>"Pull last quarter's sales data and email a summary to the team."</em> That's not one task but three: query the database, analyse the numbers, send an email. So you build three small tools:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_building_tools.ipynb: multi-tool sales assistant</div><pre>// each function below is marked @tool, so the agent can call it
+DEFINE get_sales_data(quarter)
+    RETURN a dict with revenue 1250000, deals 47 and the quarter
+
+DEFINE analyze_sales(revenue, deals, quarter)
+    SET avg_deal = revenue / deals
+    RETURN one summary line: quarter, revenue, deals and average deal size
+
+DEFINE send_email(to, subject, body)
+    PRINT the email to, subject and body
+    RETURN "Email sent to " + to
+
+CREATE agent = Agent(model, tools = [get_sales_data, analyze_sales, send_email])
+ASK agent: "Pull last quarter's sales data and email a summary to team@company.com"
+SAVE the answer in response</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_building_tools.ipynb: multi-tool sales assistant</span><button class="copy">Copy</button></div><pre><code class="lang-py">@tool
 def get_sales_data(quarter: str) -> dict:
     """Retrieve sales data for a specific quarter."""
@@ -832,6 +930,8 @@ def send_email(to: str, subject: str, body: str) -> str:
 
 agent = Agent(model=model, tools=[get_sales_data, analyze_sales, send_email])
 response = agent("Pull last quarter's sales data and email a summary to team@company.com")</code></pre></div>
+      </details>
+    </div>
     <div class="prose">
       <p>Each tool does one job. The data tool only fetches data, the analysis tool only crunches numbers, the email tool only sends messages. That makes them reusable: analysing data from another source? Same analysis tool. Emailing something else? Same email tool. And you never wrote "if the user asks for a sales summary, do steps 1, 2, 3". The agent works out which tools to use, in what order, and how to pass data from one to the next.</p>
     </div>
@@ -910,6 +1010,18 @@ response = agent("Pull last quarter's sales data and email a summary to team@com
   <p class="lede">Let's build something you'd actually use: an agent that works out the tip and splits the bill when you're out for dinner with friends.</p>
 
   <div class="annot">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_building_tools.ipynb: tip calculator</div><pre>DEFINE calculate_tip(bill_amount, tip_percentage, num_people = 1)    // @tool; num_people is optional
+    SET tip = bill_amount * (tip_percentage / 100)
+    SET total = bill_amount + tip
+    SET per_person = total / num_people
+    RETURN a dict with bill, tip, total and per_person (last three rounded to 2 decimals)
+
+CREATE agent = Agent(model, tools = [calculate_tip])
+ASK agent: "The bill is $85. What's a 20% tip, and how much does each person pay if we're splitting it 4 ways?"
+SAVE the answer in response
+PRINT the text of the final answer</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_building_tools.ipynb: tip calculator</span><button class="copy">Copy</button></div><pre><code class="lang-py">@tool
 def calculate_tip(bill_amount: float, tip_percentage: float, num_people: int = 1) -> dict:
     """Calculate tip and split the bill among people.
@@ -937,6 +1049,8 @@ response = agent(
     "The bill is $85. What's a 20% tip, and how much does each person pay if we're splitting it 4 ways?"
 )
 print("\n\nFinal answer:\n", response.message["content"][0]["text"])</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>Step 1: @tool def calculate_tip(…)</b> Create the tool: a normal Python function plus the three ingredients. <code>num_people: int = 1</code> has a default, so it's optional.</li>
       <li><b>Args: section</b> One line per parameter. This is how the model learns that "20%" means <code>tip_percentage=20</code>, not 0.2.</li>
@@ -1006,9 +1120,16 @@ So each person should pay $25.50.
 
   <h3>Try it yourself</h3>
   <div class="prose"><p>Ask the same agent differently phrased questions. It understands intent, not just keywords:</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_building_tools.ipynb</div><pre>ASK agent: "What's a 15% tip on $42?"
+ASK agent: "Bill is $120, we want to tip 18%, split between 3 people"
+ASK agent: "Calculate tip for $67.50 at 20%"</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">01_building_tools.ipynb</span><button class="copy">Copy</button></div><pre><code class="lang-py">agent("What's a 15% tip on $42?")
 agent("Bill is $120, we want to tip 18%, split between 3 people")
 agent("Calculate tip for $67.50 at 20%")</code></pre></div>
+    </details>
+  </div>
 
   <div class="sim" id="sim-tip">
     <div class="sim-head"><span class="tag">Try it</span><h4>Tip agent playground</h4></div>
@@ -1060,6 +1181,26 @@ agent("Calculate tip for $67.50 at 20%")</code></pre></div>
   <div class="callout analogy">
     <h5><span class="ico">✦</span>Think of it like this</h5>
     <p>Splitting the bill at a dhaba: one friend says "₹1,700, add 10% for the waiter, five of us", and another opens the calculator app. The friend talking is the model (understands loose words), the calculator app is your tool (exact, boring, reliable), and whoever reads the result aloud is the agent.</p>
+  </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">In <code>calculate_tip</code>, <code>num_people</code> has the default <code>= 1</code>. What does that default allow?</p>
+      <ol class="lk-opts">
+        <li>Every call must pass <code>num_people</code>, or the function raises an error<div class="lk-why">A default means the argument is optional. Leaving it out is allowed, and the function still runs.</div></li>
+        <li data-correct>A request that does not mention people still works, and the bill is split one way<div class="lk-why">With no value given, <code>num_people</code> is 1, so <code>per_person</code> equals the total. The function does not need the number to run.</div></li>
+        <li>The agent picks a random number of people each time<div class="lk-why">The default is a fixed value written in the function. The agent does not invent one.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem"><code>calculate_tip</code> returns a dict of numbers. Who turns that dict into a sentence for you?</p>
+      <ol class="lk-opts">
+        <li>The <code>calculate_tip</code> function, through its <code>return</code> line<div class="lk-why">The function only returns the numbers. It does not write any text for you.</div></li>
+        <li data-correct>The model, which reads the returned values and writes the reply<div class="lk-why">The agent hands the dict back to the model, and the model writes the final answer in plain English.</div></li>
+        <li>Nobody, because the dict is shown exactly as it is<div class="lk-why">The dict is data, not text. The model turns it into the sentence you read.</div></li>
+      </ol>
+    </div>
   </div>
 </section>
 <section class="sec" id="ecosystem" aria-labelledby="eco-h">
@@ -1118,8 +1259,24 @@ agent("Calculate tip for $67.50 at 20%")</code></pre></div>
     <div class="prose">
       <p>These tools handle common jobs out of the box: file operations, web searches, HTTP calls, AWS services, maths, even multi-agent orchestration. They're already installed with this section's <code>requirements.txt</code>; on their own you'd install them with:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>RUN pip install strands-agents-tools   // add the community tools package</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">pip install strands-agents-tools</code></pre></div>
+      </details>
+    </div>
     <div class="prose"><p>Here's the prebuilt calculator in action. One import gives the agent expressions, equation solving and calculus:</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_prebuilt_and_aws_tools.ipynb: calculator tool</div><pre>IMPORT Agent and calculator
+CREATE agent = Agent(model, tools = [calculator], system_prompt = "You are a helpful math assistant.")
+ASK agent: "What's 42 raised to the power of 9?"
+ASK agent: "Solve the equation x^2 + 5x + 6 = 0"
+ASK agent: "What's the derivative of sin(x) * cos(x)?"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the class that runs the model together with its tools.</li>
+        <li><code>calculator</code> <span class="lk-src">from <code>strands_tools</code></span>: the prebuilt maths tool. It is built on SymPy, so it solves equations and does calculus exactly.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_prebuilt_and_aws_tools.ipynb: calculator tool</span><button class="copy">Copy</button></div><pre><code class="lang-py">from strands import Agent
 from strands_tools import calculator
 
@@ -1128,6 +1285,8 @@ agent = Agent(model=model, tools=[calculator], system_prompt="You are a helpful 
 agent("What's 42 raised to the power of 9?")
 agent("Solve the equation x^2 + 5x + 6 = 0")
 agent("What's the derivative of sin(x) * cos(x)?")</code></pre></div>
+      </details>
+    </div>
     <div class="tbl-wrap">
       <table>
         <thead><tr><th>Question</th><th>What the calculator returns</th></tr></thead>
@@ -1179,6 +1338,17 @@ agent("What's the derivative of sin(x) * cos(x)?")</code></pre></div>
   <section id="combine" aria-labelledby="comb-h">
     <h3 id="comb-h">Many tools, one request</h3>
     <div class="prose"><p>Give the agent several prebuilt tools and it works out how to use them together. Here it fetches a live weather forecast for Bangalore, crunches the numbers and saves a summary:</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_prebuilt_and_aws_tools.ipynb: combining tools</div><pre>IMPORT file_write and http_request
+SET environment variable BYPASS_TOOL_CONSENT = "true"   // skip the confirmation prompt (demo only)
+CREATE agent = Agent(model, tools = [http_request, calculator, file_write], system_prompt = "You help with data analysis tasks.")
+ASK agent: "Fetch the 7-day forecast for Bangalore, take the daily maximum temperatures,
+            calculate their average, and save a short summary to weather_summary.txt"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>file_write</code> <span class="lk-src">from <code>strands_tools</code></span>: the prebuilt tool that writes text to a file.</li>
+        <li><code>http_request</code> <span class="lk-src">from <code>strands_tools</code></span>: the prebuilt tool that makes web requests, here to fetch the forecast.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_prebuilt_and_aws_tools.ipynb: combining tools</span><button class="copy">Copy</button></div><pre><code class="lang-py">from strands_tools import file_write, http_request
 
 os.environ["BYPASS_TOOL_CONSENT"] = "true"
@@ -1196,10 +1366,20 @@ extract the daily maximum temperatures for Bangalore,
 calculate the average maximum temperature over the period,
 and save a short summary to weather_summary.txt
 """)</code></pre></div>
+      </details>
+    </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_prebuilt_and_aws_tools.ipynb: check the file</div><pre>IF the file weather_summary.txt exists THEN
+    PRINT the contents of weather_summary.txt
+ELSE
+    PRINT a note: no summary yet, scroll up to see which tools the agent called</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_prebuilt_and_aws_tools.ipynb: check the file</span><button class="copy">Copy</button></div><pre><code class="lang-py">if os.path.exists("weather_summary.txt"):
     print(open("weather_summary.txt").read())
 else:
     print("No weather_summary.txt yet — scroll up to see which tools the agent called.")</code></pre></div>
+      </details>
+    </div>
     <figure class="fig">
       <div class="scroll-hint">Swipe sideways to see the full diagram</div>
       <div class="scroll">
@@ -1270,6 +1450,14 @@ else:
       </div>
       <figcaption><b>One tool, every AWS service.</b> The model picks the service, operation and parameters; <code>use_aws</code> makes the boto3 call. Two safety gates stay in place: a confirmation for changes, and your IAM permissions.</figcaption>
     </figure>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_prebuilt_and_aws_tools.ipynb: 3.1 list your S3 buckets</div><pre>IMPORT use_aws
+CREATE aws_agent = Agent(model, tools = [use_aws, calculator], system_prompt = "You are an AWS assistant ... Use region REGION.")
+ASK aws_agent: "List all S3 buckets in my account"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>use_aws</code> <span class="lk-src">from <code>strands_tools</code></span>: the prebuilt AWS tool. It turns a plain-English request into a boto3 call, using your credentials.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_prebuilt_and_aws_tools.ipynb: 3.1 list your S3 buckets</span><button class="copy">Copy</button></div><pre><code class="lang-py">from strands_tools import use_aws
 
 aws_agent = Agent(
@@ -1279,6 +1467,8 @@ aws_agent = Agent(
 )
 
 aws_agent("List all S3 buckets in my account")</code></pre></div>
+      </details>
+    </div>
     <div class="callout analogy">
       <h5><span class="ico">✦</span>Think of it like this</h5>
       <p><code>use_aws</code> is a helper at a government office who knows every form by heart. You say "I want to renew my licence", and they fill in the right form for the right counter. But your ID card still decides which counters will serve you. That ID card is IAM: <code>use_aws</code> can only do what your credentials are allowed to do.</p>
@@ -1317,6 +1507,40 @@ aws_agent("List all S3 buckets in my account")</code></pre></div>
 
     <details class="callout note" style="max-width:56rem">
       <summary style="cursor:pointer;font-weight:700">Show the setup cell (3.0) that creates the demo resources</summary>
+      <div class="lk-code">
+        <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_prebuilt_and_aws_tools.ipynb: 3.0 create the demo resources</div><pre>IMPORT csv, io, json, time, zipfile, uuid, boto3
+CREATE a boto3 session in REGION, with clients for STS, S3, DynamoDB, IAM and Lambda
+SET account_id = the AWS account number from STS
+SET suffix = 6 random characters   // unique names, so resources you already have are never touched
+SET BUCKET, TABLE, ROLE_NAME and the function name, all built from suffix
+
+// S3 bucket with a sales CSV
+CREATE BUCKET in REGION
+SAVE six monthly sales rows (month, region, revenue) as sales-2024.csv in BUCKET
+PRINT "S3 bucket ready"
+
+// DynamoDB table with one customer
+CREATE TABLE with customer_id as its key, billed per request
+WAIT until TABLE exists
+SAVE customer 12345 (Asha Rao, asha@example.com) in TABLE
+PRINT "DynamoDB table ready"
+
+// Lambda function with its IAM role
+CREATE ROLE_NAME, trusted by Lambda, with basic Lambda logging permissions
+WAIT 10 seconds   // let IAM propagate
+CREATE the order-processor Lambda function (Python 3.12), whose handler returns the order_id with status PROCESSED
+WAIT until the function is active
+PRINT "Lambda function ready"</pre></div>
+        <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+          <li><code>csv</code> <span class="lk-src">Python standard library</span>: writes the sales rows as CSV text.</li>
+          <li><code>io</code> <span class="lk-src">Python standard library</span>: in-memory buffers for the CSV text and the zip file.</li>
+          <li><code>json</code> <span class="lk-src">Python standard library</span>: turns the role's trust policy into JSON text.</li>
+          <li><code>time</code> <span class="lk-src">Python standard library</span>: <code>time.sleep</code> pauses so IAM can finish.</li>
+          <li><code>zipfile</code> <span class="lk-src">Python standard library</span>: packs the Lambda handler into a zip file.</li>
+          <li><code>uuid</code> <span class="lk-src">Python standard library</span>: makes the random suffix for unique names.</li>
+          <li><code>boto3</code> <span class="lk-src">AWS SDK for Python, package <code>boto3</code></span>: creates the clients that call S3, DynamoDB, IAM and Lambda.</li>
+        </ul></div>
+        <details class="lk-reveal"><summary>View code</summary>
       <div class="code" style="margin-top:12px"><div class="bar"><span class="file">02_prebuilt_and_aws_tools.ipynb: 3.0 create the demo resources</span><button class="copy">Copy</button></div><pre><code class="lang-py">import csv
 import io
 import json
@@ -1400,24 +1624,43 @@ lambda_client.create_function(
 )
 lambda_client.get_waiter("function_active_v2").wait(FunctionName=FUNCTION)
 print(f"Lambda function ready: {FUNCTION}")</code></pre></div>
+        </details>
+      </div>
     </details>
 
     <h4>Data analysis on S3</h4>
     <div class="prose"><p>Read a <button class="kw" data-k="csv">CSV</button> from S3, total the revenue, and write a summary back.</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_prebuilt_and_aws_tools.ipynb: 3.2</div><pre>ASK aws_agent: "Read the sales data from the S3 bucket BUCKET, key sales-2024.csv,
+    calculate the total revenue, and save a short summary back to the same bucket as sales-summary.txt"</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_prebuilt_and_aws_tools.ipynb: 3.2</span><button class="copy">Copy</button></div><pre><code class="lang-py">aws_agent(
     f"Read the sales data from S3 bucket '{BUCKET}' key 'sales-2024.csv', "
     "calculate the total revenue, and save a short summary back to the same bucket as 'sales-summary.txt'"
 )</code></pre></div>
+      </details>
+    </div>
     <div class="prose"><p>The six rows add up to <strong>710,000</strong> (North 397,000 + South 313,000). Expect the agent to read the file with S3 <code>get_object</code>, total it with the calculator, then write <code>sales-summary.txt</code> with <code>put_object</code>.</p></div>
 
     <h4>Customer service on DynamoDB</h4>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_prebuilt_and_aws_tools.ipynb: 3.3</div><pre>ASK aws_agent: "Look up customer ID 12345 in the DynamoDB table TABLE and update their email to newemail@example.com,
+    then read the item back to confirm"</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_prebuilt_and_aws_tools.ipynb: 3.3</span><button class="copy">Copy</button></div><pre><code class="lang-py">aws_agent(
     f"Look up customer ID 12345 in the DynamoDB table '{TABLE}' and update their email to newemail@example.com. "
     "Then read the item back to confirm."
 )</code></pre></div>
+      </details>
+    </div>
 
     <h4>Workflow orchestration with Lambda</h4>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_prebuilt_and_aws_tools.ipynb: 3.4</div><pre>ASK aws_agent: "Invoke the order-processor Lambda function with the payload order_id 67890, and tell me the result"</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_prebuilt_and_aws_tools.ipynb: 3.4</span><button class="copy">Copy</button></div><pre><code class="lang-py">aws_agent(f"Invoke the Lambda function '{FUNCTION}' with the payload {{\"order_id\": \"67890\"}} and tell me the result")</code></pre></div>
+      </details>
+    </div>
 
     <div class="sim" id="sim-aws">
       <div class="sim-head"><span class="tag">Try it</span><h4>See the AWS calls behind each English request</h4></div>
@@ -1435,6 +1678,21 @@ print(f"Lambda function ready: {FUNCTION}")</code></pre></div>
       <h5><span class="ico">!</span>The resources must exist, and must be cleaned up</h5>
       <p>These requests only work because cell 3.0 created the bucket, CSV, table and function first. Run the clean-up cell when you're done:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 02_prebuilt_and_aws_tools.ipynb: 3.5 clean up</div><pre>// S3: delete all objects, then the bucket
+FOR EACH obj in the objects of BUCKET
+    DELETE obj from BUCKET
+DELETE BUCKET
+PRINT "Deleted bucket" + BUCKET
+
+DELETE TABLE
+PRINT "Deleted table" + TABLE
+
+DELETE the order-processor Lambda function
+DETACH the basic logging policy from ROLE_NAME
+DELETE ROLE_NAME
+PRINT "Deleted Lambda function and role"</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">02_prebuilt_and_aws_tools.ipynb: 3.5 clean up</span><button class="copy">Copy</button></div><pre><code class="lang-py"># S3: delete all objects, then the bucket
 for obj in s3.list_objects_v2(Bucket=BUCKET).get("Contents", []):
     s3.delete_object(Bucket=BUCKET, Key=obj["Key"])
@@ -1448,8 +1706,38 @@ lambda_client.delete_function(FunctionName=FUNCTION)
 iam.detach_role_policy(RoleName=ROLE_NAME, PolicyArn="arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole")
 iam.delete_role(RoleName=ROLE_NAME)
 print("Deleted Lambda function and role")</code></pre></div>
+      </details>
+    </div>
     <div class="prose"><p>You've now used community tools and AWS integrations. Next, the tools only you can build.</p></div>
   </section>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The calculator tool solves <code>sin(x) * cos(x)</code>. Why use it instead of letting the model answer from memory?</p>
+      <ol class="lk-opts">
+        <li>The model cannot read maths notation at all<div class="lk-why">The model reads maths notation well. The problem is that it can get exact digits and steps wrong when it works them out in its head.</div></li>
+        <li>Only the calculator is allowed to answer maths questions<div class="lk-why">Nothing forbids the model from answering. The calculator is simply the more reliable choice for exact results.</div></li>
+        <li data-correct>The calculator computes the exact answer with SymPy, instead of the model guessing<div class="lk-why">Exact computation is the point of the tool. The model writes the expression, and the tool does the arithmetic and the calculus.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Notebook 2 creates and deletes its demo resources with plain boto3, not with the agent. Why?</p>
+      <ol class="lk-opts">
+        <li>Because <code>use_aws</code> cannot create anything<div class="lk-why"><code>use_aws</code> can make many AWS calls. The notebook simply chooses not to use it for setup.</div></li>
+        <li data-correct>So that setup and clean-up are predictable, and only the middle part is the agent working in English<div class="lk-why">Setup and clean-up must happen exactly the same way every time, so they are plain code. The agent is used for the requests in 3.1 to 3.4.</div></li>
+        <li>Because boto3 is faster than the agent at every task<div class="lk-why">Speed is not the reason. The point is predictable create and delete steps.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does the setup cell add a random <code>suffix</code> to the bucket, table, function and role names?</p>
+      <ol class="lk-opts">
+        <li data-correct>So the names are unique and resources you already own are never touched<div class="lk-why">Every demo resource gets its own name, so setup cannot overwrite anything in your account and the clean-up cell deletes only what the notebook made.</div></li>
+        <li>Because AWS requires every name to end with six random characters<div class="lk-why">AWS has no such rule. The suffix is the notebook's own safety choice.</div></li>
+        <li>So the model can guess the names without being told<div class="lk-why">The agent is given the real names in the request. The suffix does not help it guess.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="custom" aria-labelledby="custom-h">
   <div class="sec-head"><span class="sec-num">2.4</span><h2 id="custom-h">Building custom tools</h2></div>
@@ -1457,6 +1745,21 @@ print("Deleted Lambda function and role")</code></pre></div>
 
   <div class="prose"><p>Say you run an online store, and customers ask "Is product X in stock?" all day. You need a tool that checks your inventory:</p></div>
   <div class="annot">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_building_tools.ipynb: inventory checker</div><pre>DEFINE check_inventory(product_id)   // @tool: the model can read the docstring and call it
+    SET inventory = a dictionary: PROD-123 has 15, PROD-456 has 0, PROD-789 has 8
+    SET quantity = inventory value for product_id, or 0 if the ID is unknown
+    IF quantity > 0 THEN
+        RETURN "Product is in stock. We have quantity units available."
+    RETURN "Product is currently out of stock."
+
+CREATE agent = Agent(model, tools = [check_inventory])
+// all four questions below should lead to check_inventory
+ASK agent: "Is PROD-123 in stock?"
+ASK agent: "Do we have PROD-456 available?"
+ASK agent: "Check inventory for PROD-789"
+ASK agent: "Can I order PROD-123 right now?"</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_building_tools.ipynb: inventory checker</span><button class="copy">Copy</button></div><pre><code class="lang-py">@tool
 def check_inventory(product_id: str) -> str:
     """Check if a product is in stock.
@@ -1479,6 +1782,8 @@ agent("Is PROD-123 in stock?")
 agent("Do we have PROD-456 available?")
 agent("Check inventory for PROD-789")
 agent("Can I order PROD-123 right now?")</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>@tool</b> Without it, this is just regular Python the agent never sees.</li>
       <li><b>The docstring</b> When someone asks "Is PROD-123 in stock?", the model reads "Check if a product is in stock" and recognises this tool fits.</li>
@@ -1557,6 +1862,26 @@ agent("Can I order PROD-123 right now?")</code></pre></div>
     <h5><span class="ico">i</span>You already know enough for most tools</h5>
     <p>Plain <code>@tool</code> functions cover the majority of what you'll build. As your agents grow, though, you'll hit situations where they aren't enough: several tools sharing an expensive resource, slow APIs, and inputs that need strict validation. You don't need to memorise these now; just know they exist so you recognise them when they show up.</p>
   </div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The agent answered "Do we have PROD-456 available?" correctly, but the docstring never says "available". Why?</p>
+      <ol class="lk-opts">
+        <li>The function scans the question for the exact word "available"<div class="lk-why">The function never sees the question. Only the model reads the question, and it matches by meaning, not by keyword.</div></li>
+        <li data-correct>The model matches the meaning of the question to the docstring, "Check if a product is in stock", and pulls out PROD-456<div class="lk-why">That is intent recognition and parameter extraction. The model does it, so you do not write regex or phrase lists.</div></li>
+        <li>Strands copies every question into the docstring before the call<div class="lk-why">The docstring is fixed text in your code. Strands does not change it for each question.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">You later replace the <code>inventory</code> dictionary with a real database query. What changes for the agent?</p>
+      <ol class="lk-opts">
+        <li data-correct>Nothing else: the function body is private, so the model still sees the same name, docstring and parameters<div class="lk-why">The model never sees the body. Only the code inside the function changes, which is why the tool is easy to swap out.</div></li>
+        <li>It needs a new tool name and a new docstring for every question<div class="lk-why">The model only needs the name, the docstring and the parameters, and those stay the same.</div></li>
+        <li>The agent stops using the tool, because databases cannot be called from tools<div class="lk-why">Tools can query databases. The agent keeps calling check_inventory as before.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="advanced" aria-labelledby="adv-h">
   <div class="sec-head"><span class="sec-num">2.5</span><h2 id="adv-h">When simple tools aren't enough</h2></div>
@@ -1569,6 +1894,25 @@ agent("Can I order PROD-123 right now?")</code></pre></div>
   <section id="class-tools" aria-labelledby="class-h">
     <h3 id="class-h">The database connection problem, and class-based tools</h3>
     <div class="prose"><p>First the notebook creates a tiny inventory database and a <code>connect_to_database()</code> helper that counts every connection it opens:</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 03_advanced_tool_patterns.ipynb: setup</div><pre>IMPORT sqlite3
+SET DB_PATH = "inventory_demo.db"
+
+// create and seed a small inventory database
+open DB_PATH as conn
+    remove the old inventory table if it exists
+    CREATE the inventory table (id, name, quantity, price)
+    add three products: PROD-123 Wireless Mouse, PROD-456 USB-C Hub, PROD-789 Mechanical Keyboard
+PRINT "Database ready" and DB_PATH
+SET CONNECTIONS_OPENED = 0
+
+DEFINE connect_to_database()
+    ADD 1 to CONNECTIONS_OPENED   // count every connection that is opened
+    RETURN a new connection to DB_PATH, usable from worker threads</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>sqlite3</code> <span class="lk-src">Python standard library</span>: the built-in database. Here it is a small local file, <code>inventory_demo.db</code>.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">03_advanced_tool_patterns.ipynb: setup</span><button class="copy">Copy</button></div><pre><code class="lang-py">import sqlite3
 
 DB_PATH = "inventory_demo.db"
@@ -1596,7 +1940,33 @@ def connect_to_database():
     CONNECTIONS_OPENED += 1
     # check_same_thread=False: the agent may run tools on worker threads
     return sqlite3.connect(DB_PATH, check_same_thread=False)</code></pre></div>
+      </details>
+    </div>
     <div class="prose"><p>Now the naive version, where each tool opens a connection, uses it once and closes it:</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 03_advanced_tool_patterns.ipynb: one connection per tool call</div><pre>IMPORT Agent and tool
+DEFINE check_stock(product_id)   // @tool
+    SET db = connect_to_database()   // a new connection for this call
+    SET row = the quantity for product_id in the inventory table
+    close db
+    RETURN "product_id: N units", or "product_id not found" if there is no row
+
+DEFINE update_stock(product_id, quantity)   // @tool
+    SET db = connect_to_database()   // another new connection
+    change the quantity of product_id in the inventory table to quantity
+    commit the change
+    close db
+    RETURN "Updated product_id to quantity units"
+
+SET CONNECTIONS_OPENED = 0   // reset the counter before the request
+CREATE agent = Agent(model, tools = [check_stock, update_stock])
+ASK agent: "Check stock for PROD-123 and PROD-789, set PROD-456 to 25 units, then confirm PROD-456's new level"
+PRINT the number of connections opened for that one request</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the class that runs the model together with its tools.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that registers a function as a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">03_advanced_tool_patterns.ipynb: one connection per tool call</span><button class="copy">Copy</button></div><pre><code class="lang-py">from strands import Agent, tool
 
 
@@ -1624,6 +1994,8 @@ agent = Agent(model=model, tools=[check_stock, update_stock])
 agent("Check stock for PROD-123 and PROD-789, set PROD-456 to 25 units, then confirm PROD-456's new level")
 
 print(f"\n\nConnections opened for one request: {CONNECTIONS_OPENED}")</code></pre></div>
+      </details>
+    </div>
     <div class="prose">
       <p>That one request needs four tool calls (two checks, an update, a confirm), so it prints about <strong>4 connections</strong>. Harmless here, painful in production, because opening a connection is expensive:</p>
       <ul>
@@ -1670,6 +2042,35 @@ print(f"\n\nConnections opened for one request: {CONNECTIONS_OPENED}")</code></p
     </figure>
 
     <div class="annot">
+      <div class="lk-code">
+        <div class="lk-pseudo"><div class="lk-label">Pseudo code · 03_advanced_tool_patterns.ipynb: class-based tools</div><pre>IMPORT threading
+
+CLASS InventoryTools
+    DEFINE __init__(self)
+        // one shared connection for every tool on this object
+        SET self.db = connect_to_database()   // opened once, here
+        SET self.lock = a new lock            // so only one tool call uses the connection at a time
+
+    DEFINE check_stock(self, product_id)   // @tool method
+        WITH self.lock:
+            SET row = name and quantity for product_id, read from self.db
+        RETURN "name (product_id): N units in stock", or "Product product_id not found" if there is no row
+
+    DEFINE update_stock(self, product_id, quantity)   // @tool method
+        WITH self.lock:
+            change the quantity of product_id to quantity in self.db
+            commit the change
+        RETURN "Updated product_id to quantity units", or "Product product_id not found" if no row changed
+
+SET CONNECTIONS_OPENED = 0
+CREATE inventory = InventoryTools()
+CREATE agent = Agent(model, tools = [inventory.check_stock, inventory.update_stock])
+ASK agent: "Check stock for PROD-123 and PROD-789, set PROD-456 to 40 units, then confirm PROD-456's new level"
+PRINT the number of connections opened for that one request</pre></div>
+        <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+          <li><code>threading</code> <span class="lk-src">Python standard library</span>: provides <code>Lock</code>, which makes tool calls take turns on the shared connection.</li>
+        </ul></div>
+        <details class="lk-reveal"><summary>View code</summary>
       <div class="code"><div class="bar"><span class="file">03_advanced_tool_patterns.ipynb: class-based tools</span><button class="copy">Copy</button></div><pre><code class="lang-py">import threading
 
 
@@ -1712,6 +2113,8 @@ agent = Agent(model=model, tools=[inventory.check_stock, inventory.update_stock]
 agent("Check stock for PROD-123 and PROD-789, set PROD-456 to 40 units, then confirm PROD-456's new level")
 
 print(f"\n\nConnections opened for one request: {CONNECTIONS_OPENED}")</code></pre></div>
+        </details>
+      </div>
       <ol>
         <li><b>__init__</b> Runs once when you create <code>InventoryTools()</code>. That's where the single connection is opened.</li>
         <li><b>self.lock</b> Strands may run several tool calls at the same time on different <button class="kw" data-k="thread">threads</button>. The <button class="kw" data-k="lock">lock</button> makes them take turns on the shared connection.</li>
@@ -1748,10 +2151,18 @@ print(f"\n\nConnections opened for one request: {CONNECTIONS_OPENED}")</code></p
     <div class="prose">
       <p>Two days later your product manager writes: "Users say the agent is too slow. It takes ages to tell them whether an order can ship." To answer "Can we ship 100 units of PROD-123?", the agent checks three warehouses, each with its own API that takes about 2 seconds. Called one after another:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 03_advanced_tool_patterns.ipynb: the slow way</div><pre>SET warehouse_a = check_warehouse_inventory("PROD-123", "warehouse_a")   // about 2 seconds
+SET warehouse_b = check_warehouse_inventory("PROD-123", "warehouse_b")   // about 2 seconds
+SET warehouse_c = check_warehouse_inventory("PROD-123", "warehouse_c")   // about 2 seconds
+// total: about 6 seconds, because each call waits for the one before it</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">03_advanced_tool_patterns.ipynb: the slow way</span><button class="copy">Copy</button></div><pre><code class="lang-py">warehouse_a = check_warehouse_inventory("PROD-123", "warehouse_a")  # 2 seconds
 warehouse_b = check_warehouse_inventory("PROD-123", "warehouse_b")  # 2 seconds
 warehouse_c = check_warehouse_inventory("PROD-123", "warehouse_c")  # 2 seconds
 # Total: 6 seconds of waiting</code></pre></div>
+      </details>
+    </div>
     <div class="prose">
       <p>(The notebook's real tool names the warehouses east, west and central.) Users stare at a spinner and abandon their carts. But look closely: the three checks don't depend on each other. Warehouse B doesn't need A's answer. They could all happen at the same time.</p>
       <p>That's what <button class="kw" data-k="async">async</button> is for. When a function is marked <code>async</code>, Python's <button class="kw" data-k="event-loop">event loop</button> can pause it at each <button class="kw" data-k="await">await</button> while it waits for slow input/output (like an API response) and switch to other async work on the same thread. Several async functions make progress together, taking turns whenever one is waiting.</p>
@@ -1780,6 +2191,29 @@ warehouse_c = check_warehouse_inventory("PROD-123", "warehouse_c")  # 2 seconds
     </figure>
 
     <div class="annot">
+      <div class="lk-code">
+        <div class="lk-pseudo"><div class="lk-label">Pseudo code · 03_advanced_tool_patterns.ipynb: async tool</div><pre>IMPORT asyncio and time
+
+// @tool, marked async so it can pause while it waits
+DEFINE async check_warehouse_inventory(product_id, warehouse)
+    await asyncio.sleep(2)   // stands in for a 2 second API call
+    SET data = the quantities for PROD-123 and PROD-456, per warehouse
+    SET quantity = data for warehouse and product_id, or 0 if unknown
+    RETURN a dict with warehouse, product_id and quantity
+
+DEFINE async main()
+    CREATE agent = Agent(model, tools = [check_warehouse_inventory])
+    SET start = time.time()
+    await agent.invoke_async("Can we ship 100 units of PROD-123? Check all warehouses: east, west, and central.")
+    SET elapsed = time.time() - start
+    PRINT the answer, then the total time
+
+await main()   // in Jupyter; in a .py script use asyncio.run(main())</pre></div>
+        <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+          <li><code>asyncio</code> <span class="lk-src">Python standard library</span>: the event loop that runs async code, and <code>sleep</code> used here as a stand-in for a slow call.</li>
+          <li><code>time</code> <span class="lk-src">Python standard library</span>: <code>time.time()</code> measures how long the request takes.</li>
+        </ul></div>
+        <details class="lk-reveal"><summary>View code</summary>
       <div class="code"><div class="bar"><span class="file">03_advanced_tool_patterns.ipynb: async tool</span><button class="copy">Copy</button></div><pre><code class="lang-py">import asyncio
 import time
 
@@ -1815,6 +2249,8 @@ async def main():
 
 
 await main()</code></pre></div>
+        </details>
+      </div>
       <ol>
         <li><b>async def</b> Marks the tool as pausable.</li>
         <li><b>await asyncio.sleep(2)</b> Stands in for a 2-second API call. While one call waits here, the others run.</li>
@@ -1824,6 +2260,18 @@ await main()</code></pre></div>
       </ol>
     </div>
     <div class="prose"><p>In a real tool you'd use an async HTTP client instead of <code>asyncio.sleep</code>:</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 03_advanced_tool_patterns.ipynb: with a real async HTTP client</div><pre>IMPORT httpx
+
+// @tool, async so that waiting on the network does not block other tool calls
+DEFINE async check_warehouse_inventory(product_id, warehouse) RETURNS int
+    open an async HTTP client as client
+        SET response = await client.get the inventory address for warehouse and product_id
+    RETURN the quantity field from the JSON response</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>httpx</code> <span class="lk-src">third-party package <code>httpx</code></span>: an HTTP client with async support.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">03_advanced_tool_patterns.ipynb: with a real async HTTP client</span><button class="copy">Copy</button></div><pre><code class="lang-py">import httpx
 
 @tool
@@ -1832,6 +2280,8 @@ async def check_warehouse_inventory(product_id: str, warehouse: str) -> int:
     async with httpx.AsyncClient() as client:
         response = await client.get(f"https://api.warehouse-{warehouse}.example.com/inventory/{product_id}")
     return response.json()["quantity"]</code></pre></div>
+      </details>
+    </div>
 
     <div class="sim" id="sim-async">
       <div class="sim-head"><span class="tag">Run it</span><h4>Race: sequential vs async warehouse checks</h4></div>
@@ -1889,6 +2339,34 @@ async def check_warehouse_inventory(product_id: str, warehouse: str) -> int:
       <p>One more option: if a tool needs strict validation of its inputs (a specific format, or only certain allowed values), Strands lets you write an explicit input schema yourself, called a <code>TOOL_SPEC</code>, instead of deriving it from type hints. It's an advanced pattern we won't need in this course. In fact you've already met one: <code>use_aws</code> is defined with a <code>TOOL_SPEC</code>.</p>
     </div>
   </section>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">In the class-based version, when is the single database connection opened?</p>
+      <ol class="lk-opts">
+        <li>Every time a tool method is called<div class="lk-why">That is the problem the class removes. The naive tools opened one connection per call.</div></li>
+        <li data-correct>Once, in <code>__init__</code>, when you create <code>InventoryTools()</code><div class="lk-why">The constructor runs once, opens the connection and stores it in <code>self.db</code>. Every tool method then reuses it.</div></li>
+        <li>Never: the tools use no database<div class="lk-why">The tools read and update the inventory table, so they do need a connection.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does <code>InventoryTools</code> create a <code>threading.Lock</code>?</p>
+      <ol class="lk-opts">
+        <li>It encrypts the connection to the database<div class="lk-why">A lock controls access to a shared resource. It does not encrypt anything.</div></li>
+        <li>It stops the model from calling a tool more than once<div class="lk-why">The lock lives inside the code that runs a tool. It has no effect on how often the model chooses to call a tool.</div></li>
+        <li data-correct>Strands may run several tool calls on different threads at once, and the lock makes them take turns on the shared connection<div class="lk-why">Without the lock, two threads could use one connection at the same time. The lock makes each tool wait its turn.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">In the async tool, what does <code>await asyncio.sleep(2)</code> do?</p>
+      <ol class="lk-opts">
+        <li data-correct>It stands in for a 2 second API call, and while it waits the other tool calls can run<div class="lk-why"><code>await</code> lets the event loop switch to other work during the wait. That is how the three checks overlap.</div></li>
+        <li>It makes the tool run twice as fast<div class="lk-why">Sleeping adds waiting time. It is only a stand-in for a slow API.</div></li>
+        <li>It stops the agent from calling the tool again<div class="lk-why">Sleep has no effect on whether the model calls the tool. It only pauses this one call.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="builder" aria-labelledby="builder-h">
   <div class="sec-head"><span class="sec-num">2.6</span><h2 id="builder-h">Quick start with Strands Agent Builder</h2></div>
@@ -1902,9 +2380,16 @@ async def check_warehouse_inventory(product_id: str, warehouse: str) -> int:
     <p>Training wheels on a bicycle. You get to ride and explore right away without worrying about balance. Once you're confident, the training wheels come off and you write your own agents with full control.</p>
   </div>
   <div class="prose"><p>Install it with <button class="kw" data-k="pipx">pipx</button> (or pip), then start it:</p></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>RUN pipx install strands-agents-builder   // or: pip install strands-agents-builder
+RUN strands                               // start interactive mode
+RUN strands "Build a tool that converts Celsius to Fahrenheit"   // build it from one request</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">pipx install strands-agents-builder     # or: pip install strands-agents-builder
 strands                                 # interactive mode
 strands "Build a tool that converts Celsius to Fahrenheit"</code></pre></div>
+    </details>
+  </div>
 
   <div class="sim" id="sim-builder2">
     <div class="sim-head"><span class="tag">Watch</span><h4>An Agent Builder session (illustrative)</h4></div>
@@ -1966,8 +2451,14 @@ strands "Build a tool that converts Celsius to Fahrenheit"</code></pre></div>
     <h5><span class="ico">⌘</span>Point it at the course model</h5>
     <p>Agent Builder uses Amazon Bedrock by default and reads the model ID from the <code>STRANDS_MODEL_ID</code> environment variable. Its built-in default is an older Claude Sonnet model, so set it to the one the course uses:</p>
   </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>SET STRANDS_MODEL_ID = global.anthropic.claude-sonnet-4-6   // the model the course uses, for this shell
+RUN strands                                                   // the builder now uses that model</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">export STRANDS_MODEL_ID=global.anthropic.claude-sonnet-4-6
 strands</code></pre></div>
+    </details>
+  </div>
 
   <h3>Keeping what you build</h3>
   <div class="prose">
@@ -1987,6 +2478,17 @@ strands</code></pre></div>
     <p>Both frameworks do the same core thing: turn Python functions into tools and let agents use them. The difference is approach. Strands is model-driven: you write minimal code and let the LLM work out the workflow. LangChain gives you more explicit control over how the agent executes, which means more setup code but more ways to customise. You already ran a LangChain agent in Section 1; here is its tool next to one from this section:</p>
   </div>
   <div class="grid-2">
+    <div class="lk-code" style="margin:0">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Strands (this section, shortened)</div><pre>IMPORT Agent and tool
+DEFINE check_inventory(product_id)   // @tool: the model reads the docstring and parameters
+    // body left out in this shortened example
+CREATE agent = Agent(model, tools = [check_inventory])
+ASK agent: "Is PROD-123 in stock?"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code></span>: the class that runs the model together with its tools.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code></span>: the decorator that registers a function as a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code" style="margin:0"><div class="bar"><span class="file">Strands (this section, shortened)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from strands import Agent, tool
 
 @tool
@@ -2000,6 +2502,21 @@ def check_inventory(product_id: str) -> str:
 
 agent = Agent(model=model, tools=[check_inventory])
 agent("Is PROD-123 in stock?")</code></pre></div>
+      </details>
+    </div>
+    <div class="lk-code" style="margin:0">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · LangChain (excerpt, section-01 hello_langgraph_agent.py)</div><pre>IMPORT tool from langchain.tools
+// a simple tool the agent can call
+DEFINE greet(name)   // @tool
+    RETURN "Hello, " + name + "! Welcome to the world of AI agents."
+
+CREATE agent = create_agent(llm, tools = [greet], system_prompt = "You are a friendly assistant.")
+CALL agent.invoke with the message "Please greet Alice and Bob."
+SAVE the result in response</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>tool</code> <span class="lk-src">from <code>langchain.tools</code></span>: the LangChain decorator that registers a function as a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code" style="margin:0"><div class="bar"><span class="file">LangChain (excerpt, section-01 hello_langgraph_agent.py)</span><button class="copy">Copy</button></div><pre><code class="lang-py">from langchain.tools import tool
 
 # A simple tool the agent can call
@@ -2011,6 +2528,8 @@ def greet(name: str) -> str:
 agent = create_agent(model=llm, tools=[greet], system_prompt="You are a friendly assistant.")
 
 response = agent.invoke({"messages": [{"role": "user", "content": "Please greet Alice and Bob."}]})</code></pre></div>
+      </details>
+    </div>
   </div>
   <div class="tbl-wrap">
     <table>
@@ -2024,6 +2543,26 @@ response = agent.invoke({"messages": [{"role": "user", "content": "Please greet 
     </table>
   </div>
   <div class="prose"><p>We use Strands in this course because it's simpler to learn and fits naturally with AWS services like Bedrock, Lambda and S3. If you work in another environment or need LangChain's larger ecosystem, the tool ideas you learned here transfer directly.</p></div>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">The two tool examples above come from different frameworks, but the table says the idea is the same. What do both versions need to describe a tool?</p>
+      <ol class="lk-opts">
+        <li>A YAML file that lists the tool's inputs<div class="lk-why">Neither framework needs a separate YAML file. The description comes from the function itself.</div></li>
+        <li>No docstring, because the framework reads the function body<div class="lk-why">The model does not read the body. The docstring is what tells it what the tool does.</div></li>
+        <li data-correct>A decorator, type hints and a docstring<div class="lk-why">Both versions use <code>@tool</code>, type hints and a docstring. That is the shared recipe from this section.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What is the main difference the page gives between the two frameworks?</p>
+      <ol class="lk-opts">
+        <li>LangChain cannot call tools, while Strands can<div class="lk-why">Both frameworks turn Python functions into tools and let agents use them.</div></li>
+        <li data-correct>Strands is model-driven, with minimal code where the LLM plans the workflow, while LangChain gives explicit control over execution with more setup<div class="lk-why">That is the approach difference in the page's comparison. Strands leaves the planning to the model, and LangChain has you control it.</div></li>
+        <li>Strands only runs on a local computer, while LangChain runs only on AWS<div class="lk-why">The table says Strands fits AWS natively, and LangChain reaches AWS through integrations. Neither is limited to one place.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="recap" aria-labelledby="recap-h">
   <div class="sec-head"><span class="sec-num">2.8</span><h2 id="recap-h">Recap and self-check</h2></div>
@@ -2516,7 +3055,7 @@ function press(group,btn){$$("[aria-pressed]",group).forEach(b=>b.setAttribute("
     q[1].forEach((o,oi)=>{const b=document.createElement("button");b.type="button";b.textContent=o;b.addEventListener("click",()=>{
       if(d.classList.contains("answered"))return;d.classList.add("answered");answered++;
       if(oi===q[2]){right++;b.classList.add("right");}else{b.classList.add("wrong");opts.children[q[2]].classList.add("right");}
-      d.querySelector(".why").innerHTML=(oi===q[2]?"<b style='color:var(--tool-ink)'>Correct.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> ")+esc(q[3]);
+      d.querySelector(".why").innerHTML=(oi===q[2]?"<b style='color:var(--tool-ink)'>Correct.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> You picked “"+esc(o)+"”. The correct answer is <b>“"+esc(q[1][q[2]])+"”</b>. ")+esc(q[3]);
       $("#quiz-score").textContent="Score: "+right+" of "+answered+" answered"+(answered===Q.length?(right>=8?". Great work, you're ready for Section 3.":". Revisit the parts you missed, then try Section 3."):"");
     });opts.appendChild(b);});
     root.appendChild(d);

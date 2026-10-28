@@ -322,6 +322,8 @@ details.qa .a p:last-child{margin-bottom:0}
 :not(pre) > code{overflow-wrap:anywhere}
 
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- aiseq:top -->
@@ -679,7 +681,41 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
     <p class="kicker">Ask 1 · the tools</p>
     <h2>Three functions, each returning a <em>dict</em></h2>
     <p>Every tool takes the raw answer and returns structured data, never a sentence. The model reads JSON reliably; the report needs numbers; the scorecard needs fields. A formatted string would serve none of them.</p>
-<div class="file"><div class="file-bar"><span><b>tools.py</b> · ask 1 · run it directly to test</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> re
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · tools.py</div><pre>SET FILLER_WORDS = a short fixed list ("um", "uh", "like", "basically" and so on)   // the company decides what counts as filler
+SET STAR_SIGNALS = cue phrases for each STAR part: situation, task, action, result
+
+DEFINE _count(phrase, text):
+    // \b on both sides: "um" must not match "summary"
+    RETURN how many times phrase appears as a whole word in text
+
+DEFINE detect_filler_words(answer):
+    SET text = answer in lower case
+    SET found = count of each FILLER_WORDS entry in text
+    keep only the words that appear at least once
+    SET total = sum of the counts in found
+    RETURN total, found, and verdict: "clean" if total is 2 or less, else "needs improvement"
+
+DEFINE check_star_structure(answer):
+    SET text = answer in lower case
+    SET present = each STAR part that has at least one cue found in text
+    SET missing = each STAR part that is not in present
+    RETURN present, missing, and all_present (true when nothing is missing)
+
+DEFINE score_relevance(answer, expected_keywords):
+    SET text = answer in lower case
+    // plain substring on purpose: "listen" should credit "listened"
+    SET covered = each keyword found inside text
+    SET missed = each keyword not found inside text
+    SET score = share of keywords covered, times 100, rounded (0 if there are no keywords)
+    RETURN score, covered, missed
+
+IF this file is run directly THEN PRINT the three results for one weak answer</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>re</code> <span class="lk-src">Python standard library</span>: regular expressions. Used to match whole words only, so “um” is not found inside “summary”.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
+        <div class="file"><div class="file-bar"><span><b>tools.py</b> · ask 1 · run it directly to test</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> re
 
 <span class="c-dim"># Deliberately small and hard-coded: the company decides what counts as filler,</span>
 <span class="c-dim"># not the model. Extend the list; never hand the definition to the LLM.</span>
@@ -738,12 +774,34 @@ STAR_SIGNALS = {
     print(detect_filler_words(weak))
     print(check_star_structure(weak))
     print(score_relevance(weak, [<span class="c-str">"communicat"</span>, <span class="c-str">"listen"</span>, <span class="c-str">"compromise"</span>, <span class="c-str">"data"</span>]))</code></pre></div>
+      </details>
+    </div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>Lists are policy, and they are deliberately incomplete</b>The filler list and the STAR cue lists are non-exhaustive. Extend them as you find misses. The point is that a <em>person</em> extends them, in a reviewed change, not that the model improvises.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>The landmine: substring counting</b>The obvious version is <code>answer.lower().count("um")</code>. It counts the “um” in <em>summary</em>, <em>document</em> and <em>umbrella</em>, and the “like” in <em>likely</em>. A careful candidate gets penalised for vocabulary. Word boundaries (<code>\b</code>) fix it.</span></div>
       <div class="anno"><span class="n">3</span><span class="t"><b>A verdict, not just a count</b><code>total ≤ 2</code> is “clean”. Everyone says “um” occasionally; the threshold encodes how much the company tolerates.</span></div>
       <div class="anno"><span class="n">4</span><span class="t"><b>Relevance uses substrings on purpose</b>Here the opposite choice is right: the keyword <code>listen</code> should credit “listened”, and <code>communicat</code> should credit both “communicated” and “communication”. Store stems in the bank and let the substring match do the rest.</span></div>
       <div class="anno"><span class="n">5</span><span class="t"><b><code>all_present: not missing</code></b>An empty list is falsy, so <code>not missing</code> is <code>True</code> exactly when nothing is missing. It's a small idiom that reads like the sentence it implements.</span></div>
+    </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">A candidate writes: “I summarised the document, and it was likely fine.” What total does <code>detect_filler_words</code> return?</p>
+        <ol class="lk-opts">
+          <li>3, because a plain count finds “um” in <em>summarised</em> and <em>document</em>, and “like” in <em>likely</em><div class="lk-why">That is what a naive <code>.count()</code> would find. The tool matches whole words only, so none of those three is counted.</div></li>
+          <li data-correct>0, because none of the words in the sentence is a filler word on its own<div class="lk-why">The word-boundary check means “um” must be a whole word. “Summarised”, “document” and “likely” contain filler letters, but not as whole words.</div></li>
+          <li>2, because “um” is found twice and “like” is not on the list<div class="lk-why">“Like” is on the list. The two “um” matches sit inside longer words, so the word-boundary check rejects them.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">The expected keyword is <code>listen</code>. The candidate says: “I listened to his reasons first.” Is the keyword covered?</p>
+        <ol class="lk-opts">
+          <li data-correct>Yes, because the check is a plain substring match, so “listen” inside “listened” counts<div class="lk-why"><code>score_relevance</code> looks for the keyword anywhere in the answer text, on purpose, so a stem credits all of its forms.</div></li>
+          <li>No, because only the exact whole word “listen” can be credited<div class="lk-why">Whole-word matching is used for filler words, not for keywords. The bank stores stems so that substring matching does the work.</div></li>
+          <li>Only partly, because a word that contains the keyword earns half credit<div class="lk-why">There is no partial credit. Each keyword is either found in the answer or it goes in the missed list.</div></li>
+        </ol>
+      </div>
     </div>
   </div>
 </section>
@@ -781,7 +839,12 @@ STAR_SIGNALS = {
     <p class="kicker">Ask 1 · the agent</p>
     <h2>The loop that decides when it's <em>done</em></h2>
     <p>The question bank comes first, because <code>score_relevance</code> needs the expected keywords for each question:</p>
-<div class="file"><div class="file-bar"><span><b>interview_bank.py</b> · questions are hard-coded on purpose</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># The company's question bank. Hard-coded on purpose: in production an LLM may</span>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · interview_bank.py</div><pre>SET QUESTIONS = a fixed list of five questions, in this order
+    each question has a category, the question text and expected_keywords
+    // the keywords are what score_relevance looks for in the answer</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
+        <div class="file"><div class="file-bar"><span><b>interview_bank.py</b> · questions are hard-coded on purpose</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-dim"># The company's question bank. Hard-coded on purpose: in production an LLM may</span>
 <span class="c-dim"># generate questions, but only inside categories the hiring team defines.</span>
 QUESTIONS = [
     {
@@ -810,11 +873,66 @@ QUESTIONS = [
         <span class="c-str">"expected_keywords"</span>: [<span class="c-str">"priorit"</span>, <span class="c-str">"stakeholder"</span>, <span class="c-str">"scope"</span>, <span class="c-str">"communicat"</span>, <span class="c-str">"deliver"</span>],
     },
 ]</code></pre></div>
+      </details>
+    </div>
     <p>In production the questions might be LLM-generated, but always <em>inside</em> categories the company defines. For this build they're fixed so every candidate is measured on the same ground.</p>
 
     <h3>Tools the model can see: the schema</h3>
     <p>The model never sees your Python. It sees a JSON description of each tool: its name, a sentence about what it does, and the parameters it takes. The <strong>description is how the model decides whether to call it</strong>, so write it like documentation for a colleague.</p>
-<div class="file"><div class="file-bar"><span><b>agent.py</b> · ask 1 + ask 2 · the heart of the project</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · agent.py</div><pre>LOAD .env, CREATE the Groq client, SET MODEL = "openai/gpt-oss-20b"
+SET session_log = empty list   // one dict per evaluated answer
+SET TOOL_SCHEMA and TOOL_FUNCTIONS = the tools the model may call, and the function that runs each one
+SET SYSTEM_PROMPT = the InterviewIQ coach rules: call the three tools, base feedback only on their results
+SET MAX_TOOL_ROUNDS = 5
+
+DEFINE generate_final_report():
+    IF session_log is empty THEN RETURN "No answers evaluated yet."
+    FOR EACH entry in session_log, numbered from 1:
+        ADD a line with its filler total, missing STAR parts and relevance
+        ADD its relevance score to scores, and its missing STAR parts to gaps
+        IF filler total is above 2 THEN ADD "filler words" to gaps
+    IF scores is not empty THEN
+        ADD average relevance, then the lowest-scoring question and the keywords it missed
+    IF gaps is not empty THEN ADD gaps, most frequent first
+    RETURN all lines joined into one text
+
+DEFINE run_loop(messages, result_out):
+    REPEAT up to MAX_TOOL_ROUNDS (5) times:
+        ASK the model with messages and TOOL_SCHEMA
+        IF the model requested no tools THEN RETURN its text   // done
+        ADD its tool requests to messages
+        FOR EACH tool request:
+            CALL the matching function in TOOL_FUNCTIONS with its arguments
+            IF result_out is given and the tool is not generate_final_report THEN store the result in result_out
+            ADD the result to messages
+    RETURN "Sorry - I couldn't finish evaluating that answer."
+
+DEFINE run_turn(item, answer):
+    SET messages = system prompt, then question, answer and expected keywords
+    SET results = empty dict
+    SET feedback = run_loop(messages, results)
+    ADD question, category, answer, results and feedback to session_log
+    RETURN feedback
+
+DEFINE ask_agent(user_message):
+    SET history = question, category and results of each session_log entry, as JSON
+    CALL run_loop with the system prompt, history and the candidate's message
+    RETURN the reply   // session_log is not changed
+
+DEFINE ask_final_report():
+    RETURN generate_final_report()</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>json</code> <span class="lk-src">Python standard library</span>: writes the session history as JSON text and reads tool arguments back.</li>
+        <li><code>os</code> <span class="lk-src">Python standard library</span>: reads <code>GROQ_API_KEY</code> from the environment.</li>
+        <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: copies the <code>.env</code> file into the environment.</li>
+        <li><code>Groq</code> <span class="lk-src">from <code>groq</code></span>: the client that sends requests to the model.</li>
+        <li><code>detect_filler_words</code> <span class="lk-src">from your <code>tools.py</code></span>: counts filler words, one of the three tools the model may call.</li>
+        <li><code>check_star_structure</code> <span class="lk-src">from your <code>tools.py</code></span>: checks which STAR parts the answer contains.</li>
+        <li><code>score_relevance</code> <span class="lk-src">from your <code>tools.py</code></span>: scores the answer against the expected keywords.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
+        <div class="file"><div class="file-bar"><span><b>agent.py</b> · ask 1 + ask 2 · the heart of the project</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
 <span class="c-key">import</span> os
 
 <span class="c-key">from</span> dotenv <span class="c-key">import</span> load_dotenv
@@ -959,6 +1077,8 @@ MAX_TOOL_ROUNDS = 5
 
 <span class="c-key">def</span> ask_final_report() -&gt; str:
     <span class="c-key">return</span> generate_final_report()</code></pre></div>
+      </details>
+    </div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b>No parameters still needs a schema</b><code>generate_final_report</code> declares <code>"properties": {}</code>. In plain Python you'd never write that, but without it the model doesn't know the function can be called with nothing.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>The dispatch table</b><code>TOOL_FUNCTIONS</code> maps the name the model asks for to a <code>lambda</code> that unpacks its arguments. One dictionary lookup replaces an <code>if/elif</code> chain, and adding a tool is one line here plus one schema entry.</span></div>
@@ -1006,6 +1126,34 @@ with no fillers…"</div></dd></div>
       </div>
       <div class="stage-note">Two requests per answer is the normal case. The loop allows five in case the model wants a second look, for example re-scoring after it notices something.</div>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">The model's first reply has no tool calls and only text. How many model requests does <code>run_turn</code> make for this answer?</p>
+        <ol class="lk-opts">
+          <li>Two, one to request tools and one to write the feedback<div class="lk-why">The loop returns the text as soon as no tool calls come back, so the second request is never made.</div></li>
+          <li>Three, one for each tool<div class="lk-why">Tools run in Python and do not call the model. The model is asked again only when it needs to see tool results.</div></li>
+          <li data-correct>One. <code>run_loop</code> returns the text straight away<div class="lk-why">With no tool calls, the loop exits on its first round, so <code>run_turn</code> makes one request.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">The model keeps asking for tools and reaches the round limit without a plain-text reply. What does <code>session_log</code> store for this answer?</p>
+        <ol class="lk-opts">
+          <li>Nothing, because <code>run_turn</code> only saves answers that got a final reply<div class="lk-why"><code>run_turn</code> appends its entry after <code>run_loop</code> returns, whatever <code>run_loop</code> returned.</div></li>
+          <li data-correct>The apology as feedback, with the tool results captured in the earlier rounds<div class="lk-why"><code>result_out</code> is filled during each round as a tool runs, and <code>run_turn</code> appends the entry with the apology as its feedback.</div></li>
+          <li>Only the feedback, because results are saved only after a final reply<div class="lk-why">Results are captured inside the loop as each tool runs, so they exist even without a final reply.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">Which part decides which tool runs for an answer?</p>
+        <ol class="lk-opts">
+          <li data-correct>The model chooses which tools to request, and your code runs the matching function<div class="lk-why">The model reads the <code>TOOL_SCHEMA</code> descriptions and asks for tools. <code>run_loop</code> looks each name up in <code>TOOL_FUNCTIONS</code> and runs it.</div></li>
+          <li>The Groq server, because it runs the Python functions for the model<div class="lk-why">Your code runs every tool locally. The server only receives the request and returns the model's reply.</div></li>
+          <li>A lookup that matches words in the answer to a tool<div class="lk-why">The loop does no text matching. The choice comes from the tool requests the model sends back.</div></li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1043,6 +1191,26 @@ with no fillers…"</div></dd></div>
       <p><q>Should the final report be written by the LLM or by a Python function?</q></p>
       <p>The <em>numbers</em> by Python, always. Averages and minimums are not a judgement call. In this solution the report is pure code, and the model is free to <em>narrate</em> it when the candidate asks, by calling <code>generate_final_report</code> as a tool and explaining the result. The same split as everywhere else: code measures, the model talks.</p>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">Two answers score 100 and 0. What does <code>generate_final_report</code> report as average relevance?</p>
+        <ol class="lk-opts">
+          <li>100/100, because the highest score is the strongest signal<div class="lk-why">The report takes the mean of all the scores, not the highest one.</div></li>
+          <li>0/100, because the lowest score is used as the average<div class="lk-why">The lowest score is reported on its own line, as the lowest-scoring question. It is not used as the average.</div></li>
+          <li data-correct>50/100, the mean of the two scores<div class="lk-why">Average relevance is the mean of every score in <code>session_log</code>, so (100 + 0) / 2 gives 50.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">Why does the report count recurring gaps across every answer, not just the last one?</p>
+        <ol class="lk-opts">
+          <li data-correct>So the weakest area reflects the whole session, not only the most recent answer<div class="lk-why">The tally covers all the answers, so one weak last answer does not decide the picture. That is what “based on the complete session” means here.</div></li>
+          <li>So the report can be written before the interview ends<div class="lk-why">The report is plain Python over <code>session_log</code> and can be requested at any point. The tally is about the whole session, not timing.</div></li>
+          <li>Because the model cannot read <code>session_log</code>, so the report counts gaps itself<div class="lk-why"><code>ask_agent()</code> does read <code>session_log</code>. The report is computed in Python because the numbers must not depend on the model.</div></li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1058,7 +1226,42 @@ with no fillers…"</div></dd></div>
       <div><dt>Meta-question box</dt><dd>routes to <code>ask_agent()</code></dd></div>
       <div><dt>Final report</dt><dd>button → <code>generate_final_report()</code></dd></div>
     </div>
-<div class="file"><div class="file-bar"><span><b>app.py</b> · ask 3 · python app.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> gradio <span class="c-key">as</span> gr
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · app.py</div><pre>DEFINE format_scorecard():
+    IF session_log is empty THEN RETURN "No answers scored yet."
+    BUILD a Markdown table with one row per answer: question, relevance, fillers and STAR status
+    RETURN the table as text
+
+DEFINE show(i):
+    RETURN "Question i+1 of N" in bold, followed by the question text
+
+DEFINE on_submit(answer, q_index):
+    IF q_index is past the last question THEN RETURN a "no more questions" message and the scorecard
+    SET feedback = agent.run_turn(QUESTIONS[q_index], answer)
+    SET next = q_index + 1
+    SET display = show(next), or a "click Final report" message if the interview is over
+    RETURN feedback, scorecard, next, display, and "" to clear the answer box
+
+DEFINE ask_coach(message):
+    RETURN agent.ask_agent(message)
+
+DEFINE final_report():
+    RETURN agent.ask_final_report() inside a code block
+
+BUILD the page with gradio Blocks:
+    show the title, a question-index state starting at 0, the first question, an answer box and a Submit button
+    show a feedback box, the live scorecard, a meta-question box with an Ask button, and a Final report button
+    when Submit is clicked, CALL on_submit with the answer and the question index
+    when Ask is clicked, CALL ask_coach with the meta-question
+    when Final report is clicked, CALL final_report
+IF this file is run directly THEN start the demo</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>gradio</code> (as <code>gr</code>) <span class="lk-src">Gradio package</span>: builds the browser page from text boxes, buttons and Markdown areas.</li>
+        <li><code>agent</code> <span class="lk-src">your own <code>agent.py</code></span>: the evaluator. Runs each answer, answers meta-questions and builds the report.</li>
+        <li><code>QUESTIONS</code> <span class="lk-src">from <code>interview_bank</code>, your own file</span>: the fixed question list, shown one at a time.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
+        <div class="file"><div class="file-bar"><span><b>app.py</b> · ask 3 · python app.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> gradio <span class="c-key">as</span> gr
 
 <span class="c-key">import</span> agent
 <span class="c-key">from</span> interview_bank <span class="c-key">import</span> QUESTIONS
@@ -1121,6 +1324,8 @@ with no fillers…"</div></dd></div>
 
 <span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
     demo.launch()</code></pre></div>
+      </details>
+    </div>
     <div class="annos">
       <div class="anno"><span class="n">1</span><span class="t"><b><code>gr.State(0)</code> holds the question index</b>The state value goes in as an input and comes back out as an output. That round trip is how a Gradio app remembers anything between clicks.</span></div>
       <div class="anno"><span class="n">2</span><span class="t"><b>Five outputs, five return values, in order</b><code>on_submit</code> returns feedback, scorecard, next index, next question and <code>""</code>. That last empty string is what clears the answer box. The order has to match the <code>outputs=[…]</code> list exactly.</span></div>
@@ -1128,7 +1333,20 @@ with no fillers…"</div></dd></div>
     </div>
 
     <h3>The terminal version is not the same product</h3>
-<div class="file"><div class="file-bar"><span><b>main.py</b> · python main.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> agent
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · main.py</div><pre>PRINT the "terminal mode" heading
+FOR EACH question in QUESTIONS, numbered from 1:
+    PRINT the question
+    ASK the candidate for an answer, typed in the terminal
+    PRINT the feedback from agent.run_turn(question, answer)
+PRINT the "Final report" heading
+PRINT agent.ask_final_report()   // runs once, after the last question</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>agent</code> <span class="lk-src">your own <code>agent.py</code></span>: runs each answer through the evaluator and builds the final report.</li>
+        <li><code>QUESTIONS</code> <span class="lk-src">from <code>interview_bank</code>, your own file</span>: the questions, asked in order.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
+        <div class="file"><div class="file-bar"><span><b>main.py</b> · python main.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> agent
 <span class="c-key">from</span> interview_bank <span class="c-key">import</span> QUESTIONS
 
 <span class="c-dim"># The CLI flow is strictly sequential: no meta questions mid-interview,</span>
@@ -1142,6 +1360,8 @@ print(<span class="c-str">"=== InterviewIQ (terminal mode) ==="</span>)
 
 print(<span class="c-str">"\n=== Final report ==="</span>)
 print(agent.ask_final_report())</code></pre></div>
+      </details>
+    </div>
     <div class="tablewrap">
       <table>
         <thead><tr><th style="width:24%"></th><th>main.py · CLI</th><th>app.py · Gradio</th></tr></thead>
@@ -1153,6 +1373,26 @@ print(agent.ask_final_report())</code></pre></div>
         </tbody>
       </table>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">The last value returned by <code>on_submit</code> is an empty string. What does it do?</p>
+        <ol class="lk-opts">
+          <li>It marks the question as skipped, so the next one is shown<div class="lk-why">Skipping is not part of this flow. The next question comes from the index that <code>on_submit</code> returns.</div></li>
+          <li data-correct>It clears the answer box<div class="lk-why">The answer box is the fifth item in <code>outputs=[…]</code>, so the empty string replaces whatever the candidate typed.</div></li>
+          <li>It is ignored, because Gradio only reads the first four outputs<div class="lk-why">Gradio matches each returned value to its output by position, so all five are used.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">You want a terminal-only run where the final report prints automatically after the last question. Which file do you run?</p>
+        <ol class="lk-opts">
+          <li>app.py, because Gradio prints the report once the last question is answered<div class="lk-why"><code>app.py</code> shows the report only when the Final report button is clicked, in the browser.</div></li>
+          <li>memory_check.py, because it runs every answer for you and prints a report<div class="lk-why"><code>memory_check.py</code> feeds fixed answers and prints PASS or FAIL checks. It is not an interview with typed input.</div></li>
+          <li data-correct>main.py, because its flow is strictly sequential and prints the report after the last question<div class="lk-why"><code>main.py</code> asks each question in turn, then prints the final report. It has no meta-question box.</div></li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1161,7 +1401,26 @@ print(agent.ask_final_report())</code></pre></div>
     <p class="kicker">Ask 2 · verification</p>
     <h2>Prove the memory with a <em>planted</em> weak answer</h2>
     <p><code>memory_check.py</code> is written last, once there is something to check. It feeds one strong answer and one deliberately weak answer, asks the agent about performance, and checks the weak answer was identified as the weakest area. It's a test with a known right answer, because you planted it.</p>
-<div class="file"><div class="file-bar"><span><b>memory_check.py</b> · milestone 10 · python memory_check.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> agent
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · memory_check.py</div><pre>SET STRONG = a complete answer with situation, task, action and result
+SET WEAK = a vague answer full of filler words
+clear agent.session_log   // start from an empty session
+RUN agent.run_turn on QUESTIONS[0] with STRONG   // should score high
+RUN agent.run_turn on QUESTIONS[1] with WEAK     // planted: deliberately weak
+SET report = agent.ask_final_report()
+SET reply = agent.ask_agent("What is my weakest area so far?")
+PRINT report, then reply
+SET checks:
+    report contains "Lowest-scoring question: Q2"
+    the Q2 score is below the Q1 score
+    reply contains disagree, teammate, q2 or "question 2" (ignoring case)
+FOR EACH check: PRINT "PASS" if it is true, otherwise "FAIL"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>agent</code> <span class="lk-src">your own <code>agent.py</code></span>: the module under test. Its session log and evaluator are used directly.</li>
+        <li><code>QUESTIONS</code> <span class="lk-src">from <code>interview_bank</code>, your own file</span>: supplies the questions for the two planted answers.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
+        <div class="file"><div class="file-bar"><span><b>memory_check.py</b> · milestone 10 · python memory_check.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> agent
 <span class="c-key">from</span> interview_bank <span class="c-key">import</span> QUESTIONS
 
 STRONG = (<span class="c-str">"When I was at my previous company, checkout failed for 2% of users. "</span>
@@ -1188,6 +1447,8 @@ checks = {
 }
 <span class="c-key">for</span> name, ok <span class="c-key">in</span> checks.items():
     print((<span class="c-str">"PASS "</span> <span class="c-key">if</span> ok <span class="c-key">else</span> <span class="c-str">"FAIL "</span>) + name)</code></pre></div>
+      </details>
+    </div>
     <div class="calc"><i>expected output (abridged)</i>
 Average relevance: <b>50/100</b>
 Lowest-scoring question: <b>Q2</b> (behavioural) at <b>0/100</b>
@@ -1198,6 +1459,26 @@ Recurring gaps: situation x1, task x1, action x1, result x1, filler words x1
 <b>PASS</b> Q2 scored below Q1
 <b>PASS</b> agent's answer points at the disagreement question</div>
     <p>The first two checks are deterministic: they test code. The third tests the model, and it can occasionally fail on wording even when the memory is fine. Keep that distinction in mind when one of them goes red.</p>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem"><code>memory_check.py</code> clears <code>agent.session_log</code> before it runs anything. What would go wrong without that line?</p>
+        <ol class="lk-opts">
+          <li data-correct>The checks could look at the wrong answers, because they read <code>session_log[0]</code> and <code>session_log[1]</code><div class="lk-why">The checks assume the planted answers are the first two entries. Any earlier entries would shift them.</div></li>
+          <li>The Groq key would be loaded twice and the run would fail<div class="lk-why">The key is read once when <code>agent.py</code> is imported. Clearing the log does not touch it.</div></li>
+          <li>Nothing, because the report only reads the newest entry<div class="lk-why"><code>generate_final_report</code> loops over every entry in <code>session_log</code>, so old answers would change the average.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">The weak answer is written with filler words and vague wording. Why?</p>
+        <ol class="lk-opts">
+          <li>Because the tools only score answers that contain filler words<div class="lk-why">Each tool runs on any answer. Filler words, STAR parts and relevance are scored separately.</div></li>
+          <li data-correct>So the test has a known right answer to check the memory against<div class="lk-why">It was planted on purpose, so the report should name Q2 as the weakest area. If the report misses it, the memory or the report has a bug.</div></li>
+          <li>So the model is forced to call <code>detect_filler_words</code><div class="lk-why">The system prompt asks for all three tools on every answer, whatever the wording. The planted answer does not force any call.</div></li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1240,7 +1521,29 @@ Recurring gaps: situation x1, task x1, action x1, result x1, filler words x1
     </figure>
   </div>
   <div class="col">
-<div class="file"><div class="file-bar"><span><b>interviewer_agent.py</b> · bonus · the second agent</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · interviewer_agent.py</div><pre>SET CATEGORIES = sorted, unique categories from QUESTIONS   // behavioural, technical
+SET PASS_MARK = 60
+SET INTERVIEWER_PROMPT = the rules for picking a category, ending in a one-word reply
+
+DEFINE remaining(category, asked):
+    RETURN the questions in that category that are not in asked
+
+DEFINE choose_next_question(asked):
+    IF every question has been asked THEN RETURN None
+    SET history = category and relevance score of each session_log entry
+    ASK the model for a category, with INTERVIEWER_PROMPT and history
+    SET category = the reply, trimmed and in lower case
+    IF the reply is not a known category or has no questions left THEN
+        SET category = the first category that still has questions
+    RETURN the first remaining question in that category</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>json</code> <span class="lk-src">Python standard library</span>: turns the session history into JSON text for the model.</li>
+        <li><code>agent</code> <span class="lk-src">your own <code>agent.py</code></span>: shares the Groq client, <code>MODEL</code> and <code>session_log</code>.</li>
+        <li><code>QUESTIONS</code> <span class="lk-src">from <code>interview_bank</code>, your own file</span>: used to list the categories and find unasked questions.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
+        <div class="file"><div class="file-bar"><span><b>interviewer_agent.py</b> · bonus · the second agent</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> json
 
 <span class="c-key">import</span> agent
 <span class="c-key">from</span> interview_bank <span class="c-key">import</span> QUESTIONS
@@ -1276,7 +1579,24 @@ Reply with exactly one word from: {", ".join(CATEGORIES)}"""</span>
     <span class="c-key">if</span> category <span class="c-key">is</span> <span class="c-key">None</span>:
         category = next(c <span class="c-key">for</span> c <span class="c-key">in</span> CATEGORIES <span class="c-key">if</span> remaining(c, asked))
     <span class="c-key">return</span> remaining(category, asked)[0]</code></pre></div>
-<div class="file"><div class="file-bar"><span><b>run_multi_agent.py</b> · bonus · python run_multi_agent.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> agent
+      </details>
+    </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · run_multi_agent.py</div><pre>SET asked = empty set
+SET item = choose_next_question(asked)
+WHILE item is not None:
+    PRINT the item's category and question
+    ASK the candidate for an answer
+    PRINT the feedback from agent.run_turn(item, answer)   // the evaluator judges
+    ADD the question to asked
+    SET item = choose_next_question(asked)
+PRINT agent.ask_final_report()</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>agent</code> <span class="lk-src">your own <code>agent.py</code></span>: the evaluator. Runs each answer and builds the final report.</li>
+        <li><code>choose_next_question</code> <span class="lk-src">from <code>interviewer_agent</code>, your own file</span>: the interviewer agent that picks each next question.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
+        <div class="file"><div class="file-bar"><span><b>run_multi_agent.py</b> · bonus · python run_multi_agent.py</span><button class="copy" type="button">COPY</button></div><pre><code><span class="c-key">import</span> agent
 <span class="c-key">from</span> interviewer_agent <span class="c-key">import</span> choose_next_question
 
 asked = set()
@@ -1287,9 +1607,31 @@ asked = set()
     asked.add(item[<span class="c-str">"question"</span>])
 
 print(<span class="c-str">"\n"</span> + agent.ask_final_report())</code></pre></div>
+      </details>
+    </div>
     <div class="room">
       <span class="tag">Production reality</span>
       <p><strong>Validate every hand-off between agents.</strong> The interviewer is asked for one word from a fixed list. Sometimes it will answer “Technical.” or “I'd suggest behavioural”, or name a category that has run out of questions. The code checks the reply against the allowed set and falls back deterministically. An agent's output is untrusted input to the next agent.</p>
+    </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">The last answer scored 40, and technical questions remain. What does the interviewer's prompt tell the model to do next?</p>
+        <ol class="lk-opts">
+          <li>Move to the category the candidate has seen least<div class="lk-why">That rule applies when the score is 60 or more, or when the category has no unasked questions left.</div></li>
+          <li data-correct>Stay in technical, to probe depth<div class="lk-why">A score below 60 with unasked questions left in the same category means stay, so the interviewer can probe further.</div></li>
+          <li>Pick a random category, so candidates cannot predict the next question<div class="lk-why">The prompt never asks for randomness. It says to stay in the category or move to the least-seen one.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">What makes the <code>while</code> loop in <code>run_multi_agent.py</code> end?</p>
+        <ol class="lk-opts">
+          <li data-correct><code>choose_next_question</code> returns <code>None</code>, which happens once every question has been asked<div class="lk-why">The loop stops at <code>None</code>. <code>choose_next_question</code> returns <code>None</code> when every question in the bank is in <code>asked</code>.</div></li>
+          <li>The candidate types quit, and the loop checks for that word<div class="lk-why">The loop has no quit check. It only stops when there is no question left to choose.</div></li>
+          <li>The evaluator returns a score of 60 or more<div class="lk-why">A score never ends the loop. A low score only changes which category the interviewer picks next.</div></li>
+        </ol>
+      </div>
     </div>
   </div>
 </section>

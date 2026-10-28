@@ -324,6 +324,8 @@ footer{padding:48px 0 80px;color:var(--muted);font-size:.95rem;border-top:1px so
   body{background:#fff}
 }
 </style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
 </head>
 <body>
 <!-- Shared arrowheads for every diagram on the page -->
@@ -578,6 +580,25 @@ a.awsq-home:hover{background:var(--card-2);text-decoration:none}
     <p>The usual path looks like the journey at the top of this page: a basic LLM, then single prompts, then chatbots, then chatbots grounded with RAG, and finally agents that reason, use tools and act.</p>
   </div>
 
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">In the exam-hall analogy, what is an agent?</p>
+      <ol class="lk-opts">
+        <li data-correct>Giving the topper a phone, a laptop and permission to make calls on your behalf<div class="lk-why">An agent adds tools and a loop, so the model can act. That is the phone and laptop in the analogy.</div></li>
+        <li>Slipping the right pages under the door<div class="lk-why">That is RAG: the right information is handed over before the model answers.</div></li>
+        <li>Making the topper read more books before the exam<div class="lk-why">That is retraining. Neither fix in this section changes what the model learned.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What is the main difference between RAG and an agent?</p>
+      <ol class="lk-opts">
+        <li>RAG retrains the model on your data, while an agent only writes better prompts<div class="lk-why">RAG does not retrain the model. It changes what goes into the prompt.</div></li>
+        <li>An agent is a RAG chatbot with a bigger model behind it<div class="lk-why">Model size is not the difference. An agent adds tools and a loop of plan, act and reason.</div></li>
+        <li data-correct>RAG gives the model the right facts before it answers, while an agent also gets tools and a loop to act<div class="lk-why">RAG makes the model know more. Agents make it able to do things.</div></li>
+      </ol>
+    </div>
+  </div>
   <h3>What you'll learn here</h3>
   <div class="prose">
     <ol>
@@ -934,6 +955,33 @@ a.awsq-home:hover{background:var(--card-2);text-decoration:none}
     <h5><span class="ico">i</span>Where this goes next</h5>
     <p>Hold on to RAG. In the next part you will see that agents often use RAG as <em>one of their tools</em>, calling it only when they need facts.</p>
   </div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">Why are filtering and reranking optional steps in the RAG pipeline?</p>
+      <ol class="lk-opts">
+        <li data-correct>They improve answer quality, but add cost, latency and moving parts, so you add them only when needed<div class="lk-why">Like paying for interviews only when the quick resume screen is not good enough, you add the extra scoring when plain retrieval falls short.</div></li>
+        <li>Similarity search is already perfect, so they never help<div class="lk-why">Similarity search is fast but rough. Reranking and filtering exist because it sometimes returns weak chunks.</div></li>
+        <li>They only work with PDF documents<div class="lk-why">They work on the retrieved chunks, whatever the source documents were.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">A user asks "How many days off do I get?" The handbook says "Every employee gets 24 days of paid leave." Why can a vector search still find that sentence?</p>
+      <ol class="lk-opts">
+        <li>Both sentences share most of the same words<div class="lk-why">They share almost no words, which is exactly why plain keyword search would miss the match.</div></li>
+        <li data-correct>Similar meanings produce vectors that sit close together, even with few shared words<div class="lk-why">An embedding captures meaning, so the question lands near the leave-policy sentence.</div></li>
+        <li>The database stores each likely question next to its answer<div class="lk-why">Stored chunks are document text with their vectors. The database finds the nearest vectors; it does not hold pre-written answers.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why is the user's question turned into a vector with the same embedding model used for the chunks?</p>
+      <ol class="lk-opts">
+        <li data-correct>So that the question can be compared with the chunk vectors by meaning<div class="lk-why">Both sit in the same space, so the closest vectors are the chunks nearest in meaning to the question. A different model would give vectors that cannot be compared.</div></li>
+        <li>Because the language model can only read vectors<div class="lk-why">The language model reads text. Vectors are used only to find the right chunks, which are then sent as text.</div></li>
+        <li>To encrypt the question before it reaches the database<div class="lk-why">Embedding is not encryption. It turns text into numbers that capture its meaning.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="agents" aria-labelledby="agents-h">
   <div class="sec-head"><span class="sec-num">1.2</span><h2 id="agents-h">What is an AI agent?</h2></div>
@@ -1124,6 +1172,25 @@ a.awsq-home:hover{background:var(--card-2);text-decoration:none}
     </div>
     <div class="prose"><p>With this picture of how an agent is put together, let's see how these ideas map onto real services on AWS.</p></div>
   </section>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">An agent should remember next week that a user prefers vegetarian food. Which part of the agent does this?</p>
+      <ol class="lk-opts">
+        <li>Planning, which sets the order of tasks<div class="lk-why">Planning decides the best order of actions for a goal. It does not store facts about a user.</div></li>
+        <li>Tools, which fetch information from outside<div class="lk-why">Tools reach beyond the model's own knowledge to do things. They do not keep a record of the user.</div></li>
+        <li data-correct>Memory, which keeps long-term facts as well as the current conversation<div class="lk-why">Memory stores past interactions, short-term and long-term, so the agent keeps context across sessions.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">A booking agent first checks calendars, then books a room, then sends invites. Which ability is it using to set this order?</p>
+      <ol class="lk-opts">
+        <li>Reasoning, because it looks at each result<div class="lk-why">Reasoning means looking at results and updating the plan. Here the agent sets the order of tasks before it starts.</div></li>
+        <li data-correct>Planning, because it breaks the goal into tasks in a sensible order<div class="lk-why">Planning turns a high-level objective into tasks that can actually be carried out.</div></li>
+        <li>Memory, because it remembers the calendar<div class="lk-why">Memory stores past interactions and context. Knowing the calendar is not the same as deciding the order of work.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="stack" aria-labelledby="stack-h">
   <div class="sec-head"><span class="sec-num">1.3</span><h2 id="stack-h">The AWS agentic stack</h2></div>
@@ -1394,6 +1461,19 @@ a.awsq-home:hover{background:var(--card-2);text-decoration:none}
   <h3>The same blueprint, inside our first script</h3>
   <div class="prose"><p>Here is <code>hello_agent.py</code> from the Section 1 folder. Even ten lines touch steps 2, 3 and 5. Step 4 (tools) arrives in the notebook you run in the lab.</p></div>
   <div class="annot">
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · section-01-your-first-agent/hello_agent.py (trimmed)</div><pre>SET MODEL_ID = environment variable BEDROCK_MODEL_ID, or "global.anthropic.claude-sonnet-4-6" if it is not set
+SET REGION = environment variable AWS_REGION, or AWS_DEFAULT_REGION, or "us-east-1"
+CREATE model = BedrockModel for MODEL_ID in REGION
+CREATE agent = Agent that uses model
+SET response = the agent's answer to "Hello! Tell me a fun fact about AI agents."
+PRINT response</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>os</code> <span class="lk-src">Python standard library</span>: reads settings such as the model ID and Region from environment variables.</li>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code>, package strands-agents</span>: the agent that combines the model with its tools and prompt.</li>
+        <li><code>BedrockModel</code> <span class="lk-src">from <code>strands.models.bedrock</code>, package strands-agents</span>: the model adapter that sends each call to Amazon Bedrock.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">section-01-your-first-agent/hello_agent.py (trimmed)</span><button class="copy">Copy</button></div><pre><code class="lang-py">import os
 
 from strands import Agent
@@ -1407,6 +1487,8 @@ agent = Agent(model=model)
 
 response = agent("Hello! Tell me a fun fact about AI agents.")
 print(response)</code></pre></div>
+      </details>
+    </div>
     <ol>
       <li><b>from strands import Agent</b> Step 2: the framework (Strands Agents) supplies the agent logic.</li>
       <li><b>BedrockModel(…)</b> Step 3: the brain. Every call to the agent becomes an API call to Amazon Bedrock in your Region.</li>
@@ -1503,6 +1585,16 @@ print(response)</code></pre></div>
     <h5><span class="ico">⌘</span>In our code: <code>setup/check_setup.py</code></h5>
     <p>The setup checker is a pure stage-1 call. It sends one message straight to the model through Bedrock's Converse API, with no agent and no tools:</p>
   </div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · setup/check_setup.py (excerpt)</div><pre>CREATE runtime = Bedrock runtime client in REGION
+FOR EACH model_id IN MODELS:
+    TRY
+        ASK model_id "Reply with the single word: ready"   // one tiny Converse call, no agent and no tools
+        SET text = the reply text, trimmed
+        PRINT model_id and text
+    ON ERROR
+        PRINT model_id and the error</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="bar"><span class="file">setup/check_setup.py (excerpt)</span><button class="copy">Copy</button></div><pre><code class="lang-py">runtime = boto3.client("bedrock-runtime", region_name=REGION)
 for model_id in MODELS:
     try:
@@ -1515,6 +1607,8 @@ for model_id in MODELS:
         print(f"✅ {model_id}: {text}")
     except Exception as e:
         print(f"❌ {model_id}: {e}")</code></pre></div>
+    </details>
+  </div>
 
   <h3>Stage 2. LLM + RAG</h3>
   <div class="prose">
@@ -1691,6 +1785,33 @@ for model_id in MODELS:
     <p>Agentic workflows, autonomous agents and multi-agent teams get full hands-on treatment in Section 4 (supervisor-worker, agent as a tool, graph and swarm patterns) and Section 5 (MCP and A2A).</p>
   </div>
   <div class="prose"><p>Now that you understand how agents evolve and grow more complex, let's look at how they talk to tools and to each other.</p></div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">What does the augmented LLM stage add to a plain LLM?</p>
+      <ol class="lk-opts">
+        <li>A larger training dataset, so it knows more facts<div class="lk-why">Training data is fixed. Augmentation adds retrieval, tools and memory around the model without retraining it.</div></li>
+        <li>The freedom to set its own goals with no human input<div class="lk-why">That describes the autonomous agent, which is a later stage.</div></li>
+        <li data-correct>Retrieval, tools and memory, which help it find information, act and track progress<div class="lk-why">These are the three pillars of the augmented LLM: where to find information, how to act with it, and how to keep track of progress.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What is the difference between traditional RAG and agentic RAG?</p>
+      <ol class="lk-opts">
+        <li>Agentic RAG skips retrieval and relies on the agent's memory<div class="lk-why">Agentic RAG still retrieves. The difference is that the agent decides when and how to do it.</div></li>
+        <li data-correct>Traditional RAG follows one fixed path every time, while in agentic RAG the agent decides when to retrieve<div class="lk-why">Traditional RAG always runs retrieve, then generate. In agentic RAG, retrieval is one tool the agent chooses to call.</div></li>
+        <li>They differ only in which embedding model they use<div class="lk-why">Both use retrieval. The page's distinction is who decides when retrieval happens.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does the page say that autonomy needs limits?</p>
+      <ol class="lk-opts">
+        <li data-correct>An agent that acts without anyone checking first can do real damage, so it needs hard limits and a log<div class="lk-why">The page's example is an agent that trades money: a maximum trade size, allowed instruments, a kill switch and a full log of decisions.</div></li>
+        <li>Autonomous agents cannot call tools, so limits are added to compensate<div class="lk-why">Autonomous agents do use tools. Limits are about what an agent may do and how it can be stopped.</div></li>
+        <li>Limits make the LLM answer faster<div class="lk-why">Limits are about safety and control, not speed.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="protocols" aria-labelledby="proto-h">
   <div class="sec-head"><span class="sec-num">1.6</span><h2 id="proto-h">Agent protocols: MCP and A2A</h2></div>
@@ -1965,6 +2086,21 @@ for model_id in MODELS:
     <div class="prose">
       <p>Agents advertise their capabilities with an <button class="kw" data-k="agent-card">Agent Card</button>, a small <button class="kw" data-k="json">JSON</button> document usually published at <code>/.well-known/agent-card.json</code>. The client agent reads cards to find the best agent for a task, then uses A2A to talk to it. Here is roughly what the card of the flights agent you build in Section 5 looks like:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · Agent card for a flights agent (illustrative)</div><pre>DEFINE the agent card as a JSON document:
+    SET name = "Flights Agent"
+    SET description = "Searches for and books flights between cities."
+    SET url = the localhost address on port 9002
+    SET version = "1.0.0"
+    SET capabilities: streaming = on
+    SET default input and output modes = text
+    ADD one skill:
+        id = "search_flights"
+        name = "Search flights"
+        description = "Find available flights between two cities."
+        tags = travel, flights
+        example request = "Find flights from London to Paris"</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">Agent card for a flights agent (illustrative)</span><button class="copy">Copy</button></div><pre><code class="lang-json">{
   "name": "Flights Agent",
   "description": "Searches for and books flights between cities.",
@@ -1983,6 +2119,8 @@ for model_id in MODELS:
     }
   ]
 }</code></pre></div>
+      </details>
+    </div>
     <div class="callout analogy">
       <h5><span class="ico">✦</span>Think of it like this</h5>
       <p>An agent card is a <strong>visiting card plus a menu</strong>: who I am, where to reach me, and the list of dishes I can make. The client agent reads the menus and orders from the right kitchen.</p>
@@ -2046,6 +2184,33 @@ for model_id in MODELS:
       <p>A2A is supported on Amazon Bedrock AgentCore Runtime, so agents deployed there can discover peers, share capabilities and coordinate across platforms. You'll build A2A travel agents in Section 5 (<code>section-05-mcp-and-a2a/a2a-travel-agents</code>) and run a multi-agent system on AgentCore in Section 6.</p>
     </div>
   </section>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">A flights agent (a remote agent) uses MCP to reach its own flights database. What does the client agent see of that?</p>
+      <ol class="lk-opts">
+        <li>Every MCP call, passed along over A2A<div class="lk-why">The client only talks A2A to the remote agent. It does not see what the remote agent does behind the scenes.</div></li>
+        <li data-correct>Nothing: it is internal to the remote agent, and the client only sees the results it is sent<div class="lk-why">A remote agent can use MCP for its own tools, and you never see that from outside.</div></li>
+        <li>The database contents, copied into the agent card<div class="lk-why">An agent card lists name, URL and skills. It does not carry data.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What is an Agent Card?</p>
+      <ol class="lk-opts">
+        <li>A payment token that lets an agent call a model<div class="lk-why">Model access is controlled by AWS credentials and IAM permissions, not by an Agent Card.</div></li>
+        <li>The memory store where an agent keeps past conversations<div class="lk-why">Memory is a separate part of an agent. An Agent Card is a public description of what the agent offers.</div></li>
+        <li data-correct>A small JSON document that advertises an agent's name, URL and skills so other agents can find it<div class="lk-why">The client agent reads cards to find the best agent for a task, and the card lists the skills it can perform.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">How do MCP and A2A relate?</p>
+      <ol class="lk-opts">
+        <li data-correct>They are complementary: MCP connects an agent to tools, and A2A connects agents to each other<div class="lk-why">The page calls them partners, not rivals. A system can use both, because they solve different problems.</div></li>
+        <li>They compete, so a system should choose one<div class="lk-why">The page calls them partners, not rivals. They solve different problems.</div></li>
+        <li>A2A replaces MCP, because agents can now call each other as tools<div class="lk-why">A2A does not replace the agent-to-tool connection. MCP still covers that job.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="strands" aria-labelledby="strands-h">
   <div class="sec-head"><span class="sec-num">1.7</span><h2 id="strands-h">Strands Agents and the agent loop</h2></div>
@@ -2243,6 +2408,25 @@ for model_id in MODELS:
     <h5><span class="ico">i</span>Strands in one sentence</h5>
     <p>Strands has three core ingredients, a <strong>model</strong>, <strong>tools</strong> and a <strong>prompt</strong>, plus the <strong>agentic feedback loop</strong> that lets the agent adapt to changing situations, handle the unexpected, and improve its result with every pass round the loop. Now let's build one.</p>
   </div>
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">In the agent loop, who actually executes the tool the model asked for?</p>
+      <ol class="lk-opts">
+        <li>The model, from inside Bedrock<div class="lk-why">The model only requests the tool. It never runs code itself.</div></li>
+        <li data-correct>The agent, which runs it and sends the result back to the model<div class="lk-why">The model decides and asks, and the agent runs the tool and returns the result for the next pass.</div></li>
+        <li>The user, who must run the tool by hand<div class="lk-why">The loop is automatic. The agent runs the tool without waiting for the user.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What makes a Strands agent model-driven rather than workflow-driven?</p>
+      <ol class="lk-opts">
+        <li data-correct>The model plans, reasons and chooses tools by itself, from the goal and the tools you give it<div class="lk-why">You describe the goal and hand over the tools. The cab driver in the analogy picks the roads on their own.</div></li>
+        <li>The developer writes a fixed list of steps that the agent must follow in order<div class="lk-why">That is the workflow-driven approach, like turn-by-turn directions that get stuck when a road is closed.</div></li>
+        <li>The agent is a plain function with no model in it<div class="lk-why">A Strands agent always calls a model. It is the model that decides the next step.</div></li>
+      </ol>
+    </div>
+  </div>
 </section>
 <section class="sec" id="lab" aria-labelledby="lab-h">
   <div class="sec-head"><span class="sec-num">1.8</span><h2 id="lab-h">Lab: your Hello World agent</h2></div>
@@ -2288,7 +2472,12 @@ for model_id in MODELS:
     <div class="prose">
       <p>The <code>global.</code> prefix is a <button class="kw" data-k="inference-profile">cross-Region inference profile</button>: Bedrock routes each request to whichever AWS Region can serve it best, and it works from any supported source Region, including India. To switch the model everywhere without touching code, set an environment variable:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal</div><pre>SET BEDROCK_MODEL_ID = global.anthropic.claude-haiku-4-5-20251001-v1:0   // this terminal session only; the scripts read it</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">export BEDROCK_MODEL_ID=global.anthropic.claude-haiku-4-5-20251001-v1:0</code></pre></div>
+      </details>
+    </div>
 
     <figure class="fig">
       <div class="scroll-hint">Swipe sideways to see the full diagram</div>
@@ -2350,9 +2539,27 @@ for model_id in MODELS:
       <li><span class="k">2</span><div><h4>Create a virtual environment</h4><p>A <button class="kw" data-k="venv">virtual environment</button> keeps this course's libraries separate from everything else on your machine.</p></div></li>
       <li><span class="k">3</span><div><h4>Set the Region and run the check</h4><p>Point everything at us-east-1, then run the pre-flight script.</p></div></li>
     </ol>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal: 1. credentials</div><pre>RUN aws configure   // enter your access key, secret key and Region (us-east-1)
+// or, with IAM Identity Center (SSO):
+RUN aws configure sso
+RUN aws sso login --profile my-profile
+SET AWS_PROFILE = my-profile   // every tool then picks up this profile</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">terminal: 1. credentials</span><button class="copy">Copy</button></div><pre><code class="lang-sh">aws configure                 # access key, secret, region = us-east-1
 # or, with IAM Identity Center:
 aws configure sso &amp;&amp; aws sso login --profile my-profile &amp;&amp; export AWS_PROFILE=my-profile</code></pre></div>
+      </details>
+    </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal: 2 and 3. environment and check</div><pre>RUN cd future-with-shivank-agentic-ai-on-aws
+RUN python3 -m venv .venv   // create a virtual environment for the course libraries
+RUN source .venv/bin/activate   // on Windows: .venv\Scripts\activate
+RUN pip install --upgrade pip boto3
+SET AWS_REGION = us-east-1
+SET AWS_DEFAULT_REGION = us-east-1
+RUN python setup/check_setup.py   // the pre-flight check</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">terminal: 2 and 3. environment and check</span><button class="copy">Copy</button></div><pre><code class="lang-sh">cd future-with-shivank-agentic-ai-on-aws
 python3 -m venv .venv &amp;&amp; source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install --upgrade pip boto3
@@ -2361,6 +2568,8 @@ export AWS_REGION=us-east-1
 export AWS_DEFAULT_REGION=us-east-1
 
 python setup/check_setup.py</code></pre></div>
+      </details>
+    </div>
     <div class="prose"><p>You should see a ✅ for both models. Something like this:</p></div>
     <div class="code term"><div class="bar"><span class="file">expected output (your values will differ)</span></div><pre><span class="dim">Python  :</span> 3.12.4
 <span class="dim">Account :</span> 123456789012
@@ -2371,6 +2580,31 @@ python setup/check_setup.py</code></pre></div>
 
 If both models replied, you're ready for Section 1.</pre></div>
     <div class="annot">
+      <div class="lk-code">
+        <div class="lk-pseudo"><div class="lk-label">Pseudo code · setup/check_setup.py</div><pre>SET REGION = environment variable AWS_REGION, or AWS_DEFAULT_REGION, or "us-east-1"
+SET MODELS = your default model (BEDROCK_MODEL_ID) and Claude Haiku 4.5
+PRINT the Python version
+IF Python is older than 3.10 THEN PRINT a warning
+TRY
+    CALL STS get_caller_identity   // asks AWS who you are
+    PRINT the account and the caller ARN
+ON ERROR
+    STOP with "AWS credentials not working" and the error
+PRINT REGION
+CREATE runtime = Bedrock runtime client in REGION
+FOR EACH model_id IN MODELS:
+    TRY
+        ASK model_id "Reply with the single word: ready"   // one tiny Converse call, capped at 10 tokens
+        PRINT model_id and the reply
+    ON ERROR
+        PRINT model_id and the error
+PRINT "If both models replied, you're ready for Section 1."</pre></div>
+        <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+          <li><code>os</code> <span class="lk-src">Python standard library</span>: reads the Region and the default model ID from environment variables.</li>
+          <li><code>sys</code> <span class="lk-src">Python standard library</span>: reports the Python version and stops the script with a message if AWS credentials fail.</li>
+          <li><code>boto3</code> <span class="lk-src">package boto3, the AWS SDK for Python</span>: creates the AWS clients that check your identity and call Bedrock.</li>
+        </ul></div>
+        <details class="lk-reveal"><summary>View code</summary>
       <div class="code"><div class="bar"><span class="file">setup/check_setup.py</span><button class="copy">Copy</button></div><pre><code class="lang-py">"""Quick pre-flight check: AWS credentials, region, and Bedrock model access.
 
 Run:  python setup/check_setup.py
@@ -2414,6 +2648,8 @@ for model_id in MODELS:
         print(f"❌ {model_id}: {e}")
 
 print("\nIf both models replied, you're ready for Section 1.")</code></pre></div>
+        </details>
+      </div>
       <ol>
         <li><b>REGION = os.getenv(…)</b> Read the Region from the environment, falling back to us-east-1.</li>
         <li><b>MODELS = […]</b> The two models every lab relies on: your chosen default and Haiku.</li>
@@ -2503,11 +2739,37 @@ print("\nIf both models replied, you're ready for Section 1.")</code></pre></div
       <li><span class="k">5</span><div><h4>Bring in the course code</h4><p>Upload the course code with JupyterLab's upload button (or clone it if you have it in a Git repository). Open a terminal (File, New, Terminal). If you uploaded a zip, unzip it, then go into the Section 1 folder.</p></div></li>
       <li><span class="k">6</span><div><h4>Install and restart</h4><p>Open <code>01_hello_agent.ipynb</code> and run the first cell to install the libraries. Then <strong>restart the kernel</strong> (Kernel, Restart) so Python picks up what you just installed.</p></div></li>
     </ol>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · JupyterLab terminal</div><pre>RUN unzip future-with-shivank-agentic-ai-on-aws.zip   // unpacks the course code
+RUN cd future-with-shivank-agentic-ai-on-aws/section-01-your-first-agent   // go into the Section 1 folder</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">JupyterLab terminal</span><button class="copy">Copy</button></div><pre><code class="lang-sh">unzip future-with-shivank-agentic-ai-on-aws.zip
 cd future-with-shivank-agentic-ai-on-aws/section-01-your-first-agent</code></pre></div>
+      </details>
+    </div>
     <div class="callout word">
       <h5><span class="ico">Aa</span>New word: kernel</h5>
       <p>The <button class="kw" data-k="kernel">kernel</button> is the Python process running behind a notebook. Libraries installed while it's running aren't always visible to it, so after installing you restart it to start fresh.</p>
+    </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem"><code>check_setup.py</code> prints your account and caller ARN, but then the model call fails for both models. Where is the problem most likely?</p>
+        <ol class="lk-opts">
+          <li>Your AWS credentials, because they are not working<div class="lk-why">Printing the account and ARN means the STS "who am I?" call worked, so your credentials are fine.</div></li>
+          <li data-correct>Permissions, the Region or model access, because only the model call failed<div class="lk-why">STS worked, so the identity is good. The remaining causes are missing Bedrock permissions, the wrong Region, or the Anthropic first-time use form not yet submitted.</div></li>
+          <li>Your Python version, because it is older than 3.10<div class="lk-why">An old Python only prints a warning near the top of the output. It does not make the model call fail by itself.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">Why do the model IDs in this course start with <code>global.</code>?</p>
+        <ol class="lk-opts">
+          <li>It makes the model free to call<div class="lk-why">You still pay per token. The prefix has nothing to do with price.</div></li>
+          <li>It tells Bedrock to keep the request inside one Region<div class="lk-why">It does the opposite. A <code>global.</code> profile lets Bedrock route the request to whichever Region can serve it.</div></li>
+          <li data-correct>It is a cross-Region inference profile that routes each call to a Region with capacity<div class="lk-why">That is why it works from any supported source Region, including India, and why a bare model ID can fail with "on-demand throughput isn't supported".</div></li>
+        </ol>
+      </div>
     </div>
   </section>
 
@@ -2516,8 +2778,20 @@ cd future-with-shivank-agentic-ai-on-aws/section-01-your-first-agent</code></pre
     <div class="prose"><p>Open <code>01_hello_agent.ipynb</code> (in JupyterLab or VS Code) and run each cell in order. The notebook is organised as Steps 1 to 6; here is every code cell, with what it does and why.</p></div>
 
     <h4>Step 1. Install the dependencies</h4>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_hello_agent.ipynb, Step 1</div><pre>RUN %pip install -q -r requirements.txt   // install the libraries listed in requirements.txt, quietly</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_hello_agent.ipynb, Step 1</span><button class="copy">Copy</button></div><pre><code class="lang-py">%pip install -q -r requirements.txt</code></pre></div>
+      </details>
+    </div>
     <div class="annot">
+      <div class="lk-code">
+        <div class="lk-pseudo"><div class="lk-label">Pseudo code · requirements.txt</div><pre>// version ranges: new enough for the code, below the next major version
+LOAD strands-agents from 1.60.0, below 2.0.0
+LOAD strands-agents-tools from 0.8.9, below 0.9.0
+LOAD langchain from 1.4.0, langchain-aws from 1.8.0 and langgraph from 1.2.0, each below 2.0.0   // only for the LangGraph script
+LOAD boto3 from 1.40.0</pre></div>
+        <details class="lk-reveal"><summary>View code</summary>
       <div class="code"><div class="bar"><span class="file">requirements.txt</span><button class="copy">Copy</button></div><pre><code class="lang-txt"># Section 1 — Your First AI Agent
 strands-agents>=1.60.0,&lt;2.0.0
 strands-agents-tools>=0.8.9,&lt;0.9.0
@@ -2525,6 +2799,8 @@ langchain>=1.4.0,&lt;2.0.0
 langchain-aws>=1.8.0,&lt;2.0.0
 langgraph>=1.2.0,&lt;2.0.0
 boto3>=1.40.0</code></pre></div>
+        </details>
+      </div>
       <ol>
         <li><b>strands-agents</b> The Strands Agents SDK: <code>Agent</code>, <code>tool</code>, <code>BedrockModel</code>.</li>
         <li><b>strands-agents-tools</b> Ready-made tools, such as <code>calculator</code>.</li>
@@ -2536,6 +2812,15 @@ boto3>=1.40.0</code></pre></div>
 
     <h4>Step 2. Choose the model</h4>
     <div class="prose"><p>Every example in the course reads the model from one variable. Change it here, or set <code>BEDROCK_MODEL_ID</code>, to try a different model: <code>global.anthropic.claude-sonnet-4-6</code> (default, strong reasoning and tool use) or <code>global.anthropic.claude-haiku-4-5-20251001-v1:0</code> (faster and cheaper).</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_hello_agent.ipynb, Step 2</div><pre>SET MODEL_ID = environment variable BEDROCK_MODEL_ID, or "global.anthropic.claude-sonnet-4-6"
+SET REGION = environment variable AWS_REGION, or AWS_DEFAULT_REGION, or "us-east-1"
+SET AWS_REGION = REGION, but only if AWS_REGION is not already set   // so the AWS SDK uses the same Region
+PRINT the model and the Region</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>os</code> <span class="lk-src">Python standard library</span>: reads the model ID and Region from environment variables, and sets AWS_REGION if it is missing.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_hello_agent.ipynb, Step 2</span><button class="copy">Copy</button></div><pre><code class="lang-py">import os
 
 MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "global.anthropic.claude-sonnet-4-6")
@@ -2544,12 +2829,23 @@ os.environ.setdefault("AWS_REGION", REGION)
 
 print(f"Model : {MODEL_ID}")
 print(f"Region: {REGION}")</code></pre></div>
+      </details>
+    </div>
     <div class="callout analogy">
       <h5><span class="ico">✦</span>Think of it like this</h5>
       <p><code>os.getenv("NAME", default)</code> is a settings knob that lives <em>outside</em> the code: "use the value of this environment variable if someone set it, otherwise use the default". That's how one notebook runs on Sonnet for you and Haiku for a classmate, with no edits.</p>
     </div>
 
     <h4>Step 3. Create your first agent</h4>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_hello_agent.ipynb, Step 3</div><pre>CREATE model = BedrockModel for MODEL_ID in REGION
+CREATE agent = Agent that uses model   // an agent = a model + (optional) tools + (optional) system prompt
+SET response = the agent's answer to "Explain Amazon Bedrock AgentCore in three sentences."</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code>, package strands-agents</span>: the agent that combines the model with its tools and prompt.</li>
+        <li><code>BedrockModel</code> <span class="lk-src">from <code>strands.models.bedrock</code>, package strands-agents</span>: the model adapter that sends each call to Amazon Bedrock.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_hello_agent.ipynb, Step 3</span><button class="copy">Copy</button></div><pre><code class="lang-py">from strands import Agent
 from strands.models.bedrock import BedrockModel
 
@@ -2559,6 +2855,8 @@ model = BedrockModel(model_id=MODEL_ID, region_name=REGION)
 agent = Agent(model=model)
 
 response = agent("Explain Amazon Bedrock AgentCore in three sentences.")</code></pre></div>
+      </details>
+    </div>
     <figure class="fig small">
       <div class="scroll">
       <svg viewBox="0 0 1000 200" role="img" aria-label="The agent recipe: an agent equals a model, plus optional tools, plus an optional system prompt.">
@@ -2576,14 +2874,33 @@ response = agent("Explain Amazon Bedrock AgentCore in three sentences.")</code><
     <div class="prose">
       <p>The agent <button class="kw" data-k="streaming">streams</button> its answer as it generates it, so you see words appear live. The returned <code>response</code> object holds the full result: the final text, the token usage, and the stop reason.</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_hello_agent.ipynb, Step 3, next cell</div><pre>PRINT the stop reason of response   // end_turn: the model finished without asking for a tool
+PRINT the token usage of response   // what you are billed for: input plus output tokens</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_hello_agent.ipynb, Step 3, next cell</span><button class="copy">Copy</button></div><pre><code class="lang-py">print("Stop reason:", response.stop_reason)
 print("Tokens used:", response.metrics.accumulated_usage)</code></pre></div>
+      </details>
+    </div>
     <div class="code term"><div class="bar"><span class="file">example output (numbers will differ)</span></div><pre>Stop reason: end_turn
 Tokens used: {'inputTokens': 21, 'outputTokens': 112, 'totalTokens': 133}</pre></div>
     <div class="prose">
       <p><code>end_turn</code> means the model finished without asking for a tool, so the loop ran exactly once. <button class="kw" data-k="token">Tokens</button> are what you pay for: input tokens (what you sent) plus output tokens (what it wrote).</p>
       <p>The script version, <code>hello_agent.py</code>, is the same thing outside a notebook:</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · section-01-your-first-agent/hello_agent.py</div><pre>SET MODEL_ID and REGION from environment variables, with defaults
+CREATE model = BedrockModel for MODEL_ID in REGION
+CREATE agent = Agent that uses model
+SET response = the agent's answer to "Hello! Tell me a fun fact about AI agents."   // streams to the terminal as it is written
+PRINT an empty line, then a line of 60 dashes
+PRINT response   // the same answer again, as the final result</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>os</code> <span class="lk-src">Python standard library</span>: reads settings such as the model ID and Region from environment variables.</li>
+        <li><code>Agent</code> <span class="lk-src">from <code>strands</code>, package strands-agents</span>: the agent that combines the model with its tools and prompt.</li>
+        <li><code>BedrockModel</code> <span class="lk-src">from <code>strands.models.bedrock</code>, package strands-agents</span>: the model adapter that sends each call to Amazon Bedrock.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">section-01-your-first-agent/hello_agent.py</span><button class="copy">Copy</button></div><pre><code class="lang-py">"""Section 1: Hello World agent with the Strands Agents SDK on Amazon Bedrock.
 
 Run:
@@ -2607,6 +2924,8 @@ response = agent("Hello! Tell me a fun fact about AI agents.")
 print()
 print("-" * 60)
 print(response)</code></pre></div>
+      </details>
+    </div>
     <div class="callout note">
       <h5><span class="ico">i</span>Why you see the answer twice</h5>
       <p>Run <code>python hello_agent.py</code> and the answer appears, then a line of dashes, then the same answer again. The first copy is Strands streaming the text live as the model writes it. The second is <code>print(response)</code> printing the final result object. The dashes are there so you can tell them apart.</p>
@@ -2614,6 +2933,17 @@ print(response)</code></pre></div>
 
     <h4>Step 4. Give the agent a tool</h4>
     <div class="prose"><p>A tool is just a Python function with three things: the <code>@tool</code> <button class="kw" data-k="decorator">decorator</button>, <button class="kw" data-k="type-hints">type hints</button> so the model knows what arguments to send, and a <button class="kw" data-k="docstring">docstring</button> so the model knows <em>when</em> to use it.</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_hello_agent.ipynb, Step 4</div><pre>DEFINE current_time(timezone, default "Asia/Kolkata")   // @tool: the agent may call this function
+    RETURN the current date and time in that timezone, as readable text
+CREATE agent = Agent with model and the tool current_time
+ASK agent "What time is it right now in Bangalore and in New York?"</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>datetime</code> <span class="lk-src">from <code>datetime</code>, Python standard library</span>: gets the current date and time.</li>
+        <li><code>ZoneInfo</code> <span class="lk-src">from <code>zoneinfo</code>, Python standard library</span>: turns a timezone name such as Asia/Kolkata into a timezone.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>strands</code>, package strands-agents</span>: the decorator that registers the function as a tool the agent can call.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_hello_agent.ipynb, Step 4</span><button class="copy">Copy</button></div><pre><code class="lang-py">from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -2632,6 +2962,8 @@ def current_time(timezone: str = "Asia/Kolkata") -> str:
 
 agent = Agent(model=model, tools=[current_time])
 agent("What time is it right now in Bangalore and in New York?")</code></pre></div>
+      </details>
+    </div>
     <div class="grid-2" style="margin:1.4rem 0">
       <div>
         <p class="mini-label">How each part of the function is used</p>
@@ -2643,6 +2975,13 @@ agent("What time is it right now in Bangalore and in New York?")</code></pre></d
       </div>
       <div>
         <p class="mini-label">Roughly what the model is shown</p>
+        <div class="lk-code">
+          <div class="lk-pseudo"><div class="lk-label">Pseudo code</div><pre>DEFINE the tool description that the model is shown:
+    SET name = "current_time"
+    SET description = the docstring: "Get the current date and time in a given IANA timezone."
+    SET inputSchema = one text argument, timezone, described as an IANA timezone name
+    SET required = none, so the argument is optional</pre></div>
+          <details class="lk-reveal"><summary>View code</summary>
         <div class="json">{
   "name": "current_time",
   "description": "Get the current date and time
@@ -2660,6 +2999,8 @@ agent("What time is it right now in Bangalore and in New York?")</code></pre></d
     "required": []
   }}
 }</div>
+          </details>
+        </div>
       </div>
     </div>
     <div class="callout analogy">
@@ -2670,14 +3011,29 @@ agent("What time is it right now in Bangalore and in New York?")</code></pre></d
 
     <h4>Step 5. Use a prebuilt tool</h4>
     <div class="prose"><p><code>strands-agents-tools</code> ships ready-made tools. Here the agent gets a <code>calculator</code> so it doesn't have to do arithmetic "in its head", which LLMs are surprisingly unreliable at.</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_hello_agent.ipynb, Step 5</div><pre>LOAD the prebuilt calculator tool
+CREATE agent = Agent with model and the tools calculator and current_time
+ASK agent "What is 18% GST on a laptop that costs Rs 84,999? Give me the final price too."</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>calculator</code> <span class="lk-src">from <code>strands_tools</code>, package strands-agents-tools</span>: a ready-made tool that does exact arithmetic for the agent.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_hello_agent.ipynb, Step 5</span><button class="copy">Copy</button></div><pre><code class="lang-py">from strands_tools import calculator
 
 agent = Agent(model=model, tools=[calculator, current_time])
 agent("What is 18% GST on a laptop that costs Rs 84,999? Give me the final price too.")</code></pre></div>
+      </details>
+    </div>
     <div class="prose"><p>Expected numbers: GST = 84,999 × 0.18 = <strong>₹15,299.82</strong>, final price = <strong>₹1,00,298.82</strong>. Notice the agent has two tools but uses only the one it needs.</p></div>
 
     <h4>Step 6. Shape behaviour with a system prompt</h4>
     <div class="prose"><p>The <button class="kw" data-k="system-prompt">system prompt</button> sets the agent's role, tone and rules for every turn of the conversation.</p></div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · 01_hello_agent.ipynb, Step 6</div><pre>CREATE agent = Agent with model and system_prompt:
+    SET system_prompt = a patient tutor for engineers new to AI agents, using one real-world analogy and keeping answers under 120 words
+ASK agent "What is the difference between an LLM and an AI agent?"</pre></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">01_hello_agent.ipynb, Step 6</span><button class="copy">Copy</button></div><pre><code class="lang-py">agent = Agent(
     model=model,
     system_prompt=(
@@ -2686,6 +3042,8 @@ agent("What is 18% GST on a laptop that costs Rs 84,999? Give me the final price
     ),
 )
 agent("What is the difference between an LLM and an AI agent?")</code></pre></div>
+      </details>
+    </div>
     <div class="callout analogy">
       <h5><span class="ico">✦</span>Think of it like this</h5>
       <p>A system prompt is the <strong>briefing a new employee gets on day one</strong>: who you are here, how you talk to customers, what you never do. The user's prompt is each customer's request; the briefing applies to all of them.</p>
@@ -2722,6 +3080,34 @@ agent("What is the difference between an LLM and an AI agent?")</code></pre></di
       <h5><span class="ico">✓</span>What you just did</h5>
       <p>Built an agent in one line, added your own tool and a prebuilt tool, and controlled its behaviour with a system prompt. Next, run the two scripts in the folder to see the same idea as plain Python files, including one built with LangGraph.</p>
     </div>
+
+    <div class="lk-quiz">
+      <h4 class="lk-quiz-title">Check your understanding</h4>
+      <div class="lk-q">
+        <p class="lk-stem">In Step 4 you ask for the time in Bangalore and in New York. How many times does the model request <code>current_time</code>?</p>
+        <ol class="lk-opts">
+          <li>Once, with both cities in a single argument<div class="lk-why">The tool takes one timezone per call, so one request cannot cover both cities.</div></li>
+          <li>Never, because the model already knows the time<div class="lk-why">A model has no clock. It only knows the time from a tool, which is why the tool exists.</div></li>
+          <li data-correct>Twice, once per timezone, and then it answers from the two results<div class="lk-why">That is the agent loop with real tools: two requests, two results, then the final answer.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">Why does Step 5 give the agent the prebuilt <code>calculator</code> tool?</p>
+        <ol class="lk-opts">
+          <li data-correct>So the sum is computed exactly instead of "in its head", where LLMs are unreliable<div class="lk-why">The GST question has an exact answer, 15,299.82. The calculator computes it rather than the model guessing.</div></li>
+          <li>An agent must have at least two tools to work<div class="lk-why">One tool, or none, is fine. Step 3 builds an agent with no tools at all.</div></li>
+          <li>The model cannot do any maths, so every number needs a tool<div class="lk-why">That overstates it. The page says LLMs are surprisingly unreliable at arithmetic, which is why exact sums go to a tool.</div></li>
+        </ol>
+      </div>
+      <div class="lk-q">
+        <p class="lk-stem">What does the system prompt in Step 6 do?</p>
+        <ol class="lk-opts">
+          <li>It replaces the user's question on every turn<div class="lk-why">The user's question is still sent. The system prompt is extra instruction that sits alongside it.</div></li>
+          <li data-correct>It sets the agent's role, tone and rules for every turn of the conversation<div class="lk-why">It works like the day-one briefing for a new employee. It applies to every customer request that follows.</div></li>
+          <li>It gives the agent a new tool to call<div class="lk-why">Tools are passed with <code>tools=[...]</code>. The system prompt is only text that shapes behaviour.</div></li>
+        </ol>
+      </div>
+    </div>
   </section>
 
   <section id="langgraph" aria-labelledby="lg-h">
@@ -2729,6 +3115,22 @@ agent("What is the difference between an LLM and an AI agent?")</code></pre></di
     <div class="prose">
       <p>Strands isn't the only way. <code>hello_langgraph_agent.py</code> builds the same kind of agent with LangChain's <code>create_agent</code>, which runs on the LangGraph runtime and replaces the older <code>langgraph.prebuilt.create_react_agent</code>. It builds a <button class="kw" data-k="react">ReAct</button> agent: reason, act with a tool, observe, repeat. The same loop you met in 1.7, just with different wording.</p>
     </div>
+    <div class="lk-code">
+      <div class="lk-pseudo"><div class="lk-label">Pseudo code · section-01-your-first-agent/hello_langgraph_agent.py</div><pre>SET MODEL_ID and REGION from environment variables, with defaults
+DEFINE greet(name)   // the @tool decorator lets the agent call it
+    RETURN "Hello, " + name + "! Welcome to the world of AI agents."
+CREATE llm = chat model for MODEL_ID through the Bedrock Converse API, in REGION
+CREATE agent = create_agent with llm, the tool greet, and the system prompt "You are a friendly assistant."
+SET response = agent.invoke with the message "Please greet Alice and Bob."
+FOR EACH message IN response["messages"]:
+    PRINT the message type and its text   // user, then ai, tool and the final answer</pre></div>
+      <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+        <li><code>os</code> <span class="lk-src">Python standard library</span>: reads the model ID and Region from environment variables.</li>
+        <li><code>create_agent</code> <span class="lk-src">from <code>langchain.agents</code>, package langchain</span>: builds a ReAct-style agent that runs on the LangGraph runtime.</li>
+        <li><code>init_chat_model</code> <span class="lk-src">from <code>langchain.chat_models</code>, package langchain</span>: creates the chat model for the Bedrock Converse API.</li>
+        <li><code>tool</code> <span class="lk-src">from <code>langchain.tools</code>, package langchain</span>: the decorator that turns <code>greet</code> into a tool.</li>
+      </ul></div>
+      <details class="lk-reveal"><summary>View code</summary>
     <div class="code"><div class="bar"><span class="file">section-01-your-first-agent/hello_langgraph_agent.py</span><button class="copy">Copy</button></div><pre><code class="lang-py">"""Section 1: Hello World agent with LangGraph / LangChain on Amazon Bedrock.
 
 `create_agent` (from langchain.agents) is the current way to build a
@@ -2768,6 +3170,8 @@ response = agent.invoke({"messages": [{"role": "user", "content": "Please greet 
 # Print every message in the conversation: user -> AI (tool calls) -> tool results -> AI answer
 for message in response["messages"]:
     print(f"{message.type}: {message.text}")</code></pre></div>
+      </details>
+    </div>
     <div class="prose"><p>Because the script prints every message, you can see the loop itself in the output:</p></div>
     <div class="code term"><div class="bar"><span class="file">example output (wording will differ)</span></div><pre><span class="pr">human:</span> Please greet Alice and Bob.
 <span class="pr">ai:</span> I'll greet both Alice and Bob for you!        <span class="dim">← model asks for greet("Alice") and greet("Bob")</span>
@@ -3467,7 +3871,7 @@ function press(group,btn){$$("[aria-pressed]",group).forEach(b=>b.setAttribute("
     q[1].forEach((o,oi)=>{const b=document.createElement("button");b.type="button";b.textContent=o;b.addEventListener("click",()=>{
       if(d.classList.contains("answered"))return;d.classList.add("answered");answered++;
       if(oi===q[2]){right++;b.classList.add("right");}else{b.classList.add("wrong");opts.children[q[2]].classList.add("right");}
-      d.querySelector(".why").innerHTML=(oi===q[2]?"<b style='color:var(--tool-ink)'>Correct.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> ")+esc(q[3]);
+      d.querySelector(".why").innerHTML=(oi===q[2]?"<b style='color:var(--tool-ink)'>Correct.</b> ":"<b style='color:var(--risk-ink)'>Not quite.</b> You picked “"+esc(o)+"”. The correct answer is <b>“"+esc(q[1][q[2]])+"”</b>. ")+esc(q[3]);
       $("#quiz-score").textContent="Score: "+right+" of "+answered+" answered"+(answered===Q.length?(right>=8?". Great work, you're ready for Section 2.":". Revisit the parts you missed, then try Section 2."):"");
     });opts.appendChild(b);});
     root.appendChild(d);
