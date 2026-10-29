@@ -22,36 +22,36 @@ To fill one, paste the repo URL into `GITHUB` in `tools/bootcamp_nav.py`:
 
 | Key in `GITHUB` | Page | Zip on site now |
 |---|---|---|
-| `part-00-AWS-Revision` | Bootcamp Day 1 · Part 00 | none |
-| `your-first-agent` | Bootcamp Day 1 · Lesson 1 | yes |
-| `giving-agents-tools` | Bootcamp Day 1 · Lesson 2 | yes |
-| `Agents-that-remember` | Bootcamp Day 1 · Lesson 3 | yes |
-| `agents-that-work-together` | Bootcamp Day 1 · Lesson 4 | none |
-| `How-agents-talk` | Bootcamp Day 1 · Lesson 5 | yes |
-| `shipping-agents-to-production` | Bootcamp Day 1 · Lesson 6 | none |
-| `finance-section-1` | Bootcamp Day 1 · Project 1 | none |
-| `finance-nps-project` | Bootcamp Day 1 · Project 2 | none |
+| `part-00-AWS-Revision` | Bootcamp Week 1 · Part 00 | none |
+| `your-first-agent` | Bootcamp Week 1 · Lesson 1 | yes |
+| `giving-agents-tools` | Bootcamp Week 1 · Lesson 2 | yes |
+| `Agents-that-remember` | Bootcamp Week 1 · Lesson 3 | yes |
+| `agents-that-work-together` | Bootcamp Week 1 · Lesson 4 | none |
+| `How-agents-talk` | Bootcamp Week 1 · Lesson 5 | yes |
+| `shipping-agents-to-production` | Bootcamp Week 1 · Lesson 6 | none |
+| `finance-section-1` | Bootcamp Week 1 · Project 1 | none |
+| `finance-nps-project` | Bootcamp Week 1 · Project 2 | none |
 | `Class-1` … `Class-9` | AI-Infusion Lessons 1–10 (`Class-9` covers 9 and 10) | Classes 1, 2, 3-4, 5, 6 |
 
-New zips go in `/zips` and into `ZIPS` in the same file. The Day 1 page cards still
+New zips go in `/zips` and into `ZIPS` in the same file. The Week 1 page cards still
 say "solution zip soon" for Lessons 4 and 6 and both projects: swap those in
-`AWS-Bootcamp/day-1/index.html` by hand.
+`AWS-Bootcamp/week-1/index.html` by hand.
 
 **On the new site:** "Browse the code" can become an on-site file viewer that reads
 the repo through the GitHub API, so learners never leave the site. Keep the
 GitHub link as the fallback.
 
-## 2. Bootcamp Day 2
+## 2. Bootcamp Week 2
 
-- [ ] Add the Day 2 lesson pages under `AWS-Bootcamp/`.
-- [ ] Build `AWS-Bootcamp/day-2/` from `day-1/`, and turn the Day 2 card on
+- [ ] Add the Week 2 lesson pages under `AWS-Bootcamp/`.
+- [ ] Build `AWS-Bootcamp/week-2/` from `week-1/`, and turn the Week 2 card on
       `AWS-Bootcamp/index.html` from "coming soon" into a link.
-- [ ] Give Day 2 its own lesson list and recordings in `tools/bootcamp_nav.py`
-      (Day 1 uses `SEQ` and `DAY1_RECORDINGS`).
+- [ ] Give Week 2 its own lesson list and recordings in `tools/bootcamp_nav.py`
+      (Week 1 uses `SEQ` and `WEEK1_RECORDINGS`).
 
 ## 3. Other placeholders
 
-- [ ] Recording links: Day 1 and all 11 AI-Infusion classes are in. Class 4 points at a
+- [ ] Recording links: Week 1 and all 11 AI-Infusion classes are in. Class 4 points at a
       mentee-dashboard page, not a meetings archive.
 - [ ] Lessons 4 and 6 and both finance projects are straight copies of the Scaler
       pages, without the pseudo-code toggles and practice questions the other lessons have.

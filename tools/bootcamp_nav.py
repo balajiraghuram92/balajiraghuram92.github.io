@@ -1,8 +1,8 @@
 """Rebuild the navigation, recordings and project-file links on every lesson page.
 
-- Scaler AWS AI Bootcamp pages (AWS-Bootcamp/<lesson>/): prev / next / Day 1 nav at
+- Scaler AWS AI Bootcamp pages (AWS-Bootcamp/<lesson>/): prev / next / Week 1 nav at
   the top and bottom, the AI-Infusion home button, the class recordings and the
-  Project files box. Also fills the recordings on AWS-Bootcamp/day-1/.
+  Project files box. Also fills the recordings on AWS-Bootcamp/week-1/.
 - AI-Infusion pages (Learnings/*): the AI-Infusion home button, the class
   recordings and the Project files box in the existing lesson nav. Also fills
   the recordings list on AI-Infusion/.
@@ -17,7 +17,7 @@ import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
-# Day 1 lessons, in order: (folder, step label, kind, title)
+# Week 1 lessons, in order: (folder, step label, kind, title)
 SEQ = [
     ("part-00-AWS-Revision", "0", "Part 00", "AWS Revision"),
     ("your-first-agent", "1", "Lesson 1", "Your first AI agent"),
@@ -29,16 +29,16 @@ SEQ = [
     ("finance-section-1", "P1", "Project 1", "AI agents in finance"),
     ("finance-nps-project", "P2", "Project 2", "NPS analyst in a box"),
 ]
-DAY = "Day 1"
+WEEK = "Week 1"
 
 _REC = "https://www.scaler.com/meetings/i/{}/archive"
 
-# Bootcamp Day 1 recordings: shown on the Day 1 page and on every Day 1 lesson.
-DAY1_RECORDINGS = [
-    ("Day 1 · session 1", _REC.format("ai-bootcamp-1")),
-    ("Day 1 · session 2", _REC.format("ai-bootcamp-2")),
+# Bootcamp Week 1 recordings: shown on the Week 1 page and on every Week 1 lesson.
+WEEK1_RECORDINGS = [
+    ("Week 1 · session 1", _REC.format("ai-bootcamp-1")),
+    ("Week 1 · session 2", _REC.format("ai-bootcamp-2")),
 ]
-RECORDINGS = {folder: DAY1_RECORDINGS for folder, *_ in SEQ}
+RECORDINGS = {folder: WEEK1_RECORDINGS for folder, *_ in SEQ}
 
 # AI-Infusion class recordings: (page, nav block) -> [(label, url)].
 # The "mid" block on the Class 9 page is where Lesson 10 starts.
@@ -202,17 +202,17 @@ def files_box(key, cls):
 def caption(i):
     _, step, kind, _ = SEQ[i]
     if step == "0":
-        return f"{BRAND} · {DAY} · Revision"
+        return f"{BRAND} · {WEEK} · Revision"
     if step.startswith("P"):
         n = sum(1 for s in SEQ if s[1].startswith("P"))
-        return f"{BRAND} · {DAY} · {kind} of {n}"
+        return f"{BRAND} · {WEEK} · {kind} of {n}"
     n = sum(1 for s in SEQ if s[1].isdigit() and s[1] != "0")
-    return f"{BRAND} · {DAY} · {kind} of {n}"
+    return f"{BRAND} · {WEEK} · {kind} of {n}"
 
 
 def side(i, cls, label):
     if i < 0 or i >= len(SEQ):
-        msg = "You're at the start" if cls == "awsq-prev" else "Day 2 · coming soon"
+        msg = "You're at the start" if cls == "awsq-prev" else "Week 2 · coming soon"
         return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">{msg}</span></span>'
     folder, _, kind, title = SEQ[i]
     return (f'<a class="awsq-l {cls}" href="../{folder}/"><span class="awsq-d">{label}</span>'
@@ -240,7 +240,7 @@ def nav(i, where):
     return (f'<nav class="awsq awsq-{where}{extra}" aria-label="Bootcamp navigation ({where})"><div class="awsq-box">'
             f'<div class="awsq-head"><span class="awsq-cap">{e(caption(i))}</span>{HOME_BTN}</div>'
             f'<div class="awsq-row">{side(i - 1, "awsq-prev", "← Previous")}'
-            f'<a class="awsq-home" href="../day-1/"><b>{BRAND}</b>{DAY} · all lessons</a>'
+            f'<a class="awsq-home" href="../week-1/"><b>{BRAND}</b>{WEEK} · all lessons</a>'
             f'{side(i + 1, "awsq-next", "Next →")}</div>'
             f'<ol class="awsq-steps" aria-label="All lessons">{"".join(steps)}</ol>'
             f'{recordings(folder) if where == "top" else ""}{files_box(folder, "awsq")}</div></nav>')
@@ -320,14 +320,14 @@ def build_hubs():
     write(p, s)
     print("rec  ", p.relative_to(ROOT))
 
-    # Bootcamp Day 1 page: the day's recordings
-    p = ROOT / "AWS-Bootcamp" / "day-1" / "index.html"
+    # Bootcamp Week 1 page: the week's recordings
+    p = ROOT / "AWS-Bootcamp" / "week-1" / "index.html"
     s = p.read_text(encoding="utf-8")
     links = "".join(f'<a href="{e(url)}" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>'
                     f'<span>{e(label)}<small>Scaler recording · opens in a new tab</small></span></a>'
-                    for label, url in DAY1_RECORDINGS)
-    block = f'<!-- recs:day1 --><div class="awsb-recs">{links}</div><!-- /recs:day1 -->'
-    s = re.sub(r"<!-- recs:day1 -->.*?<!-- /recs:day1 -->", lambda m: block, s, flags=re.S)
+                    for label, url in WEEK1_RECORDINGS)
+    block = f'<!-- recs:week1 --><div class="awsb-recs">{links}</div><!-- /recs:week1 -->'
+    s = re.sub(r"<!-- recs:week1 -->.*?<!-- /recs:week1 -->", lambda m: block, s, flags=re.S)
     write(p, s)
     print("rec  ", p.relative_to(ROOT))
 
