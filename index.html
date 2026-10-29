@@ -339,6 +339,15 @@ details.qa .a p:last-child{margin-bottom:0}
 .steps{counter-reset:s; list-style:none; padding:0; margin:0 0 20px; display:grid; gap:8px}
 .steps li{counter-increment:s; background:var(--surface); border:1px solid var(--rule); border-radius:2px; padding:12px 14px 12px 50px; position:relative; font-size:15px; margin:0}
 .steps li::before{content:counter(s); position:absolute; left:14px; top:12px; width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--surface); font-family:var(--mono); font-size:11.5px; font-weight:600; display:grid; place-items:center}
+.recs{margin:28px 0 0;padding:16px 18px;background:var(--surface);border:1px solid var(--rule);border-radius:4px}
+.recs h3{margin:0 0 4px;font-size:15px}
+.recs p{margin:0 0 12px;font-size:14px;color:var(--ink-2)}
+.recs ul{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:0;padding:0;list-style:none}
+.recs li{margin:0;padding:0}
+.recs li::before{content:none}
+.recs a{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--rule);border-radius:4px;color:var(--ink);font-size:14px;font-weight:500;text-decoration:none}
+.recs a:hover{border-color:var(--accent);background:var(--accent-soft)}
+.recs a i{flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--surface);font-style:normal;font-size:9px}
 </style>
 <link rel="stylesheet" href="assets/learn-kit.css">
 <script src="assets/learn-kit.js" defer></script>
@@ -702,6 +711,7 @@ if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeig
         <span class="go">Open lesson →</span>
       </a>
     </div>
+    <!-- recs:lessons --><div class="recs" id="recordings"><h3>Class recordings</h3><p>Every AI-Infusion class on Scaler. Each lesson page also links its own recording at the top.</p><ul><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-1-2/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 1</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-2-2/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 2</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-3/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 3</a></li><li><a href="https://www.scaler.com/academy/mentee-dashboard/class/558449" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 4</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-5/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 5</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-6/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 6</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-7/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 7</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-8/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 8</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-9/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 9</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-10/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 10 · part 1</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-10-2/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 10 · part 2</a></li></ul></div><!-- /recs:lessons -->
     <p class="note-sm">Lesson 1 also has a set of <a href="Learnings/Class-1-AI-infusion/simulators.html">interactive simulators</a>. Lessons 3–4 and 9–10 share one page each because the second class continues the first.</p>
   </div>
 </section>

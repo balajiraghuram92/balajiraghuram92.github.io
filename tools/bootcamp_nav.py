@@ -11,6 +11,7 @@ Safe to re-run. To add a recording, paste its URL into RECORDINGS and run:
 import html
 import pathlib
 import re
+import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -29,6 +30,25 @@ SEQ = [
 
 # Scaler class recording per page; an empty string shows "link coming soon".
 RECORDINGS = {folder: "" for folder, *_ in SEQ}
+
+# AI Infusion class recordings: (page, nav block) -> [(label, url)].
+# The "mid" block on the Class 9 page is where Lesson 10 starts.
+_REC = "https://www.scaler.com/meetings/i/{}/archive"
+LEARN_RECORDINGS = {
+    ("Class-1-AI-infusion/index.html", "top"): [("Class 1", _REC.format("ai-infused-learning-1-2"))],
+    ("Class-1-AI-infusion/simulators.html", "top"): [("Class 1", _REC.format("ai-infused-learning-1-2"))],
+    ("Class-2-AI-infusion/index.html", "top"): [("Class 2", _REC.format("ai-infused-learning-2-2"))],
+    ("Class-3-4-AI-infusion/index.html", "top"): [("Class 3", _REC.format("ai-infused-learning-3")),
+                                                  ("Class 4", "https://www.scaler.com/academy/mentee-dashboard/class/558449")],
+    ("Class-5-AI-infusion/index.html", "top"): [("Class 5", _REC.format("ai-infused-learning-5"))],
+    ("Class-6-AI-infusion/index.html", "top"): [("Class 6", _REC.format("ai-infused-learning-6"))],
+    ("Class-7-AI-infusion/index.html", "top"): [("Class 7", _REC.format("ai-infused-learning-7"))],
+    ("Class-8-AI-infusion/index.html", "top"): [("Class 8", _REC.format("ai-infused-learning-8"))],
+    ("Class-9-Ai-Infusion/index.html", "top"): [("Class 9", _REC.format("ai-infused-learning-9"))],
+    ("Class-9-Ai-Infusion/index.html", "mid"): [("Class 10 · part 1", _REC.format("ai-infused-learning-10")),
+                                                ("Class 10 · part 2", _REC.format("ai-infused-learning-10-2"))],
+}
+LEARN_RECORDINGS[("Class-10-AI-infusion/index.html", "top")] = LEARN_RECORDINGS[("Class-9-Ai-Infusion/index.html", "mid")]
 
 # Pages built on the finance template sit inside <main>, not the lesson .wrap.
 FINANCE = {"finance-section-1", "finance-nps-project"}
@@ -84,9 +104,29 @@ AIH_STYLE = """<!-- aih:style --><style>
 .aiseq a.aih{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--aq-acc);color:var(--aq-bg);
   font:700 11.5px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.04em;text-decoration:none;white-space:nowrap}
 .aiseq a.aih:hover{filter:brightness(1.1);color:var(--aq-bg);text-decoration:none}
+.aiseq .aq-recs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.aiseq a.aq-rec{flex:1 1 200px;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:5px;border:1px solid var(--aq-acc);
+  color:var(--aq-ink);font-size:14px;font-weight:600;line-height:1.3;text-decoration:none}
+.aiseq a.aq-rec:hover{background:var(--aq-off);color:var(--aq-ink);text-decoration:none}
+.aiseq a.aq-rec i{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--aq-acc);color:var(--aq-bg);font-style:normal;font-size:10px}
+.aiseq a.aq-rec small{margin-left:auto;font:600 10px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--aq-dim)}
 </style><!-- /aih:style -->"""
 
 HOME_BTN = '<a class="aih" href="../../" title="Back to all AI-Infusion lessons">⌂ AI-Infusion</a>'
+
+
+def write(p, s):
+    """Write only when changed; retry briefly if another program has the file open."""
+    if p.read_text(encoding="utf-8") == s:
+        return
+    for attempt in range(5):
+        try:
+            p.write_text(s, encoding="utf-8", newline="\n")
+            return
+        except OSError:
+            if attempt == 4:
+                raise
+            time.sleep(0.5)
 
 
 def e(s):
@@ -157,18 +197,32 @@ def build_aws():
             k = s.rfind(anchor)
             s = s[:k] + ("" if folder in FINANCE else "\n") + bottom + s[k + (0 if folder in FINANCE else 1):]
         assert s.count("<!-- awsq:top -->") == 1 and s.count("<!-- awsq:bottom -->") == 1, folder
-        p.write_text(s, encoding="utf-8", newline="\n")
+        write(p, s)
         print("nav  ", p.relative_to(ROOT))
 
 
 def build_learnings():
     for p in sorted((ROOT / "Learnings").glob("*/*.html")):
         s = p.read_text(encoding="utf-8")
-        if "<!-- aih:style -->" not in s:
+        if "<!-- aih:style -->" in s:
+            s = re.sub(r"<!-- aih:style -->.*?<!-- /aih:style -->", lambda m: AIH_STYLE, s, flags=re.S)
+        else:
             s = s.replace("<!-- aiseq:top -->", "<!-- aiseq:top -->\n" + AIH_STYLE, 1)
         s = re.sub(r'(?<!<div class="aq-head">)(<span class="aq-cap">.*?</span>)(?!<a class="aih")',
                    lambda m: f'<div class="aq-head">{m.group(1)}{HOME_BTN}</div>', s)
-        p.write_text(s, encoding="utf-8", newline="\n")
+        s = re.sub(r"<!-- aqrec -->.*?<!-- /aqrec -->", "", s)
+        rel = p.relative_to(ROOT / "Learnings").as_posix()
+        for where in ("top", "mid"):
+            recs = LEARN_RECORDINGS.get((rel, where))
+            if not recs:
+                continue
+            links = "".join(f'<a class="aq-rec" href="{e(url)}" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>'
+                            f'Watch the {e(label)} recording<small>Scaler</small></a>' for label, url in recs)
+            block = f'<!-- aqrec --><div class="aq-recs">{links}</div><!-- /aqrec -->'
+            m = re.search(rf'<div class="aiseq aiseq-{where}"[^\n]*?</ol>', s)
+            assert m, (rel, where)
+            s = s[:m.end()] + block + s[m.end():]
+        write(p, s)
         print("home ", p.relative_to(ROOT))
 
 
@@ -182,7 +236,17 @@ def build_hub():
         else:
             chip = f'<span class="awsb-rec" data-rec="{folder}">▶ Recording soon</span>'
         s = re.sub(rf'<(span|a) class="awsb-rec" data-rec="{re.escape(folder)}"[^>]*>.*?</\1>', lambda m: chip, s)
-    p.write_text(s, encoding="utf-8", newline="\n")
+    seen, items = set(), []
+    for recs in LEARN_RECORDINGS.values():
+        for label, url in recs:
+            if url not in seen:
+                seen.add(url)
+                items.append(f'<li><a href="{e(url)}" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>{e(label)}</a></li>')
+    block = ('<!-- recs:lessons --><div class="recs" id="recordings"><h3>Class recordings</h3>'
+             '<p>Every AI-Infusion class on Scaler. Each lesson page also links its own recording at the top.</p>'
+             f'<ul>{"".join(items)}</ul></div><!-- /recs:lessons -->')
+    s = re.sub(r"<!-- recs:lessons -->.*?<!-- /recs:lessons -->", lambda m: block, s, flags=re.S)
+    write(p, s)
     print("rec  ", p.relative_to(ROOT))
 
 
