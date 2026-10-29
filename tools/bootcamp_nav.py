@@ -1,11 +1,13 @@
-"""Rebuild the navigation on every lesson page.
+"""Rebuild the navigation, recordings and project-file links on every lesson page.
 
-- Scaler AWS AI Bootcamp pages (AWS-Bootcamp/*): prev / next / all-lessons nav at
-  the top and bottom, the AI-Infusion home button, and the class-recording link.
-- AI Infusion pages (Learnings/*): adds the AI-Infusion home button to the
-  existing lesson nav.
+- Scaler AWS AI Bootcamp pages (AWS-Bootcamp/<lesson>/): prev / next / Day 1 nav at
+  the top and bottom, the AI-Infusion home button, the class recordings and the
+  Project files box. Also fills the recordings on AWS-Bootcamp/day-1/.
+- AI-Infusion pages (Learnings/*): the AI-Infusion home button, the class
+  recordings and the Project files box in the existing lesson nav. Also fills
+  the recordings list on AI-Infusion/.
 
-Safe to re-run. To add a recording, paste its URL into RECORDINGS and run:
+Safe to re-run. Edit the tables below (recordings, GITHUB, ZIPS) and run:
     python tools/bootcamp_nav.py
 """
 import html
@@ -15,7 +17,7 @@ import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
-# (folder, step label, kind, title)
+# Day 1 lessons, in order: (folder, step label, kind, title)
 SEQ = [
     ("part-00-AWS-Revision", "0", "Part 00", "AWS Revision"),
     ("your-first-agent", "1", "Lesson 1", "Your first AI agent"),
@@ -27,13 +29,19 @@ SEQ = [
     ("finance-section-1", "P1", "Project 1", "AI agents in finance"),
     ("finance-nps-project", "P2", "Project 2", "NPS analyst in a box"),
 ]
+DAY = "Day 1"
 
-# Scaler class recording per page; an empty string shows "link coming soon".
-RECORDINGS = {folder: "" for folder, *_ in SEQ}
-
-# AI Infusion class recordings: (page, nav block) -> [(label, url)].
-# The "mid" block on the Class 9 page is where Lesson 10 starts.
 _REC = "https://www.scaler.com/meetings/i/{}/archive"
+
+# Bootcamp Day 1 recordings: shown on the Day 1 page and on every Day 1 lesson.
+DAY1_RECORDINGS = [
+    ("Day 1 · session 1", _REC.format("ai-bootcamp-1")),
+    ("Day 1 · session 2", _REC.format("ai-bootcamp-2")),
+]
+RECORDINGS = {folder: DAY1_RECORDINGS for folder, *_ in SEQ}
+
+# AI-Infusion class recordings: (page, nav block) -> [(label, url)].
+# The "mid" block on the Class 9 page is where Lesson 10 starts.
 LEARN_RECORDINGS = {
     ("Class-1-AI-infusion/index.html", "top"): [("Class 1", _REC.format("ai-infused-learning-1-2"))],
     ("Class-1-AI-infusion/simulators.html", "top"): [("Class 1", _REC.format("ai-infused-learning-1-2"))],
@@ -49,6 +57,26 @@ LEARN_RECORDINGS = {
                                                 ("Class 10 · part 2", _REC.format("ai-infused-learning-10-2"))],
 }
 LEARN_RECORDINGS[("Class-10-AI-infusion/index.html", "top")] = LEARN_RECORDINGS[("Class-9-Ai-Infusion/index.html", "mid")]
+
+# Project files. Keys are AWS-Bootcamp folders or Learnings folders.
+# TODO(migration): paste each GitHub repo URL (https://github.com/<owner>/<repo>).
+# An empty string shows "GitHub link coming soon"; see MIGRATION-TODO.md.
+GITHUB = {
+    **{folder: "" for folder, *_ in SEQ},
+    **{f"Class-{n}": "" for n in ("1", "2", "3-4", "5", "6", "7", "8", "9")},
+}
+# Zips already in /zips, served from this site.
+ZIPS = {
+    "your-first-agent": "your-first-agent-main.zip",
+    "giving-agents-tools": "giving-agents-tools-main.zip",
+    "Agents-that-remember": "Agents-that-remember-main.zip",
+    "How-agents-talk": "How-agents-talk-main.zip",
+    "Class-1": "Class-1-AI-infusion.zip",
+    "Class-2": "Class-2-AI-infusion.zip",
+    "Class-3-4": "Class-3-4-AI-infusion.zip",
+    "Class-5": "Class-5-AI-infusion.zip",
+    "Class-6": "Class-6-AI-infusion.zip",
+}
 
 # Pages built on the finance template sit inside <main>, not the lesson .wrap.
 FINANCE = {"finance-section-1", "finance-nps-project"}
@@ -81,12 +109,19 @@ a.awsq-home:hover{background:var(--q-card2);text-decoration:none}
 .awsq-steps a.done{background:var(--q-acc-t);color:var(--q-acc-ink);border-color:transparent}
 .awsq-steps a.cur{background:var(--q-cur);color:var(--q-on);border-color:transparent}
 .awsq-steps a:hover{border-color:var(--q-acc);text-decoration:none}
-.awsq-rec{display:flex;align-items:center;gap:10px;margin:11px 0 0;padding:9px 13px;border-radius:9px;border:1px solid var(--q-acc);background:var(--q-acc-t);
+.awsq-recs{display:flex;flex-wrap:wrap;gap:8px;margin:11px 0 0}
+.awsq-rec{flex:1 1 220px;display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:9px;border:1px solid var(--q-acc);background:var(--q-acc-t);
   color:var(--q-acc-ink);font-weight:700;font-size:.92rem;line-height:1.3;text-decoration:none}
 a.awsq-rec:hover{text-decoration:none;filter:brightness(.97)}
 .awsq-rec i{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--q-acc);color:var(--q-on);font-style:normal;font-size:.7rem}
 .awsq-rec small{margin-left:auto;font:600 .68rem/1.3 var(--q-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.8}
-span.awsq-rec{border-style:dashed;background:transparent;color:var(--q-muted)} span.awsq-rec i{background:var(--q-rule);color:var(--q-muted)}
+.awsq-files{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:11px 0 0;padding:10px 0 0;border-top:1px dashed var(--q-rule)}
+.awsq-files > b{margin-right:4px;font:600 .7rem/1.3 var(--q-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-fb{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;border:1px solid var(--q-rule);color:var(--q-ink);
+  font-size:.85rem;font-weight:700;line-height:1.3;text-decoration:none}
+a.awsq-fb:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-fb small{font:600 .66rem/1.3 var(--q-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--q-muted)}
+span.awsq-fb{border-style:dashed;color:var(--q-muted);font-weight:600}
 .awsq a:focus-visible{outline:2px solid var(--q-focus);outline-offset:2px}
 .awsq a.aih{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--q-acc);color:var(--q-on);
   font:700 .74rem/1.2 var(--q-mono);letter-spacing:.04em;text-decoration:none;white-space:nowrap}
@@ -110,9 +145,16 @@ AIH_STYLE = """<!-- aih:style --><style>
 .aiseq a.aq-rec:hover{background:var(--aq-off);color:var(--aq-ink);text-decoration:none}
 .aiseq a.aq-rec i{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--aq-acc);color:var(--aq-bg);font-style:normal;font-size:10px}
 .aiseq a.aq-rec small{margin-left:auto;font:600 10px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--aq-dim)}
+.aiseq .aq-files{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 0;padding:9px 0 0;border-top:1px dashed var(--aq-line)}
+.aiseq .aq-files > b{margin-right:4px;font:600 10.5px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--aq-dim)}
+.aiseq .aq-fb{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;border:1px solid var(--aq-line);color:var(--aq-ink);
+  font-size:13px;font-weight:600;line-height:1.3;text-decoration:none}
+.aiseq a.aq-fb:hover{border-color:var(--aq-acc);color:var(--aq-ink);text-decoration:none}
+.aiseq .aq-fb small{font:600 10px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--aq-dim)}
+.aiseq span.aq-fb{border-style:dashed;color:var(--aq-dim);font-weight:500}
 </style><!-- /aih:style -->"""
 
-HOME_BTN = '<a class="aih" href="../../" title="Back to all AI-Infusion lessons">⌂ AI-Infusion</a>'
+HOME_BTN = '<a class="aih" href="../../" title="Back to the AI-Infusion home page">⌂ AI-Infusion</a>'
 
 
 def write(p, s):
@@ -133,33 +175,58 @@ def e(s):
     return html.escape(s, quote=True)
 
 
+def files_box(key, cls):
+    """Project files: browse the code on GitHub, and download it all as a zip.
+
+    cls is the class prefix of the nav it sits in ("awsq" or "aq").
+    """
+    repo = GITHUB.get(key, "").rstrip("/")
+    zip_name = ZIPS.get(key, "")
+    fb = f"{cls}-fb"
+    if repo:
+        browse = (f'<a class="{fb}" href="{e(repo)}" target="_blank" rel="noopener">&lt;/&gt; Browse the code'
+                  f'<small>GitHub</small></a>')
+    else:
+        browse = f'<span class="{fb}" data-todo="github">&lt;/&gt; Browse the code<small>GitHub link coming soon</small></span>'
+    if zip_name:
+        download = (f'<a class="{fb}" href="../../zips/{e(zip_name)}" download>⬇ Download all'
+                    f'<small>.zip</small></a>')
+    elif repo:
+        download = (f'<a class="{fb}" href="{e(repo)}/archive/refs/heads/main.zip">⬇ Download all'
+                    f'<small>.zip from GitHub</small></a>')
+    else:
+        download = f'<span class="{fb}" data-todo="github">⬇ Download all<small>coming soon</small></span>'
+    return f'<div class="{cls}-files"><b>Project files</b>{browse}{download}</div>'
+
+
 def caption(i):
     _, step, kind, _ = SEQ[i]
     if step == "0":
-        return f"{BRAND} · Part 1 · Revision"
+        return f"{BRAND} · {DAY} · Revision"
     if step.startswith("P"):
         n = sum(1 for s in SEQ if s[1].startswith("P"))
-        return f"{BRAND} · Part 1 · {kind} of {n}"
+        return f"{BRAND} · {DAY} · {kind} of {n}"
     n = sum(1 for s in SEQ if s[1].isdigit() and s[1] != "0")
-    return f"{BRAND} · Part 1 · {kind} of {n}"
+    return f"{BRAND} · {DAY} · {kind} of {n}"
 
 
 def side(i, cls, label):
     if i < 0 or i >= len(SEQ):
-        msg = "You're at the start" if cls == "awsq-prev" else "Part 2 · coming soon"
+        msg = "You're at the start" if cls == "awsq-prev" else "Day 2 · coming soon"
         return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">{msg}</span></span>'
     folder, _, kind, title = SEQ[i]
     return (f'<a class="awsq-l {cls}" href="../{folder}/"><span class="awsq-d">{label}</span>'
             f'<span class="awsq-t">{e(kind)} · {e(title)}</span></a>')
 
 
-def recording(folder):
-    url = RECORDINGS.get(folder, "")
-    if url:
-        return (f'<a class="awsq-rec" href="{e(url)}" target="_blank" rel="noopener">'
-                f'<i aria-hidden="true">▶</i>Watch the Scaler class recording<small>opens in a new tab</small></a>')
-    return ('<span class="awsq-rec"><i aria-hidden="true">▶</i>Scaler class recording'
-            '<small>link coming soon</small></span>')
+def recordings(folder):
+    recs = RECORDINGS.get(folder) or []
+    if not recs:
+        return ('<div class="awsq-recs"><span class="awsq-rec"><i aria-hidden="true">▶</i>Scaler class recording'
+                '<small>link coming soon</small></span></div>')
+    links = "".join(f'<a class="awsq-rec" href="{e(url)}" target="_blank" rel="noopener">'
+                    f'<i aria-hidden="true">▶</i>Watch {e(label)}<small>Scaler</small></a>' for label, url in recs)
+    return f'<div class="awsq-recs">{links}</div>'
 
 
 def nav(i, where):
@@ -173,10 +240,10 @@ def nav(i, where):
     return (f'<nav class="awsq awsq-{where}{extra}" aria-label="Bootcamp navigation ({where})"><div class="awsq-box">'
             f'<div class="awsq-head"><span class="awsq-cap">{e(caption(i))}</span>{HOME_BTN}</div>'
             f'<div class="awsq-row">{side(i - 1, "awsq-prev", "← Previous")}'
-            f'<a class="awsq-home" href="../../#aws-bootcamp"><b>{BRAND}</b>all lessons</a>'
+            f'<a class="awsq-home" href="../day-1/"><b>{BRAND}</b>{DAY} · all lessons</a>'
             f'{side(i + 1, "awsq-next", "Next →")}</div>'
             f'<ol class="awsq-steps" aria-label="All lessons">{"".join(steps)}</ol>'
-            f'{recording(folder) if where == "top" else ""}</div></nav>')
+            f'{recordings(folder) if where == "top" else ""}{files_box(folder, "awsq")}</div></nav>')
 
 
 def build_aws():
@@ -201,6 +268,12 @@ def build_aws():
         print("nav  ", p.relative_to(ROOT))
 
 
+def insert_after_steps(s, where, block, rel):
+    m = re.search(rf'<div class="aiseq aiseq-{where}"[^\n]*?</ol>', s)
+    assert m, (rel, where)
+    return s[:m.end()] + block + s[m.end():]
+
+
 def build_learnings():
     for p in sorted((ROOT / "Learnings").glob("*/*.html")):
         s = p.read_text(encoding="utf-8")
@@ -210,32 +283,30 @@ def build_learnings():
             s = s.replace("<!-- aiseq:top -->", "<!-- aiseq:top -->\n" + AIH_STYLE, 1)
         s = re.sub(r'(?<!<div class="aq-head">)(<span class="aq-cap">.*?</span>)(?!<a class="aih")',
                    lambda m: f'<div class="aq-head">{m.group(1)}{HOME_BTN}</div>', s)
+        # the centre link opens the AI-Infusion lessons page; the home button stays on the site home
+        s = s.replace('<a class="aq-home" href="../../">', '<a class="aq-home" href="../../AI-Infusion/">')
         s = re.sub(r"<!-- aqrec -->.*?<!-- /aqrec -->", "", s)
+        s = re.sub(r"<!-- aqfiles -->.*?<!-- /aqfiles -->", "", s)
         rel = p.relative_to(ROOT / "Learnings").as_posix()
+        # Class-10 redirects to the Class 9 page, whose code it shares
+        key = re.match(r"Class-([\d-]+)", rel).group(0).replace("Class-10", "Class-9")
         for where in ("top", "mid"):
             recs = LEARN_RECORDINGS.get((rel, where))
             if not recs:
                 continue
             links = "".join(f'<a class="aq-rec" href="{e(url)}" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>'
                             f'Watch the {e(label)} recording<small>Scaler</small></a>' for label, url in recs)
-            block = f'<!-- aqrec --><div class="aq-recs">{links}</div><!-- /aqrec -->'
-            m = re.search(rf'<div class="aiseq aiseq-{where}"[^\n]*?</ol>', s)
-            assert m, (rel, where)
-            s = s[:m.end()] + block + s[m.end():]
+            s = insert_after_steps(s, where, f'<!-- aqrec --><div class="aq-recs">{links}</div><!-- /aqrec -->', rel)
+        for where in ("top", "bottom"):
+            s = insert_after_steps(s, where, f"<!-- aqfiles -->{files_box(key, 'aq')}<!-- /aqfiles -->", rel)
         write(p, s)
         print("home ", p.relative_to(ROOT))
 
 
-def build_hub():
-    p = ROOT / "index.html"
+def build_hubs():
+    # AI-Infusion lessons page: every class recording in one list
+    p = ROOT / "AI-Infusion" / "index.html"
     s = p.read_text(encoding="utf-8")
-    for folder, url in RECORDINGS.items():
-        if url:
-            chip = (f'<a class="awsb-rec" data-rec="{folder}" href="{e(url)}" target="_blank" rel="noopener">'
-                    f'▶ Recording</a>')
-        else:
-            chip = f'<span class="awsb-rec" data-rec="{folder}">▶ Recording soon</span>'
-        s = re.sub(rf'<(span|a) class="awsb-rec" data-rec="{re.escape(folder)}"[^>]*>.*?</\1>', lambda m: chip, s)
     seen, items = set(), []
     for recs in LEARN_RECORDINGS.values():
         for label, url in recs:
@@ -249,8 +320,19 @@ def build_hub():
     write(p, s)
     print("rec  ", p.relative_to(ROOT))
 
+    # Bootcamp Day 1 page: the day's recordings
+    p = ROOT / "AWS-Bootcamp" / "day-1" / "index.html"
+    s = p.read_text(encoding="utf-8")
+    links = "".join(f'<a href="{e(url)}" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>'
+                    f'<span>{e(label)}<small>Scaler recording · opens in a new tab</small></span></a>'
+                    for label, url in DAY1_RECORDINGS)
+    block = f'<!-- recs:day1 --><div class="awsb-recs">{links}</div><!-- /recs:day1 -->'
+    s = re.sub(r"<!-- recs:day1 -->.*?<!-- /recs:day1 -->", lambda m: block, s, flags=re.S)
+    write(p, s)
+    print("rec  ", p.relative_to(ROOT))
+
 
 if __name__ == "__main__":
-    build_hub()
+    build_hubs()
     build_aws()
     build_learnings()

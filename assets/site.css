@@ -1,0 +1,43 @@
+/* Site bar: home, the two programmes and Help, at the top and bottom of every hub page */
+.sitebar{--sb-on:var(--bg,#fff);display:flex;align-items:center;flex-wrap:wrap;gap:8px 18px;max-width:1080px;margin:0 auto;padding:16px 0;
+  font:600 12px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.04em}
+.sitebar a{color:inherit;text-decoration:none;opacity:.78}
+.sitebar a:hover{opacity:1;text-decoration:underline;text-underline-offset:3px}
+.sitebar a[aria-current="page"]{opacity:1;text-decoration:underline;text-underline-offset:3px}
+.sitebar .sb-home{opacity:1;display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:999px;border:1.5px solid currentColor;margin-right:auto}
+.sitebar .sb-home:hover{text-decoration:none}
+.sitebar .sb-help{opacity:1;padding:6px 12px;border-radius:999px;background:currentColor}
+.sitebar .sb-help span{color:var(--sb-on)}
+.sitebar .sb-help:hover{text-decoration:none}
+.sitebar-bottom{margin-top:48px;border-top:1px solid var(--rule,rgba(128,128,128,.35))}
+@media (max-width:640px){.sitebar{gap:8px 14px}.sitebar .sb-home{margin-right:0;flex-basis:100%;justify-content:center}}
+@media print{.sitebar{display:none}}
+
+/* Home page tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin:8px 0 28px}
+.tile{position:relative;display:flex;flex-direction:column;gap:10px;padding:28px 26px 24px;border-radius:14px;text-decoration:none;
+  border:1px solid var(--rule);background:var(--surface);color:var(--ink);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.tile:hover{transform:translateY(-3px);box-shadow:0 16px 36px -18px rgba(0,0,0,.45);border-color:var(--accent)}
+.tile-k{font:600 11px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0}
+.tile h2{margin:0;font-size:clamp(32px,5vw,44px)}
+.tile p{margin:0;color:var(--ink-2);font-size:16px;line-height:1.55}
+.tile ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.tile li{margin:0;padding:5px 10px;border-radius:6px;border:1px solid var(--rule);font:500 12px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--ink-2)}
+.tile .go{margin-top:auto;padding-top:10px;font:600 13px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--accent)}
+.tile-aws{--accent:#F2A93B;--ink:#EEF1FB;--ink-2:#A9B2D6;--rule:#2A3768;
+  background:radial-gradient(600px 300px at 90% -10%,rgba(242,169,59,.25),transparent 60%),linear-gradient(180deg,#0E1530,#141D3F);border-color:#2A3768}
+.tile-aws h2 em{font-style:italic;color:#F2A93B}
+.help-strip{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:16px 20px;border:1px dashed var(--rule-2);border-radius:10px;font-size:15px;color:var(--ink-2)}
+.help-strip a{font-weight:700}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}.tile:hover{transform:none}}
+
+/* Recording buttons */
+.recs{margin:28px 0 0;padding:16px 18px;background:var(--surface);border:1px solid var(--rule);border-radius:4px}
+.recs h3{margin:0 0 4px;font-size:15px}
+.recs p{margin:0 0 12px;font-size:14px;color:var(--ink-2)}
+.recs ul{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:0;padding:0;list-style:none}
+.recs li{margin:0;padding:0}
+.recs li::before{content:none}
+.recs a{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--rule);border-radius:4px;color:var(--ink);font-size:14px;font-weight:500;text-decoration:none}
+.recs a:hover{border-color:var(--accent);background:var(--accent-soft)}
+.recs a i{flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--surface);font-style:normal;font-size:9px}

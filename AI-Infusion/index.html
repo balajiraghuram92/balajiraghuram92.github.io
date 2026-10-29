@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Infusion Lessons</title>
+<meta name="description" content="AI-Infusion, Lessons 1 to 10: what each lesson teaches, links to every page, and the Scaler class recordings.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/hub.css">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/learn-kit.css">
+<script src="../assets/learn-kit.js" defer></script>
+</head>
+<body>
+<nav class="sitebar" aria-label="Site (top)"><a class="sb-home" href="../">⌂ AI-Infusion</a><a href="../AWS-Bootcamp/">Scaler AWS AI Bootcamp</a><a href="../AI-Infusion/" aria-current="page">AI-Infusion lessons</a><a class="sb-help" href="../help/"><span>Help</span></a></nav>
+<!-- aiseq:top -->
+<style>
+.aiseq{all:initial;display:block;box-sizing:border-box;max-width:980px;margin:14px auto;padding:0 16px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --aq-bg:#FFFFFF;--aq-line:#D8D8D1;--aq-ink:#1A1A18;--aq-dim:#6B6B63;--aq-acc:#2B3A67;--aq-off:#E6E6DF;--aq-cur:#8A5E12;--aq-curink:#FFFFFF}
+@media (prefers-color-scheme: dark){.aiseq{--aq-bg:#1C1C1A;--aq-line:#3A3A35;--aq-ink:#EDEDE6;--aq-dim:#A3A39A;--aq-acc:#9CB2E0;--aq-off:#34342F;--aq-cur:#E0AE52;--aq-curink:#1A1A18}}
+.aiseq *{box-sizing:border-box}
+.aiseq .aq-box{background:var(--aq-bg);border:1px solid var(--aq-line);border-radius:6px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.aiseq .aq-cap{display:block;margin:0 0 8px;font:600 10.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--aq-dim)}
+.aiseq .aq-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+.aiseq a.aq-l,.aiseq span.aq-l{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;padding:8px 12px;border-radius:5px;
+  border:1px solid var(--aq-line);background:transparent;color:var(--aq-ink);text-decoration:none;font-size:14px;line-height:1.3;text-align:left}
+.aiseq a.aq-l:hover{border-color:var(--aq-acc);background:transparent;color:var(--aq-ink);text-decoration:none}
+.aiseq .aq-next{text-align:right;align-items:flex-end}
+.aiseq .aq-l .aq-d{font:600 10.5px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--aq-acc)}
+.aiseq .aq-l .aq-t{color:var(--aq-ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.aiseq span.aq-l{border-style:dashed;color:var(--aq-dim)} .aiseq span.aq-l .aq-d,.aiseq span.aq-l .aq-t{color:var(--aq-dim);font-weight:400}
+.aiseq a.aq-home{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 12px;border-radius:5px;text-decoration:none;color:var(--aq-ink);text-align:center;font-size:13px;line-height:1.3}
+.aiseq a.aq-home:hover{background:var(--aq-off);color:var(--aq-ink);text-decoration:none}
+.aiseq .aq-home b{font:600 10.5px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--aq-dim)}
+.aiseq .aq-steps{display:flex;gap:4px;margin:10px 0 0;padding:0;list-style:none;flex-wrap:nowrap}
+.aiseq .aq-steps li{flex:1 1 0;margin:0;padding:0;list-style:none}
+.aiseq .aq-steps li::before,.aiseq .aq-steps li::after{content:none}
+.aiseq .aq-steps a{display:block;text-align:center;padding:3px 0;border-radius:3px;font:600 11px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  text-decoration:none;background:var(--aq-off);color:var(--aq-dim)}
+.aiseq .aq-steps a.done{background:var(--aq-acc);color:var(--aq-bg)}
+.aiseq .aq-steps a.cur{background:var(--aq-cur);color:var(--aq-curink)}
+.aiseq .aq-steps a:hover{outline:2px solid var(--aq-acc);outline-offset:1px;text-decoration:none}
+.aiseq a:focus-visible{outline:2px solid var(--aq-acc);outline-offset:2px}
+@media (max-width:640px){.aiseq .aq-l .aq-t{white-space:normal;overflow-wrap:anywhere}.aiseq .aq-row{grid-template-columns:1fr 1fr}.aiseq a.aq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}}
+@media print{.aiseq{display:none}}
+</style>
+<script>
+/* pages with a fixed top bar (Lessons 1-4): start the lesson nav below it */
+addEventListener("DOMContentLoaded",function(){var t=document.getElementById("topnav"),n=document.querySelector(".aiseq-top");
+if(t&&n&&getComputedStyle(t).position==="fixed"){n.style.marginTop=(t.offsetHeight+14)+"px"}});
+</script>
+<div class="aiseq aiseq-top" role="navigation" aria-label="Lesson navigation (top)"><div class="aq-box"><span class="aq-cap">Start here</span><div class="aq-row"><span class="aq-l aq-prev"><span class="aq-d">← Previous</span><span class="aq-t">You're at the start</span></span><a class="aq-home" href="./"><b>AI Infusion</b>10 lessons · all lessons</a><a class="aq-l aq-next" href="../Learnings/Class-1-AI-infusion/"><span class="aq-d">Next →</span><span class="aq-t">Lesson 1 · Build &amp; ship your first AI app</span></a></div><ol class="aq-steps" aria-label="All lessons"><li><a class="" href="../Learnings/Class-1-AI-infusion/" title="Lesson 1 · Build &amp; ship your first AI app">1</a></li><li><a class="" href="../Learnings/Class-2-AI-infusion/" title="Lesson 2 · LangChain &amp; your first agent">2</a></li><li><a class="" href="../Learnings/Class-3-4-AI-infusion/" title="Lessons 3–4 · RAG: give your AI a library">3</a></li><li><a class="" href="../Learnings/Class-3-4-AI-infusion/" title="Lessons 3–4 · RAG: give your AI a library">4</a></li><li><a class="" href="../Learnings/Class-5-AI-infusion/" title="Lesson 5 · Dockerize everything">5</a></li><li><a class="" href="../Learnings/Class-6-AI-infusion/" title="Lesson 6 · AI agents on AWS">6</a></li><li><a class="" href="../Learnings/Class-7-AI-infusion/" title="Lesson 7 · The interview coach">7</a></li><li><a class="" href="../Learnings/Class-8-AI-infusion/" title="Lesson 8 · The shipment exception desk">8</a></li><li><a class="" href="../Learnings/Class-9-Ai-Infusion/" title="Lesson 9 · The Refund Bench: design">9</a></li><li><a class="" href="../Learnings/Class-9-Ai-Infusion/#build" title="Lesson 10 · Build &amp; evaluate the bench">10</a></li></ol></div></div>
+<!-- /aiseq:top -->
+
+<header>
+  <div class="col">
+    <p class="eyebrow">AI-Infusion · Lessons 1–10</p>
+    <h1>From your first API call to an AI system that <em>moves money</em></h1>
+    <p class="standfirst">Ten lessons that take you from “what is a token?” to designing, evaluating and building a production-shaped AI system. Every lesson ends with something you've built and can run, and every class has its Scaler recording.</p>
+    <div class="meta">
+      <span><b>Lessons</b> 10, on 8 pages</span>
+      <span><b>Recordings</b> 11</span>
+      <span><b>Language</b> Python 3.12</span>
+      <span><b>Setup</b> <a href="../help/">Help</a></span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="lessons">
+  <div class="wide">
+    <p class="kicker">The journey</p>
+    <h2>The ten lessons</h2>
+    <p class="lede">Five arcs. Each one uses everything before it.</p>
+    <div class="arcs"><span>Foundations · 1–2</span><span class="b">Knowledge · 3–4</span><span class="c">Ship it · 5–6</span><span class="d">Projects · 7–8</span><span class="e">Design &amp; evals · 9–10</span></div>
+
+    <div class="lessons">
+      <a class="lesson" href="../Learnings/Class-1-AI-infusion/">
+        <p class="ln">Lesson 1 · Foundations</p>
+        <h3>Build &amp; ship your first AI app</h3>
+        <ul>
+          <li>What an LLM is: tokens, next-token prediction, why it has no memory</li>
+          <li>Your first 6 lines against the OpenAI API, and the 3 chat roles</li>
+          <li>Swapping to a free model on Groq with one <code>base_url</code></li>
+          <li>Gradio: a web app in 4 lines</li>
+        </ul>
+        <p class="build"><b>Build</b>AI Website Summarizer, then post it on LinkedIn</p>
+        <span class="go">Open lesson →</span>
+      </a>
+      <a class="lesson" href="../Learnings/Class-2-AI-infusion/">
+        <p class="ln">Lesson 2 · Foundations</p>
+        <h3>LangChain &amp; your first agent</h3>
+        <ul>
+          <li>Three ways to make a model do what you want</li>
+          <li>Templates, models, parsers, and chains joined with <code>|</code></li>
+          <li>Memory: re-sending history, decoded</li>
+          <li>Tools and the think → call tool → answer loop</li>
+        </ul>
+        <p class="build"><b>Build</b>Smart Shop Assistant agent</p>
+        <span class="go">Open lesson →</span>
+      </a>
+      <a class="lesson arc-b" href="../Learnings/Class-3-4-AI-infusion/">
+        <p class="ln">Lessons 3–4 · Knowledge</p>
+        <h3>RAG: give your AI its own library</h3>
+        <ul>
+          <li>Embeddings and cosine similarity, drawn in 2D first</li>
+          <li>Four chunking strategies, and vector databases (HNSW)</li>
+          <li>Reranking with a cross-encoder, plus hybrid keyword + vector search</li>
+          <li>Where it goes: agentic and advanced RAG</li>
+        </ul>
+        <p class="build"><b>Build</b>Chat with your PDF, with citations</p>
+        <span class="go">Open lessons →</span>
+      </a>
+      <a class="lesson arc-c" href="../Learnings/Class-5-AI-infusion/">
+        <p class="ln">Lesson 5 · Ship it</p>
+        <h3>Dockerize everything</h3>
+        <ul>
+          <li>Images, containers, Dockerfiles and layer caching</li>
+          <li>Compose, ports, volumes and secrets</li>
+          <li>“Started ≠ ready”, and the debug decision tree</li>
+          <li>30 self-test flashcards</li>
+        </ul>
+        <p class="build"><b>Build</b>An ML API, a RAG bot and an agent with Redis, all in containers</p>
+        <span class="go">Open lesson →</span>
+      </a>
+      <a class="lesson arc-c" href="../Learnings/Class-6-AI-infusion/">
+        <p class="ln">Lesson 6 · Ship it</p>
+        <h3>AI agents on AWS</h3>
+        <ul>
+          <li>AWS and Bedrock setup from zero</li>
+          <li>From LLMs to multi-agent systems; MCP and A2A</li>
+          <li>Strands SDK, the agentic loop, and LangGraph</li>
+          <li>Tools: pre-built, custom, <code>use_aws</code>, class-based, async</li>
+        </ul>
+        <p class="build"><b>Build</b>Travel Assistant agent</p>
+        <span class="go">Open lesson →</span>
+      </a>
+      <a class="lesson arc-d" href="../Learnings/Class-7-AI-infusion/">
+        <p class="ln">Lesson 7 · Projects</p>
+        <h3>The coach that can't be bluffed</h3>
+        <ul>
+          <li>A company take-home, solved live</li>
+          <li>Tools measure, the model explains</li>
+          <li>Tool schemas, the tool-calling loop, session memory</li>
+          <li>Aggregated reports, and a bonus second agent</li>
+        </ul>
+        <p class="build"><b>Build</b>InterviewIQ mock-interview coach</p>
+        <span class="go">Open lesson →</span>
+      </a>
+      <a class="lesson arc-d" href="../Learnings/Class-8-AI-infusion/">
+        <p class="ln">Lesson 8 · Projects</p>
+        <h3>The model reads, code signs the refund</h3>
+        <ul>
+          <li>Which decisions to give a model, and which to keep in code</li>
+          <li>Three LangChain chains around deterministic business rules</li>
+          <li>Escalation thresholds and a daily summary</li>
+          <li>Preview of the weekend intensives; why Python</li>
+        </ul>
+        <p class="build"><b>Build</b>Shipment Exception Desk</p>
+        <span class="go">Open lesson →</span>
+      </a>
+      <a class="lesson arc-e" href="../Learnings/Class-9-Ai-Infusion/">
+        <p class="ln">Lesson 9 · Design &amp; evals</p>
+        <h3>The Refund Bench: design</h3>
+        <ul>
+          <li>Self-consistency: three judges and a vote</li>
+          <li>The barrier, the fan-out, and the 14-call budget</li>
+          <li>Latency, capacity and retention, worked through</li>
+          <li>Queues, 429s, idempotency, and the prompts that matter</li>
+        </ul>
+        <p class="build"><b>Build</b>The system design, on paper</p>
+        <span class="go">Open lesson →</span>
+      </a>
+      <a class="lesson arc-e" href="../Learnings/Class-9-Ai-Infusion/#build">
+        <p class="ln">Lesson 10 · Design &amp; evals</p>
+        <h3>Build &amp; evaluate the bench</h3>
+        <ul>
+          <li>Turn a problem statement into requirements</li>
+          <li>Money rules first, tested with no API key</li>
+          <li>Evals: a golden set, error-cost metrics and a gate</li>
+          <li>A ledger that survives crashes and never pays twice</li>
+        </ul>
+        <p class="build"><b>Build</b>Refund Bench, end to end, in 11 steps</p>
+        <span class="go">Open lesson →</span>
+      </a>
+    </div>
+    <!-- recs:lessons --><div class="recs" id="recordings"><h3>Class recordings</h3><p>Every AI-Infusion class on Scaler. Each lesson page also links its own recording at the top.</p><ul><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-1-2/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 1</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-2-2/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 2</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-3/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 3</a></li><li><a href="https://www.scaler.com/academy/mentee-dashboard/class/558449" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 4</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-5/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 5</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-6/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 6</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-7/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 7</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-8/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 8</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-9/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 9</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-10/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 10 · part 1</a></li><li><a href="https://www.scaler.com/meetings/i/ai-infused-learning-10-2/archive" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>Class 10 · part 2</a></li></ul></div><!-- /recs:lessons -->
+    <p class="note-sm">Setting up your laptop? <a href="../help/">Help</a> has every step: WSL, Python, models, requirements.txt and API keys.</p>
+    <p class="note-sm">Lesson 1 also has a set of <a href="../Learnings/Class-1-AI-infusion/simulators.html">interactive simulators</a>. Lessons 3–4 and 9–10 share one page each because the second class continues the first.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="col">
+    AI Infusion · notes and builds from the course, Lessons 1–10. Each lesson page links to the next.<br>
+    Model ids and prices change often. The ids on this page were current when it was written, so check each provider's models page if a call fails.
+  </div>
+</footer>
+
+</main>
+<!-- aiseq:bottom -->
+<div class="aiseq aiseq-bottom" role="navigation" aria-label="Lesson navigation (bottom)"><div class="aq-box"><span class="aq-cap">Ready? Start with Lesson 1</span><div class="aq-row"><span class="aq-l aq-prev"><span class="aq-d">← Previous</span><span class="aq-t">You're at the start</span></span><a class="aq-home" href="./"><b>AI Infusion</b>10 lessons · all lessons</a><a class="aq-l aq-next" href="../Learnings/Class-1-AI-infusion/"><span class="aq-d">Next →</span><span class="aq-t">Lesson 1 · Build &amp; ship your first AI app</span></a></div><ol class="aq-steps" aria-label="All lessons"><li><a class="" href="../Learnings/Class-1-AI-infusion/" title="Lesson 1 · Build &amp; ship your first AI app">1</a></li><li><a class="" href="../Learnings/Class-2-AI-infusion/" title="Lesson 2 · LangChain &amp; your first agent">2</a></li><li><a class="" href="../Learnings/Class-3-4-AI-infusion/" title="Lessons 3–4 · RAG: give your AI a library">3</a></li><li><a class="" href="../Learnings/Class-3-4-AI-infusion/" title="Lessons 3–4 · RAG: give your AI a library">4</a></li><li><a class="" href="../Learnings/Class-5-AI-infusion/" title="Lesson 5 · Dockerize everything">5</a></li><li><a class="" href="../Learnings/Class-6-AI-infusion/" title="Lesson 6 · AI agents on AWS">6</a></li><li><a class="" href="../Learnings/Class-7-AI-infusion/" title="Lesson 7 · The interview coach">7</a></li><li><a class="" href="../Learnings/Class-8-AI-infusion/" title="Lesson 8 · The shipment exception desk">8</a></li><li><a class="" href="../Learnings/Class-9-Ai-Infusion/" title="Lesson 9 · The Refund Bench: design">9</a></li><li><a class="" href="../Learnings/Class-9-Ai-Infusion/#build" title="Lesson 10 · Build &amp; evaluate the bench">10</a></li></ol></div></div>
+<!-- /aiseq:bottom -->
+<nav class="sitebar sitebar-bottom" aria-label="Site (bottom)"><a class="sb-home" href="../">⌂ AI-Infusion</a><a href="../AWS-Bootcamp/">Scaler AWS AI Bootcamp</a><a href="../AI-Infusion/" aria-current="page">AI-Infusion lessons</a><a class="sb-help" href="../help/"><span>Help</span></a></nav>
+</body>
+</html>
