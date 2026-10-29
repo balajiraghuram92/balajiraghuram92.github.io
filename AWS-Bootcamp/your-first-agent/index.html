@@ -401,32 +401,48 @@ footer{padding:48px 0 80px;color:var(--muted);font-size:.95rem;border-top:1px so
 </header>
 <!-- awsq:top -->
 <style>
-.awsq{max-width:72rem;margin:18px auto;padding:0 40px;font-family:var(--font-body)}
-.awsq-box{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:12px 14px}
-.awsq-cap{display:block;margin:0 0 9px;font:600 .7rem/1.4 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.awsq{--q-card:var(--card,var(--surface,#fff));--q-card2:var(--card-2,var(--surface-2,#f3f3f0));--q-rule:var(--rule,var(--line,#ddd));
+  --q-ink:var(--ink,#1a1a1a);--q-muted:var(--muted,#666);--q-acc:var(--tool,var(--accent,#0b7f73));--q-acc-t:var(--tool-t,var(--accent-soft,#d6f2ee));
+  --q-acc-ink:var(--tool-ink,var(--accent,#075a51));--q-cur:var(--brain,var(--gold,#b07600));--q-on:var(--card,var(--surface,#fff));
+  --q-focus:var(--focus,var(--accent,#2958c4));--q-mono:var(--font-mono,"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace);
+  max-width:72rem;margin:18px auto;padding:0 40px;font-family:var(--font-body,inherit)}
+.awsq-box{background:var(--q-card);border:1px solid var(--q-rule);border-radius:12px;padding:12px 14px}
+.awsq-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
+.awsq-cap{display:block;margin:0;font:600 .7rem/1.4 var(--q-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--q-muted)}
 .awsq-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
-.awsq-l{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;padding:9px 13px;border-radius:9px;border:1px solid var(--rule);color:var(--ink);text-decoration:none;font-size:.95rem;line-height:1.3}
-a.awsq-l:hover{border-color:var(--tool);text-decoration:none}
+.awsq-l{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;padding:9px 13px;border-radius:9px;border:1px solid var(--q-rule);color:var(--q-ink);text-decoration:none;font-size:.95rem;line-height:1.3}
+a.awsq-l:hover{border-color:var(--q-acc);text-decoration:none}
 .awsq-next{text-align:right;align-items:flex-end}
-.awsq-d{font:600 .7rem/1.3 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--tool)}
+.awsq-d{font:600 .7rem/1.3 var(--q-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--q-acc)}
 .awsq-t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
-span.awsq-l{border-style:dashed;color:var(--muted)} span.awsq-l .awsq-d,span.awsq-l .awsq-t{color:var(--muted);font-weight:400}
-a.awsq-home{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 12px;border-radius:9px;text-decoration:none;color:var(--ink);text-align:center;font-size:.85rem;line-height:1.3}
-a.awsq-home:hover{background:var(--card-2);text-decoration:none}
-.awsq-home b{font:600 .7rem/1.3 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+span.awsq-l{border-style:dashed;color:var(--q-muted)} span.awsq-l .awsq-d,span.awsq-l .awsq-t{color:var(--q-muted);font-weight:400}
+a.awsq-home{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 12px;border-radius:9px;text-decoration:none;color:var(--q-ink);text-align:center;font-size:.85rem;line-height:1.3}
+a.awsq-home:hover{background:var(--q-card2);text-decoration:none}
+.awsq-home b{font:600 .7rem/1.3 var(--q-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--q-muted)}
 .awsq-steps{display:flex;gap:5px;margin:11px 0 0;padding:0;list-style:none}
-.awsq-steps li{flex:1 1 0;margin:0}
-.awsq-steps a{display:block;text-align:center;padding:4px 0;border-radius:5px;font:600 .75rem/1.4 var(--font-mono);text-decoration:none;background:var(--card-2);border:1px solid var(--rule);color:var(--muted)}
-.awsq-steps a.done{background:var(--tool-t);color:var(--tool-ink);border-color:transparent}
-.awsq-steps a.cur{background:var(--brain);color:#fff;border-color:transparent}
-.awsq-steps a:hover{border-color:var(--tool);text-decoration:none}
-.awsq a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-@media (max-width:1100px){.awsq{padding:0 24px}}
-@media (max-width:640px){.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}}
+.awsq-steps li{flex:1 1 0;margin:0;padding:0;list-style:none}
+.awsq-steps li::before{content:none}
+.awsq-steps a{display:block;text-align:center;padding:4px 0;border-radius:5px;font:600 .75rem/1.4 var(--q-mono);text-decoration:none;background:var(--q-card2);border:1px solid var(--q-rule);color:var(--q-muted)}
+.awsq-steps a.done{background:var(--q-acc-t);color:var(--q-acc-ink);border-color:transparent}
+.awsq-steps a.cur{background:var(--q-cur);color:var(--q-on);border-color:transparent}
+.awsq-steps a:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-rec{display:flex;align-items:center;gap:10px;margin:11px 0 0;padding:9px 13px;border-radius:9px;border:1px solid var(--q-acc);background:var(--q-acc-t);
+  color:var(--q-acc-ink);font-weight:700;font-size:.92rem;line-height:1.3;text-decoration:none}
+a.awsq-rec:hover{text-decoration:none;filter:brightness(.97)}
+.awsq-rec i{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--q-acc);color:var(--q-on);font-style:normal;font-size:.7rem}
+.awsq-rec small{margin-left:auto;font:600 .68rem/1.3 var(--q-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+span.awsq-rec{border-style:dashed;background:transparent;color:var(--q-muted)} span.awsq-rec i{background:var(--q-rule);color:var(--q-muted)}
+.awsq a:focus-visible{outline:2px solid var(--q-focus);outline-offset:2px}
+.awsq a.aih{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--q-acc);color:var(--q-on);
+  font:700 .74rem/1.2 var(--q-mono);letter-spacing:.04em;text-decoration:none;white-space:nowrap}
+.awsq a.aih:hover{filter:brightness(1.08);text-decoration:none}
 .awsq-bottom{padding:0 !important;margin:48px 0 8px;max-width:none}
+.awsq-inmain{padding:0 !important;margin:0 0 28px;max-width:none}
+@media (max-width:1100px){.awsq{padding:0 24px}}
+@media (max-width:640px){.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}.awsq-rec small{display:none}}
 @media print{.awsq{display:none}}
 </style>
-<nav class="awsq awsq-top" aria-label="Bootcamp navigation (top)"><div class="awsq-box"><span class="awsq-cap">AI-Infusion-AWS Bootcamp · Lesson 1 of 4</span><div class="awsq-row"><a class="awsq-l awsq-prev" href="../part-00-AWS-Revision/"><span class="awsq-d">← Previous</span><span class="awsq-t">Part 00 · AWS Revision</span></a><a class="awsq-home" href="../../#aws-bootcamp"><b>AWS Bootcamp</b>all lessons</a><a class="awsq-l awsq-next" href="../giving-agents-tools/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 2 · Giving agents tools</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="done" href="../part-00-AWS-Revision/" title="Part 00 · AWS Revision">0</a></li><li><a class="cur" href="../your-first-agent/" title="Lesson 1 · Your first AI agent" aria-current="page">1</a></li><li><a class="" href="../giving-agents-tools/" title="Lesson 2 · Giving agents tools">2</a></li><li><a class="" href="../Agents-that-remember/" title="Lesson 3 · Agents that remember">3</a></li><li><a class="" href="../How-agents-talk/" title="Lesson 4 · How agents talk">4</a></li></ol></div></nav>
+<nav class="awsq awsq-top" aria-label="Bootcamp navigation (top)"><div class="awsq-box"><div class="awsq-head"><span class="awsq-cap">Scaler AWS AI Bootcamp · Part 1 · Lesson 1 of 6</span><a class="aih" href="../../" title="Back to all AI-Infusion lessons">⌂ AI-Infusion</a></div><div class="awsq-row"><a class="awsq-l awsq-prev" href="../part-00-AWS-Revision/"><span class="awsq-d">← Previous</span><span class="awsq-t">Part 00 · AWS Revision</span></a><a class="awsq-home" href="../../#aws-bootcamp"><b>Scaler AWS AI Bootcamp</b>all lessons</a><a class="awsq-l awsq-next" href="../giving-agents-tools/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 2 · Giving agents tools</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="done" href="../part-00-AWS-Revision/" title="Part 00 · AWS Revision">0</a></li><li><a class="cur" href="../your-first-agent/" title="Lesson 1 · Your first AI agent" aria-current="page">1</a></li><li><a class="" href="../giving-agents-tools/" title="Lesson 2 · Giving agents tools">2</a></li><li><a class="" href="../Agents-that-remember/" title="Lesson 3 · Agents that remember">3</a></li><li><a class="" href="../agents-that-work-together/" title="Lesson 4 · Agents that work together">4</a></li><li><a class="" href="../How-agents-talk/" title="Lesson 5 · How agents talk">5</a></li><li><a class="" href="../shipping-agents-to-production/" title="Lesson 6 · Shipping agents to production">6</a></li><li><a class="" href="../finance-section-1/" title="Project 1 · AI agents in finance">P1</a></li><li><a class="" href="../finance-nps-project/" title="Project 2 · NPS analyst in a box">P2</a></li></ol><span class="awsq-rec"><i aria-hidden="true">▶</i>Scaler class recording<small>link coming soon</small></span></div></nav>
 <!-- /awsq:top -->
 
 <div class="wrap">
@@ -3305,7 +3321,7 @@ for message in response["messages"]:
 </section>
 
 <!-- awsq:bottom -->
-<nav class="awsq awsq-bottom" aria-label="Bootcamp navigation (bottom)"><div class="awsq-box"><span class="awsq-cap">AI-Infusion-AWS Bootcamp · Lesson 1 of 4</span><div class="awsq-row"><a class="awsq-l awsq-prev" href="../part-00-AWS-Revision/"><span class="awsq-d">← Previous</span><span class="awsq-t">Part 00 · AWS Revision</span></a><a class="awsq-home" href="../../#aws-bootcamp"><b>AWS Bootcamp</b>all lessons</a><a class="awsq-l awsq-next" href="../giving-agents-tools/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 2 · Giving agents tools</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="done" href="../part-00-AWS-Revision/" title="Part 00 · AWS Revision">0</a></li><li><a class="cur" href="../your-first-agent/" title="Lesson 1 · Your first AI agent" aria-current="page">1</a></li><li><a class="" href="../giving-agents-tools/" title="Lesson 2 · Giving agents tools">2</a></li><li><a class="" href="../Agents-that-remember/" title="Lesson 3 · Agents that remember">3</a></li><li><a class="" href="../How-agents-talk/" title="Lesson 4 · How agents talk">4</a></li></ol></div></nav>
+<nav class="awsq awsq-bottom" aria-label="Bootcamp navigation (bottom)"><div class="awsq-box"><div class="awsq-head"><span class="awsq-cap">Scaler AWS AI Bootcamp · Part 1 · Lesson 1 of 6</span><a class="aih" href="../../" title="Back to all AI-Infusion lessons">⌂ AI-Infusion</a></div><div class="awsq-row"><a class="awsq-l awsq-prev" href="../part-00-AWS-Revision/"><span class="awsq-d">← Previous</span><span class="awsq-t">Part 00 · AWS Revision</span></a><a class="awsq-home" href="../../#aws-bootcamp"><b>Scaler AWS AI Bootcamp</b>all lessons</a><a class="awsq-l awsq-next" href="../giving-agents-tools/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 2 · Giving agents tools</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="done" href="../part-00-AWS-Revision/" title="Part 00 · AWS Revision">0</a></li><li><a class="cur" href="../your-first-agent/" title="Lesson 1 · Your first AI agent" aria-current="page">1</a></li><li><a class="" href="../giving-agents-tools/" title="Lesson 2 · Giving agents tools">2</a></li><li><a class="" href="../Agents-that-remember/" title="Lesson 3 · Agents that remember">3</a></li><li><a class="" href="../agents-that-work-together/" title="Lesson 4 · Agents that work together">4</a></li><li><a class="" href="../How-agents-talk/" title="Lesson 5 · How agents talk">5</a></li><li><a class="" href="../shipping-agents-to-production/" title="Lesson 6 · Shipping agents to production">6</a></li><li><a class="" href="../finance-section-1/" title="Project 1 · AI agents in finance">P1</a></li><li><a class="" href="../finance-nps-project/" title="Project 2 · NPS analyst in a box">P2</a></li></ol></div></nav>
 <!-- /awsq:bottom -->
 <footer>
   <p>© 2026 Shivank Agrawal, Future with Shivank. Agentic AI on AWS, Section 1. Course code is provided under the MIT License.</p>

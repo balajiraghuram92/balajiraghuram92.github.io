@@ -391,15 +391,35 @@ details.qa .a p:last-child{margin-bottom:0}
 .awsb-divider{max-width:980px;margin:34px auto 0;display:flex;align-items:center;gap:14px;
   font:600 11px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 .awsb-divider::before,.awsb-divider::after{content:"";flex:1;height:1px;background:var(--rule-2)}
+.awsb-part{display:flex;align-items:flex-start;gap:16px;margin:8px 0 20px;padding:18px 0 0;border-top:1px solid var(--line)}
+.awsb-part ~ .awsb-part{margin-top:44px}
+.awsb-pnum{flex:none;margin-top:4px;padding:6px 11px;border-radius:8px;background:var(--acc);color:var(--bg);font:700 12px/1.2 "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase}
+.awsb-part h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:clamp(28px,4.4vw,40px);line-height:1.05;margin:0 0 6px;color:var(--ink)}
+.awsb-part p{margin:0;font-size:15px;line-height:1.5;color:var(--dim);max-width:64ch}
+.awsb-part-sm .awsb-pnum{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+.awsb-grid-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.awsb-rec{position:relative;z-index:1;font:600 11px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--dim);padding:5px 9px;border:1px dashed var(--line);border-radius:6px;text-decoration:none}
+a.awsb-rec{color:var(--bg);background:var(--c);border:1px solid var(--c)}
+a.awsb-rec:hover{filter:brightness(1.08)}
+.awsb-zip.is-soon{border-style:dashed;opacity:.8}
+.awsb-soon{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:22px 20px;border:1px dashed var(--line);border-radius:14px;background:rgba(255,255,255,.025)}
+.awsb-soon p{margin:0;font-size:15px;line-height:1.5;color:var(--dim);flex:1 1 280px}
+.awsb-soon-tag{padding:6px 12px;border-radius:999px;background:rgba(242,169,59,.14);border:1px solid rgba(242,169,59,.45);color:var(--acc);font:700 11px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase}
+@media (max-width:640px){.awsb-part{flex-direction:column;gap:10px}}
 @media (max-width:640px){.awsb{padding:44px 20px 40px}.awsb-sub{font-size:17px}}
 @media (prefers-reduced-motion:reduce){.awsb-card{transition:none}.awsb-card:hover{transform:none}}
 </style>
 <section class="awsb" id="aws-bootcamp" aria-labelledby="awsb-h">
   <div class="awsb-in">
-    <p class="awsb-eyebrow"><i></i>Agentic AI on AWS · new</p>
-    <h1 id="awsb-h">AI-Infusion-<em>AWS</em> Bootcamp</h1>
-    <p class="awsb-sub">A revision session (Part 00), then four lessons on building agents on AWS: your first Strands agent on Amazon Bedrock, giving it tools, giving it memory, and letting it talk to tools and other agents over MCP and A2A. Open a lesson to learn it in the browser, or grab its zip to keep a copy.</p>
-    <ul class="awsb-meta"><li>Part 00 + 4 lessons</li><li>Strands Agents</li><li>Amazon Bedrock</li><li>AgentCore</li><li>MCP · A2A</li></ul>
+    <p class="awsb-eyebrow"><i></i>Agentic AI on AWS · Scaler</p>
+    <h1 id="awsb-h">Scaler <em>AWS AI</em> Bootcamp</h1>
+    <p class="awsb-sub">Build AI agents on AWS, from your first Strands agent on Amazon Bedrock to a multi-agent system running in production, then put it to work on real finance projects. Open a lesson to learn it in the browser, watch the class recording, or grab the solution zip to keep a copy.</p>
+    <ul class="awsb-meta"><li>Part 1 · 6 lessons + 2 projects</li><li>Strands Agents</li><li>Amazon Bedrock</li><li>AgentCore</li><li>MCP · A2A</li><li>Part 2 · coming soon</li></ul>
+
+    <div class="awsb-part" id="aws-part-1">
+      <span class="awsb-pnum">Part 1</span>
+      <div><h2>Agents on AWS, end to end</h2><p>Build an agent, give it tools and memory, make agents work together and talk over MCP and A2A, then ship it to production.</p></div>
+    </div>
     <div class="awsb-grid">
       <article class="awsb-card" style="--c:#9AA6C8">
       <div class="awsb-num">00</div>
@@ -407,7 +427,7 @@ details.qa .a p:last-child{margin-bottom:0}
       <h3><a href="AWS-Bootcamp/part-00-AWS-Revision/">AWS Revision</a></h3>
       <ul><li>Keys in .env and your first LangChain chain</li><li>OpenAI vs local Ollama, and the AIMessage response</li><li>Agents with tools, Tavily web search and structured output</li></ul>
       <p class="awsb-lab"><b>Lab</b>Summary chain + a web-searching agent</p>
-      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span></div>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-rec" data-rec="part-00-AWS-Revision">▶ Recording soon</span></div>
     </article>
       <article class="awsb-card" style="--c:#F2A93B">
       <div class="awsb-num">01</div>
@@ -415,7 +435,7 @@ details.qa .a p:last-child{margin-bottom:0}
       <h3><a href="AWS-Bootcamp/your-first-agent/">Your first AI agent</a></h3>
       <ul><li>Why a plain LLM isn&#x27;t enough, and how RAG helps</li><li>What an agent is, and the AWS agentic stack</li><li>MCP, A2A and the Strands agent loop</li></ul>
       <p class="awsb-lab"><b>Lab</b>Hello World agent on Amazon Bedrock</p>
-      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><a class="awsb-zip" href="zips/your-first-agent-main.zip" download>⬇ your-first-agent-main.zip</a></div>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-rec" data-rec="your-first-agent">▶ Recording soon</span><a class="awsb-zip" href="zips/your-first-agent-main.zip" download>⬇ your-first-agent-main.zip</a></div>
     </article>
       <article class="awsb-card" style="--c:#3CC6B0">
       <div class="awsb-num">02</div>
@@ -423,7 +443,7 @@ details.qa .a p:last-child{margin-bottom:0}
       <h3><a href="AWS-Bootcamp/giving-agents-tools/">Giving agents tools</a></h3>
       <ul><li>Turn Python functions into agent tools</li><li>The Strands toolbox and use_aws</li><li>Custom, class-based and async tools; tools in LangChain</li></ul>
       <p class="awsb-lab"><b>Lab</b>Multi-tool agent + Strands Agent Builder</p>
-      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><a class="awsb-zip" href="zips/giving-agents-tools-main.zip" download>⬇ giving-agents-tools-main.zip</a></div>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-rec" data-rec="giving-agents-tools">▶ Recording soon</span><a class="awsb-zip" href="zips/giving-agents-tools-main.zip" download>⬇ giving-agents-tools-main.zip</a></div>
     </article>
       <article class="awsb-card" style="--c:#7EA6FF">
       <div class="awsb-num">03</div>
@@ -431,21 +451,70 @@ details.qa .a p:last-child{margin-bottom:0}
       <h3><a href="AWS-Bootcamp/Agents-that-remember/">Agents that remember</a></h3>
       <ul><li>Short-term vs long-term memory, and why it&#x27;s hard</li><li>Memory building blocks on AWS</li><li>Context management and AgentCore Memory</li></ul>
       <p class="awsb-lab"><b>Lab</b>Personalised agent with Mem0; LangGraph + AgentCore</p>
-      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><a class="awsb-zip" href="zips/Agents-that-remember-main.zip" download>⬇ Agents-that-remember-main.zip</a></div>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-rec" data-rec="Agents-that-remember">▶ Recording soon</span><a class="awsb-zip" href="zips/Agents-that-remember-main.zip" download>⬇ Agents-that-remember-main.zip</a></div>
+    </article>
+      <article class="awsb-card" style="--c:#FF8A7A">
+      <div class="awsb-num">04</div>
+      <p class="awsb-ln">Lesson 4 · Course section 4</p>
+      <h3><a href="AWS-Bootcamp/agents-that-work-together/">Agents that work together</a></h3>
+      <ul><li>When one agent isn&#x27;t enough: multi-agent patterns</li><li>Sequential, parallel and collaborative communication</li><li>Swarm and graph orchestration, and when not to use them</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Supervisor–worker team + reusable agent as tool</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-rec" data-rec="agents-that-work-together">▶ Recording soon</span><span class="awsb-zip is-soon">⬇ solution zip soon</span></div>
     </article>
       <article class="awsb-card" style="--c:#C79BFF">
-      <div class="awsb-num">04</div>
-      <p class="awsb-ln">Lesson 4 · Course section 5</p>
+      <div class="awsb-num">05</div>
+      <p class="awsb-ln">Lesson 5 · Course section 5</p>
       <h3><a href="AWS-Bootcamp/How-agents-talk/">How agents talk</a></h3>
       <ul><li>MCP: tools, resources and prompts over one protocol</li><li>Building MCP servers and clients with FastMCP</li><li>A2A: agents calling other agents</li></ul>
       <p class="awsb-lab"><b>Lab</b>MCP server + client; travel assistant over A2A</p>
-      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><a class="awsb-zip" href="zips/How-agents-talk-main.zip" download>⬇ How-agents-talk-main.zip</a></div>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-rec" data-rec="How-agents-talk">▶ Recording soon</span><a class="awsb-zip" href="zips/How-agents-talk-main.zip" download>⬇ How-agents-talk-main.zip</a></div>
+    </article>
+      <article class="awsb-card" style="--c:#5FD07E">
+      <div class="awsb-num">06</div>
+      <p class="awsb-ln">Lesson 6 · Course section 6</p>
+      <h3><a href="AWS-Bootcamp/shipping-agents-to-production/">Shipping agents to production</a></h3>
+      <ul><li>Choosing a path: AWS Lambda or ECS on Fargate</li><li>Bedrock AgentCore Runtime, Gateway and Identity</li><li>Enterprise integration patterns and industry use cases</li></ul>
+      <p class="awsb-lab"><b>Lab</b>MCP + A2A agents deployed on AgentCore</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-rec" data-rec="shipping-agents-to-production">▶ Recording soon</span><span class="awsb-zip is-soon">⬇ solution zip soon</span></div>
     </article>
     </div>
-    <p class="awsb-note">Course material: <i>Agentic AI on AWS</i> by Shivank Agrawal (Future with Shivank). Lesson 4 is section 5 of the course.</p>
+
+    <div class="awsb-part awsb-part-sm" id="aws-part-1-projects">
+      <span class="awsb-pnum">Projects</span>
+      <div><h2>Part 1 projects · AI agents in finance</h2><p>Use what you built in Part 1 on finance problems: read earnings calls, compute ratios, remember a portfolio, and turn a customer survey into a plan.</p></div>
+    </div>
+    <div class="awsb-grid awsb-grid-2">
+      <article class="awsb-card" style="--c:#4CC3A5">
+      <div class="awsb-num">P1</div>
+      <p class="awsb-ln">Project 1 · Sections 1 and 2</p>
+      <h3><a href="AWS-Bootcamp/finance-section-1/">AI agents in finance</a></h3>
+      <ul><li>Finance words, model choice and prompting, finance style</li><li>Tool use: a ratio retriever; working and episodic memory</li><li>Evaluator–optimizer news agent; Buy / Hold / Sell with three agents</li></ul>
+      <p class="awsb-lab"><b>Labs</b>Earnings-call summariser to a three-agent trade call</p>
+      <div class="awsb-foot"><span class="awsb-go">Open project →</span><span class="awsb-rec" data-rec="finance-section-1">▶ Recording soon</span><span class="awsb-zip is-soon">⬇ solution zip soon</span></div>
+    </article>
+      <article class="awsb-card" style="--c:#EFC85A">
+      <div class="awsb-num">P2</div>
+      <p class="awsb-ln">Project 2 · Project brief</p>
+      <h3><a href="AWS-Bootcamp/finance-nps-project/">NPS analyst in a box</a></h3>
+      <ul><li>NPS as a money number: promoters, passives, detractors</li><li>Five agents: parallel analysis, planning, then synthesis</li><li>Milestones and a rubric for your own build</li></ul>
+      <p class="awsb-lab"><b>Build</b>A five-agent NPS analyst for a fictional bank</p>
+      <div class="awsb-foot"><span class="awsb-go">Open project →</span><span class="awsb-rec" data-rec="finance-nps-project">▶ Recording soon</span><span class="awsb-zip is-soon">⬇ solution zip soon</span></div>
+    </article>
+    </div>
+
+    <div class="awsb-part" id="aws-part-2">
+      <span class="awsb-pnum">Part 2</span>
+      <div><h2>Live projects on Amazon Bedrock</h2><p>More end-to-end projects built live on Amazon Bedrock and AgentCore.</p></div>
+    </div>
+    <div class="awsb-soon">
+      <span class="awsb-soon-tag">Coming soon</span>
+      <p>The Part 2 lessons are being added. They will appear here with their recordings and solution zips.</p>
+    </div>
+
+    <p class="awsb-note">Course material: <i>Agentic AI on AWS</i> and <i>AI Agents in Finance</i> by Shivank Agrawal (Future with Shivank), taught in the Scaler AWS AI Bootcamp.</p>
   </div>
 </section>
-<p class="awsb-divider">AI Infusion · Lessons 1–10 below</p>
+<p class="awsb-divider">AI-Infusion · Lessons 1–10 below</p>
 <!-- /awsb:hub -->
 <!-- aiseq:top -->
 <style>
