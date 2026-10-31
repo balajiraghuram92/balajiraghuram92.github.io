@@ -31,6 +31,7 @@ To fill one, paste the repo URL into `GITHUB` in `tools/bootcamp_nav.py`:
 | `shipping-agents-to-production` | Bootcamp Week 1 · Lesson 6 | none |
 | `finance-section-1` | Bootcamp Week 1 · Project 1 | none |
 | `finance-nps-project` | Bootcamp Week 1 · Project 2 | none |
+| `trip-buddy` | Bootcamp Week 2 · Project 1 | yes |
 | `Class-1` … `Class-9` | AI-Infusion Lessons 1–10 (`Class-9` covers 9 and 10) | Classes 1, 2, 3-4, 5, 6 |
 
 New zips go in `/zips` and into `ZIPS` in the same file. The Week 1 page cards still
@@ -43,11 +44,11 @@ GitHub link as the fallback.
 
 ## 2. Bootcamp Week 2
 
-- [ ] Add the Week 2 lesson pages under `AWS-Bootcamp/`.
-- [ ] Build `AWS-Bootcamp/week-2/` from `week-1/`, and turn the Week 2 card on
-      `AWS-Bootcamp/index.html` from "coming soon" into a link.
-- [ ] Give Week 2 its own lesson list and recordings in `tools/bootcamp_nav.py`
-      (Week 1 uses `SEQ` and `WEEK1_RECORDINGS`).
+- [x] `AWS-Bootcamp/week-2/` is live, with Project 1, Trip Buddy (`AWS-Bootcamp/trip-buddy/`,
+      zip in `/zips/trip-buddy.zip`).
+- [ ] Week 2 recordings: paste them into `WEEK_RECORDINGS["week-2"]` in `tools/bootcamp_nav.py`.
+- [ ] More Week 2 projects: add each one to `WEEK2` in `tools/bootcamp_nav.py`, and a card on
+      `AWS-Bootcamp/week-2/index.html`.
 
 ## 3. Other placeholders
 

@@ -1,0 +1,1775 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trip Buddy · Week 2 Project 1</title>
+<meta name="description" content="Scaler AWS AI Bootcamp, Week 2, Project 1: Trip Buddy, an AI trip planner for a group of friends. SQLite, embeddings, ChromaDB retrieval, an LLM chain, RAG and tool calling, in six small Python scripts with pseudo code and the full code.">
+<script>
+  try { var t = localStorage.getItem('fws-theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8f7f3; --surface:#ffffff; --surface-2:#f1f0ea; --ink:#1c232b; --muted:#5a6573; --line:#e1ddd2;
+  --accent:#0d6e5b; --accent-ink:#ffffff; --accent-soft:#e1f1eb;
+  --gold:#835c00; --gold-soft:#fff4d4;
+  --warn:#ad4519; --warn-soft:#fdede3;
+  --blue:#1d5ca6; --blue-soft:#e5eef9;
+  --skip:#5f6874; --skip-soft:#eceef1;
+  --good:#17803a; --good-soft:#e3f4e8; --bad:#be3326; --bad-soft:#fbe8e5;
+  --code-bg:#151a21; --code-ink:#e7e9ec; --code-line:#262d37;
+  --radius:14px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1317; --surface:#161b21; --surface-2:#1c232a; --ink:#e6eaee; --muted:#9aa5b1; --line:#29313b;
+    --accent:#4cc3a5; --accent-ink:#04231c; --accent-soft:#12302a;
+    --gold:#efc85a; --gold-soft:#2c250f;
+    --warn:#f29a69; --warn-soft:#35200f;
+    --blue:#82b3ee; --blue-soft:#14253a;
+    --skip:#a7b0bb; --skip-soft:#1f262e;
+    --good:#5fd07e; --good-soft:#12301c; --bad:#ff7d70; --bad-soft:#3a1714;
+    --code-bg:#0b0f13; --code-ink:#e7e9ec; --code-line:#1d242d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1317; --surface:#161b21; --surface-2:#1c232a; --ink:#e6eaee; --muted:#9aa5b1; --line:#29313b;
+  --accent:#4cc3a5; --accent-ink:#04231c; --accent-soft:#12302a;
+  --gold:#efc85a; --gold-soft:#2c250f;
+  --warn:#f29a69; --warn-soft:#35200f;
+  --blue:#82b3ee; --blue-soft:#14253a;
+  --skip:#a7b0bb; --skip-soft:#1f262e;
+  --good:#5fd07e; --good-soft:#12301c; --bad:#ff7d70; --bad-soft:#3a1714;
+  --code-bg:#0b0f13; --code-ink:#e7e9ec; --code-line:#1d242d;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:72px}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-size:17px; line-height:1.7; -webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+#progress{position:fixed; top:0; left:0; height:3px; width:0; background:var(--accent); z-index:60}
+
+/* top bar */
+.topbar{position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:12px; padding:10px 20px; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--line)}
+.brand{font-weight:800; letter-spacing:-.01em; font-size:15px}
+.brand span{color:var(--accent)}
+.brand em{font-style:normal}
+.iconbtn{white-space:nowrap; display:inline-flex; align-items:center; gap:6px}
+.iconbtn svg{width:15px; height:15px}
+input[type=range]{accent-color:var(--accent)}
+.svgwrap svg{display:block; width:100%; height:auto; color:var(--ink)}
+.trail{display:flex; flex-wrap:wrap; align-items:center; gap:4px 4px; margin:6px 0 2px; font:11.5px/1.3 "JetBrains Mono",ui-monospace,monospace}
+.trail span.c{padding:3px 7px; border-radius:6px; border:1px solid var(--line); background:var(--surface); color:var(--muted)}
+.trail span.c.done{background:var(--accent-soft); color:var(--accent); border-color:transparent}
+.trail span.c.now{background:var(--gold-soft); color:var(--gold); border-color:var(--gold); font-weight:700}
+.trail i{font-style:normal; color:var(--muted)}
+.trail b.day{font:700 10.5px Inter,system-ui,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); padding:0 4px}
+.topbar .sp{flex:1}
+.iconbtn{font:inherit; font-size:14px; font-weight:600; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:6px 14px; cursor:pointer}
+.iconbtn:hover{border-color:var(--accent)}
+#tocBtn{display:none}
+
+/* layout */
+.layout{display:grid; grid-template-columns:260px minmax(0,1fr); gap:40px; max-width:1240px; margin:0 auto; padding:0 24px}
+.toc{position:sticky; top:64px; align-self:start; max-height:calc(100vh - 80px); overflow:auto; padding:24px 0 40px; font-size:14px; line-height:1.45}
+.toc h4{margin:0 0 8px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.toc a{display:block; padding:5px 10px; border-radius:8px; color:var(--muted); text-decoration:none; border-left:2px solid transparent}
+.toc a.lvl2{padding-left:22px; font-size:13.5px}
+.toc a:hover{color:var(--ink); background:var(--surface-2)}
+.toc a.active{color:var(--accent); border-left-color:var(--accent); background:var(--accent-soft); font-weight:600}
+.toc .grp{margin-top:16px}
+main{min-width:0; max-width:880px; padding:28px 0 80px}
+
+@media (max-width:1100px){
+  .layout{grid-template-columns:minmax(0,1fr); padding:0 16px}
+  #tocBtn{display:inline-block}
+  .toc{position:fixed; top:56px; left:0; right:0; max-height:70vh; background:var(--surface); border-bottom:1px solid var(--line); padding:16px 20px; display:none; z-index:45; box-shadow:0 12px 30px rgba(0,0,0,.15)}
+  .toc.open{display:block}
+  main{padding-top:16px}
+}
+
+/* type */
+h1,h2,h3,h4{line-height:1.25; letter-spacing:-.015em}
+h1{font-size:clamp(32px,5vw,46px); margin:.2em 0 .3em; font-weight:800}
+h1 .small{display:block; font-size:.48em; color:var(--muted); font-weight:600; letter-spacing:0; margin-top:6px}
+h2{font-size:clamp(26px,3.6vw,34px); margin:0 0 .4em; font-weight:800}
+h3{font-size:23px; margin:2.2em 0 .5em; font-weight:700; display:flex; gap:10px; align-items:baseline}
+h3 .num{flex:none; font-size:13px; font-weight:700; color:var(--accent); background:var(--accent-soft); border-radius:8px; padding:2px 8px; transform:translateY(-3px)}
+h4{font-size:18px; margin:1.6em 0 .4em}
+p{margin:.6em 0 1em}
+.muted{color:var(--muted)}
+strong{font-weight:650}
+code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.86em; background:var(--surface-2); border:1px solid var(--line); padding:1px 6px; border-radius:6px; overflow-wrap:anywhere}
+.kicker{font-size:13px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0}
+hr.sec{border:0; border-top:1px solid var(--line); margin:64px 0 48px}
+
+/* hero */
+.hero{padding:24px 0 8px}
+.lede{font-size:19px; color:var(--ink); max-width:760px}
+.story{margin:20px 0; padding:16px 18px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius)}
+.build-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin:18px 0}
+.build-grid .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; font-size:15px; line-height:1.5}
+.build-grid .card b{display:block; font-size:15.5px; margin-bottom:2px}
+.build-grid .card .lab{font-size:12px; font-weight:700; color:var(--accent); letter-spacing:.06em; text-transform:uppercase}
+.legend{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 4px}
+.legend span{font-size:13.5px; padding:4px 10px; border-radius:999px; border:1px solid var(--line); background:var(--surface)}
+
+/* callouts */
+.box{margin:20px 0; padding:14px 18px 14px 18px; border-radius:12px; border:1px solid var(--line); border-left-width:5px; background:var(--surface); font-size:16px; line-height:1.65}
+.box > .tag{display:block; font-size:12.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; margin-bottom:4px}
+.box p:first-of-type{margin-top:0} .box p:last-child{margin-bottom:0}
+.box ul{margin:.3em 0 .2em; padding-left:1.2em}
+.analogy{border-left-color:var(--gold); background:var(--gold-soft)} .analogy > .tag{color:var(--gold)}
+.fin{border-left-color:var(--accent); background:var(--accent-soft)} .fin > .tag{color:var(--accent)}
+.warn{border-left-color:var(--warn); background:var(--warn-soft)} .warn > .tag{color:var(--warn)}
+.skip{border-left-color:var(--skip); background:var(--skip-soft)} .skip > .tag{color:var(--skip)}
+.tip{border-left-color:var(--blue); background:var(--blue-soft)} .tip > .tag{color:var(--blue)}
+
+/* code */
+.code{margin:16px 0 18px; border-radius:12px; overflow:hidden; background:var(--code-bg); border:1px solid var(--code-line)}
+.code .head{display:flex; align-items:center; gap:10px; padding:8px 12px 8px 16px; background:var(--code-line); color:#aeb7c2; font:600 12.5px/1.4 Inter,system-ui,sans-serif}
+.code .head .sp{flex:1}
+.code .copy{font:600 12px Inter,system-ui,sans-serif; color:#d6dbe1; background:transparent; border:1px solid #3a4350; border-radius:6px; padding:3px 10px; cursor:pointer}
+.code .copy:hover{border-color:#6c7a8a}
+.code pre{margin:0; padding:14px 16px 16px; overflow-x:auto; font:13.5px/1.62 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--code-ink); tab-size:4}
+.code pre code{background:none; border:0; padding:0; font-size:inherit; color:inherit; overflow-wrap:normal}
+.token.comment{color:#8d99a6; font-style:italic}
+.token.keyword{color:#ff8b7f}
+.token.string,.token.triple-quoted-string{color:#a8d8ff}
+.token.function{color:#d7b0ff}
+.token.number,.token.boolean{color:#7cc4ff}
+.token.builtin,.token.decorator,.token.annotation{color:#ffb070}
+.token.operator,.token.punctuation{color:#c9d1d9}
+.token.interpolation{color:#e7e9ec}
+.token.property{color:#a8d8ff}
+
+.prompt{margin:14px 0; padding:14px 16px; border-radius:12px; background:var(--surface); border:1px dashed var(--line); font:14px/1.6 "JetBrains Mono",ui-monospace,monospace; white-space:pre-wrap; overflow-wrap:anywhere}
+.prompt .hl{background:var(--gold-soft); color:var(--gold); border-radius:4px; padding:0 3px; font-weight:600}
+
+/* walkthrough lists */
+ol.walk{list-style:none; counter-reset:w; padding:0; margin:12px 0 20px}
+ol.walk > li{counter-increment:w; position:relative; padding:10px 14px 10px 50px; margin:8px 0; background:var(--surface); border:1px solid var(--line); border-radius:10px; font-size:16px; line-height:1.6}
+ol.walk > li::before{content:counter(w); position:absolute; left:14px; top:10px; width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:13px; display:grid; place-items:center}
+
+/* tables */
+.tw{overflow-x:auto; margin:16px 0; border:1px solid var(--line); border-radius:12px; background:var(--surface)}
+table.tbl{width:100%; border-collapse:collapse; font-size:15px; line-height:1.5}
+.tbl th,.tbl td{text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+.tbl th{font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); background:var(--surface-2)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td code{white-space:nowrap}
+.tbl .num{text-align:right; font-variant-numeric:tabular-nums}
+
+/* figures */
+figure{margin:22px 0; padding:16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius)}
+figure svg{display:block; width:100%; height:auto; color:var(--ink)}
+figcaption{font-size:14px; color:var(--muted); margin-top:10px; line-height:1.55}
+svg text{font-family:Inter,system-ui,sans-serif; fill:currentColor}
+svg .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+svg .t13{font-size:13px} svg .t12{font-size:12px} svg .t11{font-size:11.5px} svg .t15{font-size:15px}
+svg .b{font-weight:700}
+svg .sub{opacity:.68}
+svg .nd rect, svg .nd path.shape{fill:var(--surface); stroke:currentColor; stroke-opacity:.38; stroke-width:1.3; transition:fill .25s, stroke .25s}
+svg .nd.soft rect{fill:var(--surface-2)}
+svg .nd.acc rect, svg .nd.acc path.shape{fill:var(--accent-soft); stroke:var(--accent); stroke-opacity:1}
+svg .nd.hl rect, svg .nd.hl path.shape{fill:var(--gold-soft); stroke:var(--gold); stroke-opacity:1; stroke-width:2.4}
+svg .ar{stroke:currentColor; stroke-opacity:.55; stroke-width:1.5; fill:none; transition:stroke .25s}
+svg .ar.hl{stroke:var(--gold); stroke-opacity:1; stroke-width:2.6}
+svg .alab{font-size:11.5px; opacity:.85}
+svg .zone{fill:var(--surface-2); stroke:none}
+svg .dash{stroke:currentColor; stroke-opacity:.35; stroke-dasharray:5 5}
+
+/* sims */
+.sim{margin:22px 0; padding:16px 18px 18px; border:1.5px dashed var(--accent); border-radius:var(--radius); background:var(--surface)}
+.sim > .tag{display:inline-block; font-size:12.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:4px}
+.sim h4{margin:.1em 0 .4em}
+.btn{font:inherit; font-size:14.5px; font-weight:650; border:0; border-radius:999px; padding:8px 16px; background:var(--accent); color:var(--accent-ink); cursor:pointer}
+.btn:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.4; cursor:default}
+.btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+.btn.ghost.on{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+.row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0}
+.row .sp{flex:1}
+.stepper .row .dots{margin-left:auto}
+.state{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin:8px 0}
+.state div{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:13px}
+.state div b{display:block; font:600 15px/1.4 "JetBrains Mono",ui-monospace,monospace; color:var(--ink)}
+.state div.chg{border-color:var(--gold); background:var(--gold-soft)}
+.rbrow{display:grid; grid-template-columns:110px 1fr 56px; gap:10px; align-items:center; font-size:14.5px; margin:5px 0}
+.rbtrack{position:relative; height:16px; border-radius:8px; background:var(--surface)}
+.rbtrack i{position:absolute; left:0; top:0; bottom:0; border-radius:8px; background:var(--accent); transition:width .3s}
+.rbtrack i.over{background:var(--bad)}
+.rbtrack i.def{background:var(--blue)}
+.rbtrack s{position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--bad); opacity:.8}
+.rbrow .v{text-align:right; font-variant-numeric:tabular-nums; font-weight:700}
+.inp{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:10px 0}
+.inp label{display:block; font-size:13.5px; color:var(--muted); font-weight:600}
+.inp input{width:100%; font:inherit; font-size:15px; padding:7px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+.out{margin-top:10px; padding:12px 14px; border-radius:10px; background:var(--surface-2); font-size:15.5px; line-height:1.65}
+.out .ok{color:var(--good); font-weight:700} .out .no{color:var(--bad); font-weight:700}
+.pill{display:inline-block; font-size:12.5px; font-weight:700; padding:2px 9px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line)}
+.pill.ok{background:var(--good-soft); color:var(--good); border-color:transparent}
+.pill.no{background:var(--bad-soft); color:var(--bad); border-color:transparent}
+.stepper .counter{font-size:13px; font-weight:700; color:var(--muted)}
+.stepper .panel{margin-top:10px; padding:14px 16px; border-radius:12px; background:var(--surface-2); border:1px solid var(--line)}
+.stepper .panel h5{margin:0 0 6px; font-size:16.5px}
+.stepper .panel .lbl{font-size:12px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin:10px 0 4px}
+.stepper .panel pre{margin:0; padding:10px 12px; border-radius:8px; background:var(--code-bg); color:var(--code-ink); font:13px/1.55 "JetBrains Mono",ui-monospace,monospace; white-space:pre-wrap; overflow-wrap:anywhere}
+.stepper .panel pre.val{background:var(--surface); color:var(--ink); border:1px solid var(--line)}
+.dots{display:flex; gap:5px; flex-wrap:wrap}
+.dots i{width:22px; height:6px; border-radius:3px; background:var(--line)}
+.dots i.on{background:var(--accent)}
+
+/* glossary cards */
+.gloss{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin:16px 0}
+.gloss div{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:15px; line-height:1.55}
+.gloss b{display:block; color:var(--accent); font-size:15.5px}
+
+/* ratio cards */
+.rgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:14px 0}
+.rcard{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:14.5px; line-height:1.5}
+.rcard .nm{font-size:13px; font-weight:700; color:var(--muted)}
+.rcard .v{font-size:24px; font-weight:800; letter-spacing:-.02em; margin:2px 0 4px; font-variant-numeric:tabular-nums}
+.rcard.flag{border-color:var(--warn); box-shadow:0 0 0 1px var(--warn) inset}
+.rcard.flag .v{color:var(--warn)}
+.famhead{display:flex; align-items:baseline; gap:10px; margin:18px 0 0}
+.famhead b{font-size:16px}
+.famhead span{font-size:14px; color:var(--muted)}
+
+/* df demo */
+.df{width:100%; border-collapse:collapse; font:13.5px/1.45 "JetBrains Mono",ui-monospace,monospace}
+.df th,.df td{padding:6px 10px; border-bottom:1px solid var(--line); text-align:left}
+.df th{position:sticky; top:0; z-index:1; background:var(--surface-2); font-family:Inter,system-ui,sans-serif; font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted)}
+.df td.idx{font-weight:600}
+.df tr.pick td{background:var(--gold-soft)}
+.df tr.pick td.idx{color:var(--gold)}
+.df td.cellhl{background:var(--gold-soft); color:var(--gold); font-weight:700; outline:2px solid var(--gold); outline-offset:-2px}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0}
+.chip{font:12.5px/1.4 "JetBrains Mono",ui-monospace,monospace; padding:3px 8px; border-radius:6px; background:var(--surface-2); border:1px solid var(--line)}
+.chip.ok{background:var(--good-soft); color:var(--good); border-color:transparent}
+.chip.no{background:var(--bad-soft); color:var(--bad); border-color:transparent; text-decoration:line-through}
+
+/* chat bubbles */
+.chat{display:flex; flex-direction:column; gap:8px; margin-top:8px}
+.bub{max-width:90%; padding:9px 13px; border-radius:12px; font-size:14.5px; line-height:1.5; border:1px solid var(--line)}
+.bub.u{align-self:flex-end; background:var(--blue-soft)}
+.bub.a{align-self:flex-start; background:var(--surface)}
+.bub .who{display:block; font-size:11.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.bub.ghosted{opacity:.35; text-decoration:line-through}
+
+/* shape visual */
+.shape{font:13.5px/1.6 "JetBrains Mono",ui-monospace,monospace; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; overflow-x:auto; white-space:pre}
+.shape .k{color:var(--accent); font-weight:600}
+.shape .s{color:var(--blue)}
+.shape .m{color:var(--muted)}
+.shape .g{background:var(--gold-soft); color:var(--gold); border-radius:3px; font-weight:700}
+
+/* grid demo */
+.qgrid{display:grid; grid-template-columns:auto repeat(3,minmax(0,1fr)); gap:6px; margin:10px 0; font-size:13.5px}
+.qgrid .h{font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; align-self:end}
+.qgrid button{font:12.5px/1.4 "JetBrains Mono",ui-monospace,monospace; text-align:left; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); cursor:pointer; min-width:0; overflow:hidden; text-overflow:ellipsis}
+.qgrid button.on{background:var(--gold-soft); border-color:var(--gold); color:var(--gold); font-weight:700}
+.qgrid .qlab{font-size:13px; font-weight:600; align-self:center; padding-right:6px}
+
+/* pipeline */
+.pipe{display:grid; grid-template-columns:1fr 64px 1fr 64px 1fr; align-items:stretch; margin:12px 0}
+.pipe button{font:inherit; text-align:left; background:var(--surface); border:1.5px solid var(--line); border-radius:12px; padding:12px 14px; cursor:pointer; color:var(--ink); line-height:1.4}
+.pipe button b{display:block; font-size:15px}
+.pipe button span{font-size:13px; color:var(--muted)}
+.pipe button.on{border-color:var(--accent); background:var(--accent-soft)}
+.pipe .arr{display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:10.5px; color:var(--muted); text-align:center; line-height:1.25}
+.pipe .arr::before{content:"→"; font-size:24px; color:var(--accent); line-height:1}
+@media (max-width:700px){
+  .pipe{grid-template-columns:1fr}
+  .pipe .arr{padding:4px 0}
+  .pipe .arr::before{content:"↓"}
+}
+
+/* votes */
+.paths{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin:10px 0}
+.paths button{font:inherit; font-size:13.5px; text-align:left; padding:10px 12px; border-radius:10px; cursor:pointer; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); line-height:1.45}
+.paths button .c{display:block; font-weight:800; margin-top:4px}
+.paths button.pos{border-color:var(--good)} .paths button.pos .c{color:var(--good)}
+.paths button.neu{border-color:var(--gold)} .paths button.neu .c{color:var(--gold)}
+.bars{display:grid; grid-template-columns:150px 1fr 30px; gap:6px 10px; align-items:center; font-size:14px}
+.bar{height:14px; border-radius:7px; background:var(--surface-2); overflow:hidden}
+.bar i{display:block; height:100%; background:var(--accent); transition:width .3s}
+
+/* quiz */
+.q{margin:14px 0; padding:14px 16px; border:1px solid var(--line); border-radius:12px; background:var(--surface)}
+.q p{margin:0 0 8px; font-weight:650}
+.q button{display:block; width:100%; text-align:left; font:inherit; font-size:15px; margin:6px 0; padding:9px 12px; border-radius:9px; border:1px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer}
+.q button.right{background:var(--good-soft); border-color:var(--good)}
+.q button.wrong{background:var(--bad-soft); border-color:var(--bad)}
+.q .why{font-size:14.5px; color:var(--muted); margin-top:6px; display:none}
+.q.done .why{display:block}
+
+footer{border-top:1px solid var(--line); padding:28px 24px 48px; text-align:center; color:var(--muted); font-size:14px}
+@media (max-width:600px){
+  .brand em{display:none}
+  .iconbtn .lbl{display:none}
+  .topbar{padding:10px 16px}
+  figure{overflow-x:auto; padding:12px}
+  figure svg{min-width:620px}
+  .svgwrap{overflow-x:auto}
+  .svgwrap svg{min-width:560px}
+  body{font-size:16px}
+  .box, ol.walk > li{font-size:15px}
+  .code pre{font-size:12.5px}
+  h3{font-size:20px}
+}
+
+/* ---- page 2 additions ---- */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin:16px 0}
+.stats div{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:14px; line-height:1.45; color:var(--muted)}
+.stats b{display:block; font-size:24px; letter-spacing:-.02em; color:var(--ink); font-weight:800; margin-bottom:2px}
+.fwfilter{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 4px}
+.fwfilter button{font:inherit; font-size:13.5px; font-weight:600; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer}
+.fwfilter button.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.fwgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin:12px 0}
+.fw{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 16px; font-size:14.5px; line-height:1.55; transition:opacity .25s, border-color .25s, box-shadow .25s}
+.fw.dim{opacity:.28}
+.fw.lit{border-color:var(--accent); box-shadow:0 0 0 1.5px var(--accent) inset}
+.fw h5{margin:0; font-size:17px; letter-spacing:-.01em}
+.fw .pw{display:inline-block; margin:4px 0 8px; font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); padding:2px 8px; border-radius:6px}
+.fw p{margin:0 0 6px}
+.fw .k{font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); display:block; margin-top:6px}
+.fw .mem{background:var(--gold-soft); border-radius:8px; padding:6px 9px; margin:6px 0; font-size:14px}
+.oneword{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:6px; margin:12px 0}
+.oneword div{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:14px}
+.oneword b{display:block; font-size:13px; color:var(--muted); font-weight:700}
+.oneword span{font-weight:800; color:var(--accent); font-size:15.5px}
+.tabs{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 0}
+.tabs button{font:inherit; font-size:14px; font-weight:650; padding:7px 14px; border-radius:10px 10px 0 0; border:1px solid var(--line); border-bottom:0; background:var(--surface-2); color:var(--muted); cursor:pointer}
+.tabs button.on{background:var(--code-line); color:#e7e9ec; border-color:var(--code-line)}
+.tabpanel .code{margin-top:0; border-top-left-radius:0}
+.opt{margin:18px 0; border:1px dashed var(--skip); border-radius:12px; background:var(--skip-soft)}
+.opt > summary{cursor:pointer; padding:12px 16px; font-weight:700; list-style:none}
+.opt > summary::-webkit-details-marker{display:none}
+.opt > summary::before{content:"▸ "; color:var(--skip)}
+.opt[open] > summary::before{content:"▾ "}
+.opt > summary .optb{display:inline-block; font-size:11.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--skip); border:1px solid var(--skip); border-radius:6px; padding:1px 7px; margin-left:8px; vertical-align:2px}
+.opt .inner{padding:0 16px 14px}
+.ratingtbl{border-collapse:separate; border-spacing:4px; width:100%; font-size:13.5px}
+.ratingtbl th{font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:700; padding:4px; text-align:center}
+.ratingtbl th.rowh{text-align:right; padding-right:8px; white-space:nowrap}
+.ratingtbl td button{width:100%; font:700 13px Inter,system-ui,sans-serif; padding:10px 4px; border-radius:8px; border:1.5px solid transparent; cursor:pointer; color:var(--ink)}
+.ratingtbl td button.on{border-color:var(--ink); box-shadow:0 0 0 2px var(--gold)}
+.r-sb{background:#1a7f3a33} .r-b{background:#1a7f3a1f} .r-h{background:var(--surface-2)} .r-s{background:#be332622} .r-ss{background:#be332640}
+.trace{font:13px/1.65 "JetBrains Mono",ui-monospace,monospace; background:var(--code-bg); color:var(--code-ink); border-radius:10px; padding:10px 14px; min-height:60px; white-space:pre-wrap}
+.trace .c{color:#ffb070} .trace .o{color:#7fd6a8} .trace .m{color:#8d99a6}
+.twocol{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0}
+@media (max-width:700px){ .twocol{grid-template-columns:1fr} }
+.slider{display:grid; grid-template-columns:200px 1fr 64px; gap:10px; align-items:center; margin:6px 0; font-size:14.5px}
+.slider b{text-align:right; font-variant-numeric:tabular-nums}
+@media (max-width:600px){ .slider{grid-template-columns:1fr 64px} .slider input{grid-column:1 / -1; grid-row:2} }
+.verdict{display:inline-block; font-weight:800; font-size:13px; letter-spacing:.04em; padding:3px 10px; border-radius:999px}
+.v-su{background:var(--good-soft); color:var(--good)} .v-u{background:var(--good-soft); color:var(--good)} .v-f{background:var(--surface-2); color:var(--ink)} .v-o{background:var(--bad-soft); color:var(--bad)} .v-so{background:var(--bad-soft); color:var(--bad)}
+.brief{font:13px/1.6 "JetBrains Mono",ui-monospace,monospace; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; white-space:pre-wrap; overflow-x:auto}
+.brief .hl{background:var(--gold-soft); color:var(--gold); font-weight:700; border-radius:3px}
+.lesson{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:10px; margin:12px 0}
+.lesson div{background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:10px; padding:12px 14px; font-size:14.5px; line-height:1.55}
+.lesson div b{display:block; font-size:15px; margin-bottom:4px}
+.lesson div .fix{display:block; margin-top:6px; color:var(--accent); font-weight:650}
+.basket{display:flex; flex-direction:column; gap:6px; margin:8px 0}
+.basket label{display:grid; grid-template-columns:22px 1fr auto; gap:8px; align-items:center; font-size:14px; padding:7px 10px; border:1px solid var(--line); border-radius:9px; background:var(--surface)}
+.basket .sc{font:600 12.5px "JetBrains Mono",monospace}
+.hlword{border-radius:3px; padding:0 2px; font-weight:700}
+.hlword.b{background:var(--good-soft); color:var(--good)} .hlword.r{background:var(--bad-soft); color:var(--bad)}
+.flag{display:inline-block; font-size:11px; font-weight:800; color:var(--bad); border:1px solid var(--bad); border-radius:5px; padding:0 5px; margin-left:6px}
+.selrow{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:8px 0}
+.selrow select{font:inherit; font-size:14.5px; padding:7px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+.game .opts{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:8px; margin:10px 0}
+.game .opts button{font:inherit; font-size:14.5px; font-weight:600; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; text-align:left}
+.game .opts button.right{border-color:var(--good); background:var(--good-soft)}
+.game .opts button.wrong{border-color:var(--bad); background:var(--bad-soft)}
+.game .scen{font-size:17px; font-weight:650; margin:6px 0}
+.ratingtbl .short{display:none}
+@media (max-width:600px){ .ratingtbl .full{display:none} .ratingtbl .short{display:inline} .ratingtbl td button{font-size:11.5px; padding:9px 2px} }
+
+/* ---- NPS project additions ---- */
+.scale{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px;margin:12px 0 6px}
+.scale div{text-align:center;border-radius:8px;padding:8px 0 6px;font:700 15px/1.2 "JetBrains Mono",ui-monospace,monospace}
+.scale div small{display:block;font:600 9.5px/1.2 Inter,system-ui,sans-serif;letter-spacing:.03em;text-transform:uppercase;margin-top:3px;opacity:.85;overflow:hidden;text-overflow:ellipsis}
+.s-det{background:var(--bad-soft);color:var(--bad)} .s-pas{background:var(--gold-soft);color:var(--gold)} .s-pro{background:var(--good-soft);color:var(--good)}
+.npbar{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:12px 0 4px;border:1px solid var(--line);background:var(--surface-2)}
+.npbar i{display:flex;align-items:center;justify-content:center;font:700 12px/1 Inter,system-ui,sans-serif;font-style:normal;color:var(--bg);transition:width .25s;white-space:nowrap;overflow:hidden}
+.npbar .pro{background:var(--good)} .npbar .pas{background:var(--gold)} .npbar .det{background:var(--bad)}
+.a-g{background:#17803a2e} .a-a{background:#c991003d} .a-r{background:#be332645}
+table.wf{width:100%;border-collapse:collapse;font-size:14.5px}
+table.wf th,table.wf td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.wf th{font-size:12.5px;color:var(--muted);font-weight:700}
+table.wf td.best{font-weight:800;color:var(--accent);background:var(--accent-soft)}
+#tg-ex .btn{font-size:13px;text-align:left;white-space:normal}
+.trace{overflow-x:auto}
+.gp{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.inp input[type=text]{width:100%}
+@media (max-width:560px){ .scale div small{font-size:8px} .scale div{font-size:13px} }
+
+/* ---- Trip Buddy additions ---- */
+.lk-code .code{margin:0}
+.inp input[type=number]{width:100%}
+.state div{transition:border-color .2s,background .2s}
+.pipe button[aria-pressed]{transition:border-color .2s,background .2s}
+#rag-out pre.val{padding:10px 12px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font:13px/1.55 "JetBrains Mono",ui-monospace,monospace;overflow-wrap:anywhere}
+</style>
+<link rel="stylesheet" href="../../assets/learn-kit.css">
+<script src="../../assets/learn-kit.js" defer></script>
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar">
+  <div class="brand">Trip <span>Buddy</span><em> · Scaler AWS AI Bootcamp · Week 2 · Project 1</em></div>
+  <div class="sp"></div>
+  <button class="iconbtn" id="tocBtn" aria-controls="toc" aria-expanded="false">Contents</button>
+  <button class="iconbtn" id="themeBtn" aria-label="Switch light or dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg><span class="lbl">Theme</span></button>
+</header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Contents">
+  <h4>On this page</h4>
+  <a href="#start">Start here</a>
+  <a href="#t-problem">The problem, in one trip</a>
+  <div class="grp"><h4>Understand it</h4></div>
+  <a class="lvl2" href="#t-build">T1 What we are building</a>
+  <a class="lvl2" href="#t-arch">T2 The architecture</a>
+  <a class="lvl2" href="#t-need">T3 What you need</a>
+  <div class="grp"><h4>Build it</h4></div>
+  <a class="lvl2" href="#t-01">T4 SQLite: save the options</a>
+  <a class="lvl2" href="#t-02">T5 Embeddings: meaning as numbers</a>
+  <a class="lvl2" href="#t-03">T6 ChromaDB: the travel notebook</a>
+  <a class="lvl2" href="#t-04">T7 LLM chain: the planner</a>
+  <a class="lvl2" href="#t-05">T8 RAG: read the notebook first</a>
+  <a class="lvl2" href="#t-06">T9 Tools: no more mental maths</a>
+  <div class="grp"><h4>Own it</h4></div>
+  <a class="lvl2" href="#t-project">T10 Milestones &amp; rubric</a>
+  <div class="grp"></div>
+  <a href="#wrap">Wrap-up</a>
+</nav>
+<main id="main">
+<!-- awsq:top -->
+<style>
+.awsq{--q-card:var(--card,var(--surface,#fff));--q-card2:var(--card-2,var(--surface-2,#f3f3f0));--q-rule:var(--rule,var(--line,#ddd));
+  --q-ink:var(--ink,#1a1a1a);--q-muted:var(--muted,#666);--q-acc:var(--tool,var(--accent,#0b7f73));--q-acc-t:var(--tool-t,var(--accent-soft,#d6f2ee));
+  --q-acc-ink:var(--tool-ink,var(--accent,#075a51));--q-cur:var(--brain,var(--gold,#b07600));--q-on:var(--card,var(--surface,#fff));
+  --q-focus:var(--focus,var(--accent,#2958c4));--q-mono:var(--font-mono,"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace);
+  max-width:72rem;margin:18px auto;padding:0 40px;font-family:var(--font-body,inherit)}
+.awsq-box{background:var(--q-card);border:1px solid var(--q-rule);border-radius:12px;padding:12px 14px}
+.awsq-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
+.awsq-cap{display:block;margin:0;font:600 .7rem/1.4 var(--q-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+.awsq-l{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;padding:9px 13px;border-radius:9px;border:1px solid var(--q-rule);color:var(--q-ink);text-decoration:none;font-size:.95rem;line-height:1.3}
+a.awsq-l:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-next{text-align:right;align-items:flex-end}
+.awsq-d{font:600 .7rem/1.3 var(--q-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--q-acc)}
+.awsq-t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+span.awsq-l{border-style:dashed;color:var(--q-muted)} span.awsq-l .awsq-d,span.awsq-l .awsq-t{color:var(--q-muted);font-weight:400}
+a.awsq-home{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 12px;border-radius:9px;text-decoration:none;color:var(--q-ink);text-align:center;font-size:.85rem;line-height:1.3}
+a.awsq-home:hover{background:var(--q-card2);text-decoration:none}
+.awsq-home b{font:600 .7rem/1.3 var(--q-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-steps{display:flex;gap:5px;margin:11px 0 0;padding:0;list-style:none}
+.awsq-steps li{flex:1 1 0;margin:0;padding:0;list-style:none}
+.awsq-steps li::before{content:none}
+.awsq-steps a{display:block;text-align:center;padding:4px 0;border-radius:5px;font:600 .75rem/1.4 var(--q-mono);text-decoration:none;background:var(--q-card2);border:1px solid var(--q-rule);color:var(--q-muted)}
+.awsq-steps a.done{background:var(--q-acc-t);color:var(--q-acc-ink);border-color:transparent}
+.awsq-steps a.cur{background:var(--q-cur);color:var(--q-on);border-color:transparent}
+.awsq-steps a:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-recs{display:flex;flex-wrap:wrap;gap:8px;margin:11px 0 0}
+.awsq-rec{flex:1 1 220px;display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:9px;border:1px solid var(--q-acc);background:var(--q-acc-t);
+  color:var(--q-acc-ink);font-weight:700;font-size:.92rem;line-height:1.3;text-decoration:none}
+a.awsq-rec:hover{text-decoration:none;filter:brightness(.97)}
+.awsq-rec i{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--q-acc);color:var(--q-on);font-style:normal;font-size:.7rem}
+.awsq-rec small{margin-left:auto;font:600 .68rem/1.3 var(--q-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.awsq-files{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:11px 0 0;padding:10px 0 0;border-top:1px dashed var(--q-rule)}
+.awsq-files > b{margin-right:4px;font:600 .7rem/1.3 var(--q-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-fb{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;border:1px solid var(--q-rule);color:var(--q-ink);
+  font-size:.85rem;font-weight:700;line-height:1.3;text-decoration:none}
+a.awsq-fb:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-fb small{font:600 .66rem/1.3 var(--q-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--q-muted)}
+span.awsq-fb{border-style:dashed;color:var(--q-muted);font-weight:600}
+.awsq a:focus-visible{outline:2px solid var(--q-focus);outline-offset:2px}
+.awsq a.aih{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--q-acc);color:var(--q-on);
+  font:700 .74rem/1.2 var(--q-mono);letter-spacing:.04em;text-decoration:none;white-space:nowrap}
+.awsq a.aih:hover{filter:brightness(1.08);text-decoration:none}
+.awsq-bottom{padding:0 !important;margin:48px 0 8px;max-width:none}
+.awsq-inmain{padding:0 !important;margin:0 0 28px;max-width:none}
+@media (max-width:1100px){.awsq{padding:0 24px}}
+@media (max-width:640px){.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}.awsq-rec small{display:none}}
+@media print{.awsq{display:none}}
+</style>
+<nav class="awsq awsq-top awsq-inmain" aria-label="Bootcamp navigation (top)"><div class="awsq-box"><div class="awsq-head"><span class="awsq-cap">Scaler AWS AI Bootcamp · Week 2 · Project 1 of 1</span><a class="aih" href="../../" title="Back to the AI-Infusion home page">⌂ AI-Infusion</a></div><div class="awsq-row"><a class="awsq-l awsq-prev" href="../finance-nps-project/"><span class="awsq-d">← Previous</span><span class="awsq-t">Week 1 · Project 2 · NPS analyst in a box</span></a><a class="awsq-home" href="../week-2/"><b>Scaler AWS AI Bootcamp</b>Week 2 · all projects</a><span class="awsq-l awsq-next"><span class="awsq-d">Next →</span><span class="awsq-t">More projects · coming soon</span></span></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="cur" href="../trip-buddy/" title="Project 1 · Trip Buddy" aria-current="page">P1</a></li></ol><div class="awsq-recs"><span class="awsq-rec"><i aria-hidden="true">▶</i>Scaler class recording<small>link coming soon</small></span></div><div class="awsq-files"><b>Project files</b><span class="awsq-fb" data-todo="github">&lt;/&gt; Browse the code<small>GitHub link coming soon</small></span><a class="awsq-fb" href="../../zips/trip-buddy.zip" download>⬇ Download all<small>.zip</small></a></div></div></nav>
+<!-- /awsq:top -->
+<section class="hero" id="start">
+  <p class="kicker">Scaler AWS AI Bootcamp · Week 2 · Project 1</p>
+  <h1>Trip Buddy <span class="small">A trip planner for a group of friends that looks things up, remembers travel tips and does the maths with real tools</span></h1>
+  <p class="lede">Every friend group has "the Goa plan" that never happens. This time we plan it properly. In six small scripts you build an AI trip planner: a <strong>database</strong> of places and stays, a <strong>travel notebook</strong> searched by meaning, an <strong>LLM</strong> that gives advice, <strong>RAG</strong> so the advice uses the notebook, and <strong>tools</strong> so every rupee is calculated by Python instead of guessed.</p>
+
+  <div class="story">🧳 <strong>The group chat, Friday night.</strong> <em>"Manali in July? 3 of us, 4 nights, ₹20,000 each. Will it fit? Is July even a good time?"</em> Everyone has an opinion, nobody has the numbers. Trip Buddy has to answer both questions: <strong>what does it cost each of us</strong>, exactly, and <strong>what should we watch out for</strong>.</div>
+
+  <div class="stats">
+    <div><b>6</b>small scripts, one new idea each</div>
+    <div><b>3</b>tools the agent can call</div>
+    <div><b>8</b>travel tips in the notebook</div>
+    <div><b>₹0</b>to run scripts 01–03 (no API key)</div>
+  </div>
+
+  <p class="muted" style="margin-bottom:4px">How to read the coloured boxes:</p>
+  <div class="legend">
+    <span>🧠 Analogy</span><span>🧳 Trip corner</span><span>⚠️ Watch out</span><span>⏭️ Already covered</span><span>💡 Tip</span><span>🧪 Simulation</span>
+  </div>
+  <div class="box skip"><span class="tag">⏭️ What carries over from Week 1</span>
+    <p>Chains (<code>prompt | llm</code>), the <code>.env</code> file, <code>@tool</code> with a docstring, and the agent loop that runs until the model stops asking for tools: all of it is in <a href="../part-00-AWS-Revision/">Part 00</a> and <a href="../giving-agents-tools/">Lesson 2</a>. This page spends its time on what is <strong>new</strong>: storing data in SQLite, embeddings and a vector database, RAG, and writing the tool loop by hand.</p>
+  </div>
+</section>
+
+<hr class="sec">
+<section id="t-problem">
+  <p class="kicker">Start here · the problem statement</p>
+  <h2>The problem, explained with one trip</h2>
+
+  <h4>The situation</h4>
+  <p>The friends need one number each: <em>how much do I pay?</em> The rules are simple, and they are the same rules the tools use later:</p>
+<div class="shape">rooms needed     = people ÷ 2, rounded <span class="k">UP</span>          <span class="m"># one room fits 2 people</span>
+stay share       = rooms × room price × nights ÷ people
+food and fun     = daily spend × nights
+cost per person  = travel + stay share + food and fun</div>
+
+  <h4>A tiny example: two trips</h4>
+  <div class="tw"><table class="tbl">
+    <tr><th>Trip</th><th class="num">Friends</th><th class="num">Nights</th><th class="num">Room / night</th><th class="num">Travel / person</th><th class="num">Daily spend</th><th class="num">Cost per person</th></tr>
+    <tr><td><b>Goa</b> · Beach</td><td class="num">4</td><td class="num">3</td><td class="num">₹3,000</td><td class="num">₹2,800</td><td class="num">₹1,500</td><td class="num"><b>₹11,800</b></td></tr>
+    <tr><td><b>Manali</b> · Hills</td><td class="num">3</td><td class="num">4</td><td class="num">₹2,500</td><td class="num">₹9,000</td><td class="num">₹1,300</td><td class="num"><b>₹20,866.67</b></td></tr>
+  </table></div>
+
+  <div class="sim" id="sim-cost"><span class="tag">🧪 Try it</span>
+    <h4>The trip calculator: the same maths as the tools in script 06</h4>
+    <div class="row">
+      <button class="btn ghost" type="button" data-trip="goa">Goa · 4 friends</button>
+      <button class="btn ghost on" type="button" data-trip="manali">Manali · 3 friends</button>
+    </div>
+    <div class="inp">
+      <label>Friends<input type="number" min="1" max="20" id="c-people" value="3"></label>
+      <label>Nights<input type="number" min="1" max="30" id="c-nights" value="4"></label>
+      <label>Room price / night (₹)<input type="number" min="0" step="100" id="c-room" value="2500"></label>
+      <label>Travel / person (₹)<input type="number" min="0" step="100" id="c-travel" value="9000"></label>
+      <label>Daily spend / person (₹)<input type="number" min="0" step="100" id="c-daily" value="1300"></label>
+      <label>Budget / person (₹)<input type="number" min="0" step="500" id="c-budget" value="20000"></label>
+    </div>
+    <div class="state" id="c-state"></div>
+    <div class="row"><button class="btn ghost" type="button" id="c-slip">Show the LLM's slip: forget to round rooms up</button></div>
+    <div class="out" id="c-out" aria-live="polite"></div>
+  </div>
+
+  <p><strong>The maths takes four lines of Python.</strong> The hard part is everything around it:</p>
+  <ol class="walk">
+    <li><strong>Where do the prices come from?</strong> Someone has to keep the places, stays and room prices in one place: a database.</li>
+    <li><strong>What should we watch out for?</strong> "Manali in July" sounds fine until you remember the monsoon. That knowledge lives in a friend's travel notebook, not in the numbers.</li>
+    <li><strong>Can we just ask an LLM?</strong> It gives friendly advice, but it does the arithmetic in its head, and it may not know the notebook's tips.</li>
+    <li><strong>So what do we build?</strong> An LLM that <em>reads the notebook first</em> (RAG) and <em>calls Python for every number</em> (tools).</li>
+  </ol>
+  <div class="box warn"><span class="tag">⚠️ The trap</span>
+    <p>3 friends need <strong>2 rooms</strong>, not 1.5. An LLM doing the maths in its head often divides 3 by 2 and carries on. That makes Manali look like <strong>₹19,200</strong>, inside the ₹20,000 budget, when the real cost is <strong>₹20,866.67</strong>, over it. Press "Show the LLM's slip" above to see it. That one rounding step is why script 06 exists.</p>
+  </div>
+
+  <div class="story">📋 <strong>Problem statement for learners.</strong> A group of friends wants to plan a trip. Given a small database of places and stays and a notebook of travel tips, build an AI trip planner that answers questions like <em>"Can 3 friends do Manali for 4 nights with ₹20,000 each?"</em> with the <strong>exact cost per person</strong>, worked out by tools, and <strong>advice grounded in the travel tips</strong> (season, packing, booking early), retrieved by meaning.</div>
+</section>
+
+<hr class="sec">
+<section id="t">
+  <p class="kicker">Understand it</p>
+  <h2>What we are building, and what you need</h2>
+
+  <!-- T1 -->
+  <h3 id="t-build"><span class="num">T1</span>What we are building: six steps, one idea each</h3>
+  <p>Each script adds exactly one idea to the one before it. Open two of them side by side and the difference is the lesson.</p>
+  <div class="tw"><table class="tbl">
+    <tr><th>Script</th><th>New idea</th><th>The question it answers</th><th>Needs</th></tr>
+    <tr><td><code>trip_01_sqlite_basics.py</code></td><td>SQLite: two tables, a JOIN, a lookup</td><td>Where do we keep places, stays and prices?</td><td>nothing</td></tr>
+    <tr><td><code>trip_02_embeddings_basics.py</code></td><td>Embeddings and cosine similarity</td><td>How do we find a tip that <em>means</em> the same thing?</td><td>a free model (~90 MB, once)</td></tr>
+    <tr><td><code>trip_03_chromadb_retrieval.py</code></td><td>A vector database with labels</td><td>How do we search many tips, and only one shelf?</td><td>nothing</td></tr>
+    <tr><td><code>trip_04_llm_chain.py</code></td><td><code>prompt | llm | parser</code></td><td>Can an LLM work out the cost per person?</td><td><code>OPENAI_API_KEY</code></td></tr>
+    <tr><td><code>trip_05_rag_chain.py</code></td><td>Retrieve → augment → generate</td><td>Does the advice improve when it reads the notebook?</td><td><code>OPENAI_API_KEY</code></td></tr>
+    <tr><td><code>trip_06_tool_calling.py</code></td><td>Tools and a hand-written agent loop</td><td>Can we get exact numbers every time?</td><td><code>OPENAI_API_KEY</code></td></tr>
+  </table></div>
+  <div class="box tip"><span class="tag">💡 Why not just a Python script?</span>
+    <p>For the cost alone, a Python function is enough: that's the calculator above. The AI earns its place where a script can't go: <strong>understanding</strong> a messy question ("3 of us, Manali, 4 nights, 20k each?"), <strong>finding</strong> the right tip by meaning, <strong>choosing</strong> which tool to call with which numbers, and <strong>explaining</strong> the answer to the group. The design rule from Week 1 holds: <em>code computes, the LLM reasons and explains.</em></p>
+  </div>
+
+  <!-- T2 -->
+  <h3 id="t-arch"><span class="num">T2</span>The architecture: a planner, a notebook and a calculator</h3>
+  <figure>
+    <svg viewBox="0 0 820 390" role="img" aria-label="Architecture. A friend's question goes to the trip planner LLM, which writes the answer. Before answering, matching tips from the ChromaDB travel notebook are pasted into its prompt: that is RAG. When it needs a number, it calls a tool: lookup_place reads prices, calculate_stay_share and calculate_trip_cost do the maths in Python, and each result goes back to the LLM.">
+      <defs>
+        <marker id="tb-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".6"/></marker>
+        <marker id="tb-mh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--gold)"/></marker>
+      </defs>
+      <g class="nd soft" id="tb-q"><rect x="10" y="20" width="230" height="74" rx="10"/><text class="t13 b" x="26" y="46">The friends' question</text><text class="t11 sub" x="26" y="66">"Can 3 of us do Manali for</text><text class="t11 sub" x="26" y="82">4 nights with ₹20,000 each?"</text></g>
+      <line class="ar" id="tb-a1" x1="240" y1="57" x2="293" y2="57" marker-end="url(#tb-m)"/>
+      <g class="nd acc" id="tb-llm"><rect x="295" y="20" width="230" height="74" rx="10"/><text class="mono t13 b" x="311" y="46">Trip planner (LLM)</text><text class="t11 sub" x="311" y="66">ChatOpenAI · reads tips</text><text class="t11 sub" x="311" y="82">decides which tool to call</text></g>
+      <line class="ar" id="tb-a2" x1="525" y1="57" x2="578" y2="57" marker-end="url(#tb-m)"/>
+      <g class="nd soft" id="tb-ans"><rect x="580" y="20" width="230" height="74" rx="10"/><text class="t13 b" x="596" y="46">The answer</text><text class="t11 sub" x="596" y="66">₹20,866.67 each, over budget;</text><text class="t11 sub" x="596" y="82">July = rain and landslides</text></g>
+
+      <g class="nd" id="tb-kb"><rect x="10" y="180" width="370" height="150" rx="10"/><text class="mono t13 b" x="26" y="204">Travel notebook · ChromaDB</text><text class="t11 sub" x="26" y="222">scripts 02 · 03 · 05</text><text class="t12" x="26" y="248">tips stored as text + 384 numbers + a topic label</text><text class="mono t11" x="26" y="270">retrieve(query, n=3, where={"topic": ...})</text><text class="t12" x="26" y="294">embeddings: all-MiniLM-L6-v2, free, runs locally</text><text class="t12" x="26" y="316">closest in meaning, by cosine similarity</text></g>
+      <g class="nd" id="tb-tools"><rect x="440" y="180" width="370" height="150" rx="10"/><text class="mono t13 b" x="456" y="204">Tools · plain Python</text><text class="t11 sub" x="456" y="222">scripts 01 · 06</text><text class="mono t12" x="456" y="248">lookup_place(place)</text><text class="t11 sub" x="600" y="248">→ prices (SQLite in script 01)</text><text class="mono t12" x="456" y="274">calculate_stay_share(...)</text><text class="t11 sub" x="660" y="274">→ rooms, share</text><text class="mono t12" x="456" y="300">calculate_trip_cost(...)</text><text class="t11 sub" x="660" y="300">→ total</text><text class="t11 sub" x="456" y="320">exact, every time</text></g>
+
+      <line class="ar" id="tb-rag" x1="200" y1="180" x2="350" y2="96" marker-end="url(#tb-m)"/>
+      <text class="alab b" x="20" y="140">① RAG: tips pasted into the prompt</text>
+      <line class="ar" id="tb-call" x1="470" y1="96" x2="590" y2="178" marker-end="url(#tb-m)"/>
+      <text class="alab b" x="462" y="160">② tool call</text>
+      <line class="ar" id="tb-back" x1="650" y1="180" x2="510" y2="96" marker-end="url(#tb-m)" style="stroke-dasharray:5 4"/>
+      <text class="alab" x="655" y="160">③ result back</text>
+
+      <g class="nd soft" id="tb-rule"><rect x="10" y="346" width="800" height="36" rx="10"/><text class="t12" x="28" y="369"><tspan class="b">Code computes, the LLM explains.</tspan> The LLM never does the maths in the final version: it reads, chooses a tool, and writes the answer.</text></g>
+    </svg>
+    <figcaption>Two kinds of help for one LLM. ① <b>RAG</b> brings in <em>knowledge</em> it wasn't trained on (the notebook). ②③ <b>Tools</b> bring in <em>exactness</em> it can't do in its head (the maths). Scripts 05 and 06 each add one of them; milestone M4 joins them into one agent.</figcaption>
+  </figure>
+  <div class="box analogy"><span class="tag">🧠 The friend who plans every trip</span>
+    <p>Every group has one: they keep a <strong>notebook of tips</strong> (the vector database), a <strong>spreadsheet of prices</strong> (SQLite) and a <strong>calculator</strong> on the table (the tools). When you ask "Manali in July?", they flip to the hills page first, then work out the cost on the calculator, then tell you. Trip Buddy does the same three moves in the same order.</p>
+  </div>
+
+  <!-- T3 -->
+  <h3 id="t-need"><span class="num">T3</span>What you need</h3>
+  <div class="tw"><table class="tbl">
+    <tr><th>You need</th><th>Why</th><th>Used in</th></tr>
+    <tr><td><b>Python 3.11+</b> and <b>uv</b></td><td>The scripts use <code>dict | None</code> type hints and run with <code>uv run</code></td><td>all</td></tr>
+    <tr><td><b>An OpenAI API key</b></td><td>The planner LLM, read from <code>.env</code></td><td>04 · 05 · 06</td></tr>
+    <tr><td><b>~90 MB of disk</b></td><td>The free embedding model, downloaded on the first run</td><td>02 · 03 · 05</td></tr>
+    <tr><td><b>No AWS account</b></td><td>This project runs on OpenAI and a local model, so anyone can try it</td><td>none</td></tr>
+  </table></div>
+  <div class="tw"><table class="tbl">
+    <tr><th>Library</th><th>What it does here</th><th>Scripts</th></tr>
+    <tr><td><code>sqlite3</code></td><td>The database, built into Python</td><td>01</td></tr>
+    <tr><td><code>sentence-transformers</code>, <code>numpy</code></td><td>Turns text into 384 numbers; compares them</td><td>02</td></tr>
+    <tr><td><code>chromadb</code></td><td>Vector database: text + embedding + labels</td><td>03 · 05</td></tr>
+    <tr><td><code>langchain-huggingface</code></td><td>The same embedding model, in LangChain's shape</td><td>03 · 05</td></tr>
+    <tr><td><code>langchain-core</code>, <code>langchain-openai</code></td><td>Prompts, chains, messages, tools and <code>ChatOpenAI</code></td><td>04 · 05 · 06</td></tr>
+    <tr><td><code>python-dotenv</code></td><td>Loads <code>OPENAI_API_KEY</code> from <code>.env</code></td><td>04 · 05 · 06</td></tr>
+  </table></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal, one-time setup in the project folder</div><pre>RUN uv init trip-buddy   // a new project with its own pyproject.toml
+RUN uv add the seven libraries above   // creates .venv and locks the versions
+CREATE .env with OPENAI_API_KEY = your key   // never commit this file
+RUN uv run trip_01_sqlite_basics.py   // then 02, 03 ... 06, in order</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Bash · one-time setup (macOS / Linux / WSL)</div><pre><code class="language-bash">uv init trip-buddy &amp;&amp; cd trip-buddy
+# copy the six trip_0x_*.py scripts into this folder, then:
+uv add chromadb sentence-transformers numpy langchain-huggingface langchain-core langchain-openai python-dotenv
+cp .env.example .env        # then paste your OPENAI_API_KEY into .env
+uv run trip_01_sqlite_basics.py</code></pre></div>
+  <div class="code"><div class="head">Text · .env.example</div><pre><code class="language-none"># Copy this file to .env (same folder) and paste your key. Never commit .env.
+OPENAI_API_KEY=sk-...
+
+# Optional: any chat model your key can use (default gpt-6-luna)
+# OPENAI_MODEL=gpt-4.1-mini   # older non-reasoning model: drop reasoning_effort, use temperature=0</code></pre></div>
+    </details>
+  </div>
+<div class="shape">trip-buddy/
+├── .env                          <span class="m"># YOUR key, never committed</span>
+├── trip_01_sqlite_basics.py      <span class="m"># places + stays in SQLite</span>
+├── trip_02_embeddings_basics.py  <span class="m"># sentences → 384 numbers</span>
+├── trip_03_chromadb_retrieval.py <span class="m"># the travel notebook, with shelves</span>
+├── trip_04_llm_chain.py          <span class="m"># the planner, maths in its head</span>
+├── trip_05_rag_chain.py          <span class="m"># the planner reads the notebook first</span>
+└── trip_06_tool_calling.py       <span class="m"># the planner uses a calculator</span></div>
+  <div class="box skip"><span class="tag">⏭️ Same models, different provider</span>
+    <p>Like Part 00, this project runs on OpenAI so anyone can try it without an AWS account. The ideas map one to one onto what you used in Week 1: <code>ChatOpenAI</code> becomes <code>BedrockModel</code>, LangChain's <code>@tool</code> becomes Strands' <code>@tool</code>, and the hand-written loop in script 06 is what Strands' <code>Agent</code> runs for you. Stretch goal S1 asks you to port it.</p>
+  </div>
+</section>
+
+<hr class="sec">
+<section id="b">
+  <p class="kicker">Build it</p>
+  <h2>Six scripts, bottom-up</h2>
+  <p>Build it in order: <strong>data → meaning → search → LLM → RAG → tools</strong>. For each script: the idea in plain words, then the pseudo code, then the real code behind <em>View code</em>.</p>
+
+  <!-- T4 -->
+  <h3 id="t-01"><span class="num">T4</span>Script 01 · SQLite: save our trip options</h3>
+  <p>First we need one place that remembers each destination and where we would stay. Two tables: <code>places</code> (where we could go) and <code>stays</code> (where we'd sleep, and the room price). They are linked by <code>place_id</code>, a <strong>foreign key</strong>, so a <code>JOIN</code> puts everything about a place in one row.</p>
+  <div class="tw"><table class="tbl">
+    <tr><th>Idea</th><th>In the code</th><th>Why it matters</th></tr>
+    <tr><td><b>In-memory database</b></td><td><code>sqlite3.connect(":memory:")</code></td><td>Lives in RAM, every run starts fresh: perfect for learning</td></tr>
+    <tr><td><b>Rows by name</b></td><td><code>row_factory = sqlite3.Row</code></td><td><code>row["name"]</code> instead of <code>row[1]</code></td></tr>
+    <tr><td><b>Many rows at once</b></td><td><code>executemany(...)</code></td><td>One call, a list of rows</td></tr>
+    <tr><td><b>Safe lookup</b></td><td><code>WHERE UPPER(place_id) = UPPER(?)</code></td><td>"hampi" and "HAMPI" both work; <code>?</code> blocks SQL injection</td></tr>
+  </table></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · trip_01_sqlite_basics.py</div><pre>CREATE conn = an SQLite database in memory   // gone when the script ends
+SET conn.row_factory = sqlite3.Row   // read columns by name
+CREATE table places(place_id, name, trip_type)
+CREATE table stays(place_id → places, stay_name, room_price_per_night)
+ADD 3 places: Goa (Beach), Coorg (Hills), Hampi (Heritage)
+ADD one stay for each place, with its room price
+SAVE the changes (commit)
+
+FOR EACH row IN places JOIN stays ON place_id
+    PRINT id, place, type, stay and room price
+
+DEFINE fetch_place(place):
+    READ the row WHERE UPPER(place_id) = UPPER(place)   // "?" placeholder, safe from SQL injection
+    RETURN the row as a dict, or None if not found
+
+PRINT fetch_place("hampi")   // found: case does not matter
+PRINT fetch_place("PARIS")   // None</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>sqlite3</code> <span class="lk-src">Python standard library</span>: a full SQL database in one file, or in memory, with no server to install.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · trip_01_sqlite_basics.py</div><pre><code class="language-python">"""
+trip_01_sqlite_basics.py
+────────────────────────
+Lesson 01 · SQLite basics: save our trip options in a database.
+
+The story
+    Every friend group has "the Goa plan" that never happens. This time we
+    plan properly. First we need one place that remembers each destination
+    and where we would stay. That place is a database.
+
+What you learn
+    - Create two tables (places, stays) linked by place_id (a foreign key)
+    - Insert many rows at once with executemany
+    - JOIN the two tables to see everything about a place in one row
+    - row_factory = sqlite3.Row, so you can write row["name"] instead of row[1]
+
+How to run
+    uv run trip_01_sqlite_basics.py
+    (no API key needed, SQLite comes built into Python)
+
+What you will see
+    A small table of 3 places, then a lookup for "hampi" and for a missing "PARIS".
+"""
+
+import sqlite3
+
+# ":memory:" = the database lives in RAM and disappears when the script ends.
+# Perfect for learning: every run starts fresh.
+conn = sqlite3.connect(":memory:")
+conn.row_factory = sqlite3.Row   # lets us do row["column_name"]
+cur = conn.cursor()              # the cursor is the "pen" that reads/writes the DB
+
+# ── 1. Create the tables ──────────────────────────────────────────────────────
+# places = where we could go
+# stays  = where we would sleep there, and the price of one room per night
+cur.executescript("""
+CREATE TABLE places (
+    place_id  TEXT PRIMARY KEY,
+    name      TEXT NOT NULL,
+    trip_type TEXT NOT NULL
+);
+
+CREATE TABLE stays (
+    place_id             TEXT PRIMARY KEY,
+    stay_name            TEXT NOT NULL,
+    room_price_per_night INTEGER NOT NULL,
+    FOREIGN KEY (place_id) REFERENCES places(place_id)
+);
+""")
+
+# ── 2. Add 3 places (executemany = one call, many rows) ───────────────────────
+cur.executemany("INSERT INTO places VALUES (?, ?, ?)", [
+    ("GOA",   "Goa",   "Beach"),
+    ("COORG", "Coorg", "Hills"),
+    ("HAMPI", "Hampi", "Heritage"),
+])
+
+cur.executemany("INSERT INTO stays VALUES (?, ?, ?)", [
+    ("GOA",   "Sea Breeze Guesthouse",  3000),
+    ("COORG", "Coffee Estate Cottage",  2800),
+    ("HAMPI", "Boulder View Guesthouse", 1500),
+])
+
+conn.commit()
+
+# ── 3. JOIN: combine both tables into one view ────────────────────────────────
+print(f"{'ID':&lt;8} {'Place':&lt;8} {'Type':&lt;10} {'Stay':&lt;26} {'Room/night':&gt;10}")
+print("-" * 66)
+
+rows = cur.execute("""
+    SELECT p.place_id, p.name, p.trip_type,
+           s.stay_name, s.room_price_per_night
+    FROM   places p
+    JOIN   stays s ON s.place_id = p.place_id
+    ORDER  BY p.place_id
+""").fetchall()
+
+for r in rows:
+    print(f"{r['place_id']:&lt;8} {r['name']:&lt;8} {r['trip_type']:&lt;10} {r['stay_name']:&lt;26} {r['room_price_per_night']:&gt;10}")
+
+
+# ── 4. A reusable lookup function ─────────────────────────────────────────────
+def fetch_place(place: str) -&gt; dict | None:
+    """Return one place (with its stay) as a dict, or None if not found.
+
+    UPPER(...) on both sides means "hampi" and "HAMPI" both work.
+    The "?" placeholder keeps the query safe from SQL injection.
+    """
+    row = cur.execute(
+        "SELECT p.*, s.stay_name, s.room_price_per_night "
+        "FROM places p JOIN stays s ON s.place_id = p.place_id "
+        "WHERE UPPER(p.place_id) = UPPER(?)",
+        (place,)
+    ).fetchone()
+    return dict(row) if row else None
+
+
+print("\nLookup 'hampi':", fetch_place("hampi"))
+print("Lookup 'PARIS':", fetch_place("PARIS"))</code></pre></div>
+    </details>
+  </div>
+  <div class="code"><div class="head">Output · uv run trip_01_sqlite_basics.py</div><pre><code class="language-none">ID       Place    Type       Stay                       Room/night
+------------------------------------------------------------------
+COORG    Coorg    Hills      Coffee Estate Cottage            2800
+GOA      Goa      Beach      Sea Breeze Guesthouse            3000
+HAMPI    Hampi    Heritage   Boulder View Guesthouse          1500
+
+Lookup 'hampi': {'place_id': 'HAMPI', 'name': 'Hampi', 'trip_type': 'Heritage', 'stay_name': 'Boulder View Guesthouse', 'room_price_per_night': 1500}
+Lookup 'PARIS': None</code></pre></div>
+  <div class="box analogy"><span class="tag">🧠 Two registers at the front desk</span>
+    <p>One register lists the towns, the other lists the guesthouses, and each guesthouse line says which town it's in. <code>JOIN</code> is reading both registers side by side. <code>fetch_place</code> is the receptionist who finds "hampi" whether you write it in capitals or not, and says "not here" for Paris instead of crashing.</p>
+  </div>
+
+  <!-- T5 -->
+  <h3 id="t-02"><span class="num">T5</span>Script 02 · Embeddings: turn sentences into numbers</h3>
+  <p>Your most-travelled friend keeps a notebook of tips. When someone asks <em>"Is it safe to go to the mountains in the rainy season?"</em>, we want the tip that <strong>means</strong> the same thing, <em>"Hills: avoid July-August, landslides"</em>, even though the words are different. Keyword search can't do that. <strong>Embeddings</strong> can.</p>
+  <ol class="walk">
+    <li><strong>Encode.</strong> A small free model turns every sentence into <strong>384 numbers</strong>: a direction in space. Similar meanings point in similar directions.</li>
+    <li><strong>Normalise.</strong> <code>normalize_embeddings=True</code> makes every vector length 1, so a plain dot product <em>is</em> the cosine similarity.</li>
+    <li><strong>Compare.</strong> <code>passage_vectors @ qv</code> gives one score per tip in one line: 1.0 means the same meaning, around 0 means unrelated.</li>
+    <li><strong>Rank.</strong> <code>np.argsort(scores)[::-1][:k]</code> keeps the top <code>k</code> tips.</li>
+  </ol>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · trip_02_embeddings_basics.py</div><pre>SET PASSAGES = 6 travel tips   // cost rule, rooms, hills, beach, heritage, book early
+LOAD model = all-MiniLM-L6-v2   // small and free, ~90 MB, downloaded once
+SET passage_vectors = model.encode(PASSAGES), each of length 1   // shape (6, 384)
+
+DEFINE top_k(query, k = 3):
+    SET qv = model.encode(query), length 1
+    SET scores = passage_vectors · qv   // dot product = cosine similarity, one per tip
+    RETURN the k tips with the highest scores, with their scores
+
+FOR EACH query IN 3 questions   // sea in winter, mountains in the rain, splitting rooms
+    PRINT the top 3 tips and their scores</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>numpy as np</code> <span class="lk-src">package numpy</span>: fast maths on whole arrays; <code>@</code> is the matrix product.</li>
+      <li><code>SentenceTransformer</code> <span class="lk-src">from <code>sentence_transformers</code>, package sentence-transformers</span>: loads the embedding model and runs <code>encode()</code> on your CPU.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · trip_02_embeddings_basics.py</div><pre><code class="language-python">"""
+trip_02_embeddings_basics.py
+────────────────────────────
+Lesson 02 · Embeddings: turn sentences into numbers and find the closest match.
+
+The story
+    Your most-travelled friend keeps a notebook of travel tips. When someone asks
+    "Is it safe to go to the mountains in the rainy season?", we want the tip that
+    MEANS the same thing ("Hills: avoid July-August, landslides"), even though
+    the words are different.
+
+What you learn
+    - A sentence-transformer model turns text into 384 numbers (an embedding)
+    - Sentences with similar meaning get vectors pointing in a similar direction
+    - Cosine similarity = dot product of two unit-length vectors (1.0 = same meaning)
+    - No database and no LLM yet, only numpy and a small free model
+
+How to run
+    uv run trip_02_embeddings_basics.py
+    (no API key needed; the first run downloads the ~90 MB model once)
+
+What you will see
+    For each question, the top 3 tips with a similarity score.
+"""
+
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+# The travel notebook
+PASSAGES = [
+    "Trip cost per person = travel + stay share + daily spend x nights.",
+    "One room fits 2 people, so rooms needed = people / 2, rounded up.",
+    "Hills (Coorg, Ooty, Manali): avoid July-August, heavy rain and landslides. Carry a jacket.",
+    "Beach (Goa, Gokarna, Pondicherry): best November-February; many shacks close in the monsoon.",
+    "Heritage (Hampi, Jaipur): explore early in the morning, afternoons get very hot in April-May.",
+    "Book trains 30-60 days early; last-week prices can double.",
+]
+
+# A small, free, local model. Each sentence becomes a vector of 384 numbers.
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
+print("Embedding passages...")
+# normalize_embeddings=True makes every vector length 1,
+# so a plain dot product IS the cosine similarity.
+passage_vectors = model.encode(PASSAGES, normalize_embeddings=True)
+print(f"Passage matrix shape: {passage_vectors.shape}\n")   # (6 passages, 384 numbers)
+
+
+def top_k(query: str, k: int = 3) -&gt; list[tuple[float, str]]:
+    """Return the k passages most similar in meaning to the query."""
+    qv = model.encode(query, normalize_embeddings=True)
+    scores = passage_vectors @ qv              # one score per passage, shape: (6,)
+    ranked = np.argsort(scores)[::-1][:k]      # indexes of the highest scores first
+    return [(float(scores[i]), PASSAGES[i]) for i in ranked]
+
+
+queries = [
+    "Where should I go to see the sea in winter?",
+    "Is it safe to go to the mountains in the rainy season?",
+    "How do we split hotel rooms between friends?",
+]
+
+for query in queries:
+    print(f"Query: {query!r}")
+    for score, passage in top_k(query):
+        print(f"  {score:.3f}  {passage}")
+    print()</code></pre></div>
+    </details>
+  </div>
+  <div class="box tip"><span class="tag">💡 What you will see</span>
+    <p>For each question, three tips with a score. The mountains question should put the <strong>Hills</strong> tip first even though it never says "mountains" or "rainy season", and the rooms question should find the "one room fits 2 people" tip. Your exact scores depend on the model version; the <em>order</em> is what to check.</p>
+  </div>
+
+  <!-- T6 -->
+  <h3 id="t-03"><span class="num">T6</span>Script 03 · ChromaDB: a proper library for our tips</h3>
+  <p>The notebook grows. Instead of a Python list we put every tip in a <strong>vector database</strong>. ChromaDB stores the text, its embedding and a <strong>label</strong> (metadata) together, like a library where each book sits on a shelf: <code>money</code>, <code>trip_type</code> or <code>travel_tip</code>. You can search by meaning <em>and</em> stay on one shelf.</p>
+  <div class="tw"><table class="tbl">
+    <tr><th>Search</th><th>Shelf (<code>where</code>)</th><th>What should come back first</th></tr>
+    <tr><td>"Manali trip in the monsoon"</td><td>any</td><td>The hills tip: avoid July-August, landslides</td></tr>
+    <tr><td>"how do we split the cost"</td><td><code>{"topic": "money"}</code></td><td>Only the two money tips: cost rule and rooms rule</td></tr>
+    <tr><td>"old temples and forts"</td><td><code>{"topic": "trip_type"}</code></td><td>The heritage tip: Hampi, Jaipur</td></tr>
+  </table></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · trip_03_chromadb_retrieval.py</div><pre>CREATE embed = HuggingFaceEmbeddings(all-MiniLM-L6-v2, on the CPU, normalised)
+CREATE collection "trip_tips" in an in-memory Chroma client, compared by cosine
+SET docs = 8 tips, each with a topic label: money, trip_type or travel_tip
+ADD every tip to the collection: id + embedding + text + label
+
+DEFINE retrieve(query, n = 3, where = none):
+    SET qv = embed.embed_query(query)
+    ASK the collection for the n closest tips   // only on the "where" shelf, if given
+    RETURN their texts
+
+PRINT retrieve("Manali trip in the monsoon")
+PRINT retrieve("how do we split the cost", where topic = money)
+PRINT retrieve("old temples and forts", where topic = trip_type)</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>chromadb</code> <span class="lk-src">package chromadb</span>: the vector database; <code>Client()</code> keeps everything in memory.</li>
+      <li><code>HuggingFaceEmbeddings</code> <span class="lk-src">from <code>langchain_huggingface</code>, package langchain-huggingface</span>: the same free model as script 02, wrapped so it plugs into LangChain.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · trip_03_chromadb_retrieval.py</div><pre><code class="language-python">"""
+trip_03_chromadb_retrieval.py
+─────────────────────────────
+Lesson 03 · ChromaDB: a proper "library" for our tips, with labels (metadata).
+
+The story
+    The travel notebook grows. Instead of a Python list, we put every tip in a
+    vector database (ChromaDB). Each tip also gets a label, like a shelf in a
+    library: "money", "trip_type" or "travel_tip".
+
+What you learn
+    - ChromaDB stores text + its embedding + metadata together
+    - Query by meaning AND filter by metadata (e.g. only topic = "money")
+    - retrieve() is the building block every RAG system uses
+    - Still no LLM, only retrieval
+
+How to run
+    uv run trip_03_chromadb_retrieval.py
+    (no API key needed)
+
+What you will see
+    Three searches: one open search, one limited to money tips, one limited to trip types.
+"""
+
+import chromadb
+from langchain_huggingface import HuggingFaceEmbeddings
+
+# Same free model as lesson 02, wrapped by LangChain so it plugs into other tools.
+embed = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": True},
+)
+
+# In-memory Chroma client. "hnsw:space": "cosine" = compare vectors by cosine similarity.
+client = chromadb.Client()
+collection = client.create_collection("trip_tips", metadata={"hnsw:space": "cosine"})
+
+# 8 tips, each with a shelf label in "meta"
+docs = [
+    {"id": "trip-cost",  "text": "Trip cost per person = travel + stay share + daily spend x nights.",                              "meta": {"topic": "money"}},
+    {"id": "rooms",      "text": "One room fits 2 people, so rooms needed = people / 2, rounded up. Stay share = rooms x room price x nights / people.", "meta": {"topic": "money"}},
+    {"id": "beach",      "text": "Beach trips (Goa, Gokarna, Pondicherry): best November-February. In the monsoon many beach shacks and water sports close.", "meta": {"topic": "trip_type"}},
+    {"id": "hills",      "text": "Hill trips (Coorg, Ooty, Manali): best March-June and October. Avoid July-August: heavy rain and landslides.", "meta": {"topic": "trip_type"}},
+    {"id": "heritage",   "text": "Heritage trips (Hampi, Jaipur): old temples, forts and palaces. Best October-March; April-May afternoons cross 40°C.", "meta": {"topic": "trip_type"}},
+    {"id": "adventure",  "text": "Adventure trips (Rishikesh, Dandeli): river rafting runs October-June and closes in the monsoon.", "meta": {"topic": "trip_type"}},
+    {"id": "book-early", "text": "Book trains and flights 30-60 days early; prices often double in the last week.",                  "meta": {"topic": "travel_tip"}},
+    {"id": "weekdays",   "text": "Weekday stays are often 20-30% cheaper than weekends.",                                            "meta": {"topic": "travel_tip"}},
+]
+
+print("Embedding and storing documents...")
+vectors = embed.embed_documents([d["text"] for d in docs])
+collection.add(
+    ids=[d["id"] for d in docs],
+    embeddings=vectors,
+    documents=[d["text"] for d in docs],
+    metadatas=[d["meta"] for d in docs],
+)
+print(f"Collection has {collection.count()} documents\n")
+
+
+def retrieve(query: str, n: int = 3, where: dict | None = None) -&gt; list[str]:
+    """Find the n tips closest in meaning to `query`.
+
+    where = optional metadata filter, e.g. {"topic": "money"}
+            means "only look on the money shelf".
+    """
+    qv = embed.embed_query(query)
+    kwargs = {"query_embeddings": [qv], "n_results": n}
+    if where:
+        kwargs["where"] = where
+    results = collection.query(**kwargs)
+    return results["documents"][0]
+
+
+print("=== Query: 'Manali trip in the monsoon' ===")
+for chunk in retrieve("Manali trip in the monsoon"):
+    print(" •", chunk)
+
+print()
+
+print("=== Query: 'how do we split the cost' (money tips only) ===")
+for chunk in retrieve("how do we split the cost", where={"topic": "money"}):
+    print(" •", chunk)
+
+print()
+
+print("=== Query: 'old temples and forts' (trip types only) ===")
+for chunk in retrieve("old temples and forts", where={"topic": "trip_type"}):
+    print(" •", chunk)</code></pre></div>
+    </details>
+  </div>
+  <div class="box analogy"><span class="tag">🧠 The librarian</span>
+    <p><code>retrieve()</code> is a librarian who understands what you <em>mean</em>. "Something about splitting money" sends them to the money shelf; with <code>where</code> you tell them which shelf to stay on. Every RAG system, however big, has a function like this at its heart.</p>
+  </div>
+
+  <!-- T7 -->
+  <h3 id="t-04"><span class="num">T7</span>Script 04 · LLM chain: hire an AI trip planner</h3>
+  <p>Now an LLM joins. We write the cost rules into its <strong>system prompt</strong> (its job and rules) and send each trip's numbers in the <strong>human message</strong> (this request's data). A <code>ChatPromptTemplate</code> holds the <code>{placeholders}</code>, and the pipe <code>prompt | llm | parser</code> sends the data left to right.</p>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · trip_04_llm_chain.py</div><pre>LOAD OPENAI_API_KEY (and OPENAI_MODEL, if set) from .env
+CREATE llm = ChatOpenAI(OPENAI_MODEL or "gpt-6-luna", reasoning_effort "none")   // quick replies
+CREATE prompt:
+    system: "You are a trip planner" + the four cost rules
+            + "End with exactly COST_PER_PERSON: &lt;number&gt;"   // the output contract
+    human:  place, friends, nights, room price, travel cost, daily spend   // {placeholders}
+SET chain = prompt | llm | StrOutputParser()   // data flows left to right, plain text out
+
+FOR EACH trip IN [Goa: 4 friends, 3 nights · Manali: 3 friends, 4 nights]
+    PRINT chain.invoke(trip)   // the LLM does the maths in its head
+// correct answers to check against: Goa 11800, Manali 20866.67</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>os</code> <span class="lk-src">Python standard library</span>: reads <code>OPENAI_MODEL</code> from the environment.</li>
+      <li><code>load_dotenv</code> <span class="lk-src">from <code>dotenv</code>, package python-dotenv</span>: copies <code>.env</code> into the environment.</li>
+      <li><code>StrOutputParser</code> <span class="lk-src">from <code>langchain_core.output_parsers</code></span>: turns the model's message into a plain string.</li>
+      <li><code>ChatPromptTemplate</code> <span class="lk-src">from <code>langchain_core.prompts</code></span>: a reusable system + human prompt with blanks.</li>
+      <li><code>ChatOpenAI</code> <span class="lk-src">from <code>langchain_openai</code>, package langchain-openai</span>: the chat model that calls OpenAI.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · trip_04_llm_chain.py</div><pre><code class="language-python">"""
+trip_04_llm_chain.py
+────────────────────
+Lesson 04 · LLM chain: ask OpenAI to work out the cost of a trip.
+
+The story
+    We hire an AI "trip planner". We write the cost rules into its instructions
+    (the system prompt) and send each trip's numbers in the request. It works out
+    how much each friend has to pay.
+
+What you learn
+    - ChatPromptTemplate: a reusable prompt with {placeholders}
+    - LCEL pipe syntax: prompt | llm | parser (data flows left to right)
+    - System message = the AI's job and rules; human message = this request's data
+    - No retrieval yet: the cost rules are written directly into the prompt
+
+    Watch the maths! Here the LLM does the arithmetic itself (rounding rooms up,
+    dividing by 3...). It is usually close but not always exact.
+    Lesson 06 fixes that with tools.
+
+How to run
+    1. cp .env.example .env   and paste your OPENAI_API_KEY
+    2. uv run trip_04_llm_chain.py
+
+What you will see
+    Step-by-step working for 2 trips, each ending with COST_PER_PERSON: &lt;number&gt;.
+"""
+
+import os
+
+from dotenv import load_dotenv
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+
+load_dotenv()   # reads OPENAI_API_KEY (and optional OPENAI_MODEL) from .env
+
+# ── The model ─────────────────────────────────────────────────────────────────
+# gpt-6-luna is OpenAI's low-cost model. It can "think" before answering;
+# reasoning_effort="none" turns that off so replies are quick, like a classic
+# chat model. To try another model, set OPENAI_MODEL in .env.
+# (Older non-reasoning models such as gpt-4.1-mini: remove reasoning_effort
+#  and use temperature=0 instead.)
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+llm = ChatOpenAI(model=MODEL, reasoning_effort="none")
+
+# ── The prompt template ───────────────────────────────────────────────────────
+prompt = ChatPromptTemplate.from_messages([
+    ("system", """You are a trip planner for a group of friends.
+
+Given these numbers, compute the cost per person step by step.
+
+Rules:
+  Rooms needed     = people / 2, rounded UP (one room fits 2 people)
+  Stay share       = rooms needed * room price per night * nights / people
+  Food and fun     = daily spend per person * nights
+  Cost per person  = travel cost + stay share + food and fun
+
+End your response with exactly:
+COST_PER_PERSON: &lt;number&gt;"""),
+    ("human",
+     "Place: {place}\n"
+     "Friends: {people}\n"
+     "Nights: {nights}\n"
+     "Room price per night: ₹{room_price_per_night}\n"
+     "Travel cost per person (return): ₹{travel_cost_per_person}\n"
+     "Daily spend per person: ₹{daily_spend_per_person}"),
+])
+
+# ── The chain: prompt → model → plain string ──────────────────────────────────
+chain = prompt | llm | StrOutputParser()
+
+test_cases = [
+    {"place": "Goa",    "people": 4, "nights": 3, "room_price_per_night": 3000, "travel_cost_per_person": 2800, "daily_spend_per_person": 1500},
+    {"place": "Manali", "people": 3, "nights": 4, "room_price_per_night": 2500, "travel_cost_per_person": 9000, "daily_spend_per_person": 1300},
+]
+# Correct answers (from the tool in lesson 06), so you can check the LLM:
+#   Goa → 11800        Manali → 20866.67  (3 friends still need 2 rooms!)
+
+for params in test_cases:
+    print(f"\n{'='*60}")
+    print(f"Trip: {params['place']} — {params['people']} friends, {params['nights']} nights")
+    print("="*60)
+    result = chain.invoke(params)   # fills the {placeholders}, calls OpenAI, returns text
+    print(result)</code></pre></div>
+    </details>
+  </div>
+  <div class="box warn"><span class="tag">⚠️ Watch the maths</span>
+    <p>The LLM shows its working step by step and ends with <code>COST_PER_PERSON:</code>. It is usually close, but not always exact: the Manali trip is where it slips, because 3 friends still need 2 rooms. Run it a few times and compare with the correct answers in the comment. Script 06 fixes this for good.</p>
+  </div>
+
+  <!-- T8 -->
+  <h3 id="t-05"><span class="num">T8</span>Script 05 · RAG: give the AI the notebook before it answers</h3>
+  <p>Three friends want Manali in <strong>July</strong>. We ask the planner twice: once with only its general knowledge, and once after pasting the most relevant notebook tips into the prompt. The only difference between the two chains is one placeholder, <code>{rag_context}</code>.</p>
+  <div class="pipe" role="list">
+    <button type="button" class="on" data-rag="0" role="listitem"><b>① Retrieve</b><span>search the notebook for "Hills trip to Manali in July"</span></button>
+    <div class="arr">top 3 tips</div>
+    <button type="button" data-rag="1" role="listitem"><b>② Augment</b><span>paste the tips into the system message</span></button>
+    <div class="arr">one prompt</div>
+    <button type="button" data-rag="2" role="listitem"><b>③ Generate</b><span>the LLM answers, now grounded in the tips</span></button>
+  </div>
+  <div class="out" id="rag-out" aria-live="polite"></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · trip_05_rag_chain.py</div><pre>CREATE the travel notebook in Chroma: 6 tips   // cost, rooms, hills, beach, buffer, pack
+
+DEFINE retrieve_context(query, n = 3):   // ① RETRIEVE
+    RETURN the n closest tips as a bullet list
+
+CREATE bare_prompt = system "You are a trip planner" + human trip details
+CREATE rag_prompt  = the same + "Relevant travel tips: {rag_context}"   // ② AUGMENT
+SET bare_chain = bare_prompt | llm | parser
+SET rag_chain  = rag_prompt  | llm | parser   // ③ GENERATE
+
+SET trip = Manali, Hills, July, 3 friends, 4 nights, ₹20,000 each
+SET context = retrieve_context("Hills trip to Manali in July")
+PRINT context
+PRINT bare_chain.invoke(trip)   // general advice only
+PRINT rag_chain.invoke(trip + context)   // should warn about July rain and landslides</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>chromadb</code>, <code>HuggingFaceEmbeddings</code> <span class="lk-src">as in script 03</span>: the notebook and its embeddings.</li>
+      <li><code>ChatPromptTemplate</code>, <code>StrOutputParser</code>, <code>ChatOpenAI</code>, <code>load_dotenv</code> <span class="lk-src">as in script 04</span>: the two chains.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · trip_05_rag_chain.py</div><pre><code class="language-python">"""
+trip_05_rag_chain.py
+────────────────────
+Lesson 05 · RAG: give the AI the travel notebook before it answers.
+
+The story
+    Three friends want to go to Manali in July. We ask the AI planner twice:
+      - WITHOUT RAG: it answers from general knowledge only.
+      - WITH RAG: we first look up the most relevant tips (retrieve), paste them
+        into the prompt (augment), then let it answer (generate).
+    Does it warn us about July rains and landslides?
+
+What you learn
+    - Retrieve → Augment → Generate, the core RAG pattern
+    - {rag_context} is just text pasted into the prompt
+    - Why grounded answers are more specific and more useful
+
+How to run
+    uv run trip_05_rag_chain.py        (needs OPENAI_API_KEY in .env)
+
+What you will see
+    The retrieved tips, then the answer WITHOUT RAG, then the answer WITH RAG.
+"""
+
+import os
+
+import chromadb
+from dotenv import load_dotenv
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import ChatOpenAI
+
+load_dotenv()
+
+# ── 1. Build the vector store (same idea as lesson 03) ────────────────────────
+embed = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": True},
+)
+
+client = chromadb.Client()
+col = client.create_collection("trip_tips", metadata={"hnsw:space": "cosine"})
+
+KB = [
+    ("cost",   "Trip cost per person = travel + stay share + daily spend x nights."),
+    ("rooms",  "One room fits 2 people, so rooms needed = people / 2, rounded up."),
+    ("hills",  "Hill trips (Coorg, Ooty, Manali): best March-June and October. Avoid July-August: heavy rain and landslides block hill roads."),
+    ("beach",  "Beach trips: best November-February; many shacks close in the monsoon."),
+    ("buffer", "Keep a 10% buffer on top of the total for surprises like a cab surge or a missed bus."),
+    ("pack",   "Mountain weather changes fast: carry a rain jacket and warm layers even in summer."),
+]
+vecs = embed.embed_documents([t for _, t in KB])
+col.add(ids=[i for i, _ in KB], embeddings=vecs, documents=[t for _, t in KB])
+
+
+def retrieve_context(query: str, n: int = 3) -&gt; str:
+    """RETRIEVE step: find the n most relevant tips and return them as a bullet list."""
+    qv = embed.embed_query(query)
+    res = col.query(query_embeddings=[qv], n_results=n)
+    return "\n".join(f"- {c}" for c in res["documents"][0])
+
+
+# ── 2. Chain WITHOUT RAG ──────────────────────────────────────────────────────
+bare_prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a trip planner for a group of friends. Give advice on this trip plan."),
+    ("human",
+     "Place: {place} ({trip_type}) | Month: {month}\n"
+     "Friends: {people} | Nights: {nights} | Budget per person: ₹{budget_per_person}"),
+])
+
+# ── 3. Chain WITH RAG (only difference: {rag_context} in the system message) ──
+rag_prompt = ChatPromptTemplate.from_messages([
+    ("system",
+     "You are a trip planner for a group of friends. Give advice on this trip plan.\n\n"
+     "Relevant travel tips:\n{rag_context}"),     # ← AUGMENT step
+    ("human",
+     "Place: {place} ({trip_type}) | Month: {month}\n"
+     "Friends: {people} | Nights: {nights} | Budget per person: ₹{budget_per_person}"),
+])
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+llm = ChatOpenAI(model=MODEL, reasoning_effort="none")   # see lesson 04 for why
+parser = StrOutputParser()
+
+bare_chain = bare_prompt | llm | parser
+rag_chain  = rag_prompt  | llm | parser                   # ← GENERATE step
+
+# ── 4. Run the comparison ─────────────────────────────────────────────────────
+trip = {
+    "place":             "Manali",
+    "trip_type":         "Hills",
+    "month":             "July",
+    "people":            3,
+    "nights":            4,
+    "budget_per_person": 20000,
+}
+
+# Build a search query from the trip details, then retrieve matching tips
+query = f"{trip['trip_type']} trip to {trip['place']} in {trip['month']}"
+context = retrieve_context(query)
+
+print("=== Retrieved Context ===")
+print(context)
+
+print("\n=== Response WITHOUT RAG ===")
+print(bare_chain.invoke(trip))
+
+print("\n=== Response WITH RAG ===")
+print(rag_chain.invoke({**trip, "rag_context": context}))</code></pre></div>
+    </details>
+  </div>
+  <div class="box fin"><span class="tag">🧳 Trip corner: grounded means specific</span>
+    <p>Without RAG the planner may still mention the monsoon, but in general terms. With RAG it can quote <em>your</em> notebook: avoid July-August, roads get blocked by landslides, carry a rain jacket and warm layers, keep a 10% buffer. Grounded answers are <strong>specific, checkable and yours</strong>: if a tip is wrong, you fix the notebook, not the model.</p>
+  </div>
+
+  <!-- T9 -->
+  <h3 id="t-06"><span class="num">T9</span>Script 06 · Tool calling: a calculator instead of guessing</h3>
+  <p>In script 04 the AI did the maths in its head and sometimes slipped. Now we put three tools on the table. The AI decides <strong>which</strong> tool to call and <strong>with what inputs</strong>; Python runs the tool and hands back the result; the AI only writes the final explanation.</p>
+  <div class="tw"><table class="tbl">
+    <tr><th>Tool</th><th>Inputs</th><th>Returns</th></tr>
+    <tr><td><code>lookup_place</code></td><td><code>place</code></td><td>trip type, room price, travel cost, daily spend (Goa, Coorg, Manali)</td></tr>
+    <tr><td><code>calculate_stay_share</code></td><td><code>room_price_per_night</code>, <code>nights</code>, <code>people</code></td><td><code>rooms_needed</code> (rounded up) and <code>stay_share</code></td></tr>
+    <tr><td><code>calculate_trip_cost</code></td><td><code>travel_cost_per_person</code>, <code>stay_share</code>, <code>daily_spend_per_person</code>, <code>nights</code></td><td>the total per person</td></tr>
+  </table></div>
+
+  <div class="sim stepper" id="sim-loop"><span class="tag">🧪 Simulation</span>
+    <h4>Follow one run: "Can 3 friends do Manali for 4 nights with ₹20,000 each?"</h4>
+    <div class="row"><button class="btn ghost" type="button" data-act="prev">← Back</button><button class="btn" type="button" data-act="next">Next step →</button><span class="counter"></span><div class="dots"></div></div>
+    <div class="panel" aria-live="polite"></div>
+  </div>
+
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · trip_06_tool_calling.py</div><pre>DEFINE calculate_stay_share(room_price, nights, people) as a tool:
+    SET rooms = people / 2, rounded UP
+    RETURN rooms and rooms × room_price × nights / people
+
+DEFINE calculate_trip_cost(travel, stay_share, daily, nights) as a tool:
+    RETURN travel + stay_share + daily × nights
+
+DEFINE lookup_place(place) as a tool:
+    RETURN the prices for Goa, Coorg or Manali, or an error   // a simulated database
+
+CREATE llm = ChatOpenAI(...) with the three tools bound   // the model now sees the tool menu
+SET TOOL_MAP = tool name → tool
+
+DEFINE run_agent(question):
+    SET messages = [HumanMessage(question)]
+    REPEAT at most 8 times   // safety net
+        SET response = llm.invoke(messages)
+        APPEND response to messages
+        IF response has no tool calls THEN RETURN response.text   // the final answer
+        FOR EACH tool call IN response
+            RUN TOOL_MAP[name] with the model's arguments
+            APPEND a ToolMessage with the result and the call id
+    RETURN "Stopped: too many tool calls without a final answer."
+
+FOR EACH question IN 3 questions
+    PRINT run_agent(question)</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>json</code>, <code>math</code>, <code>os</code> <span class="lk-src">Python standard library</span>: tool results as JSON text, <code>math.ceil</code> for rounding up, and the model name.</li>
+      <li><code>HumanMessage</code>, <code>ToolMessage</code> <span class="lk-src">from <code>langchain_core.messages</code></span>: the question, and a tool's result sent back with its <code>tool_call_id</code>.</li>
+      <li><code>tool</code> <span class="lk-src">from <code>langchain_core.tools</code></span>: the decorator; the docstring and type hints become the tool's menu card.</li>
+      <li><code>ChatOpenAI</code>, <code>load_dotenv</code> <span class="lk-src">as in script 04</span>: the model, now with <code>.bind_tools(tools)</code>.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · trip_06_tool_calling.py</div><pre><code class="language-python">"""
+trip_06_tool_calling.py
+───────────────────────
+Lesson 06 · Tool calling: let the AI use a calculator and a lookup instead of guessing.
+
+The story
+    In lesson 04 the AI did the maths in its head and sometimes slipped.
+    Now we give it three tools, like a calculator and a travel diary on the table:
+      - lookup_place          → read a place's prices
+      - calculate_stay_share  → exact "how much does each friend pay for rooms"
+      - calculate_trip_cost   → exact total per person
+    The AI decides WHICH tool to call and with WHAT inputs. Python runs the tool
+    and hands the result back. The AI only writes the final explanation.
+
+What you learn
+    - @tool turns a normal Python function into something the LLM can call
+      (the docstring and type hints tell the LLM what the tool does)
+    - llm.bind_tools(tools) shows the tool menu to the model
+    - The tool loop: model asks → we run the tool → send ToolMessage back → repeat
+
+How to run
+    uv run trip_06_tool_calling.py        (needs OPENAI_API_KEY in .env)
+
+What you will see
+    For each question, every tool call the AI made, then its final answer.
+"""
+
+import json
+import math
+import os
+
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+
+load_dotenv()
+
+# ── Tool definitions ──────────────────────────────────────────────────────────
+
+@tool
+def calculate_stay_share(room_price_per_night: float, nights: int, people: int) -&gt; dict:
+    """
+    Calculate how much each person pays for the stay.
+    One room fits 2 people, so rooms_needed = people / 2 rounded up.
+    stay_share = rooms_needed * room_price_per_night * nights / people
+    """
+    rooms_needed = math.ceil(people / 2)
+    stay_share = round(rooms_needed * room_price_per_night * nights / people, 2)
+    return {"rooms_needed": rooms_needed, "stay_share": stay_share}
+
+
+@tool
+def calculate_trip_cost(travel_cost_per_person: float, stay_share: float,
+                        daily_spend_per_person: float, nights: int) -&gt; float:
+    """
+    Calculate the total trip cost for one person.
+    total = travel_cost_per_person + stay_share + daily_spend_per_person * nights
+    """
+    return round(travel_cost_per_person + stay_share + daily_spend_per_person * nights, 2)
+
+
+@tool
+def lookup_place(place: str) -&gt; dict:
+    """
+    Look up a destination's prices.
+    Returns: place, trip_type, room_price_per_night, travel_cost_per_person, daily_spend_per_person
+    """
+    # Simulated database (a real one arrives in lesson 07)
+    db = {
+        "GOA":    {"trip_type": "Beach", "room_price_per_night": 3000, "travel_cost_per_person": 2800, "daily_spend_per_person": 1500},
+        "COORG":  {"trip_type": "Hills", "room_price_per_night": 2800, "travel_cost_per_person": 1000, "daily_spend_per_person": 1100},
+        "MANALI": {"trip_type": "Hills", "room_price_per_night": 2500, "travel_cost_per_person": 9000, "daily_spend_per_person": 1300},
+    }
+    record = db.get(place.upper())
+    if not record:
+        return {"error": f"{place} not found"}
+    return {"place": place.title(), **record}
+
+
+# ── LLM with tools bound ──────────────────────────────────────────────────────
+tools = [calculate_stay_share, calculate_trip_cost, lookup_place]
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+llm = ChatOpenAI(model=MODEL, reasoning_effort="none").bind_tools(tools)
+
+# Map tool name → tool, so we can run whichever one the model asks for
+TOOL_MAP = {t.name: t for t in tools}
+
+MAX_STEPS = 8   # safety net: stop if the model keeps calling tools forever
+
+
+# ── Simple agent loop ─────────────────────────────────────────────────────────
+def run_agent(user_question: str) -&gt; str:
+    """Run the tool-calling loop until the model gives a final answer."""
+    messages = [HumanMessage(content=user_question)]
+
+    for _ in range(MAX_STEPS):
+        response = llm.invoke(messages)   # model reads everything so far
+        messages.append(response)
+
+        # No tool calls → the model is done, this is the final answer
+        if not response.tool_calls:
+            return response.text
+
+        # Otherwise run every tool the model asked for and send results back
+        for tc in response.tool_calls:
+            fn = TOOL_MAP[tc["name"]]
+            result = fn.invoke(tc["args"])
+            print(f"  [tool] {tc['name']}({tc['args']}) → {result}")
+            messages.append(ToolMessage(
+                content=json.dumps(result),
+                tool_call_id=tc["id"],    # tells the model which call this answers
+            ))
+
+    return "Stopped: too many tool calls without a final answer."
+
+
+# ── Try it ────────────────────────────────────────────────────────────────────
+questions = [
+    "We are 4 friends going to Goa for 3 nights. How much will the stay cost each of us?",
+    "Can 3 friends do Manali for 4 nights with ₹20,000 each? Show the total per person.",
+    "Calculate the trip cost per person: travel ₹1,200, stay share ₹2,400, daily spend ₹900 for 2 nights.",
+]
+
+for q in questions:
+    print(f"\nQ: {q}")
+    answer = run_agent(q)
+    print(f"A: {answer}")</code></pre></div>
+    </details>
+  </div>
+  <div class="box analogy"><span class="tag">🧠 Ordering at a counter</span>
+    <p>The model never touches the kitchen. It writes an order slip, <em>"calculate_stay_share, 2500, 4 nights, 3 people"</em>; Python cooks it and sends the plate back with the slip number (<code>tool_call_id</code>). The model can order again, as many times as it needs, until it's ready to talk to the table. That is the whole agent loop, in about 20 lines.</p>
+  </div>
+  <div class="box warn"><span class="tag">⚠️ Two safety nets in the loop</span>
+    <p><code>MAX_STEPS = 8</code> stops a model that keeps calling tools forever. <code>lookup_place</code> returns <code>{"error": "... not found"}</code> instead of raising, so a question about Paris gets an honest "I don't have prices for that" instead of a crash. Tools should fail with a message the model can read.</p>
+  </div>
+</section>
+
+<hr class="sec">
+<section id="o">
+  <p class="kicker">Own it</p>
+  <h2>Your project</h2>
+
+  <!-- T10 -->
+  <h3 id="t-project"><span class="num">T10</span>Milestones, stretch goals and rubric</h3>
+  <div class="tw"><table class="tbl">
+    <tr><th>Milestone</th><th>Build</th><th>Done when…</th><th class="num">Time</th></tr>
+    <tr><td><b>M0 · Data</b></td><td>project set up, script 01</td><td>the JOIN table prints 3 places, and "PARIS" returns <code>None</code></td><td class="num">20 min</td></tr>
+    <tr><td><b>M1 · Meaning</b></td><td>scripts 02 and 03</td><td>the mountains question finds the hills tip; the money search returns only money tips</td><td class="num">40 min</td></tr>
+    <tr><td><b>M2 · Planner</b></td><td>script 04</td><td>you've caught at least one run where the LLM's Manali number is not 20866.67</td><td class="num">30 min</td></tr>
+    <tr><td><b>M3 · Grounded</b></td><td>script 05</td><td>the RAG answer warns about July rain and landslides; you can say which tip it came from</td><td class="num">30 min</td></tr>
+    <tr><td><b>M4 · Trip Buddy v1</b></td><td>join 01 + 03 + 06 into one agent</td><td><code>lookup_place</code> reads SQLite, a new <code>get_travel_tips</code> tool wraps <code>retrieve()</code>, and one question returns the exact cost <em>and</em> the monsoon warning</td><td class="num">2 h</td></tr>
+  </table></div>
+  <h4>Stretch goals (pick two)</h4>
+  <ol class="walk">
+    <li><strong>S1 · Port it to AWS</strong>: swap <code>ChatOpenAI</code> for Strands' <code>BedrockModel</code> and the hand-written loop for <code>Agent(model, tools=[...])</code>, as in <a href="../your-first-agent/">Lesson 1</a>. Compare the tool trail.</li>
+    <li><strong>S2 · A budget check tool</strong>: <code>check_budget(cost, budget)</code> returns over or under, by how much, and the 10% buffer from the notebook. The agent must never say "fits" when the tool says "over".</li>
+    <li><strong>S3 · Keep the notebook</strong>: use <code>chromadb.PersistentClient(path=...)</code> and a SQLite file instead of <code>:memory:</code>, so tips and prices survive a restart.</li>
+    <li><strong>S4 · Grow the data</strong>: add Ooty, Gokarna and Rishikesh to both tables, and two tips of your own, then ask about each one.</li>
+    <li><strong>S5 · Remember the group</strong>: add long-term memory (<a href="../Agents-that-remember/">Lesson 3</a>), so "we're vegetarian and hate long bus rides" shapes every later plan.</li>
+    <li><strong>S6 · Test the maths</strong>: plain <code>assert</code>s on the two calculators (Goa 11800, Manali 20866.67, 1 friend still needs 1 room) that run without an LLM.</li>
+  </ol>
+  <h4>Rubric (100 points)</h4>
+  <div class="tw"><table class="tbl">
+    <tr><th>Criterion</th><th>What earns full marks</th><th class="num">Points</th></tr>
+    <tr><td>Correct numbers</td><td>every cost comes from a tool; rooms always rounded up; matches the calculator above</td><td class="num">25</td></tr>
+    <tr><td>Grounded advice</td><td>season and packing advice comes from retrieved tips, and the answer shows which ones</td><td class="num">20</td></tr>
+    <tr><td>Retrieval quality</td><td>the right shelf (<code>where</code>) for the question; sensible <code>n</code></td><td class="num">15</td></tr>
+    <tr><td>Agent design</td><td>clear tool docstrings, tools that return errors instead of crashing, a step limit</td><td class="num">15</td></tr>
+    <tr><td>Honest answers</td><td>says "over budget" when it is, and "I don't have prices for that" for unknown places</td><td class="num">15</td></tr>
+    <tr><td>Code quality</td><td>commented, small functions, the maths testable without an LLM</td><td class="num">10</td></tr>
+  </table></div>
+</section>
+
+<hr class="sec">
+<section id="wrap">
+  <p class="kicker">Wrap-up</p>
+  <h2>What to remember</h2>
+  <ol class="walk">
+    <li><strong>A database holds the facts.</strong> Two tables and a <code>JOIN</code>; <code>?</code> placeholders keep lookups safe.</li>
+    <li><strong>Embeddings turn meaning into numbers.</strong> Unit-length vectors make the dot product the cosine similarity.</li>
+    <li><strong>A vector database is a library with shelves.</strong> Search by meaning, filter by metadata; <code>retrieve()</code> is the heart of RAG.</li>
+    <li><strong>RAG = retrieve → augment → generate.</strong> The context is just text pasted into the prompt, and it makes the answer specific.</li>
+    <li><strong>LLMs are bad calculators.</strong> 3 friends need 2 rooms. Give the model tools and let Python do the maths.</li>
+    <li><strong>The agent loop is small.</strong> Ask, run the requested tools, send the results back, repeat until there are no tool calls.</li>
+  </ol>
+
+  <div class="lk-quiz">
+    <h4 class="lk-quiz-title">Check your understanding</h4>
+    <div class="lk-q">
+      <p class="lk-stem">4 friends, 3 nights, room ₹3,000 a night. What is each friend's stay share?</p>
+      <ol class="lk-opts">
+        <li>₹2,250<div class="lk-why">That is one room's cost split four ways: 3,000 × 3 ÷ 4. Four friends need two rooms.</div></li>
+        <li data-correct>₹4,500<div class="lk-why">Rooms = 4 ÷ 2 = 2. Stay share = 2 × 3,000 × 3 ÷ 4 = ₹4,500.</div></li>
+        <li>₹9,000<div class="lk-why">That is the cost of one room for three nights, not one friend's share.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">Why does script 02 use <code>normalize_embeddings=True</code>?</p>
+      <ol class="lk-opts">
+        <li>It makes the model download smaller<div class="lk-why">The model is the same size either way. Normalising only changes the vectors it returns.</div></li>
+        <li data-correct>Every vector gets length 1, so a plain dot product equals the cosine similarity<div class="lk-why">With unit vectors, <code>passage_vectors @ qv</code> gives the cosine score directly, with no extra division.</div></li>
+        <li>It turns 384 numbers into 1 number<div class="lk-why">Each sentence still has 384 numbers. Only their overall length changes.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">In script 03, what does <code>where={"topic": "money"}</code> do?</p>
+      <ol class="lk-opts">
+        <li>It adds the word "money" to the search query<div class="lk-why">The query text is unchanged. <code>where</code> filters on the metadata label.</div></li>
+        <li>It sorts the results by price<div class="lk-why">Chroma still ranks by meaning. <code>where</code> only decides which documents are allowed.</div></li>
+        <li data-correct>It only searches tips whose label is money, then ranks those by meaning<div class="lk-why">That's the "shelf" in the library: a metadata filter applied before similarity ranking.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What is the only difference between <code>bare_chain</code> and <code>rag_chain</code> in script 05?</p>
+      <ol class="lk-opts">
+        <li data-correct>The RAG prompt has a <code>{rag_context}</code> placeholder filled with the retrieved tips<div class="lk-why">Same model, same parser, same trip. The retrieved text pasted into the system message is the whole difference.</div></li>
+        <li>The RAG chain uses a bigger model<div class="lk-why">Both chains share the same <code>llm</code>. The improvement comes from the context, not the model.</div></li>
+        <li>The RAG chain was fine-tuned on the travel notebook<div class="lk-why">Nothing is trained. RAG adds knowledge at question time by putting it in the prompt.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">In script 06, when does <code>run_agent</code> return the final answer?</p>
+      <ol class="lk-opts">
+        <li>After every tool has been called once<div class="lk-why">The model may call some tools several times and others not at all. Calling every tool is not the stop rule.</div></li>
+        <li data-correct>When the model's response has no tool calls<div class="lk-why">No tool calls means the model is done. Its text becomes the answer. <code>MAX_STEPS</code> is only the safety net.</div></li>
+        <li>When <code>calculate_trip_cost</code> returns a number<div class="lk-why">The result goes back to the model as a ToolMessage. The model decides whether to call more tools or answer.</div></li>
+      </ol>
+    </div>
+  </div>
+  <div class="box skip"><span class="tag">Disclaimer</span><p>Places, guesthouses and prices are illustrative, made up for learning. Check real weather, prices and travel advice before you book.</p></div>
+</section>
+<!-- awsq:bottom -->
+<nav class="awsq awsq-bottom" aria-label="Bootcamp navigation (bottom)"><div class="awsq-box"><div class="awsq-head"><span class="awsq-cap">Scaler AWS AI Bootcamp · Week 2 · Project 1 of 1</span><a class="aih" href="../../" title="Back to the AI-Infusion home page">⌂ AI-Infusion</a></div><div class="awsq-row"><a class="awsq-l awsq-prev" href="../finance-nps-project/"><span class="awsq-d">← Previous</span><span class="awsq-t">Week 1 · Project 2 · NPS analyst in a box</span></a><a class="awsq-home" href="../week-2/"><b>Scaler AWS AI Bootcamp</b>Week 2 · all projects</a><span class="awsq-l awsq-next"><span class="awsq-d">Next →</span><span class="awsq-t">More projects · coming soon</span></span></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="cur" href="../trip-buddy/" title="Project 1 · Trip Buddy" aria-current="page">P1</a></li></ol><div class="awsq-files"><b>Project files</b><span class="awsq-fb" data-todo="github">&lt;/&gt; Browse the code<small>GitHub link coming soon</small></span><a class="awsq-fb" href="../../zips/trip-buddy.zip" download>⬇ Download all<small>.zip</small></a></div></div></nav>
+<!-- /awsq:bottom -->
+</main>
+</div>
+<footer>
+  <strong>Trip Buddy</strong> · Scaler AWS AI Bootcamp · Week 2 · Project 1<br>
+  Illustrative data, for learning only. LLM wording varies run to run; the numbers come from code.
+</footer>
+
+<script>
+var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(e){var n=/(?:^|\s)lang(?:uage)?-([\w-]+)(?=\s|$)/i,t=0,r={},a={manual:e.Prism&&e.Prism.manual,disableWorkerMessageHandler:e.Prism&&e.Prism.disableWorkerMessageHandler,util:{encode:function e(n){return n instanceof i?new i(n.type,e(n.content),n.alias):Array.isArray(n)?n.map(e):n.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).slice(8,-1)},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function e(n,t){var r,i;switch(t=t||{},a.util.type(n)){case"Object":if(i=a.util.objId(n),t[i])return t[i];for(var l in r={},t[i]=r,n)n.hasOwnProperty(l)&&(r[l]=e(n[l],t));return r;case"Array":return i=a.util.objId(n),t[i]?t[i]:(r=[],t[i]=r,n.forEach((function(n,a){r[a]=e(n,t)})),r);default:return n}},getLanguage:function(e){for(;e;){var t=n.exec(e.className);if(t)return t[1].toLowerCase();e=e.parentElement}return"none"},setLanguage:function(e,t){e.className=e.className.replace(RegExp(n,"gi"),""),e.classList.add("language-"+t)},currentScript:function(){if("undefined"==typeof document)return null;if("currentScript"in document)return document.currentScript;try{throw new Error}catch(r){var e=(/at [^(\r\n]*\((.*):[^:]+:[^:]+\)$/i.exec(r.stack)||[])[1];if(e){var n=document.getElementsByTagName("script");for(var t in n)if(n[t].src==e)return n[t]}return null}},isActive:function(e,n,t){for(var r="no-"+n;e;){var a=e.classList;if(a.contains(n))return!0;if(a.contains(r))return!1;e=e.parentElement}return!!t}},languages:{plain:r,plaintext:r,text:r,txt:r,extend:function(e,n){var t=a.util.clone(a.languages[e]);for(var r in n)t[r]=n[r];return t},insertBefore:function(e,n,t,r){var i=(r=r||a.languages)[e],l={};for(var o in i)if(i.hasOwnProperty(o)){if(o==n)for(var s in t)t.hasOwnProperty(s)&&(l[s]=t[s]);t.hasOwnProperty(o)||(l[o]=i[o])}var u=r[e];return r[e]=l,a.languages.DFS(a.languages,(function(n,t){t===u&&n!=e&&(this[n]=l)})),l},DFS:function e(n,t,r,i){i=i||{};var l=a.util.objId;for(var o in n)if(n.hasOwnProperty(o)){t.call(n,o,n[o],r||o);var s=n[o],u=a.util.type(s);"Object"!==u||i[l(s)]?"Array"!==u||i[l(s)]||(i[l(s)]=!0,e(s,t,o,i)):(i[l(s)]=!0,e(s,t,null,i))}}},plugins:{},highlightAll:function(e,n){a.highlightAllUnder(document,e,n)},highlightAllUnder:function(e,n,t){var r={callback:t,container:e,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};a.hooks.run("before-highlightall",r),r.elements=Array.prototype.slice.apply(r.container.querySelectorAll(r.selector)),a.hooks.run("before-all-elements-highlight",r);for(var i,l=0;i=r.elements[l++];)a.highlightElement(i,!0===n,r.callback)},highlightElement:function(n,t,r){var i=a.util.getLanguage(n),l=a.languages[i];a.util.setLanguage(n,i);var o=n.parentElement;o&&"pre"===o.nodeName.toLowerCase()&&a.util.setLanguage(o,i);var s={element:n,language:i,grammar:l,code:n.textContent};function u(e){s.highlightedCode=e,a.hooks.run("before-insert",s),s.element.innerHTML=s.highlightedCode,a.hooks.run("after-highlight",s),a.hooks.run("complete",s),r&&r.call(s.element)}if(a.hooks.run("before-sanity-check",s),(o=s.element.parentElement)&&"pre"===o.nodeName.toLowerCase()&&!o.hasAttribute("tabindex")&&o.setAttribute("tabindex","0"),!s.code)return a.hooks.run("complete",s),void(r&&r.call(s.element));if(a.hooks.run("before-highlight",s),s.grammar)if(t&&e.Worker){var c=new Worker(a.filename);c.onmessage=function(e){u(e.data)},c.postMessage(JSON.stringify({language:s.language,code:s.code,immediateClose:!0}))}else u(a.highlight(s.code,s.grammar,s.language));else u(a.util.encode(s.code))},highlight:function(e,n,t){var r={code:e,grammar:n,language:t};if(a.hooks.run("before-tokenize",r),!r.grammar)throw new Error('The language "'+r.language+'" has no grammar.');return r.tokens=a.tokenize(r.code,r.grammar),a.hooks.run("after-tokenize",r),i.stringify(a.util.encode(r.tokens),r.language)},tokenize:function(e,n){var t=n.rest;if(t){for(var r in t)n[r]=t[r];delete n.rest}var a=new s;return u(a,a.head,e),o(e,a,n,a.head,0),function(e){for(var n=[],t=e.head.next;t!==e.tail;)n.push(t.value),t=t.next;return n}(a)},hooks:{all:{},add:function(e,n){var t=a.hooks.all;t[e]=t[e]||[],t[e].push(n)},run:function(e,n){var t=a.hooks.all[e];if(t&&t.length)for(var r,i=0;r=t[i++];)r(n)}},Token:i};function i(e,n,t,r){this.type=e,this.content=n,this.alias=t,this.length=0|(r||"").length}function l(e,n,t,r){e.lastIndex=n;var a=e.exec(t);if(a&&r&&a[1]){var i=a[1].length;a.index+=i,a[0]=a[0].slice(i)}return a}function o(e,n,t,r,s,g){for(var f in t)if(t.hasOwnProperty(f)&&t[f]){var h=t[f];h=Array.isArray(h)?h:[h];for(var d=0;d<h.length;++d){if(g&&g.cause==f+","+d)return;var v=h[d],p=v.inside,m=!!v.lookbehind,y=!!v.greedy,k=v.alias;if(y&&!v.pattern.global){var x=v.pattern.toString().match(/[imsuy]*$/)[0];v.pattern=RegExp(v.pattern.source,x+"g")}for(var b=v.pattern||v,w=r.next,A=s;w!==n.tail&&!(g&&A>=g.reach);A+=w.value.length,w=w.next){var E=w.value;if(n.length>e.length)return;if(!(E instanceof i)){var P,L=1;if(y){if(!(P=l(b,A,e,m))||P.index>=e.length)break;var S=P.index,O=P.index+P[0].length,j=A;for(j+=w.value.length;S>=j;)j+=(w=w.next).value.length;if(A=j-=w.value.length,w.value instanceof i)continue;for(var C=w;C!==n.tail&&(j<O||"string"==typeof C.value);C=C.next)L++,j+=C.value.length;L--,E=e.slice(A,j),P.index-=A}else if(!(P=l(b,0,E,m)))continue;S=P.index;var N=P[0],_=E.slice(0,S),M=E.slice(S+N.length),W=A+E.length;g&&W>g.reach&&(g.reach=W);var z=w.prev;if(_&&(z=u(n,z,_),A+=_.length),c(n,z,L),w=u(n,z,new i(f,p?a.tokenize(N,p):N,k,N)),M&&u(n,w,M),L>1){var I={cause:f+","+d,reach:W};o(e,n,t,w.prev,A,I),g&&I.reach>g.reach&&(g.reach=I.reach)}}}}}}function s(){var e={value:null,prev:null,next:null},n={value:null,prev:e,next:null};e.next=n,this.head=e,this.tail=n,this.length=0}function u(e,n,t){var r=n.next,a={value:t,prev:n,next:r};return n.next=a,r.prev=a,e.length++,a}function c(e,n,t){for(var r=n.next,a=0;a<t&&r!==e.tail;a++)r=r.next;n.next=r,r.prev=n,e.length-=a}if(e.Prism=a,i.stringify=function e(n,t){if("string"==typeof n)return n;if(Array.isArray(n)){var r="";return n.forEach((function(n){r+=e(n,t)})),r}var i={type:n.type,content:e(n.content,t),tag:"span",classes:["token",n.type],attributes:{},language:t},l=n.alias;l&&(Array.isArray(l)?Array.prototype.push.apply(i.classes,l):i.classes.push(l)),a.hooks.run("wrap",i);var o="";for(var s in i.attributes)o+=" "+s+'="'+(i.attributes[s]||"").replace(/"/g,"&quot;")+'"';return"<"+i.tag+' class="'+i.classes.join(" ")+'"'+o+">"+i.content+"</"+i.tag+">"},!e.document)return e.addEventListener?(a.disableWorkerMessageHandler||e.addEventListener("message",(function(n){var t=JSON.parse(n.data),r=t.language,i=t.code,l=t.immediateClose;e.postMessage(a.highlight(i,a.languages[r],r)),l&&e.close()}),!1),a):a;var g=a.util.currentScript();function f(){a.manual||a.highlightAll()}if(g&&(a.filename=g.src,g.hasAttribute("data-manual")&&(a.manual=!0)),!a.manual){var h=document.readyState;"loading"===h||"interactive"===h&&g&&g.defer?document.addEventListener("DOMContentLoaded",f):window.requestAnimationFrame?window.requestAnimationFrame(f):window.setTimeout(f,16)}return a}(_self);"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism);
+Prism.languages.python={comment:{pattern:/(^|[^\\])#.*/,lookbehind:!0,greedy:!0},"string-interpolation":{pattern:/(?:f|fr|rf)(?:("""|''')[\s\S]*?\1|("|')(?:\\.|(?!\2)[^\\\r\n])*\2)/i,greedy:!0,inside:{interpolation:{pattern:/((?:^|[^{])(?:\{\{)*)\{(?!\{)(?:[^{}]|\{(?!\{)(?:[^{}]|\{(?!\{)(?:[^{}])+\})+\})+\}/,lookbehind:!0,inside:{"format-spec":{pattern:/(:)[^:(){}]+(?=\}$)/,lookbehind:!0},"conversion-option":{pattern:/![sra](?=[:}]$)/,alias:"punctuation"},rest:null}},string:/[\s\S]+/}},"triple-quoted-string":{pattern:/(?:[rub]|br|rb)?("""|''')[\s\S]*?\1/i,greedy:!0,alias:"string"},string:{pattern:/(?:[rub]|br|rb)?("|')(?:\\.|(?!\1)[^\\\r\n])*\1/i,greedy:!0},function:{pattern:/((?:^|\s)def[ \t]+)[a-zA-Z_]\w*(?=\s*\()/g,lookbehind:!0},"class-name":{pattern:/(\bclass\s+)\w+/i,lookbehind:!0},decorator:{pattern:/(^[\t ]*)@\w+(?:\.\w+)*/m,lookbehind:!0,alias:["annotation","punctuation"],inside:{punctuation:/\./}},keyword:/\b(?:_(?=\s*:)|and|as|assert|async|await|break|case|class|continue|def|del|elif|else|except|exec|finally|for|from|global|if|import|in|is|lambda|match|nonlocal|not|or|pass|print|raise|return|try|while|with|yield)\b/,builtin:/\b(?:__import__|abs|all|any|apply|ascii|basestring|bin|bool|buffer|bytearray|bytes|callable|chr|classmethod|cmp|coerce|compile|complex|delattr|dict|dir|divmod|enumerate|eval|execfile|file|filter|float|format|frozenset|getattr|globals|hasattr|hash|help|hex|id|input|int|intern|isinstance|issubclass|iter|len|list|locals|long|map|max|memoryview|min|next|object|oct|open|ord|pow|property|range|raw_input|reduce|reload|repr|reversed|round|set|setattr|slice|sorted|staticmethod|str|sum|super|tuple|type|unichr|unicode|vars|xrange|zip)\b/,boolean:/\b(?:False|None|True)\b/,number:/\b0(?:b(?:_?[01])+|o(?:_?[0-7])+|x(?:_?[a-f0-9])+)\b|(?:\b\d+(?:_\d+)*(?:\.(?:\d+(?:_\d+)*)?)?|\B\.\d+(?:_\d+)*)(?:e[+-]?\d+(?:_\d+)*)?j?(?!\w)/i,operator:/[-+%=]=?|!=|:=|\*\*?=?|\/\/?=?|<[<=>]?|>[=>]?|[&|^~]/,punctuation:/[{}[\];(),.:]/},Prism.languages.python["string-interpolation"].inside.interpolation.inside.rest=Prism.languages.python,Prism.languages.py=Prism.languages.python;
+Prism.languages.json={property:{pattern:/(^|[^\\])"(?:\\.|[^\\"\r\n])*"(?=\s*:)/,lookbehind:!0,greedy:!0},string:{pattern:/(^|[^\\])"(?:\\.|[^\\"\r\n])*"(?!\s*:)/,lookbehind:!0,greedy:!0},comment:{pattern:/\/\/.*|\/\*[\s\S]*?(?:\*\/|$)/,greedy:!0},number:/-?\b\d+(?:\.\d+)?(?:e[+-]?\d+)?\b/i,punctuation:/[{}[\],]/,operator:/:/,boolean:/\b(?:false|true)\b/,null:{pattern:/\bnull\b/,alias:"keyword"}},Prism.languages.webmanifest=Prism.languages.json;
+!function(e){var t="\\b(?:BASH|BASHOPTS|BASH_ALIASES|BASH_ARGC|BASH_ARGV|BASH_CMDS|BASH_COMPLETION_COMPAT_DIR|BASH_LINENO|BASH_REMATCH|BASH_SOURCE|BASH_VERSINFO|BASH_VERSION|COLORTERM|COLUMNS|COMP_WORDBREAKS|DBUS_SESSION_BUS_ADDRESS|DEFAULTS_PATH|DESKTOP_SESSION|DIRSTACK|DISPLAY|EUID|GDMSESSION|GDM_LANG|GNOME_KEYRING_CONTROL|GNOME_KEYRING_PID|GPG_AGENT_INFO|GROUPS|HISTCONTROL|HISTFILE|HISTFILESIZE|HISTSIZE|HOME|HOSTNAME|HOSTTYPE|IFS|INSTANCE|JOB|LANG|LANGUAGE|LC_ADDRESS|LC_ALL|LC_IDENTIFICATION|LC_MEASUREMENT|LC_MONETARY|LC_NAME|LC_NUMERIC|LC_PAPER|LC_TELEPHONE|LC_TIME|LESSCLOSE|LESSOPEN|LINES|LOGNAME|LS_COLORS|MACHTYPE|MAILCHECK|MANDATORY_PATH|NO_AT_BRIDGE|OLDPWD|OPTERR|OPTIND|ORBIT_SOCKETDIR|OSTYPE|PAPERSIZE|PATH|PIPESTATUS|PPID|PS1|PS2|PS3|PS4|PWD|RANDOM|REPLY|SECONDS|SELINUX_INIT|SESSION|SESSIONTYPE|SESSION_MANAGER|SHELL|SHELLOPTS|SHLVL|SSH_AUTH_SOCK|TERM|UID|UPSTART_EVENTS|UPSTART_INSTANCE|UPSTART_JOB|UPSTART_SESSION|USER|WINDOWID|XAUTHORITY|XDG_CONFIG_DIRS|XDG_CURRENT_DESKTOP|XDG_DATA_DIRS|XDG_GREETER_DATA_DIR|XDG_MENU_PREFIX|XDG_RUNTIME_DIR|XDG_SEAT|XDG_SEAT_PATH|XDG_SESSION_DESKTOP|XDG_SESSION_ID|XDG_SESSION_PATH|XDG_SESSION_TYPE|XDG_VTNR|XMODIFIERS)\\b",a={pattern:/(^(["']?)\w+\2)[ \t]+\S.*/,lookbehind:!0,alias:"punctuation",inside:null},n={bash:a,environment:{pattern:RegExp("\\$"+t),alias:"constant"},variable:[{pattern:/\$?\(\([\s\S]+?\)\)/,greedy:!0,inside:{variable:[{pattern:/(^\$\(\([\s\S]+)\)\)/,lookbehind:!0},/^\$\(\(/],number:/\b0x[\dA-Fa-f]+\b|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:[Ee]-?\d+)?/,operator:/--|\+\+|\*\*=?|<<=?|>>=?|&&|\|\||[=!+\-*/%<>^&|]=?|[?~:]/,punctuation:/\(\(?|\)\)?|,|;/}},{pattern:/\$\((?:\([^)]+\)|[^()])+\)|`[^`]+`/,greedy:!0,inside:{variable:/^\$\(|^`|\)$|`$/}},{pattern:/\$\{[^}]+\}/,greedy:!0,inside:{operator:/:[-=?+]?|[!\/]|##?|%%?|\^\^?|,,?/,punctuation:/[\[\]]/,environment:{pattern:RegExp("(\\{)"+t),lookbehind:!0,alias:"constant"}}},/\$(?:\w+|[#?*!@$])/],entity:/\\(?:[abceEfnrtv\\"]|O?[0-7]{1,3}|U[0-9a-fA-F]{8}|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{1,2})/};e.languages.bash={shebang:{pattern:/^#!\s*\/.*/,alias:"important"},comment:{pattern:/(^|[^"{\\$])#.*/,lookbehind:!0},"function-name":[{pattern:/(\bfunction\s+)[\w-]+(?=(?:\s*\(?:\s*\))?\s*\{)/,lookbehind:!0,alias:"function"},{pattern:/\b[\w-]+(?=\s*\(\s*\)\s*\{)/,alias:"function"}],"for-or-select":{pattern:/(\b(?:for|select)\s+)\w+(?=\s+in\s)/,alias:"variable",lookbehind:!0},"assign-left":{pattern:/(^|[\s;|&]|[<>]\()\w+(?:\.\w+)*(?=\+?=)/,inside:{environment:{pattern:RegExp("(^|[\\s;|&]|[<>]\\()"+t),lookbehind:!0,alias:"constant"}},alias:"variable",lookbehind:!0},parameter:{pattern:/(^|\s)-{1,2}(?:\w+:[+-]?)?\w+(?:\.\w+)*(?=[=\s]|$)/,alias:"variable",lookbehind:!0},string:[{pattern:/((?:^|[^<])<<-?\s*)(\w+)\s[\s\S]*?(?:\r?\n|\r)\2/,lookbehind:!0,greedy:!0,inside:n},{pattern:/((?:^|[^<])<<-?\s*)(["'])(\w+)\2\s[\s\S]*?(?:\r?\n|\r)\3/,lookbehind:!0,greedy:!0,inside:{bash:a}},{pattern:/(^|[^\\](?:\\\\)*)"(?:\\[\s\S]|\$\([^)]+\)|\$(?!\()|`[^`]+`|[^"\\`$])*"/,lookbehind:!0,greedy:!0,inside:n},{pattern:/(^|[^$\\])'[^']*'/,lookbehind:!0,greedy:!0},{pattern:/\$'(?:[^'\\]|\\[\s\S])*'/,greedy:!0,inside:{entity:n.entity}}],environment:{pattern:RegExp("\\$?"+t),alias:"constant"},variable:n.variable,function:{pattern:/(^|[\s;|&]|[<>]\()(?:add|apropos|apt|apt-cache|apt-get|aptitude|aspell|automysqlbackup|awk|basename|bash|bc|bconsole|bg|bzip2|cal|cargo|cat|cfdisk|chgrp|chkconfig|chmod|chown|chroot|cksum|clear|cmp|column|comm|composer|cp|cron|crontab|csplit|curl|cut|date|dc|dd|ddrescue|debootstrap|df|diff|diff3|dig|dir|dircolors|dirname|dirs|dmesg|docker|docker-compose|du|egrep|eject|env|ethtool|expand|expect|expr|fdformat|fdisk|fg|fgrep|file|find|fmt|fold|format|free|fsck|ftp|fuser|gawk|git|gparted|grep|groupadd|groupdel|groupmod|groups|grub-mkconfig|gzip|halt|head|hg|history|host|hostname|htop|iconv|id|ifconfig|ifdown|ifup|import|install|ip|java|jobs|join|kill|killall|less|link|ln|locate|logname|logrotate|look|lpc|lpr|lprint|lprintd|lprintq|lprm|ls|lsof|lynx|make|man|mc|mdadm|mkconfig|mkdir|mke2fs|mkfifo|mkfs|mkisofs|mknod|mkswap|mmv|more|most|mount|mtools|mtr|mutt|mv|nano|nc|netstat|nice|nl|node|nohup|notify-send|npm|nslookup|op|open|parted|passwd|paste|pathchk|ping|pkill|pnpm|podman|podman-compose|popd|pr|printcap|printenv|ps|pushd|pv|quota|quotacheck|quotactl|ram|rar|rcp|reboot|remsync|rename|renice|rev|rm|rmdir|rpm|rsync|scp|screen|sdiff|sed|sendmail|seq|service|sftp|sh|shellcheck|shuf|shutdown|sleep|slocate|sort|split|ssh|stat|strace|su|sudo|sum|suspend|swapon|sync|sysctl|tac|tail|tar|tee|time|timeout|top|touch|tr|traceroute|tsort|tty|umount|uname|unexpand|uniq|units|unrar|unshar|unzip|update-grub|uptime|useradd|userdel|usermod|users|uudecode|uuencode|v|vcpkg|vdir|vi|vim|virsh|vmstat|wait|watch|wc|wget|whereis|which|who|whoami|write|xargs|xdg-open|yarn|yes|zenity|zip|zsh|zypper)(?=$|[)\s;|&])/,lookbehind:!0},keyword:{pattern:/(^|[\s;|&]|[<>]\()(?:case|do|done|elif|else|esac|fi|for|function|if|in|select|then|until|while)(?=$|[)\s;|&])/,lookbehind:!0},builtin:{pattern:/(^|[\s;|&]|[<>]\()(?:\.|:|alias|bind|break|builtin|caller|cd|command|continue|declare|echo|enable|eval|exec|exit|export|getopts|hash|help|let|local|logout|mapfile|printf|pwd|read|readarray|readonly|return|set|shift|shopt|source|test|times|trap|type|typeset|ulimit|umask|unalias|unset)(?=$|[)\s;|&])/,lookbehind:!0,alias:"class-name"},boolean:{pattern:/(^|[\s;|&]|[<>]\()(?:false|true)(?=$|[)\s;|&])/,lookbehind:!0},"file-descriptor":{pattern:/\B&\d\b/,alias:"important"},operator:{pattern:/\d?<>|>\||\+=|=[=~]?|!=?|<<[<-]?|[&\d]?>>|\d[<>]&?|[<>][&=]?|&[>&]?|\|[&|]?/,inside:{"file-descriptor":{pattern:/^\d/,alias:"important"}}},punctuation:/\$?\(\(?|\)\)?|\.\.|[{}[\];\\]/,number:{pattern:/(^|\s)(?:[1-9]\d*|0)(?:[.,]\d+)?\b/,lookbehind:!0}},a.inside=e.languages.bash;for(var s=["comment","function-name","for-or-select","assign-left","parameter","string","environment","function","keyword","builtin","boolean","file-descriptor","operator","punctuation","number"],o=n.variable[1].inside,i=0;i<s.length;i++)o[s[i]]=e.languages.bash[s[i]];e.languages.sh=e.languages.bash,e.languages.shell=e.languages.bash}(Prism);
+</script>
+<script>
+
+(function () {
+  "use strict";
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  /* ---------- theme ---------- */
+  var root = document.documentElement;
+  $("#themeBtn").addEventListener("click", function () {
+    var cur = root.getAttribute("data-theme") || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = cur === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("fws-theme", next); } catch (e) {}
+  });
+
+  /* ---------- mobile contents ---------- */
+  var toc = $("#toc"), tocBtn = $("#tocBtn");
+  tocBtn.addEventListener("click", function () {
+    var open = toc.classList.toggle("open");
+    tocBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  $$("#toc a").forEach(function (a) { a.addEventListener("click", function () { toc.classList.remove("open"); tocBtn.setAttribute("aria-expanded", "false"); }); });
+
+  /* ---------- progress + active toc ---------- */
+  var bar = $("#progress");
+  window.addEventListener("scroll", function () {
+    var h = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = (h > 0 ? (scrollY / h) * 100 : 0) + "%";
+  }, { passive: true });
+  var links = $$("#toc a"), targets = links.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
+  function setActive() {
+    var y = scrollY + Math.min(260, innerHeight * 0.35), idx = 0;
+    targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top + scrollY <= y) idx = i; });
+    links.forEach(function (a, i) { a.classList.toggle("active", i === idx); });
+  }
+  window.addEventListener("scroll", setActive, { passive: true }); setActive();
+
+  /* ---------- copy buttons ---------- */
+  $$(".code").forEach(function (box) {
+    var head = $(".head", box), code = $("pre code", box);
+    if (!head || !code) return;
+    var sp = document.createElement("span"); sp.className = "sp"; head.appendChild(sp);
+    var b = document.createElement("button"); b.className = "copy"; b.type = "button"; b.textContent = "Copy";
+    b.addEventListener("click", function () {
+      var txt = code.textContent;
+      var done = function () { b.textContent = "Copied ✓"; setTimeout(function () { b.textContent = "Copy"; }, 1400); };
+      try {
+        navigator.clipboard.writeText(txt).then(done, function () { fallback(txt); done(); });
+      } catch (e) { fallback(txt); done(); }
+    });
+    head.appendChild(b);
+  });
+  function fallback(t) {
+    try { var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); } catch (e) {}
+  }
+
+  function inr(x) { return "₹" + (Math.round(x * 100) / 100).toLocaleString("en-IN", { maximumFractionDigits: 2 }); }
+
+  /* ---------- problem: trip calculator ---------- */
+  (function () {
+    var ids = ["people", "nights", "room", "travel", "daily", "budget"];
+    var el = {}; ids.forEach(function (k) { el[k] = document.getElementById("c-" + k); });
+    if (!el.people) return;
+    var TRIPS = {
+      goa: { people: 4, nights: 3, room: 3000, travel: 2800, daily: 1500, budget: 12000 },
+      manali: { people: 3, nights: 4, room: 2500, travel: 9000, daily: 1300, budget: 20000 }
+    };
+    var slip = false, slipBtn = $("#c-slip"), state = $("#c-state"), out = $("#c-out");
+    function v(k) { var n = parseFloat(el[k].value); return isNaN(n) || n < 0 ? 0 : n; }
+    function calc() {
+      var p = Math.max(1, Math.round(v("people"))), n = v("nights");
+      var rooms = slip ? p / 2 : Math.ceil(p / 2);
+      var stay = rooms * v("room") * n / p, food = v("daily") * n, total = v("travel") + stay + food;
+      var right = Math.ceil(p / 2) * v("room") * n / p + food + v("travel");
+      var b = v("budget"), over = total - b;
+      state.innerHTML =
+        '<div' + (slip && p % 2 ? ' class="chg"' : "") + ">Rooms needed<b>" + (Math.round(rooms * 100) / 100) + "</b></div>" +
+        "<div>Stay share<b>" + inr(stay) + "</b></div>" +
+        "<div>Food and fun<b>" + inr(food) + "</b></div>" +
+        '<div class="chg">Cost per person<b>' + inr(total) + "</b></div>";
+      var verdict = over > 0
+        ? '<span class="no">Over budget by ' + inr(over) + "</span>"
+        : '<span class="ok">Fits, with ' + inr(-over) + " to spare</span>";
+      var msg = "Rooms = " + p + " ÷ 2" + (slip ? " = " + (p / 2) + " <b>(not rounded up!)</b>" : ", rounded up = " + rooms) +
+        " · stay = " + (Math.round(rooms * 100) / 100) + " × " + inr(v("room")) + " × " + n + " ÷ " + p +
+        " · total = " + inr(v("travel")) + " + " + inr(stay) + " + " + inr(food) + " = <b>" + inr(total) + "</b> → " + verdict + ".";
+      if (slip && p % 2) msg += "<br>The correct answer is <b>" + inr(right) + "</b>" + (right > b && total <= b ? ": the slip turned an over-budget trip into one that looks affordable." : ".");
+      else if (slip) msg += "<br>With an even number of friends the slip does no harm. Try 3 or 5 friends.";
+      out.innerHTML = msg;
+      slipBtn.textContent = slip ? "Back to the correct maths (round rooms up)" : "Show the LLM's slip: forget to round rooms up";
+      slipBtn.classList.toggle("on", slip);
+    }
+    ids.forEach(function (k) { el[k].addEventListener("input", calc); });
+    slipBtn.addEventListener("click", function () { slip = !slip; calc(); });
+    $$("[data-trip]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var t = TRIPS[b.getAttribute("data-trip")];
+        ids.forEach(function (k) { el[k].value = t[k]; });
+        $$("[data-trip]").forEach(function (x) { x.classList.toggle("on", x === b); });
+        calc();
+      });
+    });
+    calc();
+  })();
+
+  /* ---------- T8: RAG pipeline ---------- */
+  (function () {
+    var out = $("#rag-out"); if (!out) return;
+    var TIPS = "- Hill trips (Coorg, Ooty, Manali): best March-June and October. Avoid July-August: heavy rain and landslides block hill roads.\n" +
+      "- Mountain weather changes fast: carry a rain jacket and warm layers even in summer.\n" +
+      "- Keep a 10% buffer on top of the total for surprises like a cab surge or a missed bus.";
+    var P = [
+      "<b>① Retrieve.</b> The trip becomes a search query, <code>\"Hills trip to Manali in July\"</code>. The notebook returns the three closest tips, typically:<pre class=\"val\" style=\"margin-top:8px;white-space:pre-wrap\">" + esc(TIPS) + "</pre>",
+      "<b>② Augment.</b> Those lines are pasted into the system message in place of <code>{rag_context}</code>. Nothing else changes: same model, same human message.<pre class=\"val\" style=\"margin-top:8px;white-space:pre-wrap\">" + esc("You are a trip planner for a group of friends. Give advice on this trip plan.\n\nRelevant travel tips:\n" + TIPS) + "</pre>",
+      "<b>③ Generate.</b> The LLM answers with the tips in front of it, so it can say <em>avoid July</em>, <em>landslides block hill roads</em>, <em>pack a rain jacket</em> and <em>keep a 10% buffer</em>, instead of general advice about Manali. The exact wording changes every run."
+    ];
+    var btns = $$("[data-rag]");
+    function show(i) {
+      btns.forEach(function (b, k) { b.classList.toggle("on", k === i); b.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+      out.innerHTML = P[i];
+    }
+    btns.forEach(function (b, k) { b.addEventListener("click", function () { show(k); }); });
+    show(0);
+  })();
+
+  /* ---------- T9: tool loop stepper ---------- */
+  (function () {
+    var el = $("#sim-loop"); if (!el) return;
+    var S = [
+      { t: "The question goes in", d: "<code>messages</code> holds one HumanMessage. The model also sees the menu of three tools from <code>bind_tools</code>.", lbl: "messages", pre: "[HumanMessage(\"Can 3 friends do Manali for 4 nights with ₹20,000 each? Show the total per person.\")]" },
+      { t: "The model asks for prices", d: "The reply has a tool call, so the loop runs <code>lookup_place</code> and appends a ToolMessage with the result.", lbl: "[tool] call → result", pre: "lookup_place({'place': 'Manali'})\n→ {'place': 'Manali', 'trip_type': 'Hills', 'room_price_per_night': 2500,\n   'travel_cost_per_person': 9000, 'daily_spend_per_person': 1300}" },
+      { t: "The model asks for the stay share", d: "It copies the room price from the last result. Python rounds the rooms up: 3 friends → 2 rooms.", lbl: "[tool] call → result", pre: "calculate_stay_share({'room_price_per_night': 2500, 'nights': 4, 'people': 3})\n→ {'rooms_needed': 2, 'stay_share': 6666.67}" },
+      { t: "The model asks for the total", d: "Again a tool, not mental maths: 9,000 + 6,666.67 + 1,300 × 4.", lbl: "[tool] call → result", pre: "calculate_trip_cost({'travel_cost_per_person': 9000, 'stay_share': 6666.67,\n                     'daily_spend_per_person': 1300, 'nights': 4})\n→ 20866.67" },
+      { t: "No more tool calls: the answer", d: "The reply has no tool calls, so <code>run_agent</code> returns its text. The numbers in it came from Python. (Wording varies run to run.)", lbl: "A:", pre: "Each friend pays about ₹20,866.67: travel ₹9,000, stay share ₹6,666.67\n(2 rooms for 3 people) and ₹5,200 for food and fun. That is ₹866.67 over\nthe ₹20,000 budget, so trim the daily spend or add a fourth friend." }
+    ];
+    var i = 0, panel = $(".panel", el), counter = $(".counter", el), dots = $(".dots", el);
+    var prev = $('[data-act="prev"]', el), next = $('[data-act="next"]', el);
+    dots.innerHTML = S.map(function () { return "<i></i>"; }).join("");
+    function show() {
+      var s = S[i];
+      panel.innerHTML = "<h5>" + esc(s.t) + "</h5><p style=\"margin:0\">" + s.d + "</p><div class=\"lbl\">" + esc(s.lbl) + "</div><pre>" + esc(s.pre) + "</pre>";
+      counter.textContent = "Step " + (i + 1) + " of " + S.length;
+      $$("i", dots).forEach(function (d, k) { d.classList.toggle("on", k <= i); });
+      prev.disabled = i === 0; next.disabled = i === S.length - 1;
+    }
+    prev.addEventListener("click", function () { if (i > 0) { i--; show(); } });
+    next.addEventListener("click", function () { if (i < S.length - 1) { i++; show(); } });
+    show();
+  })();
+
+  })();
+
+</script>
+</body>
+</html>

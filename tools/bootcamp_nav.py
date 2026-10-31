@@ -1,8 +1,8 @@
 """Rebuild the navigation, recordings and project-file links on every lesson page.
 
-- Scaler AWS AI Bootcamp pages (AWS-Bootcamp/<lesson>/): prev / next / Week 1 nav at
+- Scaler AWS AI Bootcamp pages (AWS-Bootcamp/<lesson>/): prev / next / week nav at
   the top and bottom, the AI-Infusion home button, the class recordings and the
-  Project files box. Also fills the recordings on AWS-Bootcamp/week-1/.
+  Project files box. Also fills the recordings on each AWS-Bootcamp/week-N/ page.
 - AI-Infusion pages (Learnings/*): the AI-Infusion home button, the class
   recordings and the Project files box in the existing lesson nav. Also fills
   the recordings list on AI-Infusion/.
@@ -17,8 +17,8 @@ import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
-# Week 1 lessons, in order: (folder, step label, kind, title)
-SEQ = [
+# Each week's lessons, in order: (folder, step label, kind, title)
+WEEK1 = [
     ("part-00-AWS-Revision", "0", "Part 00", "AWS Revision"),
     ("your-first-agent", "1", "Lesson 1", "Your first AI agent"),
     ("giving-agents-tools", "2", "Lesson 2", "Giving agents tools"),
@@ -29,16 +29,26 @@ SEQ = [
     ("finance-section-1", "P1", "Project 1", "AI agents in finance"),
     ("finance-nps-project", "P2", "Project 2", "NPS analyst in a box"),
 ]
-WEEK = "Week 1"
+WEEK2 = [
+    ("trip-buddy", "P1", "Project 1", "Trip Buddy"),
+]
+# (label, folder of the week page, lessons)
+WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2)]
+# Every page in order across the weeks: (folder, step, kind, title, week label, week folder)
+SEQ = [(*item, week, wdir) for week, wdir, items in WEEKS for item in items]
 
 _REC = "https://www.scaler.com/meetings/i/{}/archive"
 
-# Bootcamp Week 1 recordings: shown on the Week 1 page and on every Week 1 lesson.
-WEEK1_RECORDINGS = [
-    ("Week 1 · session 1", _REC.format("ai-bootcamp-1")),
-    ("Week 1 · session 2", _REC.format("ai-bootcamp-2")),
-]
-RECORDINGS = {folder: WEEK1_RECORDINGS for folder, *_ in SEQ}
+# Bootcamp recordings: shown on each week's page and on every lesson of that week.
+WEEK_RECORDINGS = {
+    "week-1": [
+        ("Week 1 · session 1", _REC.format("ai-bootcamp-1")),
+        ("Week 1 · session 2", _REC.format("ai-bootcamp-2")),
+    ],
+    # TODO(migration): add the Week 2 recordings once they are on Scaler.
+    "week-2": [],
+}
+RECORDINGS = {folder: WEEK_RECORDINGS[wdir] for folder, *_, wdir in SEQ}
 
 # AI-Infusion class recordings: (page, nav block) -> [(label, url)].
 # The "mid" block on the Class 9 page is where Lesson 10 starts.
@@ -71,6 +81,7 @@ ZIPS = {
     "giving-agents-tools": "giving-agents-tools-main.zip",
     "Agents-that-remember": "Agents-that-remember-main.zip",
     "How-agents-talk": "How-agents-talk-main.zip",
+    "trip-buddy": "trip-buddy.zip",
     "Class-1": "Class-1-AI-infusion.zip",
     "Class-2": "Class-2-AI-infusion.zip",
     "Class-3-4": "Class-3-4-AI-infusion.zip",
@@ -79,7 +90,7 @@ ZIPS = {
 }
 
 # Pages built on the finance template sit inside <main>, not the lesson .wrap.
-FINANCE = {"finance-section-1", "finance-nps-project"}
+FINANCE = {"finance-section-1", "finance-nps-project", "trip-buddy"}
 
 BRAND = "Scaler AWS AI Bootcamp"
 
@@ -199,24 +210,30 @@ def files_box(key, cls):
     return f'<div class="{cls}-files"><b>Project files</b>{browse}{download}</div>'
 
 
+def week_items(wdir):
+    return [s for s in SEQ if s[5] == wdir]
+
+
 def caption(i):
-    _, step, kind, _ = SEQ[i]
+    _, step, kind, _, week, wdir = SEQ[i]
     if step == "0":
-        return f"{BRAND} · {WEEK} · Revision"
+        return f"{BRAND} · {week} · Revision"
     if step.startswith("P"):
-        n = sum(1 for s in SEQ if s[1].startswith("P"))
-        return f"{BRAND} · {WEEK} · {kind} of {n}"
-    n = sum(1 for s in SEQ if s[1].isdigit() and s[1] != "0")
-    return f"{BRAND} · {WEEK} · {kind} of {n}"
+        n = sum(1 for s in week_items(wdir) if s[1].startswith("P"))
+        return f"{BRAND} · {week} · {kind} of {n}"
+    n = sum(1 for s in week_items(wdir) if s[1].isdigit() and s[1] != "0")
+    return f"{BRAND} · {week} · {kind} of {n}"
 
 
-def side(i, cls, label):
+def side(i, cur_week, cls, label):
     if i < 0 or i >= len(SEQ):
-        msg = "You're at the start" if cls == "awsq-prev" else "Week 2 · coming soon"
+        msg = "You're at the start" if cls == "awsq-prev" else "More projects · coming soon"
         return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">{msg}</span></span>'
-    folder, _, kind, title = SEQ[i]
+    folder, _, kind, title, week, _ = SEQ[i]
+    # name the week when prev / next crosses into another one
+    where = f"{e(week)} · " if week != cur_week else ""
     return (f'<a class="awsq-l {cls}" href="../{folder}/"><span class="awsq-d">{label}</span>'
-            f'<span class="awsq-t">{e(kind)} · {e(title)}</span></a>')
+            f'<span class="awsq-t">{where}{e(kind)} · {e(title)}</span></a>')
 
 
 def recordings(folder):
@@ -230,18 +247,21 @@ def recordings(folder):
 
 
 def nav(i, where):
-    folder = SEQ[i][0]
+    folder, *_, week, wdir = SEQ[i]
     steps = []
-    for j, (f, step, kind, title) in enumerate(SEQ):
+    for j, (f, step, kind, title, _, d) in enumerate(SEQ):
+        if d != wdir:
+            continue
         cls = "cur" if j == i else ("done" if j < i else "")
         cur = ' aria-current="page"' if j == i else ""
         steps.append(f'<li><a class="{cls}" href="../{f}/" title="{e(kind)} · {e(title)}"{cur}>{step}</a></li>')
     extra = " awsq-inmain" if folder in FINANCE and where == "top" else ""
+    every = "all projects" if all(s[1].startswith("P") for s in week_items(wdir)) else "all lessons"
     return (f'<nav class="awsq awsq-{where}{extra}" aria-label="Bootcamp navigation ({where})"><div class="awsq-box">'
             f'<div class="awsq-head"><span class="awsq-cap">{e(caption(i))}</span>{HOME_BTN}</div>'
-            f'<div class="awsq-row">{side(i - 1, "awsq-prev", "← Previous")}'
-            f'<a class="awsq-home" href="../week-1/"><b>{BRAND}</b>{WEEK} · all lessons</a>'
-            f'{side(i + 1, "awsq-next", "Next →")}</div>'
+            f'<div class="awsq-row">{side(i - 1, week, "awsq-prev", "← Previous")}'
+            f'<a class="awsq-home" href="../{wdir}/"><b>{BRAND}</b>{e(week)} · {every}</a>'
+            f'{side(i + 1, week, "awsq-next", "Next →")}</div>'
             f'<ol class="awsq-steps" aria-label="All lessons">{"".join(steps)}</ol>'
             f'{recordings(folder) if where == "top" else ""}{files_box(folder, "awsq")}</div></nav>')
 
@@ -320,16 +340,19 @@ def build_hubs():
     write(p, s)
     print("rec  ", p.relative_to(ROOT))
 
-    # Bootcamp Week 1 page: the week's recordings
-    p = ROOT / "AWS-Bootcamp" / "week-1" / "index.html"
-    s = p.read_text(encoding="utf-8")
-    links = "".join(f'<a href="{e(url)}" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>'
-                    f'<span>{e(label)}<small>Scaler recording · opens in a new tab</small></span></a>'
-                    for label, url in WEEK1_RECORDINGS)
-    block = f'<!-- recs:week1 --><div class="awsb-recs">{links}</div><!-- /recs:week1 -->'
-    s = re.sub(r"<!-- recs:week1 -->.*?<!-- /recs:week1 -->", lambda m: block, s, flags=re.S)
-    write(p, s)
-    print("rec  ", p.relative_to(ROOT))
+    # Bootcamp week pages: each week's recordings
+    for _, wdir, _ in WEEKS:
+        p = ROOT / "AWS-Bootcamp" / wdir / "index.html"
+        s = p.read_text(encoding="utf-8")
+        links = "".join(f'<a href="{e(url)}" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>'
+                        f'<span>{e(label)}<small>Scaler recording · opens in a new tab</small></span></a>'
+                        for label, url in WEEK_RECORDINGS[wdir])
+        tag = "recs:" + wdir.replace("-", "")
+        block = f'<!-- {tag} --><div class="awsb-recs">{links}</div><!-- /{tag} -->'
+        s, n = re.subn(rf"<!-- {tag} -->.*?<!-- /{tag} -->", lambda m: block, s, flags=re.S)
+        assert n == 1, p
+        write(p, s)
+        print("rec  ", p.relative_to(ROOT))
 
 
 if __name__ == "__main__":
