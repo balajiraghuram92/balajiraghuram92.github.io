@@ -68,6 +68,20 @@ LEARN_RECORDINGS = {
 }
 LEARN_RECORDINGS[("Class-10-AI-infusion/index.html", "top")] = LEARN_RECORDINGS[("Class-9-Ai-Infusion/index.html", "mid")]
 
+# AI-Infusion tab titles, named as in the lesson nav. Each page's tab reads "<this> · AI-Infusion".
+LEARN_TITLES = {
+    "Class-1-AI-infusion/index.html": "Lesson 1 · Build & ship your first AI app",
+    "Class-1-AI-infusion/simulators.html": "Lesson 1 · Interactive simulators",
+    "Class-2-AI-infusion/index.html": "Lesson 2 · LangChain & your first agent",
+    "Class-3-4-AI-infusion/index.html": "Lessons 3–4 · RAG: give your AI a library",
+    "Class-5-AI-infusion/index.html": "Lesson 5 · Dockerize everything",
+    "Class-6-AI-infusion/index.html": "Lesson 6 · AI agents on AWS",
+    "Class-7-AI-infusion/index.html": "Lesson 7 · The interview coach",
+    "Class-8-AI-infusion/index.html": "Lesson 8 · The shipment exception desk",
+    "Class-9-Ai-Infusion/index.html": "Lessons 9–10 · The Refund Bench",
+    "Class-10-AI-infusion/index.html": "Lesson 10 · Build & evaluate the bench",
+}
+
 # Project files. Keys are AWS-Bootcamp folders or Learnings folders.
 # TODO(migration): paste each GitHub repo URL (https://github.com/<owner>/<repo>).
 # An empty string shows "GitHub link coming soon"; see MIGRATION-TODO.md.
@@ -267,10 +281,17 @@ def nav(i, where):
             f'{recordings(folder) if where == "top" else ""}{files_box(folder, "awsq")}</div></nav>')
 
 
+def set_title(s, title):
+    """Every lesson's tab reads "<lesson> · <name> · <site>"."""
+    s, n = re.subn(r"<title>.*?</title>", lambda m: f"<title>{e(title)}</title>", s, count=1, flags=re.S)
+    assert n == 1
+    return s
+
+
 def build_aws():
-    for i, (folder, *_) in enumerate(SEQ):
+    for i, (folder, _, kind, title, week, _) in enumerate(SEQ):
         p = ROOT / "AWS-Bootcamp" / folder / "index.html"
-        s = p.read_text(encoding="utf-8")
+        s = set_title(p.read_text(encoding="utf-8"), f"{week} · {kind} · {title} · {BRAND}")
         top = f"<!-- awsq:top -->\n{AWSQ_STYLE}\n{nav(i, 'top')}\n<!-- /awsq:top -->\n"
         bottom = f"<!-- awsq:bottom -->\n{nav(i, 'bottom')}\n<!-- /awsq:bottom -->\n"
         s, n = re.subn(r"<!-- awsq:top -->.*?<!-- /awsq:top -->\n", lambda m: top, s, flags=re.S)
@@ -309,6 +330,7 @@ def build_learnings():
         s = re.sub(r"<!-- aqrec -->.*?<!-- /aqrec -->", "", s)
         s = re.sub(r"<!-- aqfiles -->.*?<!-- /aqfiles -->", "", s)
         rel = p.relative_to(ROOT / "Learnings").as_posix()
+        s = set_title(s, f"{LEARN_TITLES[rel]} · AI-Infusion")
         # Class-10 redirects to the Class 9 page, whose code it shares
         key = re.match(r"Class-([\d-]+)", rel).group(0).replace("Class-10", "Class-9")
         for where in ("top", "mid"):
