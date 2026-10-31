@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trip Buddy · Week 2 Project 1</title>
-<meta name="description" content="Scaler AWS AI Bootcamp, Week 2, Project 1: Trip Buddy, an AI trip planner for a group of friends. SQLite, embeddings, ChromaDB retrieval, an LLM chain, RAG and tool calling, in six small Python scripts with pseudo code and the full code.">
+<meta name="description" content="Scaler AWS AI Bootcamp, Week 2, Project 1: Trip Buddy, an AI trip planner for a group of friends. SQLite, embeddings, ChromaDB retrieval, LLM chains, RAG, tool calling and a full ReAct agent with a chat window, in eight small Python scripts with pseudo code and the full code, plus Slack and WhatsApp bots.">
 <script>
   try { var t = localStorage.getItem('fws-theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}
 </script>
@@ -445,8 +445,12 @@ table.wf td.best{font-weight:800;color:var(--accent);background:var(--accent-sof
   <a class="lvl2" href="#t-04">T7 LLM chain: the planner</a>
   <a class="lvl2" href="#t-05">T8 RAG: read the notebook first</a>
   <a class="lvl2" href="#t-06">T9 Tools: no more mental maths</a>
+  <a class="lvl2" href="#t-07">T10 Multi-chain: compute, then decide</a>
+  <a class="lvl2" href="#t-08">T11 The full agent + chat window</a>
+  <div class="grp"><h4>Ship it</h4></div>
+  <a class="lvl2" href="#t-chat">T12 Slack &amp; WhatsApp</a>
   <div class="grp"><h4>Own it</h4></div>
-  <a class="lvl2" href="#t-project">T10 Milestones &amp; rubric</a>
+  <a class="lvl2" href="#t-project">T13 Milestones &amp; rubric</a>
   <div class="grp"></div>
   <a href="#wrap">Wrap-up</a>
 </nav>
@@ -506,14 +510,14 @@ span.awsq-fb{border-style:dashed;color:var(--q-muted);font-weight:600}
 <section class="hero" id="start">
   <p class="kicker">Scaler AWS AI Bootcamp · Week 2 · Project 1</p>
   <h1>Trip Buddy <span class="small">A trip planner for a group of friends that looks things up, remembers travel tips and does the maths with real tools</span></h1>
-  <p class="lede">Every friend group has "the Goa plan" that never happens. This time we plan it properly. In six small scripts you build an AI trip planner: a <strong>database</strong> of places and stays, a <strong>travel notebook</strong> searched by meaning, an <strong>LLM</strong> that gives advice, <strong>RAG</strong> so the advice uses the notebook, and <strong>tools</strong> so every rupee is calculated by Python instead of guessed.</p>
+  <p class="lede">Every friend group has "the Goa plan" that never happens. This time we plan it properly. In eight small scripts you build an AI trip planner: a <strong>database</strong> of places and stays, a <strong>travel notebook</strong> searched by meaning, an <strong>LLM</strong> that gives advice, <strong>RAG</strong> so the advice uses the notebook, and <strong>tools</strong> so every rupee is calculated by Python instead of guessed. Then you chat with it in your browser, and on Slack or WhatsApp.</p>
 
   <div class="story">🧳 <strong>The group chat, Friday night.</strong> <em>"Manali in July? 3 of us, 4 nights, ₹20,000 each. Will it fit? Is July even a good time?"</em> Everyone has an opinion, nobody has the numbers. Trip Buddy has to answer both questions: <strong>what does it cost each of us</strong>, exactly, and <strong>what should we watch out for</strong>.</div>
 
   <div class="stats">
-    <div><b>6</b>small scripts, one new idea each</div>
+    <div><b>8</b>small scripts, one new idea each</div>
     <div><b>3</b>tools the agent can call</div>
-    <div><b>8</b>travel tips in the notebook</div>
+    <div><b>10</b>destinations, 13 travel tips</div>
     <div><b>₹0</b>to run scripts 01–03 (no API key)</div>
   </div>
 
@@ -584,7 +588,7 @@ cost per person  = travel + stay share + food and fun</div>
   <h2>What we are building, and what you need</h2>
 
   <!-- T1 -->
-  <h3 id="t-build"><span class="num">T1</span>What we are building: six steps, one idea each</h3>
+  <h3 id="t-build"><span class="num">T1</span>What we are building: eight steps, one idea each</h3>
   <p>Each script adds exactly one idea to the one before it. Open two of them side by side and the difference is the lesson.</p>
   <div class="tw"><table class="tbl">
     <tr><th>Script</th><th>New idea</th><th>The question it answers</th><th>Needs</th></tr>
@@ -594,6 +598,8 @@ cost per person  = travel + stay share + food and fun</div>
     <tr><td><code>trip_04_llm_chain.py</code></td><td><code>prompt | llm | parser</code></td><td>Can an LLM work out the cost per person?</td><td><code>OPENAI_API_KEY</code></td></tr>
     <tr><td><code>trip_05_rag_chain.py</code></td><td>Retrieve → augment → generate</td><td>Does the advice improve when it reads the notebook?</td><td><code>OPENAI_API_KEY</code></td></tr>
     <tr><td><code>trip_06_tool_calling.py</code></td><td>Tools and a hand-written agent loop</td><td>Can we get exact numbers every time?</td><td><code>OPENAI_API_KEY</code></td></tr>
+    <tr><td><code>trip_07_multi_chain.py</code></td><td>A 3-table database and two chained LLM steps</td><td>Can one chain explain the numbers and the next decide GO or NOT YET?</td><td><code>OPENAI_API_KEY</code></td></tr>
+    <tr><td><code>trip_08_full_agent.py</code></td><td>Everything together: ReAct agent + Gradio chat</td><td>Can friends just ask, in a chat window?</td><td><code>OPENAI_API_KEY</code>, <code>gradio</code></td></tr>
   </table></div>
   <div class="box tip"><span class="tag">💡 Why not just a Python script?</span>
     <p>For the cost alone, a Python function is enough: that's the calculator above. The AI earns its place where a script can't go: <strong>understanding</strong> a messy question ("3 of us, Manali, 4 nights, 20k each?"), <strong>finding</strong> the right tip by meaning, <strong>choosing</strong> which tool to call with which numbers, and <strong>explaining</strong> the answer to the group. The design rule from Week 1 holds: <em>code computes, the LLM reasons and explains.</em></p>
@@ -625,7 +631,7 @@ cost per person  = travel + stay share + food and fun</div>
 
       <g class="nd soft" id="tb-rule"><rect x="10" y="346" width="800" height="36" rx="10"/><text class="t12" x="28" y="369"><tspan class="b">Code computes, the LLM explains.</tspan> The LLM never does the maths in the final version: it reads, chooses a tool, and writes the answer.</text></g>
     </svg>
-    <figcaption>Two kinds of help for one LLM. ① <b>RAG</b> brings in <em>knowledge</em> it wasn't trained on (the notebook). ②③ <b>Tools</b> bring in <em>exactness</em> it can't do in its head (the maths). Scripts 05 and 06 each add one of them; milestone M4 joins them into one agent.</figcaption>
+    <figcaption>Two kinds of help for one LLM. ① <b>RAG</b> brings in <em>knowledge</em> it wasn't trained on (the notebook). ②③ <b>Tools</b> bring in <em>exactness</em> it can't do in its head (the maths). Scripts 05 and 06 each add one of them; script 08 joins them into one agent.</figcaption>
   </figure>
   <div class="box analogy"><span class="tag">🧠 The friend who plans every trip</span>
     <p>Every group has one: they keep a <strong>notebook of tips</strong> (the vector database), a <strong>spreadsheet of prices</strong> (SQLite) and a <strong>calculator</strong> on the table (the tools). When you ask "Manali in July?", they flip to the hills page first, then work out the cost on the calculator, then tell you. Trip Buddy does the same three moves in the same order.</p>
@@ -637,7 +643,7 @@ cost per person  = travel + stay share + food and fun</div>
     <tr><th>You need</th><th>Why</th><th>Used in</th></tr>
     <tr><td><b>Python 3.11+</b> and <b>uv</b></td><td>The scripts use <code>dict | None</code> type hints and run with <code>uv run</code></td><td>all</td></tr>
     <tr><td><b>An OpenAI API key</b></td><td>The planner LLM, read from <code>.env</code></td><td>04 · 05 · 06</td></tr>
-    <tr><td><b>~90 MB of disk</b></td><td>The free embedding model, downloaded on the first run</td><td>02 · 03 · 05</td></tr>
+    <tr><td><b>~90 MB of disk</b></td><td>The free embedding model, downloaded on the first run</td><td>02 · 03 · 05 · 08</td></tr>
     <tr><td><b>No AWS account</b></td><td>This project runs on OpenAI and a local model, so anyone can try it</td><td>none</td></tr>
   </table></div>
   <div class="tw"><table class="tbl">
@@ -647,17 +653,18 @@ cost per person  = travel + stay share + food and fun</div>
     <tr><td><code>chromadb</code></td><td>Vector database: text + embedding + labels</td><td>03 · 05</td></tr>
     <tr><td><code>langchain-huggingface</code></td><td>The same embedding model, in LangChain's shape</td><td>03 · 05</td></tr>
     <tr><td><code>langchain-core</code>, <code>langchain-openai</code></td><td>Prompts, chains, messages, tools and <code>ChatOpenAI</code></td><td>04 · 05 · 06</td></tr>
-    <tr><td><code>python-dotenv</code></td><td>Loads <code>OPENAI_API_KEY</code> from <code>.env</code></td><td>04 · 05 · 06</td></tr>
+    <tr><td><code>python-dotenv</code></td><td>Loads <code>OPENAI_API_KEY</code> from <code>.env</code></td><td>04 – 08</td></tr>
+    <tr><td><code>gradio</code></td><td>The chat window in your browser</td><td>08</td></tr>
   </table></div>
   <div class="lk-code">
     <div class="lk-pseudo"><div class="lk-label">Pseudo code · terminal, one-time setup in the project folder</div><pre>RUN uv init trip-buddy   // a new project with its own pyproject.toml
-RUN uv add the seven libraries above   // creates .venv and locks the versions
+RUN uv add the eight libraries above   // creates .venv and locks the versions
 CREATE .env with OPENAI_API_KEY = your key   // never commit this file
 RUN uv run trip_01_sqlite_basics.py   // then 02, 03 ... 06, in order</pre></div>
     <details class="lk-reveal"><summary>View code</summary>
   <div class="code"><div class="head">Bash · one-time setup (macOS / Linux / WSL)</div><pre><code class="language-bash">uv init trip-buddy &amp;&amp; cd trip-buddy
-# copy the six trip_0x_*.py scripts (GitHub or trip-buddy.zip) into this folder, then:
-uv add chromadb sentence-transformers numpy langchain-huggingface langchain-core langchain-openai python-dotenv
+# copy the eight trip_0x_*.py scripts (GitHub or trip-buddy.zip) into this folder, then:
+uv add chromadb sentence-transformers numpy langchain-huggingface langchain-core langchain-openai python-dotenv gradio
 cp .env.example .env        # then paste your OPENAI_API_KEY into .env
 uv run trip_01_sqlite_basics.py</code></pre></div>
   <div class="code"><div class="head">Text · .env.example</div><pre><code class="language-none"># Copy this file to .env (same folder) and paste your key. Never commit .env.
@@ -674,9 +681,13 @@ OPENAI_API_KEY=sk-...
 ├── trip_03_chromadb_retrieval.py <span class="m"># the travel notebook, with shelves</span>
 ├── trip_04_llm_chain.py          <span class="m"># the planner, maths in its head</span>
 ├── trip_05_rag_chain.py          <span class="m"># the planner reads the notebook first</span>
-└── trip_06_tool_calling.py       <span class="m"># the planner uses a calculator</span></div>
+├── trip_06_tool_calling.py       <span class="m"># the planner uses a calculator</span>
+├── trip_07_multi_chain.py        <span class="m"># compute → explain → decide</span>
+├── trip_08_full_agent.py         <span class="m"># the full agent + Gradio chat</span>
+├── slack_bot.py                  <span class="m"># optional, T12</span>
+└── whatsapp_bot.py               <span class="m"># optional, T12</span></div>
   <div class="box tip" id="t-code"><span class="tag">💡 Get the code</span>
-    <p>All six scripts are on GitHub: <a href="https://github.com/balajiraghuram92/Scaler-AI-Infusion-Bootcamp/tree/main/excersices/Lab-project/Trip-Buddy" target="_blank" rel="noopener">Scaler-AI-Infusion-Bootcamp / excersices / Lab-project / Trip-Buddy</a>. Read them there one by one, or <a href="../../zips/trip-buddy.zip" download>download all six as a zip</a> and copy them into your <code>trip-buddy/</code> folder.</p>
+    <p>All eight scripts are on GitHub: <a href="https://github.com/balajiraghuram92/Scaler-AI-Infusion-Bootcamp/tree/main/excersices/Lab-project/Trip-Buddy" target="_blank" rel="noopener">Scaler-AI-Infusion-Bootcamp / excersices / Lab-project / Trip-Buddy</a>. Read them there one by one, or <a href="../../zips/trip-buddy.zip" download>download all eight as a zip</a> and copy them into your <code>trip-buddy/</code> folder.</p>
   </div>
   <div class="box skip"><span class="tag">⏭️ Same models, different provider</span>
     <p>Like Part 00, this project runs on OpenAI so anyone can try it without an AWS account. The ideas map one to one onto what you used in Week 1: <code>ChatOpenAI</code> becomes <code>BedrockModel</code>, LangChain's <code>@tool</code> becomes Strands' <code>@tool</code>, and the hand-written loop in script 06 is what Strands' <code>Agent</code> runs for you. Stretch goal S1 asks you to port it.</p>
@@ -686,8 +697,8 @@ OPENAI_API_KEY=sk-...
 <hr class="sec">
 <section id="b">
   <p class="kicker">Build it</p>
-  <h2>Six scripts, bottom-up</h2>
-  <p>Build it in order: <strong>data → meaning → search → LLM → RAG → tools</strong>. For each script: the idea in plain words, then the pseudo code, then the real code behind <em>View code</em>.</p>
+  <h2>Eight scripts, bottom-up</h2>
+  <p>Build it in order: <strong>data → meaning → search → LLM → RAG → tools → pipeline → full agent</strong>. For each script: the idea in plain words, then the pseudo code, then the real code behind <em>View code</em>.</p>
 
   <!-- T4 -->
   <h3 id="t-01"><span class="num">T4</span>Script 01 · SQLite: save our trip options</h3>
@@ -1507,6 +1518,801 @@ for q in questions:
   <div class="box warn"><span class="tag">⚠️ Two safety nets in the loop</span>
     <p><code>MAX_STEPS = 8</code> stops a model that keeps calling tools forever. <code>lookup_place</code> returns <code>{"error": "... not found"}</code> instead of raising, so a question about Paris gets an honest "I don't have prices for that" instead of a crash. Tools should fail with a message the model can read.</p>
   </div>
+  <!-- T10 -->
+  <h3 id="t-07"><span class="num">T10</span>Script 07 · Multi-chain: compute first, then decide</h3>
+  <p>The trip options now live in a <strong>3-table database</strong>: <code>places</code> (with best months), <code>stays</code> and <code>costs</code> (travel mode, travel cost, daily spend). For each plan we run a fixed assembly line: Python computes, one chain explains, a second chain decides. <strong>The output of one chain is the input of the next.</strong></p>
+  <div class="pipe" role="list">
+    <button type="button" class="on" data-mc="0" role="listitem"><b>① Tool (Python)</b><span>exact rooms, stay share, food, total</span></button>
+    <div class="arr">numbers</div>
+    <button type="button" data-mc="1" role="listitem"><b>② Chain 1 · explain</b><span>the breakdown in plain words</span></button>
+    <div class="arr">breakdown text</div>
+    <button type="button" data-mc="2" role="listitem"><b>③ Chain 2 · decide</b><span>GO, or NOT YET plus one change</span></button>
+  </div>
+  <div class="out" id="mc-out" aria-live="polite"></div>
+  <div class="tw"><table class="tbl">
+    <tr><th>Plan</th><th class="num">Rooms</th><th class="num">Stay share</th><th class="num">Food and fun</th><th class="num">Total</th><th class="num">Budget</th><th>Chain 2 should say</th></tr>
+    <tr><td><b>Goa</b> · 4 friends, 3 nights</td><td class="num">2</td><td class="num">₹4,500</td><td class="num">₹4,500</td><td class="num">₹11,800</td><td class="num">₹12,000</td><td><span class="pill ok">GO</span> ₹200 left each</td></tr>
+    <tr><td><b>Manali</b> · 3 friends, 4 nights</td><td class="num">2</td><td class="num">₹6,666.67</td><td class="num">₹5,200</td><td class="num">₹20,866.67</td><td class="num">₹20,000</td><td><span class="pill no">NOT YET</span> ₹866.67 over</td></tr>
+  </table></div>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · trip_07_multi_chain.py</div><pre>CREATE 3 tables in memory: places(+ best_months), stays, costs(travel_mode, travel, daily)
+ADD Goa, Coorg and Manali to all three tables
+
+DEFINE fetch_place(place):   // by id or by name
+    RETURN places JOIN stays JOIN costs for that place, as one dict
+
+DEFINE trip_cost_tool(travel, room_price, daily, people, nights) as a tool:
+    SET rooms = people / 2, rounded UP
+    RETURN rooms, stay_share, food_and_fun, total_per_person
+
+CREATE explain_chain = prompt | llm | parser
+    // system: "these numbers come from a trusted tool, do NOT redo them"
+CREATE decide_chain = prompt | llm | parser
+    // system: "say GO or NOT YET; if over budget, suggest one simple change"
+
+DEFINE run_pipeline(place, people, nights, budget):
+    SET record = fetch_place(place)
+    IF record is missing THEN PRINT "not found" and STOP
+    SET numbers = trip_cost_tool.invoke({...})   // ① Python calls the tool directly, no LLM
+    SET breakdown = explain_chain.invoke(record + numbers)   // ② chain 1
+    SET decision = decide_chain.invoke(name, budget, breakdown)   // ③ chain 1's text is chain 2's input
+    PRINT numbers, breakdown, decision
+
+RUN run_pipeline for Goa (4, 3 nights, ₹12,000) and Manali (3, 4 nights, ₹20,000)</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>math</code>, <code>os</code>, <code>sqlite3</code> <span class="lk-src">Python standard library</span>: rounding up, the model name, and the database.</li>
+      <li><code>tool</code> <span class="lk-src">from <code>langchain_core.tools</code></span>: makes <code>trip_cost_tool</code> a tool; here Python calls it with <code>.invoke({...})</code>.</li>
+      <li><code>ChatPromptTemplate</code>, <code>StrOutputParser</code>, <code>ChatOpenAI</code>, <code>load_dotenv</code> <span class="lk-src">as in script 04</span>: the two chains.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · trip_07_multi_chain.py</div><pre><code class="language-python">"""
+trip_07_multi_chain.py
+──────────────────────
+Lesson 07 · Multi-chain pipeline: compute first, then decide.
+
+The story
+    Our trip options now live in a real 3-table database. For each trip plan we
+    run a fixed assembly line:
+      1. Python + tool  → exact cost per person (no AI guessing)
+      2. Chain 1 (AI)   → explains the cost breakdown in plain English
+      3. Chain 2 (AI)   → reads Chain 1's explanation and says "Pack your bags!"
+                          or "Over budget, here is what to change"
+    The output of one chain becomes the input of the next.
+
+What you learn
+    - 3 tables (places, stays, costs) joined into one record
+    - Calling a @tool directly from Python with .invoke({...}) (no LLM needed to call it)
+    - Chaining LLM steps: chain 2 consumes chain 1's text
+    - Telling the LLM "these numbers come from a trusted tool, do NOT redo them"
+
+How to run
+    uv run trip_07_multi_chain.py        (needs OPENAI_API_KEY in .env)
+
+What you will see
+    For Goa and Manali: the tool result, Chain 1's breakdown, Chain 2's decision.
+"""
+
+import math
+import os
+import sqlite3
+
+from dotenv import load_dotenv
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+
+load_dotenv()
+
+# ── 1. Database: 3 tables, 3 places ───────────────────────────────────────────
+conn = sqlite3.connect(":memory:")
+conn.row_factory = sqlite3.Row
+cur = conn.cursor()
+cur.executescript("""
+CREATE TABLE places (
+    place_id TEXT PRIMARY KEY, name TEXT, trip_type TEXT, best_months TEXT
+);
+CREATE TABLE stays (
+    place_id TEXT PRIMARY KEY, stay_name TEXT, room_price_per_night REAL
+);
+CREATE TABLE costs (
+    place_id TEXT PRIMARY KEY, travel_mode TEXT,
+    travel_cost_per_person REAL, daily_spend_per_person REAL
+);
+""")
+cur.executemany("INSERT INTO places VALUES (?,?,?,?)", [
+    ("GOA",    "Goa",    "Beach", "Nov–Feb"),
+    ("COORG",  "Coorg",  "Hills", "Oct–Jun"),
+    ("MANALI", "Manali", "Hills", "Mar–Jun"),
+])
+cur.executemany("INSERT INTO stays VALUES (?,?,?)", [
+    ("GOA",    "Sea Breeze Guesthouse", 3000),
+    ("COORG",  "Coffee Estate Cottage", 2800),
+    ("MANALI", "Old Manali Cafe Stay",  2500),
+])
+cur.executemany("INSERT INTO costs VALUES (?,?,?,?)", [
+    ("GOA",    "Overnight train", 2800, 1500),
+    ("COORG",  "Bus",             1000, 1100),
+    ("MANALI", "Flight + bus",    9000, 1300),
+])
+conn.commit()
+
+
+def fetch_place(place: str) -&gt; dict | None:
+    """JOIN all 3 tables and return one place's full record as a dict."""
+    row = cur.execute("""
+        SELECT p.*, s.stay_name, s.room_price_per_night,
+               c.travel_mode, c.travel_cost_per_person, c.daily_spend_per_person
+        FROM places p
+        JOIN stays s ON s.place_id = p.place_id
+        JOIN costs c ON c.place_id = p.place_id
+        WHERE UPPER(p.place_id) = UPPER(?) OR UPPER(p.name) = UPPER(?)
+    """, (place, place)).fetchone()
+    return dict(row) if row else None
+
+
+# ── 2. The calculator tool ────────────────────────────────────────────────────
+@tool
+def trip_cost_tool(travel_cost_per_person: float, room_price_per_night: float,
+                   daily_spend_per_person: float, people: int, nights: int) -&gt; dict:
+    """Compute rooms needed, stay share, food &amp; fun, and total cost per person with exact arithmetic."""
+    rooms_needed = math.ceil(people / 2)
+    stay_share = round(rooms_needed * room_price_per_night * nights / people, 2)
+    food_and_fun = round(daily_spend_per_person * nights, 2)
+    total = round(travel_cost_per_person + stay_share + food_and_fun, 2)
+    return {"rooms_needed": rooms_needed, "stay_share": stay_share,
+            "food_and_fun": food_and_fun, "total_per_person": total}
+
+
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+llm = ChatOpenAI(model=MODEL, reasoning_effort="none")   # see lesson 04 for why
+
+# ── 3. Chain 1: explain the cost breakdown ────────────────────────────────────
+explain_prompt = ChatPromptTemplate.from_messages([
+    ("system",
+     "You are a trip planner for a group of friends.\n"
+     "The numbers below were calculated by a trusted tool — do NOT redo them.\n"
+     "Explain the cost breakdown in simple words and end with:\nCOST_PER_PERSON: {total_per_person}"),
+    ("human",
+     "Trip: {name} ({trip_type}), best months {best_months}\n"
+     "Group: {people} friends, {nights} nights at {stay_name}\n"
+     "Travel: {travel_mode}, ₹{travel_cost_per_person} per person\n\n"
+     "Tool results:\n"
+     "  Rooms needed     : {rooms_needed}\n"
+     "  Stay share       : ₹{stay_share}\n"
+     "  Food and fun     : ₹{food_and_fun}\n"
+     "  Total per person : ₹{total_per_person}"),
+])
+explain_chain = explain_prompt | llm | StrOutputParser()
+
+# ── 4. Chain 2: go / no-go decision (reads chain 1's output) ──────────────────
+decide_prompt = ChatPromptTemplate.from_messages([
+    ("system",
+     "You are the group's money-minded friend.\n"
+     "Money left per person = budget - total cost per person.\n"
+     "Say clearly: GO (within budget) or NOT YET (over budget). "
+     "If over budget, suggest one simple change (fewer nights, cheaper place, more friends)."),
+    ("human",
+     "Trip: {name} | Budget per person: ₹{budget_per_person}\n\n"
+     "Cost breakdown:\n{breakdown}"),
+])
+decide_chain = decide_prompt | llm | StrOutputParser()
+
+
+def run_pipeline(place: str, people: int, nights: int, budget_per_person: float) -&gt; None:
+    """DB → tool → chain 1 → chain 2, printing each stage."""
+    record = fetch_place(place)
+    if not record:
+        print(f"Place {place} not found.")
+        return
+
+    # Step 1: exact arithmetic via the tool (Python calls it directly, no LLM)
+    tool_result = trip_cost_tool.invoke({
+        "travel_cost_per_person": record["travel_cost_per_person"],
+        "room_price_per_night":   record["room_price_per_night"],
+        "daily_spend_per_person": record["daily_spend_per_person"],
+        "people":                 people,
+        "nights":                 nights,
+    })
+    print(f"\n[Tool] trip_cost_tool → {tool_result}")
+
+    # Step 2: chain 1 explains the numbers ({**a, **b} merges dicts)
+    breakdown = explain_chain.invoke({**record, **tool_result, "people": people, "nights": nights})
+    print(f"\n--- Chain 1: Cost Breakdown ---\n{breakdown}")
+
+    # Step 3: chain 2 turns that explanation into a decision
+    decision = decide_chain.invoke({
+        "name":              record["name"],
+        "budget_per_person": budget_per_person,
+        "breakdown":         breakdown,      # ← chain 1's output is chain 2's input
+    })
+    print(f"\n--- Chain 2: Go or Not Yet ---\n{decision}")
+
+
+# ── Run ───────────────────────────────────────────────────────────────────────
+plans = [
+    ("Goa",    4, 3, 12000),   # 4 friends, 3 nights, ₹12,000 each
+    ("Manali", 3, 4, 20000),   # 3 friends, 4 nights, ₹20,000 each
+]
+for place, people, nights, budget in plans:
+    print(f"\n{'='*60}")
+    print(f"Plan: {place} — {people} friends, {nights} nights, ₹{budget} each")
+    print("="*60)
+    run_pipeline(place, people, nights, budget)</code></pre></div>
+    </details>
+  </div>
+  <div class="box tip"><span class="tag">💡 Pipeline or agent?</span>
+    <p>Here <strong>you</strong> fix the order: tool, explain, decide, every time. That is a <strong>pipeline</strong>: predictable, cheap, easy to test. In script 06 the <strong>model</strong> chose which tool to call: an <strong>agent</strong>. Use a pipeline when the steps never change; use an agent when the question decides the steps. Script 08 needs the agent, because "list everything" and "can we afford Goa?" need different tools.</p>
+  </div>
+
+  <!-- T11 -->
+  <h3 id="t-08"><span class="num">T11</span>Script 08 · The full Trip Buddy agent, with a chat window</h3>
+  <p>Everything comes together in one file: the 3-table database now holds <strong>10 destinations</strong>, the notebook holds <strong>13 tips</strong>, and a <strong>ReAct loop</strong> (reason → act with a tool → observe the result → repeat) chooses between three tools. A <strong>Gradio</strong> chat window runs it in your browser.</p>
+  <div class="tw"><table class="tbl">
+    <tr><th>From script</th><th>What it brings to script 08</th></tr>
+    <tr><td><b>01 · 07</b></td><td>The 3-table SQLite schema, now with 10 places from Bengaluru, and <code>fetch_place</code> by id or name</td></tr>
+    <tr><td><b>02 · 03</b></td><td>The free embedding model and ChromaDB, now 13 tips on three shelves</td></tr>
+    <tr><td><b>04 · 05</b></td><td>The prompt; the retrieved tips go into the system message for every question</td></tr>
+    <tr><td><b>06</b></td><td>The tool loop, now with <code>SystemMessage</code> and a 10-step limit</td></tr>
+    <tr><td><b>07</b></td><td>Compute, then decide: <code>compute_trip_cost</code> also checks the budget</td></tr>
+  </table></div>
+  <div class="tw"><table class="tbl">
+    <tr><th>Tool</th><th>Inputs</th><th>Returns</th></tr>
+    <tr><td><code>db_lookup</code></td><td><code>place</code></td><td>trip type, state, best months, stay, room price, travel mode and cost, daily spend; or an error that says to call <code>list_destinations</code></td></tr>
+    <tr><td><code>list_destinations</code></td><td>none</td><td>every place, with its type and best months</td></tr>
+    <tr><td><code>compute_trip_cost</code></td><td>travel, room price, daily spend, <code>people</code>, <code>nights</code>, optional <code>budget_per_person</code></td><td>rooms, stay share, food and fun, total; with a budget also <code>within_budget</code> and <code>money_left_per_person</code></td></tr>
+  </table></div>
+
+  <div class="sim" id="sim-fit"><span class="tag">🧪 Simulation</span>
+    <h4>"Which trips fit my budget?": the maths the agent runs, for all 10 places</h4>
+    <div class="inp">
+      <label>Friends<input type="number" min="1" max="20" id="f-people" value="3"></label>
+      <label>Nights<input type="number" min="1" max="30" id="f-nights" value="2"></label>
+      <label>Budget / person (₹)<input type="number" min="0" step="500" id="f-budget" value="8000"></label>
+    </div>
+    <div class="tw" style="margin-bottom:0"><table class="tbl" id="f-table"></table></div>
+    <div class="out" id="f-out" aria-live="polite"></div>
+  </div>
+
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · trip_08_full_agent.py</div><pre>CREATE the 3 tables, with check_same_thread off   // Gradio answers on worker threads
+ADD 10 places: Beach, Hills, Heritage, Adventure, prices from Bengaluru
+DEFINE fetch_place(place) and list_places()
+
+CREATE the travel notebook in Chroma: 13 tips on 3 shelves (money, trip_type, travel_tip)
+DEFINE retrieve_context(query, n = 3):
+    RETURN the n closest tips as bullet points
+
+DEFINE db_lookup(place) as a tool   // the record, or an error naming list_destinations
+DEFINE list_destinations() as a tool
+DEFINE compute_trip_cost(travel, room, daily, people, nights, budget = none) as a tool:
+    RETURN rooms, stay share, food and fun, total
+        + within_budget and money_left_per_person, IF a budget is given
+
+CREATE llm = ChatOpenAI(...) with the three tools bound
+SET SYSTEM = "You are Trip Buddy" + steps: db_lookup, then compute_trip_cost, then answer
+             + "ask if friends or nights are missing" + {rag_context}
+
+DEFINE run_agent(user_message):
+    SET messages = [SystemMessage(SYSTEM with retrieve_context(user_message)), HumanMessage]
+    REPEAT at most 10 times   // ReAct: reason → act → observe
+        SET response = llm.invoke(messages)   // reason
+        IF response has no tool calls THEN RETURN response.text
+        FOR EACH tool call IN response
+            RUN the tool   // act
+            APPEND a ToolMessage with the JSON result   // observe
+    RETURN "I had to stop after too many steps"
+
+CREATE demo = Gradio ChatInterface(chat_handler, title, 5 example questions)
+START demo   // open http://127.0.0.1:7860</pre></div>
+    <div class="lk-imports"><div class="lk-label">Imported</div><ul>
+      <li><code>json</code>, <code>math</code>, <code>os</code>, <code>sqlite3</code> <span class="lk-src">Python standard library</span>: tool results as JSON, rounding up, settings, the database.</li>
+      <li><code>chromadb</code>, <code>HuggingFaceEmbeddings</code> <span class="lk-src">as in script 03</span>: the 13-tip notebook.</li>
+      <li><code>gradio as gr</code> <span class="lk-src">package gradio</span>: <code>gr.ChatInterface</code> turns one Python function into a chat web page.</li>
+      <li><code>HumanMessage</code>, <code>SystemMessage</code>, <code>ToolMessage</code> <span class="lk-src">from <code>langchain_core.messages</code></span>: the rules plus tips, the question, and each tool result.</li>
+      <li><code>tool</code>, <code>ChatOpenAI</code>, <code>load_dotenv</code> <span class="lk-src">as in script 06</span>: the tools and the model.</li>
+    </ul></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · trip_08_full_agent.py</div><pre><code class="language-python">"""
+trip_08_full_agent.py
+─────────────────────
+Lesson 08 · The full Trip Buddy agent: database + RAG + tools + ReAct loop + chat UI.
+
+The story
+    Everything comes together. Your friend group opens a chat window and asks
+    "We are 4 friends with ₹12,000 each. Can we do Goa for 3 nights?"
+    or "Which trips fit ₹8,000 each for 3 of us, 2 nights?"
+    The agent:
+      1. pulls the most relevant tips from the travel notebook (RAG, ChromaDB)
+      2. decides on its own which tools to call (ReAct loop):
+           db_lookup          → fetch a place's prices from SQLite
+           list_destinations  → see every place we could go
+           compute_trip_cost  → exact rooms, stay share, total per person, budget check
+      3. writes a clear answer: can we afford it, what it costs, and travel tips
+
+Brings together
+    01  SQLite: full 3-table schema, 10 destinations
+    02  Embeddings: sentence-transformers
+    03  ChromaDB: 13-tip travel notebook
+    04  LLM chains: prompt + model
+    05  RAG: retrieved tips injected into the system prompt
+    06  Tool calling: exact arithmetic and DB lookup as tools
+    07  Multi-step reasoning: compute → decide
+
+New in this file
+    - A ReAct-style agent loop (Reason → Act with a tool → Observe the result → repeat)
+    - A Gradio chat interface in your browser
+    - Type "list" to see all destinations
+    - All prices come from the DB; you only say where, how many friends, nights and budget
+
+How to run
+    uv run trip_08_full_agent.py        (needs OPENAI_API_KEY in .env)
+    then open the link it prints (usually http://127.0.0.1:7860)
+
+Try asking
+    list
+    We are 4 friends with ₹12,000 each. Can we do Goa for 3 nights?
+    Is Manali a good idea in July?
+    Which trips fit ₹8,000 each for 3 friends, 2 nights?
+"""
+
+import json
+import math
+import os
+import sqlite3
+
+import chromadb
+import gradio as gr
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+from langchain_core.tools import tool
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import ChatOpenAI
+
+load_dotenv()
+
+# =============================================================================
+# 1. Database (3 tables, 10 destinations)
+# =============================================================================
+# check_same_thread=False: Gradio answers chats on worker threads, so the
+# connection must be usable from a thread other than the one that created it.
+conn = sqlite3.connect(":memory:", check_same_thread=False)
+conn.row_factory = sqlite3.Row
+cur = conn.cursor()
+
+cur.executescript("""
+CREATE TABLE places (
+    place_id TEXT PRIMARY KEY, name TEXT NOT NULL, trip_type TEXT,
+    state TEXT, best_months TEXT
+);
+CREATE TABLE stays (
+    place_id TEXT PRIMARY KEY, stay_name TEXT, room_price_per_night REAL NOT NULL,
+    FOREIGN KEY (place_id) REFERENCES places(place_id)
+);
+CREATE TABLE costs (
+    place_id TEXT PRIMARY KEY, travel_mode TEXT,
+    travel_cost_per_person REAL NOT NULL, daily_spend_per_person REAL NOT NULL,
+    FOREIGN KEY (place_id) REFERENCES places(place_id)
+);
+""")
+
+# 4 kinds of trips: Beach, Hills, Heritage, Adventure. Prices are from Bengaluru.
+cur.executemany("INSERT INTO places VALUES (?,?,?,?,?)", [
+    ("GOA",       "Goa",         "Beach",     "Goa",              "Nov–Feb"),
+    ("GOKARNA",   "Gokarna",     "Beach",     "Karnataka",        "Oct–Mar"),
+    ("PONDY",     "Pondicherry", "Beach",     "Puducherry",       "Oct–Mar"),
+    ("COORG",     "Coorg",       "Hills",     "Karnataka",        "Oct–Jun"),
+    ("OOTY",      "Ooty",        "Hills",     "Tamil Nadu",       "Mar–Jun"),
+    ("MANALI",    "Manali",      "Hills",     "Himachal Pradesh", "Mar–Jun"),
+    ("HAMPI",     "Hampi",       "Heritage",  "Karnataka",        "Oct–Feb"),
+    ("JAIPUR",    "Jaipur",      "Heritage",  "Rajasthan",        "Oct–Mar"),
+    ("RISHIKESH", "Rishikesh",   "Adventure", "Uttarakhand",      "Oct–Jun"),
+    ("DANDELI",   "Dandeli",     "Adventure", "Karnataka",        "Oct–May"),
+])
+cur.executemany("INSERT INTO stays VALUES (?,?,?)", [   # one room fits 2 people
+    ("GOA",       "Sea Breeze Guesthouse",   3000), ("GOKARNA", "Om Beach Huts",          1800),
+    ("PONDY",     "French Quarter Homestay", 2500), ("COORG",   "Coffee Estate Cottage",  2800),
+    ("OOTY",      "Nilgiri View Lodge",      2200), ("MANALI",  "Old Manali Cafe Stay",   2500),
+    ("HAMPI",     "Boulder View Guesthouse", 1500), ("JAIPUR",  "Pink City Haveli",       2400),
+    ("RISHIKESH", "Ganga Riverside Camp",    1600), ("DANDELI", "Jungle River Camp",      2000),
+])
+cur.executemany("INSERT INTO costs VALUES (?,?,?,?)", [  # travel = return trip per person
+    ("GOA",       "Overnight train", 2800, 1500), ("GOKARNA", "Overnight bus",   1200,  900),
+    ("PONDY",     "Bus",             1400, 1200), ("COORG",   "Bus",             1000, 1100),
+    ("OOTY",      "Bus",             1000, 1000), ("MANALI",  "Flight + bus",    9000, 1300),
+    ("HAMPI",     "Overnight train",  900,  800), ("JAIPUR",  "Flight",          7500, 1200),
+    ("RISHIKESH", "Flight + cab",    8500, 1400), ("DANDELI", "Bus",             1100, 1600),
+])
+conn.commit()
+
+
+def fetch_place(place: str) -&gt; dict | None:
+    """JOIN places + stays + costs for one place (by id like 'PONDY' or name like 'Pondicherry')."""
+    row = cur.execute("""
+        SELECT p.place_id, p.name, p.trip_type, p.state, p.best_months,
+               s.stay_name, s.room_price_per_night,
+               c.travel_mode, c.travel_cost_per_person, c.daily_spend_per_person
+        FROM places p
+        JOIN stays s ON s.place_id = p.place_id
+        JOIN costs c ON c.place_id = p.place_id
+        WHERE UPPER(p.place_id) = UPPER(?) OR UPPER(p.name) = UPPER(?)
+    """, (place, place)).fetchone()
+    return dict(row) if row else None
+
+
+def list_places() -&gt; list[dict]:
+    """A short list of every destination."""
+    return [dict(r) for r in cur.execute(
+        "SELECT place_id, name, trip_type, best_months FROM places ORDER BY trip_type, name"
+    ).fetchall()]
+
+
+# =============================================================================
+# 2. RAG knowledge base (the travel notebook, 13 tips)
+# =============================================================================
+KB = [
+    ("trip-cost",    "Trip cost per person = travel + stay share + daily spend x nights.",                                  {"topic": "money"}),
+    ("rooms",        "One room fits 2 people, so rooms needed = people / 2, rounded up. Stay share = rooms x room price x nights / people.", {"topic": "money"}),
+    ("buffer",       "Keep a 10% buffer on top of the total for surprises like a cab surge or a missed bus.",                {"topic": "money"}),
+    ("splitting",    "Split shared costs (stay, cabs, fuel) equally. Personal shopping is never split.",                     {"topic": "money"}),
+    ("beach",        "Beach trips (Goa, Gokarna, Pondicherry): best November-February. In the monsoon (June-September) many beach shacks and water sports close.", {"topic": "trip_type"}),
+    ("hills",        "Hill trips (Coorg, Ooty, Manali): best March-June and October. Avoid July-August: heavy rain and landslides block hill roads. Carry a jacket even in summer.", {"topic": "trip_type"}),
+    ("heritage",     "Heritage trips (Hampi, Jaipur): best October-March. April-May afternoons cross 40°C, so explore early in the morning.", {"topic": "trip_type"}),
+    ("adventure",    "Adventure trips (Rishikesh, Dandeli): river rafting runs October-June and closes in the monsoon. Use licensed operators and always wear a life jacket.", {"topic": "trip_type"}),
+    ("book-early",   "Book trains and flights 30-60 days early; prices often double in the last week.",                     {"topic": "travel_tip"}),
+    ("weekdays",     "Weekday stays are often 20-30% cheaper than weekends.",                                                {"topic": "travel_tip"}),
+    ("long-weekend", "Long weekends and New Year push Goa prices up sharply; book early or pick Gokarna instead.",           {"topic": "travel_tip"}),
+    ("overnight",    "Overnight buses and trains save the cost of one night's stay.",                                       {"topic": "travel_tip"}),
+    ("big-group",    "Groups bigger than 6: a villa or homestay is usually cheaper than many hotel rooms.",                 {"topic": "travel_tip"}),
+]
+
+embed = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": True},
+)
+
+chroma = chromadb.Client()
+col = chroma.create_collection("trip_tips", metadata={"hnsw:space": "cosine"})
+vecs = embed.embed_documents([t for _, t, _ in KB])
+col.add(ids=[i for i, _, _ in KB], embeddings=vecs,
+        documents=[t for _, t, _ in KB], metadatas=[m for _, _, m in KB])
+
+
+def retrieve_context(query: str, n: int = 3) -&gt; str:
+    """Top-n notebook tips for this question, as bullet points."""
+    qv = embed.embed_query(query)
+    res = col.query(query_embeddings=[qv], n_results=n)
+    return "\n".join(f"- {c}" for c in res["documents"][0])
+
+
+# =============================================================================
+# 3. Tools (the agent decides when to call these)
+# =============================================================================
+@tool
+def db_lookup(place: str) -&gt; dict:
+    """Fetch a destination's trip type, best months, stay, room price, travel cost and daily spend from the database."""
+    record = fetch_place(place)
+    return record if record else {"error": f"{place} not found. Use list_destinations to see valid places."}
+
+
+@tool
+def list_destinations() -&gt; list[dict]:
+    """Return all destinations in the database."""
+    return list_places()
+
+
+@tool
+def compute_trip_cost(travel_cost_per_person: float, room_price_per_night: float,
+                      daily_spend_per_person: float, people: int, nights: int,
+                      budget_per_person: float | None = None) -&gt; dict:
+    """
+    Compute the trip cost per person with exact arithmetic.
+    One room fits 2 people. Returns: rooms_needed, stay_share_per_person,
+    food_and_fun_per_person, total_per_person, and (if a budget is given)
+    within_budget and money_left_per_person (negative = over budget).
+    """
+    rooms_needed = math.ceil(people / 2)
+    stay_share = round(rooms_needed * room_price_per_night * nights / people, 2)
+    food_and_fun = round(daily_spend_per_person * nights, 2)
+    total = round(travel_cost_per_person + stay_share + food_and_fun, 2)
+    result = {
+        "rooms_needed": rooms_needed,
+        "stay_share_per_person": stay_share,
+        "food_and_fun_per_person": food_and_fun,
+        "total_per_person": total,
+    }
+    if budget_per_person is not None:
+        result["within_budget"] = total &lt;= budget_per_person
+        result["money_left_per_person"] = round(budget_per_person - total, 2)
+    return result
+
+
+TOOLS = [db_lookup, list_destinations, compute_trip_cost]
+TOOL_MAP = {t.name: t for t in TOOLS}
+
+# =============================================================================
+# 4. Agent
+# =============================================================================
+MODEL = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+llm = ChatOpenAI(model=MODEL, reasoning_effort="none").bind_tools(TOOLS)   # see lesson 04
+
+SYSTEM = """You are Trip Buddy, a cheerful trip planner for groups of friends travelling from Bengaluru.
+
+When the user asks about a trip:
+1. Use db_lookup to fetch the place's prices
+2. Use compute_trip_cost for exact arithmetic (never do the maths yourself)
+3. Give a clear answer: can they afford it, cost per person, and 1-2 useful tips
+If the number of friends or nights is missing, ask for it before calculating.
+
+When the user asks to list places, call list_destinations.
+
+Travel notebook (use this for tips and warnings):
+{rag_context}"""
+
+MAX_STEPS = 10   # safety net so a confused model can't loop (and bill you) forever
+
+
+def run_agent(user_message: str) -&gt; str:
+    """One full ReAct run: RAG context → (think → tool → observe)* → final answer."""
+    # Build RAG context based on the message
+    rag_context = retrieve_context(user_message)
+
+    messages = [
+        SystemMessage(content=SYSTEM.format(rag_context=rag_context)),
+        HumanMessage(content=user_message),
+    ]
+
+    # ReAct loop
+    for _ in range(MAX_STEPS):
+        response = llm.invoke(messages)      # Reason: model decides what to do next
+        messages.append(response)
+
+        if not response.tool_calls:          # no tool requested → final answer
+            return response.text
+
+        for tc in response.tool_calls:       # Act: run each requested tool
+            fn = TOOL_MAP[tc["name"]]
+            result = fn.invoke(tc["args"])
+            print(f"  [tool] {tc['name']}({tc['args']})")
+            messages.append(ToolMessage(     # Observe: hand the result back
+                content=json.dumps(result, default=str),
+                tool_call_id=tc["id"],
+            ))
+
+    return "I had to stop after too many steps. Try asking about one place at a time."
+
+
+# =============================================================================
+# 5. Gradio chat interface
+# =============================================================================
+def chat_handler(message, _history):
+    """Gradio calls this for every chat message. _history is unused (each question stands alone)."""
+    try:
+        return run_agent(message)
+    except Exception as e:
+        return (
+            f"Something went wrong: {e}\n\n"
+            "Try: *\"We are 4 friends with ₹12,000 each. Can we do Goa for 3 nights?\"*  \n"
+            "Or: **list** to see all destinations."
+        )
+
+
+demo = gr.ChatInterface(
+    fn=chat_handler,
+    title="Trip Buddy (DB + RAG + Tools)",
+    description=(
+        "Plan a trip with friends. The agent fetches prices from the DB, "
+        "does exact maths with tools, and uses the travel notebook for tips.  \n"
+        "Type **list** to see all destinations."
+    ),
+    examples=[
+        "list",
+        "We are 4 friends with ₹12,000 each. Can we do Goa for 3 nights?",
+        "Is Manali a good idea in July?",
+        "How much is Hampi for 5 friends, 2 nights?",
+        "Which trips fit ₹8,000 each for 3 friends, 2 nights?",
+    ],
+)
+
+if __name__ == "__main__":
+    print("Starting Trip Buddy...")
+    print(f"  model: {MODEL}")
+    print(f"  {len(list_places())} destinations in DB")
+    print(f"  {col.count()} tips in ChromaDB")
+    demo.launch(debug=True)</code></pre></div>
+    </details>
+  </div>
+  <div class="code"><div class="head">Try asking · in the chat window</div><pre><code class="language-none">list
+We are 4 friends with ₹12,000 each. Can we do Goa for 3 nights?
+Is Manali a good idea in July?
+How much is Hampi for 5 friends, 2 nights?
+Which trips fit ₹8,000 each for 3 friends, 2 nights?</code></pre></div>
+  <div class="box fin"><span class="tag">🧳 Trip corner: check the agent against the table</span>
+    <p>Hampi for 5 friends, 2 nights: 3 rooms, stay share ₹1,800, food ₹1,600, travel ₹900, so <strong>₹4,300</strong> each. For "₹8,000 each, 3 friends, 2 nights" the simulation above shows six places fit: Hampi, Gokarna, Ooty, Coorg, Dandeli and Pondicherry. If the agent's list differs, look at the <code>[tool]</code> lines in the terminal: did it call <code>compute_trip_cost</code> for every place, or guess?</p>
+  </div>
+  <div class="box warn"><span class="tag">⚠️ Each question stands alone</span>
+    <p><code>chat_handler</code> ignores <code>_history</code>, so the agent forgets the last message. "And for 3 nights?" after a Goa question won't know you mean Goa. That is a deliberate simplification; stretch goal S4 adds memory.</p>
+  </div>
+</section>
+
+<hr class="sec">
+<section id="s">
+  <p class="kicker">Ship it</p>
+  <h2>Take Trip Buddy to where your friends already chat</h2>
+
+  <!-- T12 -->
+  <h3 id="t-chat"><span class="num">T12</span>Feature · Ask Trip Buddy from Slack or WhatsApp</h3>
+  <p>Nobody plans a trip in a Gradio tab. The plan happens in the group chat. The good news: <code>run_agent(text) → text</code> is already the whole brain. A chat app only needs a thin <strong>adapter</strong> that receives a message, calls <code>run_agent</code>, and sends the reply back. The database, notebook, tools and ReAct loop don't change at all.</p>
+  <figure>
+    <svg viewBox="0 0 820 250" role="img" aria-label="Slack and WhatsApp each send the friend's message to a small adapter: a Slack Bolt app over Socket Mode, or a Flask webhook called by Twilio. Both adapters call the same run_agent function from script 08, which uses the database, the notebook and the tools, and the reply goes back the same way.">
+      <defs><marker id="ch-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity=".6"/></marker></defs>
+      <g class="nd soft"><rect x="10" y="20" width="200" height="80" rx="10"/><text class="t13 b" x="26" y="46">Slack</text><text class="t11 sub" x="26" y="66">@Trip Buddy in #goa-plan,</text><text class="t11 sub" x="26" y="82">or a direct message</text></g>
+      <g class="nd soft"><rect x="10" y="140" width="200" height="80" rx="10"/><text class="t13 b" x="26" y="166">WhatsApp</text><text class="t11 sub" x="26" y="186">a message to the bot's</text><text class="t11 sub" x="26" y="202">number (Twilio)</text></g>
+      <g class="nd"><rect x="280" y="20" width="230" height="80" rx="10"/><text class="mono t13 b" x="296" y="46">slack_bot.py</text><text class="t11 sub" x="296" y="66">Slack Bolt · Socket Mode</text><text class="t11 sub" x="296" y="82">no public URL needed</text></g>
+      <g class="nd"><rect x="280" y="140" width="230" height="80" rx="10"/><text class="mono t13 b" x="296" y="166">whatsapp_bot.py</text><text class="t11 sub" x="296" y="186">Flask webhook · TwiML reply</text><text class="t11 sub" x="296" y="202">public URL via ngrok</text></g>
+      <g class="nd acc"><rect x="580" y="70" width="230" height="100" rx="10"/><text class="mono t13 b" x="596" y="96">run_agent(text)</text><text class="t11 sub" x="596" y="116">from trip_08_full_agent.py</text><text class="t11" x="596" y="138">DB + notebook + 3 tools</text><text class="t11" x="596" y="156">unchanged</text></g>
+      <line class="ar" x1="210" y1="60" x2="278" y2="60" marker-end="url(#ch-m)"/>
+      <line class="ar" x1="210" y1="180" x2="278" y2="180" marker-end="url(#ch-m)"/>
+      <line class="ar" x1="510" y1="60" x2="578" y2="100" marker-end="url(#ch-m)"/>
+      <line class="ar" x1="510" y1="180" x2="578" y2="142" marker-end="url(#ch-m)"/>
+      <text class="alab" x="540" y="238" text-anchor="middle">the reply goes back the same way</text>
+    </svg>
+    <figcaption>One brain, many front doors. Gradio, Slack and WhatsApp are just different ways to deliver <code>run_agent</code>'s text. This is the same idea as an MCP or A2A wrapper from Week 1: keep the agent, change the transport.</figcaption>
+  </figure>
+
+  <div class="tw"><table class="tbl">
+    <tr><th></th><th>Slack</th><th>WhatsApp</th></tr>
+    <tr><td><b>Library</b></td><td><code>slack_bolt</code></td><td><code>flask</code> + <code>twilio</code></td></tr>
+    <tr><td><b>How messages arrive</b></td><td>Socket Mode: your script opens a connection to Slack, so it runs on a laptop with no public URL</td><td>A webhook: Twilio POSTs each message to a public URL (ngrok while you develop)</td></tr>
+    <tr><td><b>Keys in .env</b></td><td><code>SLACK_BOT_TOKEN</code> (xoxb-…), <code>SLACK_APP_TOKEN</code> (xapp-…)</td><td>none to receive; Twilio signs each request (check it, see below)</td></tr>
+    <tr><td><b>Free to try</b></td><td>Any workspace where you can create an app</td><td>Twilio's WhatsApp Sandbox: each friend joins once with a code word</td></tr>
+    <tr><td><b>Watch out</b></td><td>Reply in a thread so the channel stays readable</td><td>Twilio waits 15 s for the reply and a message holds 1,600 characters</td></tr>
+  </table></div>
+
+  <h4>Option A · Slack</h4>
+  <ol class="walk">
+    <li>At api.slack.com/apps, <strong>create an app</strong> from scratch in your workspace.</li>
+    <li><strong>Socket Mode</strong>: turn it on and create an app-level token with <code>connections:write</code>. That is <code>SLACK_APP_TOKEN</code>.</li>
+    <li><strong>OAuth &amp; Permissions</strong>: add the bot scopes <code>app_mentions:read</code>, <code>chat:write</code> and <code>im:history</code>, then install the app. The Bot User OAuth Token is <code>SLACK_BOT_TOKEN</code>.</li>
+    <li><strong>Event Subscriptions</strong>: subscribe to the bot events <code>app_mention</code> and <code>message.im</code>. Under <strong>App Home</strong>, allow messages in the Messages tab.</li>
+    <li>Invite the bot to your trip channel with <code>/invite @Trip Buddy</code>, run <code>uv run slack_bot.py</code>, and ask it something.</li>
+  </ol>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · slack_bot.py (suggested, next to script 08)</div><pre>LOAD SLACK_BOT_TOKEN and SLACK_APP_TOKEN from .env
+IMPORT run_agent from trip_08_full_agent   // builds the DB and notebook; does not start Gradio
+CREATE app = Slack Bolt App with the bot token
+
+ON a message that mentions @Trip Buddy in a channel:
+    SET question = the text without the "@Trip Buddy" tag
+    REPLY in the message's thread with run_agent(question)
+
+ON a direct message to the bot:
+    IF it was sent by a bot THEN ignore it   // never answer yourself
+    REPLY with run_agent(text)
+
+START Socket Mode with the app token   // runs until you press Ctrl+C</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · slack_bot.py (suggested)</div><pre><code class="language-python">"""
+slack_bot.py: ask Trip Buddy from Slack.
+
+Run next to trip_08_full_agent.py:
+    uv add slack-bolt
+    uv run slack_bot.py
+.env needs SLACK_BOT_TOKEN (xoxb-...) and SLACK_APP_TOKEN (xapp-...).
+"""
+import os
+import re
+
+from dotenv import load_dotenv
+from slack_bolt import App
+from slack_bolt.adapter.socket_mode import SocketModeHandler
+
+load_dotenv()
+
+# Importing builds the database, the notebook and the tools.
+# Gradio only starts under `if __name__ == "__main__"`, so it stays off here.
+from trip_08_full_agent import run_agent
+
+app = App(token=os.environ["SLACK_BOT_TOKEN"])
+
+
+@app.event("app_mention")
+def on_mention(event, say):
+    """Someone wrote @Trip Buddy in a channel: answer in that message's thread."""
+    question = re.sub(r"&lt;@[A-Z0-9]+&gt;\s*", "", event["text"]).strip()   # drop the @mention tag
+    say(text=run_agent(question), thread_ts=event.get("thread_ts", event["ts"]))
+
+
+@app.event("message")
+def on_direct_message(event, say):
+    """A direct message to the bot. Ignore bot messages, including our own replies."""
+    if event.get("channel_type") == "im" and not event.get("bot_id") and event.get("text"):
+        say(text=run_agent(event["text"]))
+
+
+if __name__ == "__main__":
+    print("Trip Buddy is listening on Slack (Ctrl+C to stop)...")
+    SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start()</code></pre></div>
+    </details>
+  </div>
+
+  <h4>Option B · WhatsApp (Twilio Sandbox)</h4>
+  <ol class="walk">
+    <li>In the Twilio console, open <strong>Messaging → Try it out → Send a WhatsApp message</strong>. Each friend sends the sandbox's <code>join &lt;code-word&gt;</code> message to its number once.</li>
+    <li>Run <code>uv run whatsapp_bot.py</code> (port 5000), then <code>ngrok http 5000</code> in a second terminal.</li>
+    <li>In the sandbox settings, set <strong>When a message comes in</strong> to <code>https://&lt;your-ngrok-id&gt;.ngrok-free.app/whatsapp</code>, method POST.</li>
+    <li>Message the sandbox number: <em>"We are 4 friends with ₹12,000 each. Can we do Goa for 3 nights?"</em></li>
+  </ol>
+  <div class="lk-code">
+    <div class="lk-pseudo"><div class="lk-label">Pseudo code · whatsapp_bot.py (suggested, next to script 08)</div><pre>IMPORT run_agent from trip_08_full_agent
+CREATE app = Flask web app
+
+ON POST /whatsapp:   // Twilio calls this for every incoming WhatsApp message
+    IF the X-Twilio-Signature header is not valid THEN RETURN 403   // only Twilio may call
+    SET question = the "Body" form field
+    SET answer = run_agent(question), cut to 1,500 characters   // WhatsApp limit
+    RETURN a TwiML reply containing answer   // Twilio sends it to the friend
+
+START the app on port 5000   // expose it with: ngrok http 5000</pre></div>
+    <details class="lk-reveal"><summary>View code</summary>
+  <div class="code"><div class="head">Python · whatsapp_bot.py (suggested)</div><pre><code class="language-python">"""
+whatsapp_bot.py: ask Trip Buddy on WhatsApp, through the Twilio Sandbox.
+
+Run next to trip_08_full_agent.py:
+    uv add flask twilio
+    uv run whatsapp_bot.py          # then, in another terminal: ngrok http 5000
+.env needs TWILIO_AUTH_TOKEN (to check that requests really come from Twilio).
+"""
+import os
+
+from dotenv import load_dotenv
+from flask import Flask, abort, request
+from twilio.request_validator import RequestValidator
+from twilio.twiml.messaging_response import MessagingResponse
+
+load_dotenv()
+
+from trip_08_full_agent import run_agent   # builds DB + notebook; Gradio stays off
+
+app = Flask(__name__)
+validator = RequestValidator(os.environ["TWILIO_AUTH_TOKEN"])
+MAX_CHARS = 1500   # a WhatsApp message via Twilio holds 1,600 characters
+
+
+@app.post("/whatsapp")
+def whatsapp():
+    # Only Twilio can sign a request with your auth token. Behind ngrok, the URL
+    # Twilio signed is the public https one, so rebuild it from the forwarded headers.
+    url = request.url.replace("http://", "https://", 1) if request.headers.get("X-Forwarded-Proto") == "https" else request.url
+    if not validator.validate(url, request.form, request.headers.get("X-Twilio-Signature", "")):
+        abort(403)
+
+    question = request.form.get("Body", "").strip()
+    answer = run_agent(question) if question else "Ask me about a trip, or send: list"
+
+    reply = MessagingResponse()
+    reply.message(answer[:MAX_CHARS])
+    return str(reply), 200, {"Content-Type": "application/xml"}
+
+
+if __name__ == "__main__":
+    app.run(port=5000)</code></pre></div>
+    </details>
+  </div>
+
+  <div class="box warn"><span class="tag">⚠️ Before you share the bot with friends</span>
+    <ul>
+      <li><strong>Keys stay in <code>.env</code>.</strong> Slack and Twilio tokens are passwords; never paste them into code or the group chat.</li>
+      <li><strong>Check who is calling.</strong> The WhatsApp webhook is a public URL; the Twilio signature check is what stops strangers from spending your OpenAI credits.</li>
+      <li><strong>Slow answers.</strong> A long ReAct run can pass Twilio's 15-second limit. For real use, reply "Planning…" at once and send the answer later with Twilio's REST API.</li>
+      <li><strong>Phone numbers are personal data.</strong> Don't log them, and don't store chats you don't need.</li>
+      <li><strong>The sandbox is for testing.</strong> A real WhatsApp number needs a WhatsApp Business account (through Twilio or Meta's Cloud API) and approved templates for messages the bot starts.</li>
+    </ul>
+  </div>
+  <div class="box analogy"><span class="tag">🧠 Same chef, new delivery apps</span>
+    <p>The kitchen (<code>run_agent</code>) doesn't care whether an order came from the dine-in counter (Gradio), Swiggy (Slack) or Zomato (WhatsApp). Each delivery app needs its own rider, the adapter, who picks up the order and drops off the food. You add front doors without touching the recipe.</p>
+  </div>
 </section>
 
 <hr class="sec">
@@ -1514,24 +2320,27 @@ for q in questions:
   <p class="kicker">Own it</p>
   <h2>Your project</h2>
 
-  <!-- T10 -->
-  <h3 id="t-project"><span class="num">T10</span>Milestones, stretch goals and rubric</h3>
+  <!-- T13 -->
+  <h3 id="t-project"><span class="num">T13</span>Milestones, stretch goals and rubric</h3>
   <div class="tw"><table class="tbl">
     <tr><th>Milestone</th><th>Build</th><th>Done when…</th><th class="num">Time</th></tr>
     <tr><td><b>M0 · Data</b></td><td>project set up, script 01</td><td>the JOIN table prints 3 places, and "PARIS" returns <code>None</code></td><td class="num">20 min</td></tr>
     <tr><td><b>M1 · Meaning</b></td><td>scripts 02 and 03</td><td>the mountains question finds the hills tip; the money search returns only money tips</td><td class="num">40 min</td></tr>
     <tr><td><b>M2 · Planner</b></td><td>script 04</td><td>you've caught at least one run where the LLM's Manali number is not 20866.67</td><td class="num">30 min</td></tr>
     <tr><td><b>M3 · Grounded</b></td><td>script 05</td><td>the RAG answer warns about July rain and landslides; you can say which tip it came from</td><td class="num">30 min</td></tr>
-    <tr><td><b>M4 · Trip Buddy v1</b></td><td>join 01 + 03 + 06 into one agent</td><td><code>lookup_place</code> reads SQLite, a new <code>get_travel_tips</code> tool wraps <code>retrieve()</code>, and one question returns the exact cost <em>and</em> the monsoon warning</td><td class="num">2 h</td></tr>
+    <tr><td><b>M4 · Pipeline</b></td><td>script 07</td><td>Goa comes back GO with ₹200 left, Manali NOT YET with one suggested change, and chain 1 never changes a tool number</td><td class="num">40 min</td></tr>
+    <tr><td><b>M5 · Trip Buddy</b></td><td>script 08</td><td>"list" shows 10 places; Hampi for 5 friends, 2 nights is ₹4,300; the ₹8,000 question returns the six places from the simulation</td><td class="num">1 h</td></tr>
+    <tr><td><b>M6 · In the group chat</b></td><td>T12: <code>slack_bot.py</code> or <code>whatsapp_bot.py</code></td><td>a friend asks from Slack or WhatsApp and gets the same answer as in Gradio</td><td class="num">1 h</td></tr>
   </table></div>
   <h4>Stretch goals (pick two)</h4>
   <ol class="walk">
     <li><strong>S1 · Port it to AWS</strong>: swap <code>ChatOpenAI</code> for Strands' <code>BedrockModel</code> and the hand-written loop for <code>Agent(model, tools=[...])</code>, as in <a href="../your-first-agent/">Lesson 1</a>. Compare the tool trail.</li>
-    <li><strong>S2 · A budget check tool</strong>: <code>check_budget(cost, budget)</code> returns over or under, by how much, and the 10% buffer from the notebook. The agent must never say "fits" when the tool says "over".</li>
+    <li><strong>S2 · The 10% buffer</strong>: make <code>compute_trip_cost</code> also return <code>total_with_buffer</code> (the notebook's 10% rule) and judge <code>within_budget</code> on it. The agent must never say "fits" when the tool says it doesn't.</li>
     <li><strong>S3 · Keep the notebook</strong>: use <code>chromadb.PersistentClient(path=...)</code> and a SQLite file instead of <code>:memory:</code>, so tips and prices survive a restart.</li>
-    <li><strong>S4 · Grow the data</strong>: add Ooty, Gokarna and Rishikesh to both tables, and two tips of your own, then ask about each one.</li>
+    <li><strong>S4 · Remember the conversation</strong>: pass Gradio's <code>history</code> (or the Slack thread) into <code>run_agent</code>, so "and for 3 nights?" knows you still mean Goa.</li>
     <li><strong>S5 · Remember the group</strong>: add long-term memory (<a href="../Agents-that-remember/">Lesson 3</a>), so "we're vegetarian and hate long bus rides" shapes every later plan.</li>
     <li><strong>S6 · Test the maths</strong>: plain <code>assert</code>s on the two calculators (Goa 11800, Manali 20866.67, 1 friend still needs 1 room) that run without an LLM.</li>
+    <li><strong>S7 · Your own place</strong>: add a destination to all three tables and two tips of your own, then ask Trip Buddy about it.</li>
   </ol>
   <h4>Rubric (100 points)</h4>
   <div class="tw"><table class="tbl">
@@ -1539,7 +2348,7 @@ for q in questions:
     <tr><td>Correct numbers</td><td>every cost comes from a tool; rooms always rounded up; matches the calculator above</td><td class="num">25</td></tr>
     <tr><td>Grounded advice</td><td>season and packing advice comes from retrieved tips, and the answer shows which ones</td><td class="num">20</td></tr>
     <tr><td>Retrieval quality</td><td>the right shelf (<code>where</code>) for the question; sensible <code>n</code></td><td class="num">15</td></tr>
-    <tr><td>Agent design</td><td>clear tool docstrings, tools that return errors instead of crashing, a step limit</td><td class="num">15</td></tr>
+    <tr><td>Agent design</td><td>clear tool docstrings, tools that return errors instead of crashing, a step limit; works from a chat app</td><td class="num">15</td></tr>
     <tr><td>Honest answers</td><td>says "over budget" when it is, and "I don't have prices for that" for unknown places</td><td class="num">15</td></tr>
     <tr><td>Code quality</td><td>commented, small functions, the maths testable without an LLM</td><td class="num">10</td></tr>
   </table></div>
@@ -1556,6 +2365,8 @@ for q in questions:
     <li><strong>RAG = retrieve → augment → generate.</strong> The context is just text pasted into the prompt, and it makes the answer specific.</li>
     <li><strong>LLMs are bad calculators.</strong> 3 friends need 2 rooms. Give the model tools and let Python do the maths.</li>
     <li><strong>The agent loop is small.</strong> Ask, run the requested tools, send the results back, repeat until there are no tool calls.</li>
+    <li><strong>Pipeline or agent.</strong> Fixed steps: chain them yourself (script 07). Steps that depend on the question: let the model choose tools (script 08).</li>
+    <li><strong>One brain, many front doors.</strong> Gradio, Slack and WhatsApp are thin adapters around the same <code>run_agent</code>.</li>
   </ol>
 
   <div class="lk-quiz">
@@ -1598,6 +2409,22 @@ for q in questions:
         <li>After every tool has been called once<div class="lk-why">The model may call some tools several times and others not at all. Calling every tool is not the stop rule.</div></li>
         <li data-correct>When the model's response has no tool calls<div class="lk-why">No tool calls means the model is done. Its text becomes the answer. <code>MAX_STEPS</code> is only the safety net.</div></li>
         <li>When <code>calculate_trip_cost</code> returns a number<div class="lk-why">The result goes back to the model as a ToolMessage. The model decides whether to call more tools or answer.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">In script 07, what does <code>decide_chain</code> read to make its GO or NOT YET call?</p>
+      <ol class="lk-opts">
+        <li>The raw database row<div class="lk-why">The database row goes into the tool and into chain 1. Chain 2 gets the place name, the budget and chain 1's text.</div></li>
+        <li data-correct>Chain 1's breakdown text, plus the place name and the budget<div class="lk-why">That is the multi-chain idea: <code>breakdown</code>, the output of chain 1, is an input of chain 2.</div></li>
+        <li>Nothing: it calls <code>trip_cost_tool</code> again itself<div class="lk-why">Chain 2 has no tools. The numbers were computed once, by Python, before either chain ran.</div></li>
+      </ol>
+    </div>
+    <div class="lk-q">
+      <p class="lk-stem">What do you change in <code>trip_08_full_agent.py</code> to answer questions from Slack?</p>
+      <ol class="lk-opts">
+        <li>Rewrite the tools so they post to Slack<div class="lk-why">The tools don't know where the question came from, and they shouldn't.</div></li>
+        <li>Replace Gradio's <code>ChatInterface</code> with a Slack version of the ReAct loop<div class="lk-why">The loop stays as it is. Only the front door changes.</div></li>
+        <li data-correct>Nothing: a small <code>slack_bot.py</code> imports <code>run_agent</code> and sends its text back<div class="lk-why">The adapter receives the message, calls <code>run_agent</code> and replies. Gradio only starts under <code>if __name__ == "__main__"</code>, so importing is safe.</div></li>
       </ol>
     </div>
   </div>
@@ -1744,6 +2571,53 @@ Prism.languages.json={property:{pattern:/(^|[^\\])"(?:\\.|[^\\"\r\n])*"(?=\s*:)/
     }
     btns.forEach(function (b, k) { b.addEventListener("click", function () { show(k); }); });
     show(0);
+  })();
+
+  /* ---------- T10: multi-chain pipeline ---------- */
+  (function () {
+    var out = $("#mc-out"); if (!out) return;
+    var P = [
+      "<b>① Tool, called by Python.</b> No LLM yet: <code>trip_cost_tool.invoke({...})</code> takes the prices from the 3-table JOIN. For Manali, 3 friends, 4 nights:<pre class=\"val\" style=\"margin-top:8px;white-space:pre-wrap\">" + esc("[Tool] trip_cost_tool → {'rooms_needed': 2, 'stay_share': 6666.67, 'food_and_fun': 5200.0, 'total_per_person': 20866.67}") + "</pre>",
+      "<b>② Chain 1 explains.</b> Its system prompt says the numbers come from a trusted tool, <em>do NOT redo them</em>, and it must end with <code>COST_PER_PERSON: 20866.67</code>. The LLM only turns the numbers into plain words.",
+      "<b>③ Chain 2 decides.</b> It never sees the tool. It reads chain 1's text, the place name and the budget, and says <b>GO</b> or <b>NOT YET</b>. Manali is ₹866.67 over ₹20,000, so it should say NOT YET and suggest one change, such as fewer nights, a cheaper place or a fourth friend. (Wording varies run to run.)"
+    ];
+    var btns = $$("[data-mc]");
+    function show(i) {
+      btns.forEach(function (b, k) { b.classList.toggle("on", k === i); b.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+      out.innerHTML = P[i];
+    }
+    btns.forEach(function (b, k) { b.addEventListener("click", function () { show(k); }); });
+    show(0);
+  })();
+
+  /* ---------- T11: which trips fit? (the 10 places of script 08) ---------- */
+  (function () {
+    var tbl = $("#f-table"); if (!tbl) return;
+    var D = [ // name, type, best months, room/night, travel, daily
+      ["Goa", "Beach", "Nov–Feb", 3000, 2800, 1500], ["Gokarna", "Beach", "Oct–Mar", 1800, 1200, 900],
+      ["Pondicherry", "Beach", "Oct–Mar", 2500, 1400, 1200], ["Coorg", "Hills", "Oct–Jun", 2800, 1000, 1100],
+      ["Ooty", "Hills", "Mar–Jun", 2200, 1000, 1000], ["Manali", "Hills", "Mar–Jun", 2500, 9000, 1300],
+      ["Hampi", "Heritage", "Oct–Feb", 1500, 900, 800], ["Jaipur", "Heritage", "Oct–Mar", 2400, 7500, 1200],
+      ["Rishikesh", "Adventure", "Oct–Jun", 1600, 8500, 1400], ["Dandeli", "Adventure", "Oct–May", 2000, 1100, 1600]
+    ];
+    function n(id, min) { var v = parseFloat($("#" + id).value); return isNaN(v) || v < min ? min : v; }
+    function calc() {
+      var p = Math.round(n("f-people", 1)), ni = n("f-nights", 1), b = n("f-budget", 0);
+      var rows = D.map(function (d) {
+        var rooms = Math.ceil(p / 2), stay = Math.round(rooms * d[3] * ni / p * 100) / 100;
+        var total = Math.round((d[4] + stay + d[5] * ni) * 100) / 100;
+        return { d: d, total: total, left: Math.round((b - total) * 100) / 100 };
+      }).sort(function (a, c) { return a.total - c.total; });
+      tbl.innerHTML = "<tr><th>Place</th><th>Type · best</th><th class=\"num\">Total / person</th><th>Fits?</th></tr>" + rows.map(function (r) {
+        return "<tr><td><b>" + r.d[0] + "</b></td><td>" + r.d[1] + " · " + r.d[2] + "</td><td class=\"num\">" + inr(r.total) + "</td><td>" +
+          (r.left >= 0 ? "<span class=\"pill ok\">yes · " + inr(r.left) + " left</span>" : "<span class=\"pill no\">no · " + inr(-r.left) + " over</span>") + "</td></tr>";
+      }).join("");
+      var fit = rows.filter(function (r) { return r.left >= 0; }).map(function (r) { return r.d[0]; });
+      $("#f-out").innerHTML = "<b>" + fit.length + " of 10</b> fit ₹" + b.toLocaleString("en-IN") + " each for " + p + " friends, " + ni + " nights" +
+        (fit.length ? ": " + fit.join(", ") + "." : ".") + " Rooms = " + p + " ÷ 2 rounded up = " + Math.ceil(p / 2) + ", the same rule as <code>compute_trip_cost</code>.";
+    }
+    ["f-people", "f-nights", "f-budget"].forEach(function (id) { $("#" + id).addEventListener("input", calc); });
+    calc();
   })();
 
   /* ---------- T9: tool loop stepper ---------- */
