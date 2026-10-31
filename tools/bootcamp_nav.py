@@ -74,6 +74,7 @@ LEARN_RECORDINGS[("Class-10-AI-infusion/index.html", "top")] = LEARN_RECORDINGS[
 GITHUB = {
     **{folder: "" for folder, *_ in SEQ},
     **{f"Class-{n}": "" for n in ("1", "2", "3-4", "5", "6", "7", "8", "9")},
+    "trip-buddy": "https://github.com/balajiraghuram92/Scaler-AI-Infusion-Bootcamp/tree/main/excersices/Lab-project/Trip-Buddy",
 }
 # Zips already in /zips, served from this site.
 ZIPS = {
