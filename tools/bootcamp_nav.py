@@ -42,6 +42,8 @@ SEQ = [(*item, week, wdir) for week, wdir, items in WEEKS for item in items]
 # The bottom nav on each links to the other version.
 V2 = {"your-first-agent", "giving-agents-tools", "Agents-that-remember", "agents-that-work-together",
       "How-agents-talk", "shipping-agents-to-production", "evals-observability-governance"}
+# The same for AI-Infusion classes: the original from the class zip at Learnings/<folder>/, ours at <folder>-v2/.
+LEARN_V2 = {"Class-1-AI-infusion", "Class-2-AI-infusion", "Class-3-4-AI-infusion", "Class-5-AI-infusion", "Class-6-AI-infusion"}
 
 _REC = "https://www.scaler.com/meetings/i/{}/archive"
 
@@ -191,6 +193,11 @@ AIH_STYLE = """<!-- aih:style --><style>
 .aiseq a.aq-fb:hover{border-color:var(--aq-acc);color:var(--aq-ink);text-decoration:none}
 .aiseq .aq-fb small{font:600 10px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--aq-dim)}
 .aiseq span.aq-fb{border-style:dashed;color:var(--aq-dim);font-weight:500}
+.aiseq .aq-ver{display:flex;justify-content:flex-end;margin:10px 0 0;padding:9px 0 0;border-top:1px dashed var(--aq-line)}
+.aiseq a.aq-vl{display:inline-flex;align-items:center;gap:8px;padding:5px 11px;border-radius:999px;border:1px solid var(--aq-acc);color:var(--aq-ink);
+  font-size:13px;font-weight:600;line-height:1.3;text-decoration:none}
+.aiseq a.aq-vl:hover{background:var(--aq-off);color:var(--aq-ink);text-decoration:none}
+.aiseq .aq-vl small{font:600 10px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--aq-dim)}
 </style><!-- /aih:style -->"""
 
 HOME_BTN = '<a class="aih" href="../../" title="Back to the AI-Infusion home page">⌂ AI-Infusion</a>'
@@ -362,10 +369,25 @@ def build_learnings():
         s = s.replace('<a class="aq-home" href="../../">', '<a class="aq-home" href="../../AI-Infusion/">')
         s = re.sub(r"<!-- aqrec -->.*?<!-- /aqrec -->", "", s)
         s = re.sub(r"<!-- aqfiles -->.*?<!-- /aqfiles -->", "", s)
-        rel = p.relative_to(ROOT / "Learnings").as_posix()
-        s = set_title(s, f"{LEARN_TITLES[rel]} · AI-Infusion")
+        v2 = p.parent.name.endswith("-v2")
+        folder = p.parent.name.removesuffix("-v2")
+        rel = f"{folder}/{p.name}"
+        s = set_title(s, f"{LEARN_TITLES[rel]}{' (v2)' if v2 else ''} · AI-Infusion")
+        if v2:
+            # prev / next and the step dots stay on v2 wherever a class has one
+            s = re.sub(r'href="\.\./([^"/]+)/', lambda m: f'href="../{m.group(1)}-v2/' if m.group(1) in LEARN_V2 else m.group(0), s)
+            s = re.sub(r'(<div class="aiseq aiseq-top".*?<span class="aq-cap">[^<]*?)(?<! · v2)</span>', r"\1 · v2</span>", s, count=1)
+        s = re.sub(r"<!-- aqver -->.*?<!-- /aqver -->", "", s)
+        if folder in LEARN_V2:
+            page = "" if p.name == "index.html" else p.name
+            if v2:
+                link = f'<a class="aq-vl" href="../{folder}/{page}">← Original version<small>as taught on Scaler</small></a>'
+            else:
+                link = f'<a class="aq-vl" href="../{folder}-v2/{page}">Read the v2 version →<small>reworked edition</small></a>'
+            # the Project files box goes in after the steps below, so this ends up under it
+            s = insert_after_steps(s, "bottom", f'<!-- aqver --><div class="aq-ver">{link}</div><!-- /aqver -->', rel)
         # Class-10 redirects to the Class 9 page, whose code it shares
-        key = re.match(r"Class-([\d-]+)", rel).group(0).replace("Class-10", "Class-9")
+        key = re.match(r"Class-\d+(?:-\d+)?", rel).group(0).replace("Class-10", "Class-9")
         for where in ("top", "mid"):
             recs = LEARN_RECORDINGS.get((rel, where))
             if not recs:
