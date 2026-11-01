@@ -42,8 +42,10 @@ SEQ = [(*item, week, wdir) for week, wdir, items in WEEKS for item in items]
 # The bottom nav on each links to the other version.
 V2 = {"your-first-agent", "giving-agents-tools", "Agents-that-remember", "agents-that-work-together",
       "How-agents-talk", "shipping-agents-to-production", "evals-observability-governance"}
-# The same for AI-Infusion classes: the original from the class zip at Learnings/<folder>/, ours at <folder>-v2/.
-LEARN_V2 = {"Class-1-AI-infusion", "Class-2-AI-infusion", "Class-3-4-AI-infusion", "Class-5-AI-infusion", "Class-6-AI-infusion"}
+# The same for AI-Infusion classes: the original (Classes 1-6 from their zips, 7-9 as written before the
+# pseudo code and quizzes went in) at Learnings/<folder>/, and the page with them at <folder>-v2/.
+LEARN_V2 = {"Class-1-AI-infusion", "Class-2-AI-infusion", "Class-3-4-AI-infusion", "Class-5-AI-infusion", "Class-6-AI-infusion",
+            "Class-7-AI-infusion", "Class-8-AI-infusion", "Class-9-Ai-Infusion"}
 
 _REC = "https://www.scaler.com/meetings/i/{}/archive"
 
