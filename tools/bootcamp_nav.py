@@ -38,6 +38,11 @@ WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2)]
 # Every page in order across the weeks: (folder, step, kind, title, week label, week folder)
 SEQ = [(*item, week, wdir) for week, wdir, items in WEEKS for item in items]
 
+# Lessons that keep Scaler's original page at <folder>/ and our reworked page at <folder>-v2/.
+# The bottom nav on each links to the other version.
+V2 = {"your-first-agent", "giving-agents-tools", "Agents-that-remember", "agents-that-work-together",
+      "How-agents-talk", "shipping-agents-to-production", "evals-observability-governance"}
+
 _REC = "https://www.scaler.com/meetings/i/{}/archive"
 
 # Bootcamp recordings: shown on each week's page and on every lesson of that week.
@@ -155,6 +160,11 @@ span.awsq-fb{border-style:dashed;color:var(--q-muted);font-weight:600}
 .awsq a.aih{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--q-acc);color:var(--q-on);
   font:700 .74rem/1.2 var(--q-mono);letter-spacing:.04em;text-decoration:none;white-space:nowrap}
 .awsq a.aih:hover{filter:brightness(1.08);text-decoration:none}
+.awsq-ver{display:flex;justify-content:flex-end;margin:11px 0 0;padding:10px 0 0;border-top:1px dashed var(--q-rule)}
+a.awsq-vl{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid var(--q-acc);color:var(--q-acc-ink);
+  font-size:.85rem;font-weight:700;line-height:1.3;text-decoration:none}
+a.awsq-vl:hover{background:var(--q-acc-t);text-decoration:none}
+.awsq-vl small{font:600 .66rem/1.3 var(--q-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--q-muted)}
 .awsq-bottom{padding:0 !important;margin:48px 0 8px;max-width:none}
 .awsq-inmain{padding:0 !important;margin:0 0 28px;max-width:none}
 @media (max-width:1100px){.awsq{padding:0 24px}}
@@ -232,26 +242,42 @@ def week_items(wdir):
     return [s for s in SEQ if s[5] == wdir]
 
 
-def caption(i):
+def href(folder, v2):
+    """On a v2 page, prev / next and the step dots stay on v2 wherever a lesson has one."""
+    return f"{folder}-v2" if v2 and folder in V2 else folder
+
+
+def caption(i, v2=False):
     _, step, kind, _, week, wdir = SEQ[i]
+    tag = " · v2" if v2 else ""
     if step == "0":
-        return f"{BRAND} · {week} · Revision"
+        return f"{BRAND} · {week} · Revision{tag}"
     if step.startswith("P"):
         n = sum(1 for s in week_items(wdir) if s[1].startswith("P"))
-        return f"{BRAND} · {week} · {kind} of {n}"
+        return f"{BRAND} · {week} · {kind} of {n}{tag}"
     # lessons are numbered across the whole course, so count them across every week
     n = max(int(s[1]) for s in SEQ if s[1].isdigit())
-    return f"{BRAND} · {week} · {kind} of {n}"
+    return f"{BRAND} · {week} · {kind} of {n}{tag}"
 
 
-def side(i, cur_week, cls, label):
+def version_link(folder, v2):
+    if folder not in V2:
+        return ""
+    if v2:
+        link = f'<a class="awsq-vl" href="../{folder}/">← Original version<small>as taught on Scaler</small></a>'
+    else:
+        link = f'<a class="awsq-vl" href="../{folder}-v2/">Read the v2 version →<small>reworked edition</small></a>'
+    return f'<div class="awsq-ver">{link}</div>'
+
+
+def side(i, cur_week, cls, label, v2=False):
     if i < 0 or i >= len(SEQ):
         msg = "You're at the start" if cls == "awsq-prev" else "More projects · coming soon"
         return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">{msg}</span></span>'
     folder, _, kind, title, week, _ = SEQ[i]
     # name the week when prev / next crosses into another one
     where = f"{e(week)} · " if week != cur_week else ""
-    return (f'<a class="awsq-l {cls}" href="../{folder}/"><span class="awsq-d">{label}</span>'
+    return (f'<a class="awsq-l {cls}" href="../{href(folder, v2)}/"><span class="awsq-d">{label}</span>'
             f'<span class="awsq-t">{where}{e(kind)} · {e(title)}</span></a>')
 
 
@@ -265,7 +291,7 @@ def recordings(folder):
     return f'<div class="awsq-recs">{links}</div>'
 
 
-def nav(i, where):
+def nav(i, where, v2=False):
     folder, *_, week, wdir = SEQ[i]
     steps = []
     for j, (f, step, kind, title, _, d) in enumerate(SEQ):
@@ -273,16 +299,17 @@ def nav(i, where):
             continue
         cls = "cur" if j == i else ("done" if j < i else "")
         cur = ' aria-current="page"' if j == i else ""
-        steps.append(f'<li><a class="{cls}" href="../{f}/" title="{e(kind)} · {e(title)}"{cur}>{step}</a></li>')
+        steps.append(f'<li><a class="{cls}" href="../{href(f, v2)}/" title="{e(kind)} · {e(title)}"{cur}>{step}</a></li>')
     extra = " awsq-inmain" if folder in FINANCE and where == "top" else ""
     every = "all projects" if all(s[1].startswith("P") for s in week_items(wdir)) else "all lessons"
     return (f'<nav class="awsq awsq-{where}{extra}" aria-label="Bootcamp navigation ({where})"><div class="awsq-box">'
-            f'<div class="awsq-head"><span class="awsq-cap">{e(caption(i))}</span>{HOME_BTN}</div>'
-            f'<div class="awsq-row">{side(i - 1, week, "awsq-prev", "← Previous")}'
+            f'<div class="awsq-head"><span class="awsq-cap">{e(caption(i, v2))}</span>{HOME_BTN}</div>'
+            f'<div class="awsq-row">{side(i - 1, week, "awsq-prev", "← Previous", v2)}'
             f'<a class="awsq-home" href="../{wdir}/"><b>{BRAND}</b>{e(week)} · {every}</a>'
-            f'{side(i + 1, week, "awsq-next", "Next →")}</div>'
+            f'{side(i + 1, week, "awsq-next", "Next →", v2)}</div>'
             f'<ol class="awsq-steps" aria-label="All lessons">{"".join(steps)}</ol>'
-            f'{recordings(folder) if where == "top" else ""}{files_box(folder, "awsq")}</div></nav>')
+            f'{recordings(folder) if where == "top" else ""}{files_box(folder, "awsq")}'
+            f'{version_link(folder, v2) if where == "bottom" else ""}</div></nav>')
 
 
 def set_title(s, title):
@@ -293,11 +320,13 @@ def set_title(s, title):
 
 
 def build_aws():
-    for i, (folder, _, kind, title, week, _) in enumerate(SEQ):
-        p = ROOT / "AWS-Bootcamp" / folder / "index.html"
-        s = set_title(p.read_text(encoding="utf-8"), f"{week} · {kind} · {title} · {BRAND}")
-        top = f"<!-- awsq:top -->\n{AWSQ_STYLE}\n{nav(i, 'top')}\n<!-- /awsq:top -->\n"
-        bottom = f"<!-- awsq:bottom -->\n{nav(i, 'bottom')}\n<!-- /awsq:bottom -->\n"
+    pages = [(i, False) for i in range(len(SEQ))] + [(i, True) for i, s in enumerate(SEQ) if s[0] in V2]
+    for i, v2 in pages:
+        folder, _, kind, title, week, _ = SEQ[i]
+        p = ROOT / "AWS-Bootcamp" / href(folder, v2) / "index.html"
+        s = set_title(p.read_text(encoding="utf-8"), f"{week} · {kind} · {title}{' (v2)' if v2 else ''} · {BRAND}")
+        top = f"<!-- awsq:top -->\n{AWSQ_STYLE}\n{nav(i, 'top', v2)}\n<!-- /awsq:top -->\n"
+        bottom = f"<!-- awsq:bottom -->\n{nav(i, 'bottom', v2)}\n<!-- /awsq:bottom -->\n"
         s, n = re.subn(r"<!-- awsq:top -->.*?<!-- /awsq:top -->\n", lambda m: top, s, flags=re.S)
         if not n:
             if folder in FINANCE:
