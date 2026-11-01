@@ -30,6 +30,7 @@ WEEK1 = [
     ("finance-nps-project", "P2", "Project 2", "NPS analyst in a box"),
 ]
 WEEK2 = [
+    ("evals-observability-governance", "7", "Lesson 7", "Evals, observability and governance"),
     ("trip-buddy", "P1", "Project 1", "Trip Buddy"),
 ]
 # (label, folder of the week page, lessons)
@@ -89,6 +90,7 @@ GITHUB = {
     **{folder: "" for folder, *_ in SEQ},
     **{f"Class-{n}": "" for n in ("1", "2", "3-4", "5", "6", "7", "8", "9")},
     "trip-buddy": "https://github.com/balajiraghuram92/Scaler-AI-Infusion-Bootcamp/tree/main/excersices/Lab-project/Trip-Buddy",
+    "evals-observability-governance": "https://github.com/balajiraghuram92/Scaler-AI-Infusion-Bootcamp/tree/main/notes/weekend-sessions-Day-1/section-07-evals-observability-governance",
 }
 # Zips already in /zips, served from this site.
 ZIPS = {
@@ -97,6 +99,7 @@ ZIPS = {
     "Agents-that-remember": "Agents-that-remember-main.zip",
     "How-agents-talk": "How-agents-talk-main.zip",
     "trip-buddy": "trip-buddy.zip",
+    "evals-observability-governance": "evals-observability-governance.zip",
     "Class-1": "Class-1-AI-infusion.zip",
     "Class-2": "Class-2-AI-infusion.zip",
     "Class-3-4": "Class-3-4-AI-infusion.zip",
@@ -236,7 +239,8 @@ def caption(i):
     if step.startswith("P"):
         n = sum(1 for s in week_items(wdir) if s[1].startswith("P"))
         return f"{BRAND} · {week} · {kind} of {n}"
-    n = sum(1 for s in week_items(wdir) if s[1].isdigit() and s[1] != "0")
+    # lessons are numbered across the whole course, so count them across every week
+    n = max(int(s[1]) for s in SEQ if s[1].isdigit())
     return f"{BRAND} · {week} · {kind} of {n}"
 
 

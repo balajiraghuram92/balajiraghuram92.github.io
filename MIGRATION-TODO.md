@@ -31,6 +31,7 @@ To fill one, paste the repo URL into `GITHUB` in `tools/bootcamp_nav.py`:
 | `shipping-agents-to-production` | Bootcamp Week 1 · Lesson 6 | none |
 | `finance-section-1` | Bootcamp Week 1 · Project 1 | none |
 | `finance-nps-project` | Bootcamp Week 1 · Project 2 | none |
+| `evals-observability-governance` | Bootcamp Week 2 · Lesson 7 | yes |
 | `trip-buddy` | Bootcamp Week 2 · Project 1 | yes |
 | `Class-1` … `Class-9` | AI-Infusion Lessons 1–10 (`Class-9` covers 9 and 10) | Classes 1, 2, 3-4, 5, 6 |
 
@@ -54,7 +55,7 @@ GitHub link as the fallback.
 
 - [ ] Recording links: Week 1 and all 11 AI-Infusion classes are in. Class 4 points at a
       mentee-dashboard page, not a meetings archive.
-- [ ] Lessons 4 and 6 and both finance projects are straight copies of the Scaler
+- [ ] Lessons 4, 6 and 7 and both finance projects are straight copies of the Scaler
       pages, without the pseudo-code toggles and practice questions the other lessons have.
 
 ## 4. Moving hosts
