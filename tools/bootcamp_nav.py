@@ -46,8 +46,6 @@ V2 = {"your-first-agent", "giving-agents-tools", "Agents-that-remember", "agents
 LEARN_V2 = {"Class-1-AI-infusion", "Class-2-AI-infusion", "Class-3-4-AI-infusion", "Class-5-AI-infusion", "Class-6-AI-infusion"}
 
 _REC = "https://www.scaler.com/meetings/i/{}/archive"
-# AI-Infusion Classes 1-6 live on the mentee dashboard rather than the meetings archive.
-_CLASS = "https://www.scaler.com/academy/mentee-dashboard/class/{}"
 
 # Bootcamp recordings: shown on each week's page and on every lesson of that week.
 WEEK_RECORDINGS = {
@@ -63,13 +61,13 @@ RECORDINGS = {folder: WEEK_RECORDINGS[wdir] for folder, *_, wdir in SEQ}
 # AI-Infusion class recordings: (page, nav block) -> [(label, url)].
 # The "mid" block on the Class 9 page is where Lesson 10 starts.
 LEARN_RECORDINGS = {
-    ("Class-1-AI-infusion/index.html", "top"): [("Class 1", _CLASS.format(557038))],
-    ("Class-1-AI-infusion/simulators.html", "top"): [("Class 1", _CLASS.format(557038))],
-    ("Class-2-AI-infusion/index.html", "top"): [("Class 2", _CLASS.format(557037))],
-    ("Class-3-4-AI-infusion/index.html", "top"): [("Class 3", _CLASS.format(558448)),
-                                                  ("Class 4", _CLASS.format(558449))],
-    ("Class-5-AI-infusion/index.html", "top"): [("Class 5", _CLASS.format(558459))],
-    ("Class-6-AI-infusion/index.html", "top"): [("Class 6", _CLASS.format(558455))],
+    ("Class-1-AI-infusion/index.html", "top"): [("Class 1", _REC.format("ai-infused-learning-1-2"))],
+    ("Class-1-AI-infusion/simulators.html", "top"): [("Class 1", _REC.format("ai-infused-learning-1-2"))],
+    ("Class-2-AI-infusion/index.html", "top"): [("Class 2", _REC.format("ai-infused-learning-2-2"))],
+    ("Class-3-4-AI-infusion/index.html", "top"): [("Class 3", _REC.format("ai-infused-learning-3")),
+                                                  ("Class 4", "https://www.scaler.com/academy/mentee-dashboard/class/558449")],
+    ("Class-5-AI-infusion/index.html", "top"): [("Class 5", _REC.format("ai-infused-learning-5"))],
+    ("Class-6-AI-infusion/index.html", "top"): [("Class 6", _REC.format("ai-infused-learning-6"))],
     ("Class-7-AI-infusion/index.html", "top"): [("Class 7", _REC.format("ai-infused-learning-7"))],
     ("Class-8-AI-infusion/index.html", "top"): [("Class 8", _REC.format("ai-infused-learning-8"))],
     ("Class-9-Ai-Infusion/index.html", "top"): [("Class 9", _REC.format("ai-infused-learning-9"))],
