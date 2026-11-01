@@ -60,19 +60,19 @@ RECORDINGS = {folder: WEEK_RECORDINGS[wdir] for folder, *_, wdir in SEQ}
 
 # AI-Infusion class recordings: (page, nav block) -> [(label, url)].
 # The "mid" block on the Class 9 page is where Lesson 10 starts.
+# The Scaler meeting slugs run one ahead from Class 4 on (Class 4 is ai-infused-learning-5).
 LEARN_RECORDINGS = {
-    ("Class-1-AI-infusion/index.html", "top"): [("Class 1", _REC.format("ai-infused-learning-1-2"))],
-    ("Class-1-AI-infusion/simulators.html", "top"): [("Class 1", _REC.format("ai-infused-learning-1-2"))],
+    ("Class-1-AI-infusion/index.html", "top"): [("Class 1", "https://www.scaler.com/meetings/i/ai-infused-learning-1-2/")],
+    ("Class-1-AI-infusion/simulators.html", "top"): [("Class 1", "https://www.scaler.com/meetings/i/ai-infused-learning-1-2/")],
     ("Class-2-AI-infusion/index.html", "top"): [("Class 2", _REC.format("ai-infused-learning-2-2"))],
     ("Class-3-4-AI-infusion/index.html", "top"): [("Class 3", _REC.format("ai-infused-learning-3")),
-                                                  ("Class 4", "https://www.scaler.com/academy/mentee-dashboard/class/558449")],
-    ("Class-5-AI-infusion/index.html", "top"): [("Class 5", _REC.format("ai-infused-learning-5"))],
-    ("Class-6-AI-infusion/index.html", "top"): [("Class 6", _REC.format("ai-infused-learning-6"))],
-    ("Class-7-AI-infusion/index.html", "top"): [("Class 7", _REC.format("ai-infused-learning-7"))],
-    ("Class-8-AI-infusion/index.html", "top"): [("Class 8", _REC.format("ai-infused-learning-8"))],
-    ("Class-9-Ai-Infusion/index.html", "top"): [("Class 9", _REC.format("ai-infused-learning-9"))],
-    ("Class-9-Ai-Infusion/index.html", "mid"): [("Class 10 · part 1", _REC.format("ai-infused-learning-10")),
-                                                ("Class 10 · part 2", _REC.format("ai-infused-learning-10-2"))],
+                                                  ("Class 4", _REC.format("ai-infused-learning-5"))],
+    ("Class-5-AI-infusion/index.html", "top"): [("Class 5", _REC.format("ai-infused-learning-6"))],
+    ("Class-6-AI-infusion/index.html", "top"): [("Class 6", _REC.format("ai-infused-learning-7"))],
+    ("Class-7-AI-infusion/index.html", "top"): [("Class 7", _REC.format("ai-infused-learning-8"))],
+    ("Class-8-AI-infusion/index.html", "top"): [("Class 8", _REC.format("ai-infused-learning-9"))],
+    ("Class-9-Ai-Infusion/index.html", "top"): [("Class 9", _REC.format("ai-infused-learning-10"))],
+    ("Class-9-Ai-Infusion/index.html", "mid"): [("Class 10", _REC.format("ai-infused-learning-10-2"))],
 }
 LEARN_RECORDINGS[("Class-10-AI-infusion/index.html", "top")] = LEARN_RECORDINGS[("Class-9-Ai-Infusion/index.html", "mid")]
 
