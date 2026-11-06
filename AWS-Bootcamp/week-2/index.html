@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bootcamp Week 2</title>
-<meta name="description" content="Scaler AWS AI Bootcamp, Week 2: Lesson 7, evaluating, tracing and governing agents on AWS, then Project 1, Trip Buddy: an AI trip planner built with SQLite, embeddings, ChromaDB, RAG, tool calling and MCP.">
+<meta name="description" content="Scaler AWS AI Bootcamp, Week 2: Lessons 4 to 7 on multi-agent systems, MCP and A2A, shipping agents to production, and evaluating, tracing and governing them.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="../../assets/hub.css">
@@ -14,12 +14,12 @@
 <body class="bc">
 <section class="awsb" aria-labelledby="awsb-h">
   <div class="awsb-in">
-    <nav class="sitebar" aria-label="Site (top)"><a class="sb-home" href="../../">⌂ AI-Infusion</a><a href="../../AWS-Bootcamp/" aria-current="page">Scaler AWS AI Bootcamp</a><a href="../../AI-Infusion/">AI-Infusion lessons</a><a class="sb-help" href="../../help/"><span>Help</span></a></nav>
+    <nav class="sitebar" aria-label="Site (top)"><a class="sb-home" href="../../">⌂ AI-Infusion</a><a href="../../AWS-Bootcamp/" aria-current="page">Scaler AWS AI Bootcamp</a><a href="../../AWS-Capstone/">AWS AI Capstone</a><a href="../../AI-Infusion/">AI-Infusion lessons</a><a href="../../Interview-Ready/">Interview Ready</a><a class="sb-help" href="../../help/"><span>Help</span></a></nav>
     <p class="awsb-crumb"><a href="../">Scaler AWS AI Bootcamp</a> / Week 2</p>
     <p class="awsb-eyebrow"><i></i>Scaler AWS AI Bootcamp · Week 2</p>
-    <h1 id="awsb-h">Live projects, <em>end to end</em></h1>
-    <p class="awsb-sub">Finish the course with Lesson 7, evals, observability and governance, then put Week 1 to work on projects you build yourself. Each project page explains what we are building and what you need, then walks through every script with pseudo code and the full code.</p>
-    <ul class="awsb-meta"><li>Recordings coming soon</li><li>Lesson 7 + 1 project</li><li>Evals · tracing · guardrails · RAG · tools · MCP</li></ul>
+    <h1 id="awsb-h">Agents in teams, <em>in production</em></h1>
+    <p class="awsb-sub">Make agents work together, connect them over MCP and A2A, ship them to production on AgentCore, then measure, trace and govern them. The projects that use all of it are on the AWS AI Capstone page.</p>
+    <ul class="awsb-meta"><li>Recordings coming soon</li><li>Lessons 4–7</li><li>Multi-agent · MCP · A2A · AgentCore · evals</li></ul>
 
     <div class="awsb-part" id="recordings">
       <span class="awsb-pnum">Watch</span>
@@ -29,37 +29,51 @@
 
     <div class="awsb-part" id="sessions">
       <span class="awsb-pnum">Learn</span>
-      <div><h2>Week 2 sessions</h2><p>The course continues from Week 1's Lesson 6: your agents are in production, so now you measure, watch and govern them.</p></div>
+      <div><h2>Week 2 lessons</h2><p>The course continues from Week 1's Lesson 3. Work through Lessons 4 to 7 in order; each lesson page links the next.</p></div>
     </div>
     <div class="awsb-grid">
+      <article class="awsb-card" style="--c:#FF8A7A">
+      <div class="awsb-num">04</div>
+      <p class="awsb-ln">Lesson 4 · Course section 4</p>
+      <h3><a href="../agents-that-work-together/">Agents that work together</a></h3>
+      <ul><li>When one agent isn&#x27;t enough: multi-agent patterns</li><li>Sequential, parallel and collaborative communication</li><li>Swarm and graph orchestration, and when not to use them</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Supervisor–worker team + reusable agent as tool</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-04-multi-agent-patterns" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-04-multi-agent-patterns.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#C79BFF">
+      <div class="awsb-num">05</div>
+      <p class="awsb-ln">Lesson 5 · Course section 5</p>
+      <h3><a href="../How-agents-talk/">How agents talk</a></h3>
+      <ul><li>MCP: tools, resources and prompts over one protocol</li><li>Building MCP servers and clients with FastMCP</li><li>A2A: agents calling other agents</li></ul>
+      <p class="awsb-lab"><b>Lab</b>MCP server + client; travel assistant over A2A</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-05-mcp-and-a2a" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-05-mcp-and-a2a.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#5FD07E">
+      <div class="awsb-num">06</div>
+      <p class="awsb-ln">Lesson 6 · Course section 6</p>
+      <h3><a href="../shipping-agents-to-production/">Shipping agents to production</a></h3>
+      <ul><li>Choosing a path: AWS Lambda or ECS on Fargate</li><li>Bedrock AgentCore Runtime, Gateway and Identity</li><li>Enterprise integration patterns and industry use cases</li></ul>
+      <p class="awsb-lab"><b>Lab</b>MCP + A2A agents deployed on AgentCore</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-06-production-deployment" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-06-production-deployment.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
       <article class="awsb-card" style="--c:#7EA6FF">
       <div class="awsb-num">07</div>
       <p class="awsb-ln">Lesson 7 · Course section 7</p>
       <h3><a href="../evals-observability-governance/">Evals, observability and governance</a></h3>
       <ul><li>Evaluating agents on traces: built-in and custom evaluators, AgentCore Evaluations</li><li>Observability with OpenTelemetry: Jaeger, Langfuse, LangSmith and CloudWatch</li><li>Governance: Bedrock Guardrails, AgentCore Policy (Cedar) and the human layer</li></ul>
       <p class="awsb-lab"><b>Lab</b>Score the travel agent with an LLM judge, then trace and govern it</p>
-      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><a class="awsb-zip" href="../../zips/evals-observability-governance.zip" download>⬇ evals-observability-governance.zip</a></div>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://scaler2101.github.io/Section7.github.io/#/1/0" target="_blank" rel="noopener">▦ Session 7 slides</a><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-07-evals-observability-governance" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-07-evals-observability-governance.zip" download>⬇ Code (.zip)</a></span></div>
     </article>
     </div>
 
     <div class="awsb-part awsb-part-sm" id="projects">
       <span class="awsb-pnum">Projects</span>
-      <div><h2>Week 2 projects</h2><p>Each project builds one small idea at a time, and ends with milestones and a rubric for your own build.</p></div>
+      <div><h2>Projects moved to the AWS AI Capstone</h2><p>Trip Buddy, the two finance projects, the three RAG and research courses and the capstone now have their own page.</p></div>
     </div>
-    <div class="awsb-grid awsb-grid-2">
-      <article class="awsb-card" style="--c:#3CC6B0">
-      <div class="awsb-num">P1</div>
-      <p class="awsb-ln">Project 1 · Ten scripts + an MCP server</p>
-      <h3><a href="../trip-buddy/">Trip Buddy</a></h3>
-      <ul><li>SQLite for places and stays; embeddings and ChromaDB for travel tips</li><li>An LLM planner, then RAG so it reads the notebook first</li><li>Tool calling, a full ReAct agent and a chat window</li><li>The same tools as an MCP server, then ask it from Slack or WhatsApp</li></ul>
-      <p class="awsb-lab"><b>Build</b>An AI trip planner for a group of friends</p>
-      <div class="awsb-foot"><span class="awsb-go">Open project →</span><a class="awsb-zip" href="../../zips/trip-buddy.zip" download>⬇ trip-buddy.zip</a></div>
-    </article>
-    </div>
+    <div class="awsb-soon"><span class="awsb-soon-tag">7 projects</span><p>Build them after Week 2: they use the agents, tools, memory, MCP and evals from these lessons.</p><a class="awsb-zip" href="../../AWS-Capstone/">Open the AWS AI Capstone →</a></div>
 
-
-    <p class="awsb-note">Week 1 lessons and projects are on the <a href="../week-1/">Week 1 page</a>. Need to set up your laptop? See <a href="../../help/">Help</a>.</p>
-    <nav class="sitebar sitebar-bottom" aria-label="Site (bottom)"><a class="sb-home" href="../../">⌂ AI-Infusion</a><a href="../../AWS-Bootcamp/" aria-current="page">Scaler AWS AI Bootcamp</a><a href="../../AI-Infusion/">AI-Infusion lessons</a><a class="sb-help" href="../../help/"><span>Help</span></a></nav>
+    <p class="awsb-note">Part 00 and Lessons 1 to 3 are on the <a href="../week-1/">Week 1 page</a>. Need to set up your laptop? See <a href="../../help/">Help</a>.</p>
+    <nav class="sitebar sitebar-bottom" aria-label="Site (bottom)"><a class="sb-home" href="../../">⌂ AI-Infusion</a><a href="../../AWS-Bootcamp/" aria-current="page">Scaler AWS AI Bootcamp</a><a href="../../AWS-Capstone/">AWS AI Capstone</a><a href="../../AI-Infusion/">AI-Infusion lessons</a><a href="../../Interview-Ready/">Interview Ready</a><a class="sb-help" href="../../help/"><span>Help</span></a></nav>
   </div>
 </section>
 </body>

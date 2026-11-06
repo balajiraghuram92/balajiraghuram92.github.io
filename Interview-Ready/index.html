@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Ready</title>
+<meta name="description" content="Interview Ready: the AI and Data Science resume kit by Shivank Agrawal. A quick guide, a 72-page full guide, Word and LaTeX resume templates, a 7-day plan and AI prompts to get shortlisted.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/hub.css">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+.ir-sec{padding-block:34px 8px}
+.ir-sec > h2{margin:0 0 6px}
+.ir-sec > .lede{margin:0 0 20px;max-width:64ch}
+.ir-num{font:600 11px/1 var(--mono);color:var(--accent);margin-right:10px;letter-spacing:.08em}
+.ir-cta{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 8px}
+.ir-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);
+  font:600 13px/1.2 var(--mono);text-decoration:none}
+.ir-btn:hover{background:var(--accent-soft)}
+.ir-btn.primary{background:var(--accent);color:var(--bg)}
+.ir-btn.primary:hover{filter:brightness(1.1);background:var(--accent)}
+.ir-btn small{font-weight:400;opacity:.8}
+.ir-kit{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin:0;padding:0;list-style:none}
+.ir-kit li{display:flex;flex-direction:column;gap:8px;margin:0;padding:18px 18px 16px;border:1px solid var(--rule);border-radius:12px;background:var(--surface)}
+.ir-kit li::before{content:none}
+.ir-kit .k{font:600 11px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.ir-kit h3{margin:0;font-family:var(--body);font-weight:700;font-size:18px}
+.ir-kit p{margin:0;font-size:15px;line-height:1.5;color:var(--ink-2)}
+.ir-kit .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:6px}
+.ir-kit .acts a{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1px solid var(--rule-2);color:var(--ink);
+  font:600 12px/1.2 var(--mono);text-decoration:none}
+.ir-kit .acts a:hover{border-color:var(--accent);color:var(--accent)}
+.ir-kit li.first{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+.ir-plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.ir-plan li{margin:0;padding:14px 16px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+.ir-plan li::before{content:none}
+.ir-plan b{display:block;font:600 11px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 4px}
+.ir-plan strong{display:block;font-size:16px;margin:0 0 3px}
+.ir-plan span{font-size:14.5px;line-height:1.5;color:var(--ink-2)}
+.ir-heat{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:24px;align-items:start}
+.ir-heat a.img{display:block;border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--surface)}
+.ir-heat img{display:block;width:100%;height:auto}
+.ir-heat p{margin:0 0 12px;font-size:16px;line-height:1.6;color:var(--ink-2)}
+.ir-heat .r{color:var(--rej);font-weight:700}.ir-heat .g{color:var(--up);font-weight:700}
+.ir-prompts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.ir-prompts li{display:flex;flex-direction:column;gap:8px;margin:0;padding:14px 16px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+.ir-prompts li::before{content:none}
+.ir-prompts h3{margin:0;font-family:var(--body);font-weight:700;font-size:16px}
+.ir-prompts blockquote{margin:0;padding:10px 12px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;font-size:14.5px;line-height:1.5;color:var(--ink)}
+.ir-prompts .note{margin:0;font-size:13.5px;color:var(--ink-3)}
+.ir-copy{align-self:flex-start;padding:5px 11px;border-radius:999px;border:1px solid var(--rule-2);background:transparent;color:var(--ink-2);font:600 11.5px/1.2 var(--mono);cursor:pointer}
+.ir-copy:hover{border-color:var(--accent);color:var(--accent)}
+.ir-gold{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;margin:22px 0 0;padding:18px 22px;border-radius:12px;background:var(--code-bg);color:var(--code-ink)}
+.ir-gold b{font:600 11px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#F0B658}
+.ir-gold p{margin:0;flex:1 1 320px;font-size:16px;line-height:1.55}
+.ir-credit{margin:28px 0 0;font-size:14px;color:var(--ink-3)}
+.ir a:focus-visible,.ir button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:640px){.ir-heat{grid-template-columns:1fr}.ir-prompts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="sitebar" aria-label="Site (top)"><a class="sb-home" href="../">⌂ AI-Infusion</a><a href="../AWS-Bootcamp/">Scaler AWS AI Bootcamp</a><a href="../AWS-Capstone/">AWS AI Capstone</a><a href="../AI-Infusion/">AI-Infusion lessons</a><a href="../Interview-Ready/" aria-current="page">Interview Ready</a><a class="sb-help" href="../help/"><span>Help</span></a></nav>
+<header>
+  <div class="wide">
+    <p class="eyebrow">Interview Ready · AI Engineering &amp; Data Science resume kit</p>
+    <h1>Get shortlisted, <em>not filtered</em></h1>
+    <p class="standfirst">Most AI and Data Science resumes are filtered out by a screening system (ATS) before a person reads them, and usually not because of skills. This kit by Shivank Agrawal fixes that in a week: two guides, two templates, a 7-day plan and AI prompts.</p>
+    <div class="ir-cta">
+      <a class="ir-btn primary" href="kit/00_START_HERE.pdf" target="_blank" rel="noopener">Start here <small>PDF · 2 pages</small></a>
+      <a class="ir-btn" href="../zips/Code/Zips/AI-DS-Resume-Kit_Shivank-Agrawal.zip" download>⬇ Download the whole kit <small>.zip · 6.5 MB</small></a>
+    </div>
+  </div>
+</header>
+
+<main class="wide ir">
+  <section class="ir-sec" id="kit" aria-labelledby="kit-h">
+    <h2 id="kit-h"><span class="ir-num">01</span>What's in the kit</h2>
+    <p class="lede">Every file opens or downloads from this site. Read the Quick Guide first.</p>
+    <ul class="ir-kit">
+      <li class="first"><span class="k">01 · 25 slides · read first</span><h3>Quick Guide</h3>
+        <p>How AI hiring works across all five stages, from screening to team fit, and what every resume section must show. About 20 minutes.</p>
+        <div class="acts"><a href="kit/01_Quick_Guide_25_Slides.pdf" target="_blank" rel="noopener">Open PDF</a><a href="kit/01_Quick_Guide_25_Slides.pdf" download>⬇ Download</a></div></li>
+      <li><span class="k">02 · 72 pages · the deep dive</span><h3>Full Guide</h3>
+        <p>What to write in each section, how to pass ATS, 10 mistakes that cost interviews, a FAANG data science resume breakdown, and how to build an industry-level AI project.</p>
+        <div class="acts"><a href="kit/02_Full_Guide_72_Pages.pdf" target="_blank" rel="noopener">Open PDF</a><a href="kit/02_Full_Guide_72_Pages.pdf" download>⬇ Download</a></div></li>
+      <li><span class="k">03 · .docx</span><h3>Word template</h3>
+        <p>Clean, single-column and ATS-friendly. Fill it in, then export it as a PDF.</p>
+        <div class="acts"><a href="kit/03_Resume_Template_Word.docx" download>⬇ Download .docx</a></div></li>
+      <li><span class="k">04 · .tex · Overleaf</span><h3>LaTeX template</h3>
+        <p>Filled with a sample AI Engineer resume, so you can see what strong bullets look like. Replace everything with your own.</p>
+        <div class="acts"><a href="https://www.overleaf.com/docs?snip_uri=https://balajiraghuram92.github.io/Interview-Ready/kit/04_Resume_Template_LaTeX.tex" target="_blank" rel="noopener">Open in Overleaf ↗</a><a href="kit/04_Resume_Template_LaTeX.tex" download>⬇ Download .tex</a></div></li>
+      <li><span class="k">05 · .png</span><h3>Heatmap example</h3>
+        <p>One picture that shows why numbers matter. It is explained further down this page.</p>
+        <div class="acts"><a href="#heatmap">See it below</a><a href="kit/05_Resume_Heatmap_Example.png" download>⬇ Download</a></div></li>
+    </ul>
+  </section>
+
+  <section class="ir-sec" id="plan" aria-labelledby="plan-h">
+    <h2 id="plan-h"><span class="ir-num">02</span>Your 7-day plan</h2>
+    <p class="lede">Follow it in order and your resume is ready in a week.</p>
+    <ol class="ir-plan">
+      <li><b>Day 1</b><strong>Read the Quick Guide</strong><span>End to end. Note three things your current resume gets wrong.</span></li>
+      <li><b>Day 2</b><strong>Rebuild in one template</strong><span>One page. Standard titles: Experience, Education, Projects, Skills. No columns, icons or graphics.</span></li>
+      <li><b>Day 3</b><strong>Put a number in every bullet</strong><span>Use the formula: accomplished X, measured by Y, by doing Z.</span></li>
+      <li><b>Day 4</b><strong>Match one real job</strong><span>Pick a job description you want. Use its keywords in your summary and skills, only where they are true.</span></li>
+      <li><b>Day 5</b><strong>Test every link</strong><span>Click every GitHub, LinkedIn and demo link. Fix anything broken or private.</span></li>
+      <li><b>Days 6–7</b><strong>Upgrade your best project</strong><span>Run it through the portfolio checklist at the end of the Full Guide: README, baseline, evaluation, demo, deployment.</span></li>
+    </ol>
+  </section>
+
+  <section class="ir-sec" id="heatmap" aria-labelledby="heat-h">
+    <h2 id="heat-h"><span class="ir-num">03</span>Numbers are what a recruiter remembers</h2>
+    <div class="ir-heat">
+      <a class="img" href="kit/05_Resume_Heatmap_Example.png" target="_blank" rel="noopener"><img src="kit/05_Resume_Heatmap_Example.png" width="1290" height="1720" loading="lazy" alt="A sample backend engineer's resume with every number highlighted in red and text without numbers in green. The bullets glow red; the summary is all green."></a>
+      <div>
+        <p>This heatmap marks every number on a sample resume: <span class="r">red</span> where there are numbers, <span class="g">green</span> where there are none.</p>
+        <p>The bullets stand out because of numbers like 85K+ users, a 60% latency cut, and 3 hours down to 15 minutes. The summary has no numbers, so it is all green and nothing sticks.</p>
+        <p>Before you call your resume done, check every bullet for a number. If one is missing, find the real figure and add it.</p>
+        <p class="note" style="font-size:14px;color:var(--ink-3)">The sample is a backend engineer's resume. Use it for the lesson on numbers, and the templates for structure.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="ir-sec" id="prompts" aria-labelledby="prompts-h">
+    <h2 id="prompts-h"><span class="ir-num">04</span>Let AI do the heavy lifting</h2>
+    <p class="lede">Paste these into ChatGPT, Claude or Gemini, and attach your resume where the prompt asks for it.</p>
+    <ul class="ir-prompts">
+      <li><h3>1 · Fill the template, no LaTeX needed</h3><blockquote>Here is my current resume and a LaTeX resume template. Put my details into this template, 1 page max. Don't add anything I haven't given you.</blockquote><p class="note">Then paste the output into Overleaf, recompile and download the PDF.</p><button class="ir-copy" type="button">Copy prompt</button></li>
+      <li><h3>2 · Make every bullet hit hard</h3><blockquote>Rewrite each bullet as: Accomplished X, measured by Y, by doing Z. If a bullet has no number, don't invent one. Ask me questions to find the real number.</blockquote><button class="ir-copy" type="button">Copy prompt</button></li>
+      <li><h3>3 · Match a specific job</h3><blockquote>Here is a job description and my resume. List the top 15 keywords from the JD, mark which are missing from my resume, and suggest where I can honestly add them.</blockquote><button class="ir-copy" type="button">Copy prompt</button></li>
+      <li><h3>4 · Turn a project into bullets</h3><blockquote>Here is my GitHub README. Write 2–3 resume bullets: problem, solution + tech stack, impact with metrics. Then tell me what's missing: baseline, evaluation, failure cases, deployment, demo.</blockquote><button class="ir-copy" type="button">Copy prompt</button></li>
+      <li><h3>5 · Full ATS audit</h3><p class="note" style="font-size:14.5px;color:var(--ink-2)">Use the ATS checker prompt on page 25 of the <a href="kit/02_Full_Guide_72_Pages.pdf#page=25" target="_blank" rel="noopener">Full Guide</a>, then cross-check for free on Jobscan or Resume Worded.</p></li>
+      <li><h3>6 · Practise before the real interview</h3><blockquote>Act as an interviewer for [role]. Ask me 10 questions based only on my resume, one at a time, and give feedback on each answer.</blockquote><button class="ir-copy" type="button">Copy prompt</button></li>
+    </ul>
+    <div class="ir-gold"><b>Golden rule</b><p><strong>AI polishes. You bring the facts.</strong> Never put a number on your resume that you can't explain in an interview: every line is fair game.</p></div>
+  </section>
+
+  <p class="ir-credit">The AI &amp; Data Science Resume Kit is by Shivank Agrawal (Future with Shivank). For the projects to put on your resume, see the <a href="../AWS-Capstone/">AWS AI Capstone</a>.</p>
+</main>
+<nav class="sitebar sitebar-bottom" aria-label="Site (bottom)"><a class="sb-home" href="../">⌂ AI-Infusion</a><a href="../AWS-Bootcamp/">Scaler AWS AI Bootcamp</a><a href="../AWS-Capstone/">AWS AI Capstone</a><a href="../AI-Infusion/">AI-Infusion lessons</a><a href="../Interview-Ready/" aria-current="page">Interview Ready</a><a class="sb-help" href="../help/"><span>Help</span></a></nav>
+<script>
+document.querySelectorAll('.ir-copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=b.parentNode.querySelector('blockquote').textContent.trim();
+    function done(ok){b.textContent=ok?'Copied ✓':'Select and copy';setTimeout(function(){b.textContent='Copy prompt';},1800);}
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){done(true);},function(){done(false);});}else{done(false);}
+  });
+});
+</script>
+</body>
+</html>

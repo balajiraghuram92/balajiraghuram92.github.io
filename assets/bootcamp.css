@@ -91,3 +91,24 @@ a.awsb-day:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0
 .awsb-recs i{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--acc);color:var(--bg);font-style:normal;font-size:12px}
 .awsb-recs small{display:block;font:500 11.5px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--dim);font-weight:500;margin-top:2px}
 @media (prefers-reduced-motion:reduce){.awsb-day{transition:none}a.awsb-day:hover{transform:none}}
+
+/* AWS AI Capstone: three projects per row, and the capstone card marked as important */
+.awsb-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:900px){.awsb-grid-3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
+.awsb-links{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:6px}
+a.awsb-zip{color:var(--ink)}
+.awsb-key{--c:#FF5A5F;border:1.5px solid rgba(255,90,95,.65);
+  background:radial-gradient(700px 260px at 100% 0%,rgba(255,90,95,.16),transparent 60%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  box-shadow:0 0 0 4px rgba(255,90,95,.08),0 18px 44px -22px rgba(255,90,95,.6)}
+.awsb-key::before{height:4px;background:linear-gradient(90deg,#FF5A5F,#FFB25A)}
+.awsb-key h3{font-size:clamp(30px,4.4vw,40px)}
+.awsb-key-body{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:8px 28px}
+.awsb-key-body ul{font-size:15px}
+.awsb-flag{position:absolute;top:16px;right:16px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px 5px 9px;border-radius:999px;
+  background:#E5484D;color:#fff;font:700 11px/1.2 "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;
+  box-shadow:0 4px 14px -4px rgba(229,72,77,.8)}
+.awsb-flag span{font-size:14px;line-height:1}
+.awsb-needs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none}
+.awsb-key .awsb-needs li{margin:0;padding:4px 9px;border-radius:6px;border:1px solid var(--line);font:500 11.5px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--ink)}
+.awsb-part-key .awsb-pnum{background:#E5484D;color:#fff}
+@media (max-width:640px){.awsb-key-body{grid-template-columns:1fr}.awsb-flag{position:static;align-self:flex-start;margin:0 0 12px}}

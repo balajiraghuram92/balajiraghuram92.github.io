@@ -27,6 +27,15 @@
 .tile-aws{--accent:#F2A93B;--ink:#EEF1FB;--ink-2:#A9B2D6;--rule:#2A3768;
   background:radial-gradient(600px 300px at 90% -10%,rgba(242,169,59,.25),transparent 60%),linear-gradient(180deg,#0E1530,#141D3F);border-color:#2A3768}
 .tile-aws h2 em{font-style:italic;color:#F2A93B}
+.tile-cap{--accent:#FF7A7E;background:radial-gradient(600px 300px at 90% -10%,rgba(255,90,95,.25),transparent 60%),linear-gradient(180deg,#0E1530,#141D3F)}
+.tile-cap h2 em{color:#FF7A7E}
+.tile-flag{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:#E5484D;color:#fff;
+  font:700 10.5px/1.2 "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase}
+.tile-ir{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) auto;align-items:center;gap:14px 32px;padding:24px 26px}
+.tile-ir > div{display:flex;flex-direction:column;gap:10px}
+.tile-ir h2 em{font-style:italic;color:var(--accent)}
+.tile-ir .go{margin:0;padding:0}
+@media (max-width:820px){.tile-ir{grid-template-columns:1fr}}
 .help-strip{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:16px 20px;border:1px dashed var(--rule-2);border-radius:10px;font-size:15px;color:var(--ink-2)}
 .help-strip a{font-weight:700}
 @media (prefers-reduced-motion:reduce){.tile{transition:none}.tile:hover{transform:none}}

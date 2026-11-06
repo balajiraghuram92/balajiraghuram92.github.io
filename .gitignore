@@ -1,3 +1,36 @@
 /zips/Excersises
 /zips/future-with-shivank-agentic-ai-on-aws
 /.claude
+
+# Code under zips/Code: never publish secrets or build junk
+.env
+.env.*
+!.env.example
+!.env.sample
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+chroma_db/
+.gradio/
+.vscode/
+.DS_Store
+# Lesson 7 is a clone of github.com/22f1001418/InterviewIQ (its own repo); the site links there and ships a zip
+/zips/Code/Ai-Infusion/Lesson-7/
+# duplicate of zips/Code/Aws-Bootcamp
+/zips/Code/weekend-sessions-Day-1/
+/zips/Code/weekend-sessions-Day-1.7z
+# more secret-shaped files
+*.pem
+!**/.gradio/certificate.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+credentials
+credentials.json
+secrets.*
+.aws/
+.streamlit/secrets.toml
+service-account*.json

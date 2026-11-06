@@ -23,20 +23,30 @@ WEEK1 = [
     ("your-first-agent", "1", "Lesson 1", "Your first AI agent"),
     ("giving-agents-tools", "2", "Lesson 2", "Giving agents tools"),
     ("Agents-that-remember", "3", "Lesson 3", "Agents that remember"),
+]
+WEEK2 = [
     ("agents-that-work-together", "4", "Lesson 4", "Agents that work together"),
     ("How-agents-talk", "5", "Lesson 5", "How agents talk"),
     ("shipping-agents-to-production", "6", "Lesson 6", "Shipping agents to production"),
-    ("finance-section-1", "P1", "Project 1", "AI agents in finance"),
-    ("finance-nps-project", "P2", "Project 2", "NPS analyst in a box"),
-]
-WEEK2 = [
     ("evals-observability-governance", "7", "Lesson 7", "Evals, observability and governance"),
-    ("trip-buddy", "P1", "Project 1", "Trip Buddy"),
 ]
 # (label, folder of the week page, lessons)
 WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2)]
 # Every page in order across the weeks: (folder, step, kind, title, week label, week folder)
 SEQ = [(*item, week, wdir) for week, wdir, items in WEEKS for item in items]
+
+# AWS AI Capstone projects (AWS-Capstone/<folder>/), in order: (folder, step, title).
+# Row 1: the bootcamp projects; row 2: the RAG and research courses; row 3: the capstone itself.
+CAP_BRAND = "AWS AI Capstone"
+CAPSTONE = [
+    ("trip-buddy", "P1", "Trip Buddy"),
+    ("finance-section-1", "P2", "AI agents in finance"),
+    ("finance-nps-project", "P3", "NPS analyst in a box"),
+    ("production-rag", "P4", "Production RAG from scratch"),
+    ("agentic-rag", "P5", "Agentic RAG"),
+    ("deep-search-agents", "P6", "Deep search agents"),
+    ("vendor-risk-assessor", "P7", "Capstone · AI vendor risk assessor"),
+]
 
 # Lessons that keep Scaler's original page at <folder>/ and our reworked page at <folder>-v2/.
 # The bottom nav on each links to the other version.
@@ -92,28 +102,54 @@ LEARN_TITLES = {
     "Class-10-AI-infusion/index.html": "Lesson 10 · Build & evaluate the bench",
 }
 
-# Project files. Keys are AWS-Bootcamp folders or Learnings folders.
-# TODO(migration): paste each GitHub repo URL (https://github.com/<owner>/<repo>).
-# An empty string shows "GitHub link coming soon"; see MIGRATION-TODO.md.
+# Project files. Keys are AWS-Bootcamp folders, AWS-Capstone folders or AI-Infusion classes.
+# Code lives in this site's own repo under zips/Code/; tools/build_code_zips.py builds the zips in
+# zips/Code/Zips/. An empty string shows "GitHub link coming soon".
+_REPO = "https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code"
+_CAP_REPO = f"{_REPO}/Capstone-Projects"
+# page key -> (folder under zips/Code, zip in zips/Code/Zips)
+_CODE = {
+    "part-00-AWS-Revision": ("Aws-Bootcamp/section-00-AWS-Revision", "aws-bootcamp-section-00-aws-revision"),
+    "your-first-agent": ("Aws-Bootcamp/section-01-your-first-agent", "aws-bootcamp-section-01-your-first-agent"),
+    "giving-agents-tools": ("Aws-Bootcamp/section-02-agent-tools", "aws-bootcamp-section-02-agent-tools"),
+    "Agents-that-remember": ("Aws-Bootcamp/section-03-agent-memory", "aws-bootcamp-section-03-agent-memory"),
+    "agents-that-work-together": ("Aws-Bootcamp/section-04-multi-agent-patterns", "aws-bootcamp-section-04-multi-agent-patterns"),
+    "How-agents-talk": ("Aws-Bootcamp/section-05-mcp-and-a2a", "aws-bootcamp-section-05-mcp-and-a2a"),
+    "shipping-agents-to-production": ("Aws-Bootcamp/section-06-production-deployment", "aws-bootcamp-section-06-production-deployment"),
+    "evals-observability-governance": ("Aws-Bootcamp/section-07-evals-observability-governance", "aws-bootcamp-section-07-evals-observability-governance"),
+    "Class-1": ("Ai-Infusion/lesson-1", "ai-infusion-lesson-1"),
+    "Class-2": ("Ai-Infusion/lesson-2", "ai-infusion-lesson-2"),
+    "Class-3-4": ("Ai-Infusion/lesson-3", "ai-infusion-lesson-3-4"),
+    "Class-5": ("Ai-Infusion/lesson-5", "ai-infusion-lesson-5"),
+    "Class-6": ("Ai-Infusion/Lesson-6", "ai-infusion-lesson-6"),
+    "Class-7": (None, "ai-infusion-lesson-7"),
+    "Class-9": ("Ai-Infusion/Lesson-9", "ai-infusion-lesson-9"),
+    "Class-10": ("Ai-Infusion/Lesson-10", "ai-infusion-lesson-10"),
+    "production-rag": ("Capstone-Projects/Production-RAG-Course-Shivank-Agrawal/code", "Production-RAG-Course-Shivank-Agrawal-code"),
+    "agentic-rag": ("Capstone-Projects/Agentic_RAG_Study_Kit/code", "Agentic_RAG_Study_Kit-code"),
+    "deep-search-agents": ("Capstone-Projects/shivank-deep-search-agent/code", "shivank-deep-search-agent-code"),
+    "vendor-risk-assessor": ("Capstone-Projects/project-vendor-risk-assessor/code", "project-vendor-risk-assessor-code"),
+}
 GITHUB = {
     **{folder: "" for folder, *_ in SEQ},
-    **{f"Class-{n}": "" for n in ("1", "2", "3-4", "5", "6", "7", "8", "9")},
+    **{folder: "" for folder, *_ in CAPSTONE},
+    **{f"Class-{n}": "" for n in ("1", "2", "3-4", "5", "6", "7", "8", "9", "10")},
+    **{key: f"{_REPO}/{src}" for key, (src, _) in _CODE.items() if src},
     "trip-buddy": "https://github.com/balajiraghuram92/Scaler-AI-Infusion-Bootcamp/tree/main/excersices/Lab-project/Trip-Buddy",
-    "evals-observability-governance": "https://github.com/balajiraghuram92/Scaler-AI-Infusion-Bootcamp/tree/main/notes/weekend-sessions-Day-1/section-07-evals-observability-governance",
+    # Lesson 7 is its own repo (InterviewIQ); the site keeps a zip of it
+    "Class-7": "https://github.com/22f1001418/InterviewIQ",
 }
-# Zips already in /zips, served from this site.
+# Zips under /zips, served from this site, so the button downloads in one click.
 ZIPS = {
-    "your-first-agent": "your-first-agent-main.zip",
-    "giving-agents-tools": "giving-agents-tools-main.zip",
-    "Agents-that-remember": "Agents-that-remember-main.zip",
-    "How-agents-talk": "How-agents-talk-main.zip",
-    "trip-buddy": "trip-buddy.zip",
-    "evals-observability-governance": "evals-observability-governance.zip",
-    "Class-1": "Class-1-AI-infusion.zip",
-    "Class-2": "Class-2-AI-infusion.zip",
-    "Class-3-4": "Class-3-4-AI-infusion.zip",
-    "Class-5": "Class-5-AI-infusion.zip",
-    "Class-6": "Class-6-AI-infusion.zip",
+    **{key: f"Code/Zips/{z}.zip" for key, (_, z) in _CODE.items()},
+    "trip-buddy": "HTML/trip-buddy.zip",
+}
+# Extra links in the Project files box: (label, small note, url). Slides are linked, not copied in.
+LINKS = {
+    "evals-observability-governance": [
+        ("▦ Session 7 slides", "opens in a new tab", "https://scaler2101.github.io/Section7.github.io/#/1/0"),
+        ("↗ Original lesson", "Scaler", "https://scaler-content.github.io/evals-observability-governance/"),
+    ],
 }
 
 # Pages built on the finance template sit inside <main>, not the lesson .wrap.
@@ -244,7 +280,9 @@ def files_box(key, cls):
                     f'<small>.zip from GitHub</small></a>')
     else:
         download = f'<span class="{fb}" data-todo="github">⬇ Download all<small>coming soon</small></span>'
-    return f'<div class="{cls}-files"><b>Project files</b>{browse}{download}</div>'
+    extra = "".join(f'<a class="{fb}" href="{e(url)}" target="_blank" rel="noopener">{e(label)}<small>{e(note)}</small></a>'
+                    for label, note, url in LINKS.get(key, []))
+    return f'<div class="{cls}-files"><b>Project files</b>{browse}{download}{extra}</div>'
 
 
 def week_items(wdir):
@@ -280,9 +318,12 @@ def version_link(folder, v2):
 
 
 def side(i, cur_week, cls, label, v2=False):
-    if i < 0 or i >= len(SEQ):
-        msg = "You're at the start" if cls == "awsq-prev" else "More projects · coming soon"
-        return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">{msg}</span></span>'
+    if i >= len(SEQ):
+        # after the last lesson, carry on to the capstone projects
+        return (f'<a class="awsq-l {cls}" href="../../AWS-Capstone/"><span class="awsq-d">{label}</span>'
+                f'<span class="awsq-t">{CAP_BRAND} · {len(CAPSTONE)} projects</span></a>')
+    if i < 0:
+        return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">You\'re at the start</span></span>'
     folder, _, kind, title, week, _ = SEQ[i]
     # name the week when prev / next crosses into another one
     where = f"{e(week)} · " if week != cur_week else ""
@@ -352,6 +393,72 @@ def build_aws():
         print("nav  ", p.relative_to(ROOT))
 
 
+# The four Study-Material pages bring their own colours; point the nav at their tokens so it follows their theme.
+CAP_OWN = {"production-rag", "agentic-rag", "deep-search-agents", "vendor-risk-assessor"}
+CAP_STYLE = """<style>
+.awsq.awsq-own{--q-card:var(--panel,var(--surface,#fff));--q-card2:var(--panel-2,var(--surface-2,var(--paper,#f3f3f0)));
+  --q-rule:var(--rule,var(--line,#ddd));--q-muted:var(--ink-3,var(--muted,var(--ink-2,#666)));
+  --q-acc:var(--teal,var(--web,var(--accent,#0b7f73)));--q-acc-t:var(--teal-soft,var(--web-soft,var(--accent-soft,#d6f2ee)));
+  --q-acc-ink:var(--ink,#1a1a1a);--q-cur:var(--amber,#b07600);--q-on:var(--panel,var(--surface,#fff));
+  --q-mono:var(--f-code,var(--mono,"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace));
+  font-family:var(--f-ui,var(--sans,system-ui,sans-serif));font-size:16px;line-height:1.5;position:static;height:auto;overflow:visible;border:0;background:none}
+.awsq.awsq-own.awsq-top{margin:14px auto}
+.awsq-steps a.key{box-shadow:inset 0 0 0 1.5px #E5484D}
+</style>"""
+
+
+def cap_side(i, cls, label):
+    if i < 0 or i >= len(CAPSTONE):
+        msg = "You're at the start" if i < 0 else "That's every project"
+        return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">{msg}</span></span>'
+    folder, step, title = CAPSTONE[i]
+    return (f'<a class="awsq-l {cls}" href="../{folder}/"><span class="awsq-d">{label}</span>'
+            f'<span class="awsq-t">Project {step[1:]} · {e(title)}</span></a>')
+
+
+def cap_nav(i, where):
+    folder, step, title = CAPSTONE[i]
+    steps = []
+    for j, (f, st, t) in enumerate(CAPSTONE):
+        cls = "cur" if j == i else ("done" if j < i else "")
+        if f == "vendor-risk-assessor":
+            cls = f"{cls} key".strip()
+        cur = ' aria-current="page"' if j == i else ""
+        steps.append(f'<li><a class="{cls}" href="../{f}/" title="Project {st[1:]} · {e(t)}"{cur}>{st}{" ★" if f == "vendor-risk-assessor" else ""}</a></li>')
+    extra = " awsq-inmain" if folder in FINANCE and where == "top" else ""
+    own = " awsq-own" if folder in CAP_OWN else ""
+    cap = f"{CAP_BRAND} · Project {step[1:]} of {len(CAPSTONE)}"
+    return (f'<div class="awsq awsq-{where}{extra}{own}" role="navigation" aria-label="Capstone navigation ({where})"><div class="awsq-box">'
+            f'<div class="awsq-head"><span class="awsq-cap">{e(cap)}</span>{HOME_BTN}</div>'
+            f'<div class="awsq-row">{cap_side(i - 1, "awsq-prev", "← Previous")}'
+            f'<a class="awsq-home" href="../"><b>{CAP_BRAND}</b>All {len(CAPSTONE)} projects</a>'
+            f'{cap_side(i + 1, "awsq-next", "Next →")}</div>'
+            f'<ol class="awsq-steps" aria-label="All projects">{"".join(steps)}</ol>'
+            f'{files_box(folder, "awsq")}</div></div>')
+
+
+def build_capstone():
+    for i, (folder, step, title) in enumerate(CAPSTONE):
+        p = ROOT / "AWS-Capstone" / folder / "index.html"
+        s = set_title(p.read_text(encoding="utf-8"), f"Project {step[1:]} · {title} · {CAP_BRAND}")
+        style = AWSQ_STYLE + ("\n" + CAP_STYLE if folder in CAP_OWN else "")
+        top = f"<!-- awsq:top -->\n{style}\n{cap_nav(i, 'top')}\n<!-- /awsq:top -->\n"
+        bottom = f"<!-- awsq:bottom -->\n{cap_nav(i, 'bottom')}\n<!-- /awsq:bottom -->\n"
+        s, n = re.subn(r"<!-- awsq:top -->.*?<!-- /awsq:top -->\n", lambda m: top, s, flags=re.S)
+        if not n:
+            m = re.search(r"<body[^>]*>\n", s)
+            assert m, folder
+            s = s[:m.end()] + top + s[m.end():]
+        s, n = re.subn(r"<!-- awsq:bottom -->.*?<!-- /awsq:bottom -->\n", lambda m: bottom, s, flags=re.S)
+        if not n:
+            k = s.rfind("<footer")
+            assert k > 0, folder
+            s = s[:k] + bottom + s[k:]
+        assert s.count("<!-- awsq:top -->") == 1 and s.count("<!-- awsq:bottom -->") == 1, folder
+        write(p, s)
+        print("cap  ", p.relative_to(ROOT))
+
+
 def insert_after_steps(s, where, block, rel):
     m = re.search(rf'<div class="aiseq aiseq-{where}"[^\n]*?</ol>', s)
     assert m, (rel, where)
@@ -389,7 +496,7 @@ def build_learnings():
             # the Project files box goes in after the steps below, so this ends up under it
             s = insert_after_steps(s, "bottom", f'<!-- aqver --><div class="aq-ver">{link}</div><!-- /aqver -->', rel)
         # Class-10 redirects to the Class 9 page, whose code it shares
-        key = re.match(r"Class-\d+(?:-\d+)?", rel).group(0).replace("Class-10", "Class-9")
+        key = re.match(r"Class-\d+(?:-\d+)?", rel).group(0)
         for where in ("top", "mid"):
             recs = LEARN_RECORDINGS.get((rel, where))
             if not recs:
@@ -438,4 +545,5 @@ def build_hubs():
 if __name__ == "__main__":
     build_hubs()
     build_aws()
+    build_capstone()
     build_learnings()

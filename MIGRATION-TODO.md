@@ -26,13 +26,14 @@ To fill one, paste the repo URL into `GITHUB` in `tools/bootcamp_nav.py`:
 | `your-first-agent` | Bootcamp Week 1 · Lesson 1 | yes |
 | `giving-agents-tools` | Bootcamp Week 1 · Lesson 2 | yes |
 | `Agents-that-remember` | Bootcamp Week 1 · Lesson 3 | yes |
-| `agents-that-work-together` | Bootcamp Week 1 · Lesson 4 | none |
-| `How-agents-talk` | Bootcamp Week 1 · Lesson 5 | yes |
-| `shipping-agents-to-production` | Bootcamp Week 1 · Lesson 6 | none |
-| `finance-section-1` | Bootcamp Week 1 · Project 1 | none |
-| `finance-nps-project` | Bootcamp Week 1 · Project 2 | none |
+| `agents-that-work-together` | Bootcamp Week 2 · Lesson 4 | none |
+| `How-agents-talk` | Bootcamp Week 2 · Lesson 5 | yes |
+| `shipping-agents-to-production` | Bootcamp Week 2 · Lesson 6 | none |
+| `finance-section-1` | AWS AI Capstone · Project 2 | none |
+| `finance-nps-project` | AWS AI Capstone · Project 3 | none |
 | `evals-observability-governance` | Bootcamp Week 2 · Lesson 7 | yes |
-| `trip-buddy` | Bootcamp Week 2 · Project 1 | yes |
+| `trip-buddy` | AWS AI Capstone · Project 1 | yes |
+| `production-rag`, `agentic-rag`, `deep-search-agents`, `vendor-risk-assessor` | AWS AI Capstone · Projects 4–7 | yes, in `zips/Code/Zips/`; code in `zips/Code/Capstone-Projects/` |
 | `Class-1` … `Class-9` | AI-Infusion Lessons 1–10 (`Class-9` covers 9 and 10) | Classes 1, 2, 3-4, 5, 6 |
 
 New zips go in `/zips` and into `ZIPS` in the same file. The Week 1 page cards still
