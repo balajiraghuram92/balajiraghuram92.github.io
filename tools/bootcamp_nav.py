@@ -318,12 +318,10 @@ def version_link(folder, v2):
 
 
 def side(i, cur_week, cls, label, v2=False):
-    if i >= len(SEQ):
-        # after the last lesson, carry on to the capstone projects
-        return (f'<a class="awsq-l {cls}" href="../../AWS-Capstone/"><span class="awsq-d">{label}</span>'
-                f'<span class="awsq-t">{CAP_BRAND} · {len(CAPSTONE)} projects</span></a>')
-    if i < 0:
-        return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">You\'re at the start</span></span>'
+    if i < 0 or i >= len(SEQ):
+        # the capstone projects are their own section of the site, so the bootcamp simply ends here
+        msg = "You're at the start" if i < 0 else "End of the bootcamp · Weeks 3–4 coming soon"
+        return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">{msg}</span></span>'
     folder, _, kind, title, week, _ = SEQ[i]
     # name the week when prev / next crosses into another one
     where = f"{e(week)} · " if week != cur_week else ""

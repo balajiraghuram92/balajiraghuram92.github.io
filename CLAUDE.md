@@ -10,13 +10,19 @@ the AWS AI Capstone projects and Interview Ready. Pushing `main` publishes it.
   Haiku sub-agents (`model: "haiku"`) for them and run them in parallel to save time and tokens.
   Keep design decisions, cross-page edits to shared files (`assets/*.css`, `tools/*.py`) and the
   final check and push in the main session. Skip agents for work one script or a few edits can do.
+- **Long-running checks go to a background Haiku agent**, so the main session keeps working and
+  doesn't pay for the waiting: secret scans, link checks, checking the live site after a push.
+  For secrets the agent runs `python -I tools/scan_secrets.py` (add `--history` for everything
+  ever pushed) and reports the short summary.
 - **Nav, recordings and project-file links are generated.** Edit the tables in
   `tools/bootcamp_nav.py` (weeks, `CAPSTONE`, `GITHUB`, `ZIPS`, `LINKS`), then run
   `python tools/bootcamp_nav.py`. Don't hand-edit the `<!-- awsq:* -->` / `<!-- aqfiles -->` blocks.
 - **Code and zips.** Source code lives in `zips/Code/<Programme>/...`; `python tools/build_code_zips.py`
   rebuilds the downloadable zips in `zips/Code/Zips/`. "Browse the code" links point at
   `https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/...`.
-- **Never publish secrets.** Before any push, scan staged files for `.env` and API keys.
+- **Never publish secrets.** Before any push, run `tools/scan_secrets.py` (via a background Haiku agent).
+  GitHub push protection blocks known key formats (it caught a Stripe docs key once): replace with
+  a placeholder and amend; never Bypass.
   `zips/Code/Ai-Infusion/Lesson-7/` is a clone of github.com/22f1001418/InterviewIQ, holds a real
   `.env`, and is git-ignored on purpose.
 - **Git** isn't on PATH; use GitHub Desktop's:
