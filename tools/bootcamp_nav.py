@@ -65,8 +65,10 @@ WEEK_RECORDINGS = {
         ("Week 1 · session 1", _REC.format("ai-bootcamp-1")),
         ("Week 1 · session 2", _REC.format("ai-bootcamp-2")),
     ],
-    # TODO(migration): add the Week 2 recordings once they are on Scaler.
-    "week-2": [],
+    "week-2": [
+        ("Week 2 · session 1", _REC.format("ai-bootcamp-3")),
+        ("Week 2 · session 2", _REC.format("ai-bootcamp-4")),
+    ],
 }
 RECORDINGS = {folder: WEEK_RECORDINGS[wdir] for folder, *_, wdir in SEQ}
 

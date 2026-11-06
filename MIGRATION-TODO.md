@@ -48,7 +48,7 @@ GitHub link as the fallback.
 
 - [x] `AWS-Bootcamp/week-2/` is live, with Project 1, Trip Buddy (`AWS-Bootcamp/trip-buddy/`,
       zip in `/zips/trip-buddy.zip`).
-- [ ] Week 2 recordings: paste them into `WEEK_RECORDINGS["week-2"]` in `tools/bootcamp_nav.py`.
+- [x] Week 2 recordings (ai-bootcamp-3 and -4) are in `WEEK_RECORDINGS["week-2"]`.
 - [ ] More Week 2 projects: add each one to `WEEK2` in `tools/bootcamp_nav.py`, and a card on
       `AWS-Bootcamp/week-2/index.html`.
 
