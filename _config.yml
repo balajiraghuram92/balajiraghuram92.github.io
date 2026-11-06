@@ -1,0 +1,11 @@
+# GitHub Pages settings. The site is plain HTML; this file only keeps repo-only files off the live site
+# so each deploy uploads less. They stay in the GitHub repo, where "Browse the code" links open them.
+# The download zips in zips/Code/Zips/ and zips/HTML/ are still published.
+exclude:
+  - zips/Code/Ai-Infusion
+  - zips/Code/Aws-Bootcamp
+  - zips/Code/Capstone-Projects
+  - zips/Code/weekend-sessions-Day-1
+  - tools
+  - CLAUDE.md
+  - MIGRATION-TODO.md

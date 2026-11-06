@@ -27,4 +27,6 @@ the AWS AI Capstone projects and Interview Ready. Pushing `main` publishes it.
   `.env`, and is git-ignored on purpose.
 - **Git** isn't on PATH; use GitHub Desktop's:
   `C:\Users\raghuram\AppData\Local\GitHubDesktop\app-3.6.10\resources\app\git\cmd\git.exe`.
+- `_config.yml` keeps the source-code folders, `tools/` and these notes off the live site (smaller deploys).
+  If you add a folder that pages must link to directly, check it is not excluded there.
 - Open items are in `MIGRATION-TODO.md`.
