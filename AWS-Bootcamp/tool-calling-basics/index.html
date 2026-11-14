@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 5 · Lesson 22 · Tool calling basics · Scaler AWS AI Bootcamp</title>
+<style>
+:root{
+  --bg:#f7f5ef; --paper:#ffffff; --ink:#1c1b19; --muted:#5d5a53; --line:#e4dfd3;
+  --accent:#f2b705; --navy:#1f2a44;
+  --blue-bg:#eef4ff; --blue:#2f63c9;
+  --amber-bg:#fff5d6; --amber:#c98a00;
+  --green-bg:#e8f6ec; --green:#23804c;
+  --rose-bg:#fdeceb; --rose:#b8352a;
+  --gray-bg:#f2f0ea; --gray:#8d877a;
+  --code-bg:#14161b;
+  --serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--sans)}
+a{color:var(--blue)}
+#progress{position:fixed;top:0;left:0;height:4px;width:0;background:var(--accent);z-index:50}
+
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);max-width:1240px;margin:0 auto}
+nav.toc{position:sticky;top:0;height:100vh;overflow:auto;padding:28px 18px 40px 22px;border-right:1px solid var(--line);font-size:14px}
+nav.toc .brand{font:700 15px/1.3 var(--serif);color:var(--navy);margin-bottom:14px}
+nav.toc .grp{margin:16px 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+nav.toc a{display:flex;gap:8px;padding:3px 8px;border-radius:6px;color:var(--ink);text-decoration:none;line-height:1.35}
+nav.toc a span.n{flex:0 0 22px;color:var(--muted);font-variant-numeric:tabular-nums}
+nav.toc a:hover{background:#ece8dd}
+nav.toc a.active{background:var(--navy);color:#fff}
+nav.toc a.active span.n{color:#cfd6e6}
+main{padding:34px 44px 80px;min-width:0}
+.mobile-toc{display:none}
+@media (max-width:1000px){
+  .layout{grid-template-columns:1fr}
+  nav.toc{display:none}
+  main{padding:22px 16px 60px}
+  .mobile-toc{display:block;margin-bottom:18px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+  .mobile-toc summary{font-weight:700;cursor:pointer}
+  .mobile-toc a{display:block;padding:3px 0}
+}
+
+/* ---------- hero ---------- */
+.hero{background:var(--navy);color:#fff;border-radius:18px;padding:40px 40px 34px;margin-bottom:26px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;background:var(--accent);opacity:.9;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.hero .kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#f6d36b;font-weight:700}
+.hero h1{font:700 40px/1.12 var(--serif);margin:10px 0 12px;max-width:720px;position:relative;z-index:1}
+.hero p{max-width:690px;color:#dfe4ef;margin:0 0 8px;position:relative;z-index:1}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;position:relative;z-index:1}
+.legend span{font-size:13px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12)}
+
+.intro{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:30px}
+.intro h2{font:700 22px/1.3 var(--serif);margin:0 0 10px;color:var(--navy)}
+.roadmap{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.roadmap .step{background:var(--gray-bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px}
+.roadmap .step b{display:block;color:var(--navy)}
+.roadmap .arr{color:var(--muted)}
+
+/* ---------- part dividers ---------- */
+.part{margin:46px 0 14px;display:flex;align-items:center;gap:14px}
+.part .tag{background:var(--accent);color:#2a2100;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:6px}
+.part h2{margin:0;font:700 26px/1.2 var(--serif);color:var(--navy)}
+
+/* ---------- slide cards ---------- */
+section.slide{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:26px 30px 24px;margin:18px 0 26px;scroll-margin-top:16px}
+.slide-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.slide-head .num{background:var(--navy);color:#fff;font-weight:700;font-size:13px;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.slide-head h3{font:700 26px/1.25 var(--serif);margin:0;color:var(--ink)}
+.oneliner{color:var(--muted);font-size:16px;margin:2px 0 14px}
+section.slide h4{margin:0 0 6px;font-size:13px;letter-spacing:.07em;text-transform:uppercase}
+section.slide p{margin:0 0 10px}
+section.slide ul,section.slide ol{margin:4px 0 10px;padding-left:22px}
+section.slide li{margin:3px 0}
+
+.box{border-radius:12px;padding:14px 18px 8px;margin:14px 0;border-left:5px solid}
+.box.said{background:var(--gray-bg);border-color:var(--gray)} .box.said h4{color:#6b665b}
+.box.simple{background:var(--blue-bg);border-color:var(--blue)} .box.simple h4{color:var(--blue)}
+.box.analogy{background:var(--amber-bg);border-color:var(--amber)} .box.analogy h4{color:#8a5d00}
+.box.real{background:var(--green-bg);border-color:var(--green)} .box.real h4{color:var(--green)}
+.box.careful{background:var(--rose-bg);border-color:var(--rose)} .box.careful h4{color:var(--rose)}
+.box.try{background:#f4f3fb;border-color:#5b4fc4} .box.try h4{color:#4b40a8}
+
+details.orig{margin:6px 0 4px}
+details.orig summary{cursor:pointer;color:var(--muted);font-size:14px}
+details.orig img{display:block;width:100%;max-width:640px;border:1px solid var(--line);border-radius:8px;margin-top:8px}
+
+/* ---------- code ---------- */
+.codebox{margin:12px 0 4px;border-radius:12px;overflow:hidden;background:var(--code-bg);border:1px solid #23262e}
+.codebar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#1d2027;color:#c9ced8;font:13px var(--mono)}
+.codebar .fname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{font:700 11px var(--sans);letter-spacing:.03em;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.badge.run{background:#1f6f43;color:#dff7e8}
+.badge.key{background:#7a5a00;color:#fff1c7}
+.badge.gpu{background:#6b2f8a;color:#f3e3ff}
+.badge.local{background:#1f4f8a;color:#e1edff}
+.copy{background:#2c313b;color:#e6e9ef;border:0;border-radius:6px;padding:3px 9px;font:12px var(--sans);cursor:pointer}
+.copy:hover{background:#3a404c}
+pre.hl{margin:0;padding:14px 16px;overflow:auto;font:13.5px/1.55 var(--mono);color:#e6edf3;tab-size:4}
+.outbox{margin:0 0 12px;border-radius:0 0 12px 12px;background:#0b0d10;border:1px solid #23262e;border-top:0;position:relative;top:-6px;padding-top:6px}
+.outbar{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#7ee2a8;padding:8px 14px 0}
+.outbox pre{margin:0;padding:6px 14px 12px;overflow:auto;font:13px/1.5 var(--mono);color:#cfe9d8}
+code.i{font:14.5px var(--mono);background:#efece4;padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+
+/* ---------- tables ---------- */
+table.t{border-collapse:collapse;width:100%;margin:10px 0 14px;font-size:15px}
+table.t th,table.t td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+table.t th{background:#f0ede5;font-weight:700}
+table.t td.fill{background:#fff5d6}
+@media (max-width:700px){table.t{display:block;overflow-x:auto;font-size:14px}}
+.threecol{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:700px){.threecol{grid-template-columns:1fr}}
+
+/* ---------- diagrams ---------- */
+.diagram{background:#fbfaf6;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0;overflow-x:auto}
+.flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+.flow .b{background:#fff;border:2px solid var(--navy);border-radius:10px;padding:8px 14px;font-weight:600;text-align:center;font-size:15px}
+.flow .b.dark{background:var(--navy);color:#fff}
+.flow .b.y{background:var(--accent);border-color:#b98a00;color:#2a2100}
+.flow .b.g{background:var(--green-bg);border-color:var(--green)}
+.flow .b.r{background:var(--rose-bg);border-color:var(--rose)}
+.flow .b small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.flow .b.dark small{color:#cfd6e6}
+.flow .a{font-size:22px;color:var(--muted)}
+.caption{font-size:13.5px;color:var(--muted);text-align:center;margin-top:8px}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:700px){.twocol{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.card h5{margin:0 0 6px;font-size:15px;color:var(--navy)}
+.stack{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.stack div{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden}
+.tl{display:flex;align-items:stretch;height:34px;border-radius:6px;overflow:hidden;font-size:12px;font-weight:700}
+.tl div{display:flex;align-items:center;justify-content:center;color:#fff;border-right:1px solid rgba(255,255,255,.4)}
+.chip{display:inline-block;font:600 14px var(--mono);padding:4px 9px;border-radius:6px;border:1px solid var(--line);background:#fff;margin:2px}
+.chip.ok{background:var(--green-bg);border-color:var(--green)}
+.chip.bad{background:var(--rose-bg);border-color:var(--rose);text-decoration:line-through}
+.chip.new{background:#fff5d6;border-color:var(--amber)}
+.chip.ghost{color:var(--muted)}
+.grid-kv{display:inline-grid;gap:3px}
+.grid-kv .row{display:flex;gap:3px;align-items:center}
+.grid-kv .c{width:20px;height:20px;border-radius:4px}
+.c.re{background:#e8833a} .c.ca{background:#5fb27f} .c.no{background:transparent}
+.grid-kv .lbl{font-size:12px;color:var(--muted);width:54px}
+.bars .bar{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:14px}
+.bars .bar .lab{width:92px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.bars .bar .fillbar{height:18px;border-radius:4px}
+
+/* ---------- widgets ---------- */
+.widget{background:#fff;border:2px dashed #c9c2b2;border-radius:12px;padding:14px 16px;margin:12px 0}
+.widget h5{margin:0 0 10px;font-size:15px;color:var(--navy)}
+.widget .row{display:flex;flex-wrap:wrap;gap:10px 16px;margin-bottom:10px}
+.widget label{font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.widget input,.widget textarea{font:15px var(--mono);padding:6px 8px;border:1px solid #cfc8b8;border-radius:6px;width:130px;background:#fffdf8}
+.widget textarea{width:100%;height:46px}
+.widget button{background:var(--navy);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+.widget .res{font:15px/1.6 var(--mono);background:#f6f4ee;border-radius:8px;padding:10px 12px;white-space:pre-wrap}
+.stream-out{min-height:72px;font-size:16px;background:#f6f4ee;border-radius:8px;padding:10px 12px;margin-top:8px}
+.cursor{display:inline-block;width:8px;height:17px;background:var(--navy);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ---------- glossary & quiz ---------- */
+dl.gloss{display:grid;grid-template-columns:200px 1fr;gap:6px 16px;margin:0}
+dl.gloss dt{font-weight:700;color:var(--navy)}
+dl.gloss dd{margin:0}
+@media (max-width:700px){dl.gloss{grid-template-columns:1fr} dl.gloss dd{margin-bottom:8px}}
+details.q{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+details.q summary{cursor:pointer;font-weight:600}
+details.q p{margin:8px 0 2px}
+footer{color:var(--muted);font-size:14px;text-align:center;margin-top:40px}
+
+@media print{
+  nav.toc,.mobile-toc,#progress,.copy{display:none !important}
+  .layout{display:block} main{padding:0}
+  section.slide{break-inside:avoid-page}
+  body{background:#fff}
+}
+pre { line-height: 125%; }
+td.linenos .normal { color: #6e7681; background-color: #0d1117; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #6e7681; background-color: #0d1117; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #e6edf3; background-color: #6e7681; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #e6edf3; background-color: #6e7681; padding-left: 5px; padding-right: 5px; }
+pre.hl .hll { background-color: #6e7681 }
+pre.hl { background: #0d1117; color: #E6EDF3 }
+pre.hl .c { color: #8B949E; font-style: italic } /* Comment */
+pre.hl .err { color: #F85149 } /* Error */
+pre.hl .esc { color: #E6EDF3 } /* Escape */
+pre.hl .g { color: #E6EDF3 } /* Generic */
+pre.hl .k { color: #FF7B72 } /* Keyword */
+pre.hl .l { color: #A5D6FF } /* Literal */
+pre.hl .n { color: #E6EDF3 } /* Name */
+pre.hl .o { color: #FF7B72; font-weight: bold } /* Operator */
+pre.hl .x { color: #E6EDF3 } /* Other */
+pre.hl .p { color: #E6EDF3 } /* Punctuation */
+pre.hl .ch { color: #8B949E; font-style: italic } /* Comment.Hashbang */
+pre.hl .cm { color: #8B949E; font-style: italic } /* Comment.Multiline */
+pre.hl .cp { color: #8B949E; font-weight: bold; font-style: italic } /* Comment.Preproc */
+pre.hl .cpf { color: #8B949E; font-style: italic } /* Comment.PreprocFile */
+pre.hl .c1 { color: #8B949E; font-style: italic } /* Comment.Single */
+pre.hl .cs { color: #8B949E; font-weight: bold; font-style: italic } /* Comment.Special */
+pre.hl .gd { color: #FFA198; background-color: #490202 } /* Generic.Deleted */
+pre.hl .ge { color: #E6EDF3; font-style: italic } /* Generic.Emph */
+pre.hl .ges { color: #E6EDF3; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+pre.hl .gr { color: #FFA198 } /* Generic.Error */
+pre.hl .gh { color: #79C0FF; font-weight: bold } /* Generic.Heading */
+pre.hl .gi { color: #56D364; background-color: #0F5323 } /* Generic.Inserted */
+pre.hl .go { color: #8B949E } /* Generic.Output */
+pre.hl .gp { color: #8B949E } /* Generic.Prompt */
+pre.hl .gs { color: #E6EDF3; font-weight: bold } /* Generic.Strong */
+pre.hl .gu { color: #79C0FF } /* Generic.Subheading */
+pre.hl .gt { color: #FF7B72 } /* Generic.Traceback */
+pre.hl .g-Underline { color: #E6EDF3; text-decoration: underline } /* Generic.Underline */
+pre.hl .kc { color: #79C0FF } /* Keyword.Constant */
+pre.hl .kd { color: #FF7B72 } /* Keyword.Declaration */
+pre.hl .kn { color: #FF7B72 } /* Keyword.Namespace */
+pre.hl .kp { color: #79C0FF } /* Keyword.Pseudo */
+pre.hl .kr { color: #FF7B72 } /* Keyword.Reserved */
+pre.hl .kt { color: #FF7B72 } /* Keyword.Type */
+pre.hl .ld { color: #79C0FF } /* Literal.Date */
+pre.hl .m { color: #A5D6FF } /* Literal.Number */
+pre.hl .s { color: #A5D6FF } /* Literal.String */
+pre.hl .na { color: #E6EDF3 } /* Name.Attribute */
+pre.hl .nb { color: #E6EDF3 } /* Name.Builtin */
+pre.hl .nc { color: #F0883E; font-weight: bold } /* Name.Class */
+pre.hl .no { color: #79C0FF; font-weight: bold } /* Name.Constant */
+pre.hl .nd { color: #D2A8FF; font-weight: bold } /* Name.Decorator */
+pre.hl .ni { color: #FFA657 } /* Name.Entity */
+pre.hl .ne { color: #F0883E; font-weight: bold } /* Name.Exception */
+pre.hl .nf { color: #D2A8FF; font-weight: bold } /* Name.Function */
+pre.hl .nl { color: #79C0FF; font-weight: bold } /* Name.Label */
+pre.hl .nn { color: #FF7B72 } /* Name.Namespace */
+pre.hl .nx { color: #E6EDF3 } /* Name.Other */
+pre.hl .py { color: #79C0FF } /* Name.Property */
+pre.hl .nt { color: #7EE787 } /* Name.Tag */
+pre.hl .nv { color: #79C0FF } /* Name.Variable */
+pre.hl .ow { color: #FF7B72; font-weight: bold } /* Operator.Word */
+pre.hl .pm { color: #E6EDF3 } /* Punctuation.Marker */
+pre.hl .w { color: #6E7681 } /* Text.Whitespace */
+pre.hl .mb { color: #A5D6FF } /* Literal.Number.Bin */
+pre.hl .mf { color: #A5D6FF } /* Literal.Number.Float */
+pre.hl .mh { color: #A5D6FF } /* Literal.Number.Hex */
+pre.hl .mi { color: #A5D6FF } /* Literal.Number.Integer */
+pre.hl .mo { color: #A5D6FF } /* Literal.Number.Oct */
+pre.hl .sa { color: #79C0FF } /* Literal.String.Affix */
+pre.hl .sb { color: #A5D6FF } /* Literal.String.Backtick */
+pre.hl .sc { color: #A5D6FF } /* Literal.String.Char */
+pre.hl .dl { color: #79C0FF } /* Literal.String.Delimiter */
+pre.hl .sd { color: #A5D6FF } /* Literal.String.Doc */
+pre.hl .s2 { color: #A5D6FF } /* Literal.String.Double */
+pre.hl .se { color: #79C0FF } /* Literal.String.Escape */
+pre.hl .sh { color: #79C0FF } /* Literal.String.Heredoc */
+pre.hl .si { color: #A5D6FF } /* Literal.String.Interpol */
+pre.hl .sx { color: #A5D6FF } /* Literal.String.Other */
+pre.hl .sr { color: #79C0FF } /* Literal.String.Regex */
+pre.hl .s1 { color: #A5D6FF } /* Literal.String.Single */
+pre.hl .ss { color: #A5D6FF } /* Literal.String.Symbol */
+pre.hl .bp { color: #E6EDF3 } /* Name.Builtin.Pseudo */
+pre.hl .fm { color: #D2A8FF; font-weight: bold } /* Name.Function.Magic */
+pre.hl .vc { color: #79C0FF } /* Name.Variable.Class */
+pre.hl .vg { color: #79C0FF } /* Name.Variable.Global */
+pre.hl .vi { color: #79C0FF } /* Name.Variable.Instance */
+pre.hl .vm { color: #79C0FF } /* Name.Variable.Magic */
+pre.hl .il { color: #A5D6FF } /* Literal.Number.Integer.Long */
+
+.outbox.standalone{top:0;border-radius:12px;border-top:1px solid #23262e;margin:10px 0 14px}
+.outbox.standalone pre{white-space:pre-wrap;overflow-wrap:anywhere}
+pre.mini{background:#14161b;color:#e6edf3;border-radius:10px;padding:12px 14px;overflow:auto;font:13.5px/1.55 var(--mono);margin:8px 0 10px}
+details.orig > .codebox{margin-top:10px}
+section.slide h4 code.i{text-transform:none;letter-spacing:0;font-size:14px}
+</style>
+<meta name="description" content="Scaler AWS AI Bootcamp, Week 5, Lesson 22: tool calling basics. Describe a Python function as a JSON tool menu, let OpenAI GPT ask for it, run it and send the result back, first with the plain OpenAI SDK, then with LangChain&#x27;s @tool and bind_tools, then with four warehouse inventory tools. Every line explained.">
+<style>
+/* bootcamp nav: use this page's navy and amber instead of the yellow accent, which is too light for white text */
+@media (max-width:640px){.hero:after{width:140px;height:140px;right:-50px;top:-50px;opacity:.3}}
+main .awsq{--q-acc:var(--navy);--q-acc-t:#e6eaf3;--q-acc-ink:var(--navy);--q-cur:#a86f00;--q-on:#fff;--q-card2:var(--gray-bg)}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="layout">
+<nav class="toc" id="toc">
+  <div class="brand">Tool Calling Basics<br><span style="font:400 13px var(--sans);color:var(--muted)">code walkthrough · by Shivank Agarwal</span></div>
+  <div class="grp">Start here</div>
+  <a href="#what"><span class="n">1</span>What you'll achieve</a>
+  <a href="#picture"><span class="n">2</span>The big picture</a>
+  <a href="#run"><span class="n">3</span>How to run it</a>
+  <a href="#files"><span class="n">4</span>The three files</a>
+  <div class="grp">File 1 · raw OpenAI SDK</div>
+  <a href="#f1-setup"><span class="n">1.1</span>Imports &amp; client</a>
+  <a href="#f1-tool"><span class="n">1.2</span>The real function</a>
+  <a href="#f1-menu"><span class="n">1.3</span>The JSON tool menu</a>
+  <a href="#f1-ask"><span class="n">1.4</span>Ask &amp; check</a>
+  <a href="#f1-run"><span class="n">1.5</span>Run it, send it back</a>
+  <a href="#f1-main"><span class="n">1.6</span>The test questions</a>
+  <div class="grp">File 2 · LangChain</div>
+  <a href="#f2-tool"><span class="n">2.1</span>@tool builds the menu</a>
+  <a href="#f2-bind"><span class="n">2.2</span>bind_tools</a>
+  <a href="#f2-loop"><span class="n">2.3</span>The same loop, shorter</a>
+  <a href="#f2-main"><span class="n">2.4</span>Peek &amp; the trap</a>
+  <a href="#compare"><span class="n">⇄</span>SDK vs LangChain</a>
+  <div class="grp">File 3 · four tools</div>
+  <a href="#f3-data"><span class="n">3.1</span>The warehouse data</a>
+  <a href="#f3-tools"><span class="n">3.2</span>Three ready tools</a>
+  <a href="#f3-todo"><span class="n">3.3</span>Tool 4 &amp; binding</a>
+  <a href="#f3-loop"><span class="n">3.4</span>Choosing a tool</a>
+  <div class="grp">See it work</div>
+  <a href="#trace"><span class="n">▶</span>One question, message by message</a>
+  <div class="grp">Teach &amp; extend</div>
+  <a href="#fits"><span class="n">↔</span>Where this fits</a>
+  <a href="#exercises"><span class="n">✎</span>Exercises</a>
+  <a href="#quiz"><span class="n">?</span>Quick quiz</a>
+  <a href="#gloss"><span class="n">★</span>Glossary</a>
+  <a href="#source"><span class="n">{}</span>Full source</a>
+</nav>
+
+<main>
+<!-- awsq:top -->
+<style>
+.awsq{--q-card:var(--card,var(--surface,#fff));--q-card2:var(--card-2,var(--surface-2,#f3f3f0));--q-rule:var(--rule,var(--line,#ddd));
+  --q-ink:var(--ink,#1a1a1a);--q-muted:var(--muted,#666);--q-acc:var(--tool,var(--accent,#0b7f73));--q-acc-t:var(--tool-t,var(--accent-soft,#d6f2ee));
+  --q-acc-ink:var(--tool-ink,var(--accent,#075a51));--q-cur:var(--brain,var(--gold,#b07600));--q-on:var(--card,var(--surface,#fff));
+  --q-focus:var(--focus,var(--accent,#2958c4));--q-mono:var(--font-mono,"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace);
+  max-width:72rem;margin:18px auto;padding:0 40px;font-family:var(--font-body,inherit)}
+.awsq-box{background:var(--q-card);border:1px solid var(--q-rule);border-radius:12px;padding:12px 14px}
+.awsq-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
+.awsq-cap{display:block;margin:0;font:600 .7rem/1.4 var(--q-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+.awsq-l{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;padding:9px 13px;border-radius:9px;border:1px solid var(--q-rule);color:var(--q-ink);text-decoration:none;font-size:.95rem;line-height:1.3}
+a.awsq-l:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-next{text-align:right;align-items:flex-end}
+.awsq-d{font:600 .7rem/1.3 var(--q-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--q-acc)}
+.awsq-t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+span.awsq-l{border-style:dashed;color:var(--q-muted)} span.awsq-l .awsq-d,span.awsq-l .awsq-t{color:var(--q-muted);font-weight:400}
+a.awsq-home{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 12px;border-radius:9px;text-decoration:none;color:var(--q-ink);text-align:center;font-size:.85rem;line-height:1.3}
+a.awsq-home:hover{background:var(--q-card2);text-decoration:none}
+.awsq-home b{font:600 .7rem/1.3 var(--q-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-steps{display:flex;gap:5px;margin:11px 0 0;padding:0;list-style:none}
+.awsq-steps li{flex:1 1 0;margin:0;padding:0;list-style:none}
+.awsq-steps li::before{content:none}
+.awsq-steps a{display:block;text-align:center;padding:4px 0;border-radius:5px;font:600 .75rem/1.4 var(--q-mono);text-decoration:none;background:var(--q-card2);border:1px solid var(--q-rule);color:var(--q-muted)}
+.awsq-steps a.done{background:var(--q-acc-t);color:var(--q-acc-ink);border-color:transparent}
+.awsq-steps a.cur{background:var(--q-cur);color:var(--q-on);border-color:transparent}
+.awsq-steps a:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-recs{display:flex;flex-wrap:wrap;gap:8px;margin:11px 0 0}
+.awsq-rec{flex:1 1 220px;display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:9px;border:1px solid var(--q-acc);background:var(--q-acc-t);
+  color:var(--q-acc-ink);font-weight:700;font-size:.92rem;line-height:1.3;text-decoration:none}
+a.awsq-rec:hover{text-decoration:none;filter:brightness(.97)}
+.awsq-rec i{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--q-acc);color:var(--q-on);font-style:normal;font-size:.7rem}
+.awsq-rec small{margin-left:auto;font:600 .68rem/1.3 var(--q-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.awsq-files{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:11px 0 0;padding:10px 0 0;border-top:1px dashed var(--q-rule)}
+.awsq-files > b{margin-right:4px;font:600 .7rem/1.3 var(--q-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-fb{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;border:1px solid var(--q-rule);color:var(--q-ink);
+  font-size:.85rem;font-weight:700;line-height:1.3;text-decoration:none}
+a.awsq-fb:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-fb small{font:600 .66rem/1.3 var(--q-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--q-muted)}
+span.awsq-fb{border-style:dashed;color:var(--q-muted);font-weight:600}
+.awsq a:focus-visible{outline:2px solid var(--q-focus);outline-offset:2px}
+.awsq a.aih{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--q-acc);color:var(--q-on);
+  font:700 .74rem/1.2 var(--q-mono);letter-spacing:.04em;text-decoration:none;white-space:nowrap}
+.awsq a.aih:hover{filter:brightness(1.08);text-decoration:none}
+.awsq-ver{display:flex;justify-content:flex-end;margin:11px 0 0;padding:10px 0 0;border-top:1px dashed var(--q-rule)}
+a.awsq-vl{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid var(--q-acc);color:var(--q-acc-ink);
+  font-size:.85rem;font-weight:700;line-height:1.3;text-decoration:none}
+a.awsq-vl:hover{background:var(--q-acc-t);text-decoration:none}
+.awsq-vl small{font:600 .66rem/1.3 var(--q-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-bottom{padding:0 !important;margin:48px 0 8px;max-width:none}
+.awsq-inmain{padding:0 !important;margin:0 0 28px;max-width:none}
+@media (max-width:1100px){.awsq{padding:0 24px}}
+@media (max-width:640px){.awsq-steps{flex-wrap:wrap}.awsq-steps li{flex:1 0 28px}.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}a.awsq-rec small{display:none}}
+@media print{.awsq{display:none}}
+</style>
+<nav class="awsq awsq-top awsq-inmain" aria-label="Bootcamp navigation (top)"><div class="awsq-box"><div class="awsq-head"><span class="awsq-cap">Scaler AWS AI Bootcamp · Week 5 · Lesson 22 of 23</span><a class="aih" href="../../" title="Back to the AI-Infusion home page">⌂ AI-Infusion</a></div><div class="awsq-row"><a class="awsq-l awsq-prev" href="../chunking-hyde/"><span class="awsq-d">← Previous</span><span class="awsq-t">Lesson 21 · Chunking strategies and HyDE</span></a><a class="awsq-home" href="../week-5/"><b>Scaler AWS AI Bootcamp</b>Week 5 · all lessons</a><a class="awsq-l awsq-next" href="../inventory-agent-steps/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 23 · Inventory agent, step by step</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="done" href="../memory-explained/" title="Lesson 15 · Memory, explained simply">15</a></li><li><a class="done" href="../mcp-explained/" title="Lesson 16 · MCP, explained simply">16</a></li><li><a class="done" href="../memory-mcp-code/" title="Lesson 17 · Memory and MCP in code">17</a></li><li><a class="done" href="../evals-explained/" title="Lesson 18 · Evals, explained simply">18</a></li><li><a class="done" href="../component-evals/" title="Lesson 19 · Component evals in code">19</a></li><li><a class="done" href="../embeddings-reranking/" title="Lesson 20 · Embeddings, similarity and reranking">20</a></li><li><a class="done" href="../chunking-hyde/" title="Lesson 21 · Chunking strategies and HyDE">21</a></li><li><a class="cur" href="../tool-calling-basics/" title="Lesson 22 · Tool calling basics" aria-current="page">22</a></li><li><a class="" href="../inventory-agent-steps/" title="Lesson 23 · Inventory agent, step by step">23</a></li><li><a class="" href="../ai-evals-why/" title="Homework 1 · AI Evals 1 · Why AI evals">H1</a></li><li><a class="" href="../ai-evals-methods/" title="Homework 2 · AI Evals 2 · Evaluation methods">H2</a></li><li><a class="" href="../ai-evals-quantitative/" title="Homework 3 · AI Evals 3 · Metrics, judges, test sets">H3</a></li><li><a class="" href="../ai-evals-after-launch/" title="Homework 4 · AI Evals 4 · After launch">H4</a></li><li><a class="" href="../ai-evals-governance/" title="Homework 5 · AI Evals 5 · Tools and governance">H5</a></li></ol><div class="awsq-recs"><span class="awsq-rec"><i aria-hidden="true">▶</i>Scaler class recording<small>link coming soon</small></span></div><div class="awsq-files"><b>Project files</b><a class="awsq-fb" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-22-tool-calling" target="_blank" rel="noopener">&lt;/&gt; Browse the code<small>GitHub</small></a><a class="awsq-fb" href="../../zips/Code/Zips/aws-bootcamp-section-22-tool-calling.zip" download>⬇ Download all<small>.zip</small></a></div></div></nav>
+<!-- /awsq:top -->
+<details class="mobile-toc"><summary>☰ Contents</summary><a href="#what">What you'll achieve</a><a href="#picture">The big picture</a><a href="#run">How to run it</a><a href="#files">The three files</a><a href="#f1-setup">Imports &amp; client</a><a href="#f1-tool">The real function</a><a href="#f1-menu">The JSON tool menu</a><a href="#f1-ask">Ask &amp; check</a><a href="#f1-run">Run it, send it back</a><a href="#f1-main">The test questions</a><a href="#f2-tool">@tool builds the menu</a><a href="#f2-bind">bind_tools</a><a href="#f2-loop">The same loop, shorter</a><a href="#f2-main">Peek &amp; the trap</a><a href="#compare">SDK vs LangChain</a><a href="#f3-data">The warehouse data</a><a href="#f3-tools">Three ready tools</a><a href="#f3-todo">Tool 4 &amp; binding</a><a href="#f3-loop">Choosing a tool</a><a href="#trace">One question, message by message</a><a href="#fits">Where this fits</a><a href="#exercises">Exercises</a><a href="#quiz">Quick quiz</a><a href="#gloss">Glossary</a><a href="#source">Full source</a></details>
+<header class="hero">
+  <div class="kicker">Lesson 22 · Hands-on code explainer · Tool calling basics</div>
+  <h1>Tool calling: letting the model ask your Python code for help</h1>
+  <p>LLMs are good with words but can slip on exact maths and cannot see your data. With tool calling, the model asks your code to run a function, and answers with the real result. You will build it three times: by hand with the OpenAI SDK, with LangChain, and as a four-tool warehouse assistant.</p>
+  <div class="legend"><span>OpenAI SDK</span><span>JSON Schema tools</span><span>LangChain @tool</span><span>bind_tools</span><span>4 inventory tools</span></div>
+</header>
+
+<!-- ============ WHAT ============ -->
+<section class="slide" id="what">
+  <div class="slide-head"><span class="num">1</span><h3>What you'll achieve</h3></div>
+
+  <div class="box simple"><h4>💡 The problem</h4>
+    <p>An LLM (large language model, like GPT) writes text by predicting the next word. That makes it great with words, but shaky with <b>exact</b> work: precise maths, or looking up today's stock count in your warehouse. It may give an answer that <i>sounds</i> right and is slightly wrong, and it cannot see your data at all.</p>
+  </div>
+  <div class="box simple"><h4>💡 The fix: tool calling</h4>
+    <p><b>Tool calling</b> lets the model ask <b>your Python code</b> to do the job. You describe your functions to the model (a "menu"). When a question needs one, the model does not answer. It replies with a request: "please call <code class="i">square_root</code> with <code class="i">number = 144</code>". Your code runs the real function, sends the result back, and the model writes the final answer using it.</p>
+    <p>The model never runs anything itself. It only <b>asks</b>. Your code decides whether and how to run it.</p>
+  </div>
+  <p>By the end of this lesson you will be able to:</p>
+  <ul>
+    <li>write a tool "menu" by hand in OpenAI's JSON format and run the 4-step loop with the plain OpenAI SDK (file 1);</li>
+    <li>do the same thing in far fewer lines with LangChain's <code class="i">@tool</code> and <code class="i">bind_tools</code> (file 2);</li>
+    <li>give a model four warehouse tools and watch it pick the right one and fill in the arguments from a plain-English question (file 3).</li>
+  </ul>
+  <div class="box analogy"><h4>🔧 Analogy: the waiter and the kitchen</h4>
+    <p>The model is a waiter. It talks to the customer well, but it does not cook. The tool menu tells it which dishes the kitchen can make. When a customer orders, the waiter writes a ticket ("square_root, number 144") and passes it to the kitchen (your code). The kitchen cooks and hands back the plate (the result), and the waiter serves it with a friendly sentence.</p>
+  </div>
+
+</section>
+<!-- ============ PICTURE ============ -->
+<section class="slide" id="picture">
+  <div class="slide-head"><span class="num">2</span><h3>The big picture: one question, four steps</h3></div>
+  <p class="oneliner">All three files follow the same loop. Only the amount of code you write by hand changes.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 700 390" width="100%" style="max-width:700px;display:block;margin:auto" role="img" aria-label="The 4-step tool-calling loop between the tool function, our code and the LLM">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a44"/></marker></defs>
+      <rect x="40" y="20" width="150" height="50" rx="10" fill="#fff5d6" stroke="#c98a00" stroke-width="2"/><text x="115" y="42" text-anchor="middle" font-size="14" font-weight="700">Tool function</text><text x="115" y="60" text-anchor="middle" font-size="12" fill="#5d5a53">square_root()</text>
+      <rect x="265" y="20" width="170" height="50" rx="10" fill="#1f2a44"/><text x="350" y="42" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Our code</text><text x="350" y="60" text-anchor="middle" font-size="12" fill="#cfd6e6">chat_with_tools()</text>
+      <rect x="510" y="20" width="150" height="50" rx="10" fill="#e8f6ec" stroke="#23804c" stroke-width="2"/><text x="585" y="42" text-anchor="middle" font-size="14" font-weight="700">LLM (OpenAI)</text><text x="585" y="60" text-anchor="middle" font-size="12" fill="#5d5a53">sees only the menu</text>
+      <line x1="115" y1="70" x2="115" y2="345" stroke="#c9c2b2" stroke-width="2" stroke-dasharray="5 5"/>
+      <line x1="350" y1="70" x2="350" y2="345" stroke="#c9c2b2" stroke-width="2" stroke-dasharray="5 5"/>
+      <line x1="585" y1="70" x2="585" y2="345" stroke="#c9c2b2" stroke-width="2" stroke-dasharray="5 5"/>
+      <line x1="352" y1="105" x2="581" y2="105" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/><text x="467" y="97" text-anchor="middle" font-size="12.5" font-weight="700">1 · question + tool menu</text>
+      <line x1="583" y1="150" x2="354" y2="150" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/><text x="467" y="142" text-anchor="middle" font-size="12.5" font-weight="700">2 · "call square_root(number=144)"</text>
+      <line x1="348" y1="195" x2="119" y2="195" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/><text x="232" y="187" text-anchor="middle" font-size="12.5" font-weight="700">3 · run square_root(144)</text>
+      <line x1="117" y1="230" x2="346" y2="230" stroke="#23804c" stroke-width="2" marker-end="url(#ar)"/><text x="232" y="222" text-anchor="middle" font-size="12" fill="#23804c">returns 12.0</text>
+      <line x1="352" y1="270" x2="581" y2="270" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/><text x="467" y="262" text-anchor="middle" font-size="12.5" font-weight="700">3 · result, role = "tool"</text>
+      <line x1="583" y1="315" x2="354" y2="315" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/><text x="467" y="307" text-anchor="middle" font-size="12.5" font-weight="700">4 · final answer in words</text>
+      <text x="350" y="375" text-anchor="middle" font-size="12.5" fill="#5d5a53">No tool needed (e.g. "capital of France")? Step 2 is already the answer, and we stop there.</text>
+    </svg>
+  </div>
+  <p class="caption">Arrows 1 and 3 (right) are API calls to OpenAI. Arrow 3 (left) is plain Python on your machine.</p>
+  <div class="box said"><h4>🗣 The four steps, as file 1's docstring puts them</h4>
+    <ol>
+      <li>We send the question plus a description of our tools (a JSON "menu").</li>
+      <li>The LLM replies with either a normal answer or "please call tool X with arguments Y".</li>
+      <li>Our code runs the Python function and sends the result back (with <code class="i">role = &quot;tool&quot;</code>).</li>
+      <li>The LLM writes the final answer using that result.</li>
+    </ol>
+  </div>
+  <div class="box simple"><h4>💡 Two calls to the model, not one</h4>
+    <p>When a tool is used, your code calls the model <b>twice</b>: once to get the tool request, once (with the result added) to get the answer. The model has no memory between calls, so the second call must carry the whole conversation so far: the question, the model's own tool request, and the tool's result. That is what the <code class="i">messages</code> list is for.</p>
+  </div>
+
+</section>
+<!-- ============ RUN ============ -->
+<section class="slide" id="run">
+  <div class="slide-head"><span class="num">3</span><h3>How to run it</h3></div>
+
+  <div class="box try"><h4>⌨️ Setup</h4>
+    <ol>
+      <li>Open a terminal in the <code class="i">section-22-tool-calling</code> folder (download it with the buttons at the top of this page). Python 3.11, 3.12 or 3.13 is recommended in <code class="i">requirements.txt</code>.</li>
+      <li>Install the packages: <code class="i">pip install -r requirements.txt</code></li>
+      <li>Copy <code class="i">.env.example</code> to <code class="i">.env</code> in the same folder and paste your own OpenAI API key after the <code class="i">=</code> sign (no quotes, no spaces).</li>
+      <li>Run each file with the command from its docstring (below).</li>
+    </ol>
+  </div>
+  <div class="codebox"><div class="codebar"><span class="fname">terminal</span><button class="copy" type="button">Copy</button></div><pre class="hl">pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+cp<span class="w"> </span>.env.example<span class="w"> </span>.env<span class="w">            </span><span class="c1"># Windows: copy .env.example .env</span>
+python<span class="w"> </span>1_tool_calling_from_scratch.py
+python<span class="w"> </span>2_tool_calling_with_langchain.py
+python<span class="w"> </span>3_inventory_tools_demo.py
+</pre></div>
+  <div class="codebox"><div class="codebar"><span class="fname">.env.example (copy it to .env)</span><button class="copy" type="button">Copy</button></div><pre class="hl"># Hands-On: RAG and Tool Calling (Shivank Agarwal)
+# Copy this file to .env in this same folder, then paste your own OpenAI API key
+# after the = sign (no quotes, no spaces). Never share or commit your .env.
+OPENAI_API_KEY=sk-paste-your-key-here
+</pre></div>
+  <div class="box real"><h4>🌍 Every file calls OpenAI</h4>
+    <p>All three files run <code class="i">load_dotenv()</code> to read <code class="i">OPENAI_API_KEY</code> from <code class="i">.env</code>. File 1 uses the <code class="i">openai</code> SDK (<code class="i">OpenAI()</code>); files 2 and 3 use LangChain's <code class="i">ChatOpenAI</code>. Each question costs one or two small API calls. The model name (<code class="i">&quot;gpt-6-luna&quot;</code>) is written in each file; change it there if your account uses a different model.</p>
+  </div>
+  <div class="box simple"><h4>💡 A lighter install</h4>
+    <p><code class="i">requirements.txt</code> covers the whole "RAG and Tool Calling" workshop (vector stores, local models, Gradio...). For this module you only need four of them: <code class="i">openai</code>, <code class="i">langchain-core</code>, <code class="i">langchain-openai</code> and <code class="i">python-dotenv</code>. So <code class="i">pip install openai langchain-core langchain-openai python-dotenv</code> is enough if you are short on disk space.</p>
+  </div>
+  <div class="box careful"><h4>⚠️ These are starter files with TODOs</h4>
+    <p>Each file has gaps marked <code class="i"># ----- TODO n</code> for you to fill. Until you do, they will not work yet:</p>
+    <ul>
+      <li><b>File 1</b> sends an empty tool list (<code class="i">tools = []</code>) and returns the text <code class="i">&quot;TODO&quot;</code> instead of a final answer.</li>
+      <li><b>File 2</b> stops almost at once with an <code class="i">AttributeError</code>: without <code class="i">@tool</code>, <code class="i">square_root</code> is a plain function with no <code class="i">.name</code>, so <code class="i">tool_map = {t.name: t for t in tools}</code> fails.</li>
+      <li><b>File 3</b> fails on the first question because <code class="i">llm_with_tools</code> is still <code class="i">None</code>.</li>
+    </ul>
+    <p>Each TODO below has a collapsed "one possible answer" so you can check your work.</p>
+  </div>
+  <div class="box careful"><h4>⚠️ Keep your key secret</h4>
+    <p>Never share or commit your <code class="i">.env</code> file. If you use git, add <code class="i">.env</code> to <code class="i">.gitignore</code>.</p>
+  </div>
+
+</section>
+<!-- ============ FILES ============ -->
+<section class="slide" id="files">
+  <div class="slide-head"><span class="num">4</span><h3>The three files at a glance</h3></div>
+
+  <table class="t">
+    <tr><th>File</th><th>Exercise</th><th>What it teaches</th><th>Tools</th><th>Your TODOs</th></tr>
+    <tr><td><code class="i">1_tool_calling_from_scratch.py</code></td><td>3.1</td><td>Tool calling by hand with the plain OpenAI SDK: the JSON menu, tool_call ids, <code class="i">role = &quot;tool&quot;</code></td><td><code class="i">square_root</code></td><td>write the menu; run the tool; make the second call</td></tr>
+    <tr><td><code class="i">2_tool_calling_with_langchain.py</code></td><td>3.2</td><td>The same thing with LangChain: <code class="i">@tool</code>, <code class="i">bind_tools</code>, parsed <code class="i">tool_calls</code></td><td><code class="i">square_root</code></td><td>add <code class="i">@tool</code>; run the tool</td></tr>
+    <tr><td><code class="i">3_inventory_tools_demo.py</code></td><td>3.3</td><td>Choosing between four tools and filling arguments from plain English</td><td>4 warehouse tools</td><td>write the 4th tool; bind all four</td></tr>
+  </table>
+  <div class="box simple"><h4>💡 Read them in order</h4>
+    <p>File 1 shows every moving part. File 2 hides the boring parts. File 3 scales up to a real-looking job. Lesson 23 then puts these warehouse tools inside a full agent loop.</p>
+  </div>
+
+</section>
+<div class="part"><span class="tag">File 1</span><h2>Tool calling from scratch (plain OpenAI SDK)</h2></div>
+<p style="color:var(--muted);margin-top:-4px">Every block below is copied straight from the file, with its line numbers, so you can follow along in your editor.</p>
+<!-- ============ F1-SETUP ============ -->
+<section class="slide" id="f1-setup">
+  <div class="slide-head"><span class="num">1.1</span><h3>Imports, the client and the model</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">1_tool_calling_from_scratch.py · lines 18–27</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># reads OPENAI_API_KEY from the .env file</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">()</span>
+<span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gpt-6-luna"</span>
+</pre></div>
+  <ul>
+    <li><code class="i">json</code> turns the model's arguments (sent as a JSON <i>string</i>) into a Python dict. <code class="i">math</code> gives us <code class="i">math.sqrt</code>.</li>
+    <li><code class="i">load_dotenv()</code> reads <code class="i">.env</code> and puts <code class="i">OPENAI_API_KEY</code> into the environment.</li>
+    <li><code class="i">OpenAI()</code> creates the API client. It finds the key in the environment by itself, so you never write the key in code.</li>
+    <li><code class="i">MODEL</code> is set once, so you change the model in one place.</li>
+  </ul>
+
+</section>
+<!-- ============ F1-TOOL ============ -->
+<section class="slide" id="f1-tool">
+  <div class="slide-head"><span class="num">1.2</span><h3>The real Python function and the tool map</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">1_tool_calling_from_scratch.py · lines 32–39</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="k">def</span><span class="w"> </span><span class="nf">square_root</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">number</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Cannot compute square root of a negative number."</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+
+
+<span class="c1"># Maps the tool NAME the LLM will use -&gt; the Python function we run</span>
+<span class="n">tool_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"square_root"</span><span class="p">:</span> <span class="n">square_root</span><span class="p">}</span>
+</pre></div>
+  <p>This is an ordinary function. Nothing about it is special to AI. It even refuses negative numbers with a <code class="i">ValueError</code>.</p>
+  <p><code class="i">tool_map</code> is a dictionary from a <b>name</b> (a string) to the <b>function</b> itself. Later the model will say "call <code class="i">square_root</code>", and we use <code class="i">tool_map[&quot;square_root&quot;]</code> to find the function to run.</p>
+  <div class="box analogy"><h4>🔧 Analogy: the order ticket and the recipe book</h4>
+    <p>The model writes a dish name on a ticket. <code class="i">tool_map</code> is the kitchen's recipe book: look up the name, get the recipe (the function), cook it.</p>
+  </div>
+
+</section>
+<!-- ============ F1-MENU ============ -->
+<section class="slide" id="f1-menu">
+  <div class="slide-head"><span class="num">1.3</span><h3>The tool menu: describing the function in JSON (TODO 1)</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">1_tool_calling_from_scratch.py · lines 41–48</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># 2) The tool "menu" we show the LLM (JSON Schema)</span>
+<span class="c1">#    The LLM never sees our Python code. It only sees this name, description and parameters.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># ----- TODO 1: Describe the square_root tool in OpenAI's JSON tool format -----</span>
+<span class="c1"># Hint: A list with one dict: {"type": "function", "function": {"name": ..., "description": ..., "parameters": {...}}}</span>
+<span class="c1"># Hint: "parameters" is a JSON Schema: {"type": "object", "properties": {"number": {"type": "number", ...}}, "required": ["number"]}</span>
+<span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+</pre></div>
+  <p>The model <b>never sees your Python code</b>. It only sees what you put in this menu. Each entry has:</p>
+  <table class="t">
+    <tr><th>Field</th><th>What it is for</th></tr>
+    <tr><td><code class="i">&quot;type&quot;: &quot;function&quot;</code></td><td>Says this tool is a function the model may ask for.</td></tr>
+    <tr><td><code class="i">&quot;name&quot;</code></td><td>The exact name the model will use in its request. It must match a key in <code class="i">tool_map</code>.</td></tr>
+    <tr><td><code class="i">&quot;description&quot;</code></td><td>Plain English the model reads to decide <i>when</i> this tool helps. A vague description means wrong choices.</td></tr>
+    <tr><td><code class="i">&quot;parameters&quot;</code></td><td>A <b>JSON Schema</b>: a standard way to describe the shape of data. Here, "an object with one property <code class="i">number</code>, of type number, and it is required".</td></tr>
+  </table>
+  <details class="orig"><summary>Show one possible answer for TODO 1</summary><div class="codebox"><div class="codebar"><span class="fname">one possible answer (not in the starter file)</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">tools</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"function"</span><span class="p">,</span>
+        <span class="s2">"function"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"square_root"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Calculate the square root of a non-negative number."</span><span class="p">,</span>
+            <span class="s2">"parameters"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"object"</span><span class="p">,</span>
+                <span class="s2">"properties"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"number"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"number"</span><span class="p">,</span> <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"The number to take the square root of"</span><span class="p">}</span>
+                <span class="p">},</span>
+                <span class="s2">"required"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"number"</span><span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div></details>
+  <div class="box real"><h4>🌍 In real projects</h4>
+    <p>This JSON shape (name, description, JSON Schema parameters) is close to universal. OpenAI, Anthropic, Amazon Bedrock and MCP servers all describe tools in almost the same way, so the skill transfers.</p>
+  </div>
+
+</section>
+<!-- ============ F1-ASK ============ -->
+<section class="slide" id="f1-ask">
+  <div class="slide-head"><span class="num">1.4</span><h3>Step 1 and 2: ask, then check for a tool request</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">1_tool_calling_from_scratch.py · lines 51–67</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="k">def</span><span class="w"> </span><span class="nf">chat_with_tools</span><span class="p">(</span><span class="n">user_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">user_message</span><span class="p">}]</span>
+
+    <span class="c1"># Step 1: ask the LLM, and tell it which tools exist.</span>
+    <span class="c1"># reasoning_effort="none" is required for tool calling with this model in the Chat Completions API.</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+        <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+        <span class="n">reasoning_effort</span><span class="o">=</span><span class="s2">"none"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span>
+    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>  <span class="c1"># keep the assistant's reply (including its tool requests) in the history</span>
+
+    <span class="c1"># Step 2: did the LLM ask for a tool?</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">message</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">message</span><span class="o">.</span><span class="n">content</span>  <span class="c1"># no tool needed, e.g. "What is the capital of France?"</span>
+</pre></div>
+  <ul>
+    <li><code class="i">messages</code> is the conversation so far, as a list. Each message has a <code class="i">role</code>: <code class="i">&quot;user&quot;</code> (the person), <code class="i">&quot;assistant&quot;</code> (the model) or <code class="i">&quot;tool&quot;</code> (a tool result).</li>
+    <li><code class="i">tools=tools</code> attaches the menu to this call. Without it the model does not know the tool exists.</li>
+    <li><code class="i">reasoning_effort=&quot;none&quot;</code>: the file's comment says this is required for tool calling with this model in the Chat Completions API.</li>
+    <li><code class="i">response.choices[0].message</code> is the model's reply. We append it to <code class="i">messages</code> straight away, <b>including its tool requests</b>. The second call needs to see them.</li>
+    <li><code class="i">message.tool_calls</code> is empty when the model just answered. Then we return <code class="i">message.content</code> (the text) and we are done in one call.</li>
+  </ul>
+  <div class="box simple"><h4>💡 What a tool request looks like</h4>
+    <p>Each item in <code class="i">message.tool_calls</code> has three things you need: an <code class="i">id</code> (a unique label for this request), <code class="i">function.name</code> (which tool), and <code class="i">function.arguments</code> (a JSON <b>string</b> such as <code class="i">{&quot;number&quot;: 144}</code>, not a dict yet).</p>
+  </div>
+  <div class="box careful"><h4>⚠️ Why the id matters</h4>
+    <p>The model can ask for several tools in one reply. When you send results back, each one carries the <code class="i">tool_call_id</code> of the request it answers, so the model can match result to request. A result with a wrong or missing id is rejected by the API.</p>
+  </div>
+
+</section>
+<!-- ============ F1-RUN ============ -->
+<section class="slide" id="f1-run">
+  <div class="slide-head"><span class="num">1.5</span><h3>Step 3 and 4: run the tool, send the result, ask again (TODO 2 and 3)</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">1_tool_calling_from_scratch.py · lines 69–81</span><button class="copy" type="button">Copy</button></div><pre class="hl">    <span class="c1"># Step 3: run every tool the LLM asked for and send the results back</span>
+    <span class="k">for</span> <span class="n">tool_call</span> <span class="ow">in</span> <span class="n">message</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="c1"># ----- TODO 2: Run the requested tool and add its result to messages -----</span>
+        <span class="c1"># Hint: The tool name is in tool_call.function.name</span>
+        <span class="c1"># Hint: The arguments are a JSON string in tool_call.function.arguments</span>
+        <span class="c1"># Hint: json.loads(...) turns the arguments into a dict, then call tool_map[name](**args)</span>
+        <span class="c1"># Hint: Append {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}</span>
+        <span class="k">pass</span>  <span class="c1"># replace with your code</span>
+
+    <span class="c1"># Step 4: ask again; now the LLM can see the tool results and write the final answer</span>
+    <span class="c1"># ----- TODO 3: Call the LLM a second time with the updated messages and return its text -----</span>
+    <span class="c1"># Hint: Same client.chat.completions.create(...) call as in Step 1, with the updated messages</span>
+    <span class="k">return</span> <span class="s2">"TODO"</span>  <span class="c1"># replace with your code</span>
+</pre></div>
+  <p>For every request the model made, your code must:</p>
+  <ol>
+    <li>read the name from <code class="i">tool_call.function.name</code>;</li>
+    <li>turn the argument string into a dict with <code class="i">json.loads(...)</code>, e.g. <code class="i">{&quot;number&quot;: 144}</code>;</li>
+    <li>run the function: <code class="i">tool_map[name](**args)</code>. The <code class="i">**</code> unpacks the dict into keyword arguments, so it becomes <code class="i">square_root(number=144)</code>;</li>
+    <li>append a <code class="i">&quot;tool&quot;</code> message with the matching <code class="i">tool_call_id</code> and the result as a string.</li>
+  </ol>
+  <p>Then call the model again with the longer <code class="i">messages</code> list. This time it can see the result and writes the answer.</p>
+  <details class="orig"><summary>Show one possible answer for TODO 2 (inside the for loop)</summary><div class="codebox"><div class="codebar"><span class="fname">one possible answer (not in the starter file)</span><button class="copy" type="button">Copy</button></div><pre class="hl">        <span class="n">name</span> <span class="o">=</span> <span class="n">tool_call</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">tool_call</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">arguments</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">tool_map</span><span class="p">[</span><span class="n">name</span><span class="p">](</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"tool"</span><span class="p">,</span> <span class="s2">"tool_call_id"</span><span class="p">:</span> <span class="n">tool_call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)})</span>
+</pre></div></details>
+  <details class="orig"><summary>Show one possible answer for TODO 3</summary><div class="codebox"><div class="codebar"><span class="fname">one possible answer (not in the starter file)</span><button class="copy" type="button">Copy</button></div><pre class="hl">    <span class="n">final</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+        <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+        <span class="n">reasoning_effort</span><span class="o">=</span><span class="s2">"none"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">final</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">content</span>
+</pre></div></details>
+  <div class="box careful"><h4>⚠️ Content must be text</h4>
+    <p><code class="i">math.sqrt(144)</code> returns the float <code class="i">12.0</code>. The API wants message content as a string, hence <code class="i">str(result)</code>.</p>
+  </div>
+  <div class="box careful"><h4>⚠️ One round only</h4>
+    <p>This function asks for tools once, then expects an answer. If the model asked for <i>another</i> tool in the second reply, this code would not run it. A real agent keeps looping until there are no more tool calls. Lesson 23 builds that loop.</p>
+  </div>
+
+</section>
+<!-- ============ F1-MAIN ============ -->
+<section class="slide" id="f1-main">
+  <div class="slide-head"><span class="num">1.6</span><h3>The test questions</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">1_tool_calling_from_scratch.py · lines 84–92</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">questions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">"What is the square root of 144?"</span><span class="p">,</span>
+        <span class="s2">"What is the capital of France?"</span><span class="p">,</span>               <span class="c1"># no tool needed</span>
+        <span class="s2">"Can you calculate the square root of 2025 for me?"</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Q: </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"A: </span><span class="si">{</span><span class="n">chat_with_tools</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  <table class="t">
+    <tr><th>Question</th><th>Should the model use the tool?</th><th>What the tool would return</th></tr>
+    <tr><td>What is the square root of 144?</td><td>Yes, <code class="i">number = 144</code></td><td><code class="i">12.0</code></td></tr>
+    <tr><td>What is the capital of France?</td><td>No (the file's comment says "no tool needed")</td><td>not called</td></tr>
+    <tr><td>Can you calculate the square root of 2025 for me?</td><td>Yes, <code class="i">number = 2025</code></td><td><code class="i">45.0</code></td></tr>
+  </table>
+  <p class="caption">The tool results are what <code class="i">math.sqrt</code> returns for those numbers. Whether the model calls the tool is its own choice each run.</p>
+  <div class="box try"><h4>✎ Try it</h4>
+    <p>Add <code class="i">&quot;What is the square root of -9?&quot;</code>. Your function raises <code class="i">ValueError</code> and, with no <code class="i">try/except</code>, the whole program stops. Exercise 2 below fixes that.</p>
+  </div>
+
+</section>
+<div class="part"><span class="tag">File 2</span><h2>The same tool calling, with LangChain</h2></div>
+<!-- ============ F2-TOOL ============ -->
+<section class="slide" id="f2-tool">
+  <div class="slide-head"><span class="num">2.1</span><h3>@tool builds the menu for you (TODO 1)</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">2_tool_calling_with_langchain.py · lines 14–33</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.messages</span><span class="w"> </span><span class="kn">import</span> <span class="n">HumanMessage</span><span class="p">,</span> <span class="n">ToolMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">tool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatOpenAI</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+
+<span class="c1"># ----- TODO 1: Turn square_root into a LangChain tool -----</span>
+<span class="c1"># Hint: Put the @tool decorator above the function</span>
+<span class="c1"># Hint: The docstring becomes the tool description the LLM reads, so keep it clear</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">square_root</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calculate the square root of a non-negative number."""</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>  <span class="c1"># add the decorator above this function</span>
+
+
+<span class="n">tools</span> <span class="o">=</span> <span class="p">[</span><span class="n">square_root</span><span class="p">]</span>
+<span class="n">tool_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">}</span>  <span class="c1"># "square_root" -&gt; the tool object</span>
+</pre></div>
+  <p><b>LangChain</b> is a Python library that wraps many LLM providers behind one interface. Its <code class="i">@tool</code> <b>decorator</b> (a line starting with <code class="i">@</code> that wraps the function below it) reads three things and builds the JSON menu from them:</p>
+  <table class="t">
+    <tr><th>From your function</th><th>Becomes in the menu</th></tr>
+    <tr><td>the name <code class="i">square_root</code></td><td><code class="i">&quot;name&quot;</code></td></tr>
+    <tr><td>the docstring <code class="i">&quot;&quot;&quot;Calculate the square root of a non-negative number.&quot;&quot;&quot;</code></td><td><code class="i">&quot;description&quot;</code></td></tr>
+    <tr><td>the type hint <code class="i">number: float</code></td><td><code class="i">&quot;parameters&quot;</code> (a number called <code class="i">number</code>, required)</td></tr>
+  </table>
+  <details class="orig"><summary>Show one possible answer for TODO 1</summary><div class="codebox"><div class="codebar"><span class="fname">one possible answer (not in the starter file)</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">square_root</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calculate the square root of a non-negative number."""</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+</pre></div></details>
+  <div class="box simple"><h4>💡 The docstring is now a prompt</h4>
+    <p>In file 1 you wrote the description in JSON. Now the docstring <i>is</i> the description. Write it for the model to read: what the tool does and when to use it.</p>
+  </div>
+  <p>After <code class="i">@tool</code>, <code class="i">square_root</code> is a <b>tool object</b>, not a plain function. It has <code class="i">.name</code>, <code class="i">.description</code> and <code class="i">.args</code>, and you run it with <code class="i">.invoke(...)</code>. That is why <code class="i">tool_map = {t.name: t for t in tools}</code> works now.</p>
+
+</section>
+<!-- ============ F2-BIND ============ -->
+<section class="slide" id="f2-bind">
+  <div class="slide-head"><span class="num">2.2</span><h3>ChatOpenAI and bind_tools</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">2_tool_calling_with_langchain.py · lines 35–36</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">llm</span> <span class="o">=</span> <span class="n">ChatOpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"gpt-6-luna"</span><span class="p">,</span> <span class="n">reasoning_effort</span><span class="o">=</span><span class="s2">"none"</span><span class="p">)</span>
+<span class="n">llm_with_tools</span> <span class="o">=</span> <span class="n">llm</span><span class="o">.</span><span class="n">bind_tools</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span>  <span class="c1"># the LLM now knows the tool exists</span>
+</pre></div>
+  <ul>
+    <li><code class="i">ChatOpenAI</code> is LangChain's wrapper for OpenAI chat models. It reads <code class="i">OPENAI_API_KEY</code> from the environment, like <code class="i">OpenAI()</code> did.</li>
+    <li><code class="i">bind_tools(tools)</code> returns a new model object that sends the tool menu with <b>every</b> call. In file 1 you had to remember <code class="i">tools=tools</code> in both calls; here you cannot forget.</li>
+  </ul>
+
+</section>
+<!-- ============ F2-LOOP ============ -->
+<section class="slide" id="f2-loop">
+  <div class="slide-head"><span class="num">2.3</span><h3>The same 4 steps, shorter (TODO 2)</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">2_tool_calling_with_langchain.py · lines 39–56</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="k">def</span><span class="w"> </span><span class="nf">chat_with_tools</span><span class="p">(</span><span class="n">user_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">HumanMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">user_message</span><span class="p">)]</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">llm_with_tools</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>  <span class="c1"># Step 1: ask</span>
+    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>  <span class="c1"># Step 2: no tool needed</span>
+        <span class="c1"># .text = the answer as plain text. (With tools bound, LangChain talks to OpenAI's newer</span>
+        <span class="c1"># "Responses API", where .content is a list of blocks; .text joins them for us.)</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+
+    <span class="c1"># ----- TODO 2: Run every requested tool and add a ToolMessage with its result -----</span>
+    <span class="c1"># Hint: Each tool call is a dict with keys "name", "args" and "id"</span>
+    <span class="c1"># Hint: tool_map[tc["name"]].invoke(tc["args"]) runs the tool</span>
+    <span class="c1"># Hint: messages.append(ToolMessage(content=str(result), tool_call_id=tc["id"]))</span>
+    <span class="k">pass</span>  <span class="c1"># replace with your code</span>
+
+    <span class="k">return</span> <span class="n">llm_with_tools</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>  <span class="c1"># Step 4: final answer (.text = plain text)</span>
+</pre></div>
+  <ul>
+    <li><code class="i">HumanMessage</code> replaces <code class="i">{&quot;role&quot;: &quot;user&quot;, ...}</code>. The reply is an <code class="i">AIMessage</code>, appended as before.</li>
+    <li><code class="i">response.tool_calls</code> is already parsed: a list of plain dicts with <code class="i">&quot;name&quot;</code>, <code class="i">&quot;args&quot;</code> (a dict, no <code class="i">json.loads</code> needed) and <code class="i">&quot;id&quot;</code>.</li>
+    <li><code class="i">ToolMessage(content=..., tool_call_id=...)</code> replaces <code class="i">{&quot;role&quot;: &quot;tool&quot;, ...}</code>.</li>
+    <li><code class="i">.text</code> gives the answer as plain text. The file's comment explains why: with tools bound, LangChain uses OpenAI's newer Responses API, where <code class="i">.content</code> can be a list of blocks.</li>
+  </ul>
+  <details class="orig"><summary>Show one possible answer for TODO 2</summary><div class="codebox"><div class="codebar"><span class="fname">one possible answer (not in the starter file)</span><button class="copy" type="button">Copy</button></div><pre class="hl">    <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">tool_map</span><span class="p">[</span><span class="n">tc</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]]</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">tc</span><span class="p">[</span><span class="s2">"args"</span><span class="p">])</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ToolMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="n">tool_call_id</span><span class="o">=</span><span class="n">tc</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]))</span>
+</pre></div></details>
+  <div class="box careful"><h4>⚠️ Keep the indentation</h4>
+    <p>The loop replaces the <code class="i">pass</code> on line 54 and sits at the same level, before the final <code class="i">return</code>. If the <code class="i">return</code> ends up inside the loop, only the first tool result is sent.</p>
+  </div>
+
+</section>
+<!-- ============ F2-MAIN ============ -->
+<section class="slide" id="f2-main">
+  <div class="slide-head"><span class="num">2.4</span><h3>Peek at the generated menu, and the trap question</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">2_tool_calling_with_langchain.py · lines 59–72</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="c1"># Peek at the JSON "menu" that @tool generated for us</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Tool name       :"</span><span class="p">,</span> <span class="n">square_root</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Tool description:"</span><span class="p">,</span> <span class="n">square_root</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Tool arguments  :"</span><span class="p">,</span> <span class="n">square_root</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">questions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">"Is 15241383937 the square of 123456?"</span><span class="p">,</span>  <span class="c1"># a trap: 123456 squared is 15241383936</span>
+        <span class="s2">"What is the capital of France?"</span><span class="p">,</span>
+        <span class="s2">"Can you calculate the square root of 2025 for me?"</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Q: </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"A: </span><span class="si">{</span><span class="n">chat_with_tools</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  <p>The first three prints show the menu <code class="i">@tool</code> built: the tool's name, its description (your docstring) and its arguments (from the type hint). Run it and compare with the JSON you wrote by hand in file 1.</p>
+  <div class="box real"><h4>🌍 Why the trap question matters</h4>
+    <p>The file's own comment says: <code class="i">123456</code> squared is <code class="i">15241383936</code>, not <code class="i">15241383937</code>. The two numbers differ by 1 in eleven digits, exactly the kind of thing a model can get wrong by "feel". With the tool, Python does the maths: <code class="i">math.sqrt(15241383937)</code> is <code class="i">123456.00000405003</code>, which is not a whole number, so the honest answer is "no".</p>
+  </div>
+  <div class="box careful"><h4>⚠️ The model still decides</h4>
+    <p>The model chooses whether to call the tool, and what number to pass. It might pass <code class="i">15241383937</code> to <code class="i">square_root</code>, or answer from memory. Tool calling makes correct answers possible; good descriptions and prompts make them likely.</p>
+  </div>
+
+</section>
+<!-- ============ COMPARE ============ -->
+<section class="slide" id="compare">
+  <div class="slide-head"><span class="num">⇄</span><h3>Side by side: raw SDK vs LangChain</h3></div>
+
+  <table class="t">
+    <tr><th>Job</th><th>File 1: OpenAI SDK</th><th>File 2: LangChain</th></tr>
+    <tr><td>Describe the tool</td><td>Write the JSON menu by hand</td><td><code class="i">@tool</code> + a docstring + type hints</td></tr>
+    <tr><td>Send the menu</td><td><code class="i">tools=tools</code> on every <code class="i">create(...)</code> call</td><td><code class="i">llm.bind_tools(tools)</code> once</td></tr>
+    <tr><td>User message</td><td><code class="i">{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: ...}</code></td><td><code class="i">HumanMessage(content=...)</code></td></tr>
+    <tr><td>Ask the model</td><td><code class="i">client.chat.completions.create(...)</code></td><td><code class="i">llm_with_tools.invoke(messages)</code></td></tr>
+    <tr><td>Find tool requests</td><td><code class="i">message.tool_calls</code> (objects)</td><td><code class="i">response.tool_calls</code> (dicts)</td></tr>
+    <tr><td>Read arguments</td><td><code class="i">json.loads(tool_call.function.arguments)</code></td><td><code class="i">tc[&quot;args&quot;]</code>, already a dict</td></tr>
+    <tr><td>Run the tool</td><td><code class="i">tool_map[name](**args)</code></td><td><code class="i">tool_map[tc[&quot;name&quot;]].invoke(tc[&quot;args&quot;])</code></td></tr>
+    <tr><td>Send the result</td><td><code class="i">{&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: ..., &quot;content&quot;: ...}</code></td><td><code class="i">ToolMessage(content=..., tool_call_id=...)</code></td></tr>
+    <tr><td>Final text</td><td><code class="i">.choices[0].message.content</code></td><td><code class="i">.text</code></td></tr>
+    <tr><td>Switch provider</td><td>Rewrite the calls</td><td>Swap <code class="i">ChatOpenAI</code> for another chat model class</td></tr>
+  </table>
+  <div class="box simple"><h4>💡 Same loop, less typing</h4>
+    <p>LangChain changes none of the four steps. It removes the JSON writing and the parsing. Knowing file 1 means you can debug file 2 when something goes wrong.</p>
+  </div>
+
+</section>
+<div class="part"><span class="tag">File 3</span><h2>Four tools: a warehouse assistant</h2></div>
+<!-- ============ F3-DATA ============ -->
+<section class="slide" id="f3-data">
+  <div class="slide-head"><span class="num">3.1</span><h3>The warehouse "database"</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">3_inventory_tools_demo.py · lines 19–32</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># A tiny "database" (a Python dict) of warehouse items. SKU = Stock Keeping Unit = product id.</span>
+<span class="c1"># reorder_point = when stock falls to this level or below, we should order more.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="n">INVENTORY</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"SKU-001"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Industrial Valve"</span><span class="p">,</span> <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span> <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>  <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">7000</span><span class="p">},</span>
+    <span class="s2">"SKU-002"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Hydraulic Pump"</span><span class="p">,</span>   <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>  <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>  <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">35000</span><span class="p">},</span>
+    <span class="s2">"SKU-003"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Conveyor Belt"</span><span class="p">,</span>    <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>   <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>  <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">17500</span><span class="p">},</span>
+    <span class="s2">"SKU-004"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Safety Helmet"</span><span class="p">,</span>    <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">},</span>
+    <span class="s2">"SKU-005"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Pressure Gauge"</span><span class="p">,</span>   <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>  <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span>  <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">4500</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># How many units of each item we use per day (on average)</span>
+<span class="n">DAILY_DEMAND</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"SKU-001"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">"SKU-002"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"SKU-003"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"SKU-004"</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">"SKU-005"</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
+</pre></div>
+  <ul>
+    <li><b>SKU</b> (Stock Keeping Unit) is a product id, like <code class="i">SKU-003</code>.</li>
+    <li><b>reorder_point</b>: when stock falls to this level or below, it is time to order more.</li>
+    <li><code class="i">DAILY_DEMAND</code>: how many units of each item are used per day, on average. Costs are in rupees.</li>
+  </ul>
+  <p>Using the rule <code class="i">stock &lt;= reorder_point</code>, two items are low today:</p>
+  <table class="t">
+    <tr><th>SKU</th><th>Name</th><th>stock</th><th>reorder_point</th><th>Low?</th></tr>
+    <tr><td>SKU-001</td><td>Industrial Valve</td><td>120</td><td>50</td><td>no</td></tr>
+    <tr><td>SKU-002</td><td>Hydraulic Pump</td><td>18</td><td>25</td><td class="fill"><b>yes</b></td></tr>
+    <tr><td>SKU-003</td><td>Conveyor Belt</td><td>5</td><td>10</td><td class="fill"><b>yes</b></td></tr>
+    <tr><td>SKU-004</td><td>Safety Helmet</td><td>300</td><td>100</td><td>no</td></tr>
+    <tr><td>SKU-005</td><td>Pressure Gauge</td><td>42</td><td>40</td><td>no (just above)</td></tr>
+  </table>
+  <div class="box real"><h4>🌍 Why a dict</h4>
+    <p>A dictionary keeps the demo simple. In Lesson 23 the same tools read from a real database. The model does not care: it only sees the tool menu, never where the data lives.</p>
+  </div>
+
+</section>
+<!-- ============ F3-TOOLS ============ -->
+<section class="slide" id="f3-tools">
+  <div class="slide-head"><span class="num">3.2</span><h3>The three ready-made tools</h3></div>
+
+  <h4>Tool 1 · <code class="i">get_stock_level</code></h4>
+  <div class="codebox"><div class="codebar"><span class="fname">3_inventory_tools_demo.py · lines 38–46</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_stock_level</span><span class="p">(</span><span class="n">sku</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return current stock level and reorder point for a given SKU."""</span>
+    <span class="n">sku</span> <span class="o">=</span> <span class="n">sku</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">INVENTORY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"SKU </span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2"> not found."</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s2">"LOW"</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">"stock"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"reorder_point"</span><span class="p">]</span> <span class="k">else</span> <span class="s2">"OK"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2">): stock=</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'stock'</span><span class="p">]</span><span class="si">}</span><span class="s2">, reorder_point=</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'reorder_point'</span><span class="p">]</span><span class="si">}</span><span class="s2">, status=</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">"</span>
+</pre></div>
+  <p><code class="i">sku.upper()</code> accepts <code class="i">&quot;sku-003&quot;</code> as well as <code class="i">&quot;SKU-003&quot;</code>: models do not always copy text exactly. An unknown SKU returns a message instead of crashing, so the model can tell the user.</p>
+  <h4>Tool 2 · <code class="i">calculate_reorder_quantity</code></h4>
+  <div class="codebox"><div class="codebar"><span class="fname">3_inventory_tools_demo.py · lines 49–69</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_reorder_quantity</span><span class="p">(</span><span class="n">sku</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">lead_time_days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calculate recommended reorder quantity for a SKU given supplier lead time in days."""</span>
+    <span class="n">sku</span> <span class="o">=</span> <span class="n">sku</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">INVENTORY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"SKU </span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2"> not found."</span>
+    <span class="n">daily</span> <span class="o">=</span> <span class="n">DAILY_DEMAND</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Simple rule of thumb:</span>
+    <span class="c1">#   demand during delivery wait  = daily demand x lead time</span>
+    <span class="c1">#   safety buffer                = the same amount again (in case of delays / spikes)</span>
+    <span class="c1">#   order                        = (wait demand + buffer) - what we already have</span>
+    <span class="n">lead_time_demand</span> <span class="o">=</span> <span class="n">daily</span> <span class="o">*</span> <span class="n">lead_time_days</span>
+    <span class="n">safety_buffer</span> <span class="o">=</span> <span class="n">lead_time_demand</span>
+    <span class="n">reorder_qty</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">lead_time_demand</span> <span class="o">+</span> <span class="n">safety_buffer</span> <span class="o">-</span> <span class="n">item</span><span class="p">[</span><span class="s2">"stock"</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">total_cost</span> <span class="o">=</span> <span class="n">reorder_qty</span> <span class="o">*</span> <span class="n">item</span><span class="p">[</span><span class="s2">"unit_cost"</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2">): recommend ordering </span><span class="si">{</span><span class="n">reorder_qty</span><span class="si">}</span><span class="s2"> units "</span>
+        <span class="sa">f</span><span class="s2">"(lead_time_demand=</span><span class="si">{</span><span class="n">lead_time_demand</span><span class="si">}</span><span class="s2">, safety_buffer=</span><span class="si">{</span><span class="n">safety_buffer</span><span class="si">}</span><span class="s2">, "</span>
+        <span class="sa">f</span><span class="s2">"lead_time=</span><span class="si">{</span><span class="n">lead_time_days</span><span class="si">}</span><span class="s2">d, estimated_cost=Rs </span><span class="si">{</span><span class="n">total_cost</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="p">)</span>
+</pre></div>
+  <p>The rule of thumb in the comments, in plain words:</p>
+  <ul>
+    <li>demand while we wait for delivery = daily demand × lead time;</li>
+    <li>safety buffer = the same amount again, in case of delays or spikes;</li>
+    <li>order = (wait demand + buffer) − stock we already have, never below 0 (<code class="i">max(..., 0)</code>).</li>
+  </ul>
+  <p><code class="i">lead_time_days: int = 7</code> has a default. If the user does not mention a lead time, the model can leave it out and 7 days is used. The <code class="i">:,</code> in <code class="i">{total_cost:,}</code> adds thousands separators (612,500).</p>
+  <h4>Tool 3 · <code class="i">days_until_stockout</code></h4>
+  <div class="codebox"><div class="codebar"><span class="fname">3_inventory_tools_demo.py · lines 72–81</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">days_until_stockout</span><span class="p">(</span><span class="n">sku</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Estimate how many days until a SKU runs out of stock at current demand rate."""</span>
+    <span class="n">sku</span> <span class="o">=</span> <span class="n">sku</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">INVENTORY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"SKU </span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2"> not found."</span>
+    <span class="n">daily</span> <span class="o">=</span> <span class="n">DAILY_DEMAND</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"stock"</span><span class="p">]</span> <span class="o">/</span> <span class="n">daily</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">days</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> days until stockout (stock=</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'stock'</span><span class="p">]</span><span class="si">}</span><span class="s2">, daily_demand=</span><span class="si">{</span><span class="n">daily</span><span class="si">}</span><span class="s2">)"</span>
+</pre></div>
+  <p>Stock divided by daily demand, shown with one decimal place (<code class="i">:.1f</code>). <code class="i">DAILY_DEMAND.get(sku, 1)</code> falls back to 1 if an item has no demand figure, which also avoids dividing by zero.</p>
+  <div class="box simple"><h4>💡 Tools return sentences, not just numbers</h4>
+    <p>Each tool returns a string that names the item and shows its working (<code class="i">stock=..., daily_demand=...</code>). The model reads this text, so labelled values help it write a correct, clear answer.</p>
+  </div>
+
+</section>
+<!-- ============ F3-TODO ============ -->
+<section class="slide" id="f3-todo">
+  <div class="slide-head"><span class="num">3.3</span><h3>Write tool 4, then bind all four (TODO 1 and 2)</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">3_inventory_tools_demo.py · lines 84–99</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="c1"># ----- TODO 1: Write a 4th tool that lists every SKU at or below its reorder point -----</span>
+<span class="c1"># Hint: Decorate with @tool and write a clear docstring (the LLM reads it!)</span>
+<span class="c1"># Hint: Loop over INVENTORY.items() and keep items where stock &lt;= reorder_point</span>
+<span class="c1"># Hint: Return a string, e.g. "Items needing reorder (2 total): SKU-002 (...); SKU-003 (...)"</span>
+<span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_low_stock_items</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""List all SKUs that are at or below their reorder point and need restocking."""</span>
+    <span class="k">return</span> <span class="s2">"TODO"</span>  <span class="c1"># replace with your code</span>
+
+
+<span class="c1"># ----- TODO 2: Put all four tools in a list, build tool_map, and bind the tools to the LLM -----</span>
+<span class="c1"># Hint: tool_map = {t.name: t for t in tools}</span>
+<span class="c1"># Hint: ChatOpenAI(model="gpt-6-luna", reasoning_effort="none").bind_tools(tools)</span>
+<span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">tool_map</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">llm_with_tools</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># replace with your code</span>
+</pre></div>
+  <p><code class="i">list_low_stock_items</code> takes <b>no arguments</b>. It is still a valid tool; its menu entry just has an empty parameter list. The docstring is already written, so the model knows when to pick it.</p>
+  <details class="orig"><summary>Show one possible answer for TODO 1</summary><div class="codebox"><div class="codebar"><span class="fname">one possible answer (not in the starter file)</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_low_stock_items</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""List all SKUs that are at or below their reorder point and need restocking."""</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">: stock=</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'stock'</span><span class="p">]</span><span class="si">}</span><span class="s2">, reorder_point=</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'reorder_point'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span>
+        <span class="k">for</span> <span class="n">sku</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">INVENTORY</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">"stock"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"reorder_point"</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">low</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"No items need reordering."</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Items needing reorder (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="p">)</span><span class="si">}</span><span class="s2"> total): "</span> <span class="o">+</span> <span class="s2">"; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">low</span><span class="p">)</span>
+</pre></div></details>
+  <details class="orig"><summary>Show one possible answer for TODO 2</summary><div class="codebox"><div class="codebar"><span class="fname">one possible answer (not in the starter file)</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">tools</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_stock_level</span><span class="p">,</span> <span class="n">calculate_reorder_quantity</span><span class="p">,</span> <span class="n">days_until_stockout</span><span class="p">,</span> <span class="n">list_low_stock_items</span><span class="p">]</span>
+<span class="n">tool_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">}</span>
+<span class="n">llm_with_tools</span> <span class="o">=</span> <span class="n">ChatOpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"gpt-6-luna"</span><span class="p">,</span> <span class="n">reasoning_effort</span><span class="o">=</span><span class="s2">"none"</span><span class="p">)</span><span class="o">.</span><span class="n">bind_tools</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span>
+</pre></div></details>
+  <div class="box careful"><h4>⚠️ Forget one tool, lose one skill</h4>
+    <p>If a tool is missing from the <code class="i">tools</code> list, the model never hears about it. If it is in the list but missing from <code class="i">tool_map</code>, the model can ask for it and your code crashes with a <code class="i">KeyError</code>. Building both from the same list avoids that.</p>
+  </div>
+
+</section>
+<!-- ============ F3-LOOP ============ -->
+<section class="slide" id="f3-loop">
+  <div class="slide-head"><span class="num">3.4</span><h3>The loop and the four questions: choosing a tool</h3></div>
+
+  <div class="codebox"><div class="codebar"><span class="fname">3_inventory_tools_demo.py · lines 102–128</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="k">def</span><span class="w"> </span><span class="nf">chat_with_tools</span><span class="p">(</span><span class="n">user_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Same 4-step loop as Exercise 3.2."""</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">HumanMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">user_message</span><span class="p">)]</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">llm_with_tools</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>  <span class="c1"># .text = the answer as plain text</span>
+
+    <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">tool_map</span><span class="p">[</span><span class="n">tc</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]]</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">tc</span><span class="p">[</span><span class="s2">"args"</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"   [tool] </span><span class="si">{</span><span class="n">tc</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">tc</span><span class="p">[</span><span class="s1">'args'</span><span class="p">]</span><span class="si">}</span><span class="s2">) -&gt; </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ToolMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="n">tool_call_id</span><span class="o">=</span><span class="n">tc</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">llm_with_tools</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">questions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">"What is the current stock level for SKU-003?"</span><span class="p">,</span>
+        <span class="s2">"Which items need to be reordered right now?"</span><span class="p">,</span>
+        <span class="s2">"How many days until SKU-002 runs out of stock?"</span><span class="p">,</span>
+        <span class="s2">"What quantity of SKU-003 should I order if my supplier takes 10 days to deliver?"</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Q: </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"A: </span><span class="si">{</span><span class="n">chat_with_tools</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  <p>This loop is already complete: it is file 2's loop plus one <code class="i">print</code> so you can see each tool call and its result in the terminal.</p>
+  <div class="diagram"><div class="flow">
+    <div class="b">Plain-English question</div><div class="a">→</div>
+    <div class="b dark">LLM reads 4 docstrings<small>picks a tool, fills its arguments</small></div><div class="a">→</div>
+    <div class="b y">Our code runs it<small>tool_map[name].invoke(args)</small></div><div class="a">→</div>
+    <div class="b g">Final answer</div>
+  </div></div>
+  <table class="t">
+    <tr><th>Question</th><th>Tool a good model should pick</th><th>Arguments taken from the question</th><th>What that tool returns (worked out from the code)</th></tr>
+    <tr><td>What is the current stock level for SKU-003?</td><td><code class="i">get_stock_level</code></td><td><code class="i">sku=&quot;SKU-003&quot;</code></td><td><code class="i">Conveyor Belt (SKU-003): stock=5, reorder_point=10, status=LOW</code></td></tr>
+    <tr><td>Which items need to be reordered right now?</td><td><code class="i">list_low_stock_items</code></td><td>none</td><td>SKU-002 and SKU-003 (2 items), in whatever format your TODO 1 returns</td></tr>
+    <tr><td>How many days until SKU-002 runs out of stock?</td><td><code class="i">days_until_stockout</code></td><td><code class="i">sku=&quot;SKU-002&quot;</code></td><td><code class="i">Hydraulic Pump (SKU-002): 6.0 days until stockout (stock=18, daily_demand=3)</code></td></tr>
+    <tr><td>What quantity of SKU-003 should I order if my supplier takes 10 days to deliver?</td><td><code class="i">calculate_reorder_quantity</code></td><td><code class="i">sku=&quot;SKU-003&quot;, lead_time_days=10</code></td><td><code class="i">Conveyor Belt (SKU-003): recommend ordering 35 units (lead_time_demand=20, safety_buffer=20, lead_time=10d, estimated_cost=Rs 612,500)</code></td></tr>
+  </table>
+  <p class="caption">The right-hand column is what each Python function returns for those arguments (2 × 10 = 20; 20 + 20 − 5 = 35; 35 × 17,500 = 612,500). It is not a recorded run: the model's choice of tool and its final wording can vary.</p>
+  <div class="box simple"><h4>💡 Notice "10 days" became <code class="i">lead_time_days=10</code></h4>
+    <p>Nobody parsed the sentence. The model matched "supplier takes 10 days" to the parameter name <code class="i">lead_time_days</code> and the docstring "given supplier lead time in days". Clear names and docstrings do the work that a hand-written parser used to do.</p>
+  </div>
+  <div class="box try"><h4>✎ Try it</h4>
+    <p>Ask "Which items are low, and how long until each runs out?" The model may ask for several tools at once. The <code class="i">for</code> loop runs them all, but if it needs a <i>second</i> round (first find the low items, then check each), this one-round code cannot do it. That limit is exactly what Lesson 23's agent loop removes.</p>
+  </div>
+
+</section>
+<div class="part"><span class="tag">See it work</span><h2>One question through the loop</h2></div>
+<!-- ============ TRACE ============ -->
+<section class="slide" id="trace">
+  <div class="slide-head"><span class="num">▶</span><h3>One question, message by message</h3></div>
+
+  <p>Here is the <code class="i">messages</code> list in file 1 as it grows for <b>"What is the square root of 144?"</b>, assuming your TODOs are filled. Rows marked <b>illustrative</b> show the <i>shape</i> the API returns; the id and the wording are made up for this example.</p>
+  <table class="t">
+    <tr><th>#</th><th>Added by</th><th>Message</th><th>Source</th></tr>
+    <tr><td>1</td><td>line 52</td><td><code class="i">{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is the square root of 144?&quot;}</code></td><td>from the code</td></tr>
+    <tr><td colspan="4"><i>Step 1: first API call, with <code class="i">tools=tools</code></i></td></tr>
+    <tr><td>2</td><td>line 63</td><td>assistant message, no text, with <code class="i">tool_calls</code>: one call, <code class="i">id=&quot;call_abc123&quot;</code>, <code class="i">function.name=&quot;square_root&quot;</code>, <code class="i">function.arguments=&#x27;{&quot;number&quot;: 144}&#x27;</code></td><td><b>illustrative</b></td></tr>
+    <tr><td colspan="4"><i>Step 2: <code class="i">message.tool_calls</code> is not empty, so we carry on. Step 3: <code class="i">json.loads</code> gives <code class="i">{&quot;number&quot;: 144}</code>; <code class="i">square_root(number=144)</code> returns <code class="i">12.0</code></i></td></tr>
+    <tr><td>3</td><td>TODO 2</td><td><code class="i">{&quot;role&quot;: &quot;tool&quot;, &quot;tool_call_id&quot;: &quot;call_abc123&quot;, &quot;content&quot;: &quot;12.0&quot;}</code></td><td>from the code (<code class="i">str(math.sqrt(144))</code>); id copied from row 2</td></tr>
+    <tr><td colspan="4"><i>Step 4: second API call with all three messages</i></td></tr>
+    <tr><td>→</td><td>TODO 3</td><td>assistant text, e.g. "The square root of 144 is 12."</td><td><b>illustrative</b></td></tr>
+  </table>
+  <div class="box simple"><h4>💡 Read it like this</h4>
+    <p>Two API calls, one Python function call. The model's second reply is based on row 3, a number your code computed, not on the model's own guess. For "What is the capital of France?" the table stops after row 2: that reply has text and no <code class="i">tool_calls</code>, and line 67 returns it.</p>
+  </div>
+  <div class="box careful"><h4>⚠️ Why row 2 must stay in the list</h4>
+    <p>If you skip <code class="i">messages.append(message)</code> and send only the user question plus the tool result, the API rejects the request: a <code class="i">&quot;tool&quot;</code> message must follow the assistant message that asked for it.</p>
+  </div>
+
+</section>
+<div class="part"><span class="tag">Teach &amp; extend</span><h2>Connecting it to the rest of the course</h2></div>
+<!-- ============ FITS ============ -->
+<section class="slide" id="fits">
+  <div class="slide-head"><span class="num">↔</span><h3>Where this fits</h3></div>
+
+  <table class="t">
+    <tr><th>Lesson</th><th>How it connects</th></tr>
+    <tr><td><a href="../embeddings-reranking/">Lesson 20 · Embeddings and reranking</a></td><td>Module 1 of the same workshop: finding the right text for the model to read.</td></tr>
+    <tr><td><a href="../chunking-hyde/">Lesson 21 · Chunking and HyDE</a></td><td>The previous lesson: how to split and search documents for RAG.</td></tr>
+    <tr><td><a href="../inventory-agent-steps/">Lesson 23 · Inventory agent, step by step</a></td><td>Next: these warehouse tools go into a real agent loop with a database and RAG.</td></tr>
+    <tr><td><a href="../giving-agents-tools/">Bootcamp Lesson 2 · Giving agents tools</a></td><td>The same idea with Strands Agents on AWS, where <code class="i">@tool</code> also turns a function into a tool.</td></tr>
+    <tr><td><a href="../inventory-agent/">Bootcamp Lesson 14 · Inventory agent, v0 to v7</a></td><td>A warehouse agent grown version by version, with tracing and guardrails.</td></tr>
+    <tr><td><a href="../../Learnings/Class-2-AI-infusion/">AI-Infusion Lesson 2 · LangChain and your first agent</a></td><td>A gentler first look at LangChain, chat models and agents.</td></tr>
+  </table>
+
+</section>
+<!-- ============ EXERCISES ============ -->
+<section class="slide" id="exercises">
+  <div class="slide-head"><span class="num">✎</span><h3>Exercises (easy → hard)</h3></div>
+
+  <ol>
+    <li><b>Fill the TODOs.</b> Complete all seven TODOs across the three files and run each file. Check your answers against the collapsed solutions.</li>
+    <li><b>Handle tool errors.</b> In file 1, wrap <code class="i">tool_map[name](**args)</code> in <code class="i">try/except</code> and send <code class="i">f&quot;Error: {e}&quot;</code> back as the tool content. Ask for the square root of −9: the model should now explain the problem instead of the program crashing. Do the same in file 2, whose <code class="i">square_root</code> has no negative check at all (<code class="i">math.sqrt(-9)</code> raises <code class="i">ValueError</code>).</li>
+    <li><b>Add a second maths tool.</b> In file 2, add <code class="i">@tool def power(base: float, exponent: float) -&gt; float</code> with a clear docstring. Ask "What is 2 to the power 40?" and "What is the square root of 2 to the power 40?" and watch which tools it picks.</li>
+    <li><b>Break a description on purpose.</b> In file 3, change <code class="i">days_until_stockout</code>'s docstring to something vague like "Inventory helper." Rerun the questions. How often does the model pick the wrong tool now?</li>
+    <li><b>Print the menu.</b> In file 3, print <code class="i">[t.name for t in tools]</code> and each <code class="i">t.args</code>. Compare with the JSON you wrote by hand in file 1.</li>
+    <li><b>Make it a real loop.</b> Change file 3's <code class="i">chat_with_tools</code> to repeat "invoke → run tools" in a <code class="i">while</code> loop until the reply has no <code class="i">tool_calls</code>, with a limit of 5 rounds. Then ask "Which items are low, and how many days until each runs out?" (This is what Lesson 23 builds.)</li>
+    <li><b>Port file 1 to file 3's tools.</b> Write the JSON menu for <code class="i">calculate_reorder_quantity</code> by hand, including the optional <code class="i">lead_time_days</code> (hint: leave it out of <code class="i">&quot;required&quot;</code>).</li>
+  </ol>
+
+</section>
+<!-- ============ QUIZ ============ -->
+<section class="slide" id="quiz">
+  <div class="slide-head"><span class="num">?</span><h3>Quick quiz</h3></div>
+  <details class="q"><summary>1. Does the model run your Python function?</summary><p>No. It only replies with a request (tool name + arguments). Your code runs the function and sends the result back.</p></details>
+  <details class="q"><summary>2. What does the model actually see about your tool?</summary><p>Only the menu: the name, the description and the parameter schema. Never your Python code.</p></details>
+  <details class="q"><summary>3. Why do we append the assistant&#x27;s reply to messages before running the tool?</summary><p>The second API call must contain the tool request, so the tool result that follows it has something to answer. The model has no memory between calls.</p></details>
+  <details class="q"><summary>4. What is tool_call_id for?</summary><p>It links each tool result to the request it answers, which matters when the model asks for several tools at once.</p></details>
+  <details class="q"><summary>5. In file 1, why json.loads, and why not in file 2?</summary><p>The OpenAI SDK gives arguments as a JSON string. LangChain parses them for you, so tc[&quot;args&quot;] is already a dict.</p></details>
+  <details class="q"><summary>6. What does @tool use to build the description?</summary><p>The function&#x27;s docstring. The name comes from the function name and the parameters from its type hints.</p></details>
+  <details class="q"><summary>7. For &quot;order SKU-003 with a 10-day lead time&quot;, what does calculate_reorder_quantity recommend?</summary><p>35 units: 2 per day × 10 = 20, plus a 20 buffer = 40, minus 5 in stock = 35, costing Rs 612,500.</p></details>
+  <details class="q"><summary>8. What happens in these files if the model needs a second round of tools?</summary><p>Nothing runs it: the code makes one tool round and then asks for the answer. A full agent loop (Lesson 23) keeps going until no tools are requested.</p></details>
+</section>
+<!-- ============ GLOSS ============ -->
+<section class="slide" id="gloss">
+  <div class="slide-head"><span class="num">★</span><h3>Glossary</h3></div>
+  <table class="t">
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td><b>LLM</b></td><td>Large language model: a model that writes text by predicting the next word, such as GPT.</td></tr>
+    <tr><td><b>Tool</b></td><td>A function your code can run when the model asks for it.</td></tr>
+    <tr><td><b>Tool calling</b></td><td>The model replies with a request to run a named tool with arguments, instead of (or before) answering.</td></tr>
+    <tr><td><b>Tool menu / schema</b></td><td>The description of your tools sent to the model: name, description and parameters.</td></tr>
+    <tr><td><b>JSON Schema</b></td><td>A standard JSON format for describing the shape of data, e.g. &quot;an object with a required number&quot;.</td></tr>
+    <tr><td><b>messages</b></td><td>The conversation list sent on each call, with roles user, assistant and tool.</td></tr>
+    <tr><td><b>tool_calls</b></td><td>The list of tool requests inside the model&#x27;s reply.</td></tr>
+    <tr><td><b>tool_call_id</b></td><td>The id that links a tool result back to the request it answers.</td></tr>
+    <tr><td><b>role = &quot;tool&quot;</b></td><td>The message role used to send a tool&#x27;s result back to the model.</td></tr>
+    <tr><td><b>tool_map</b></td><td>A dict from tool name to the function (or tool object) to run.</td></tr>
+    <tr><td><b>LangChain</b></td><td>A Python library that wraps many LLM providers and tools behind one interface.</td></tr>
+    <tr><td><b>@tool</b></td><td>LangChain decorator that turns a function into a tool object and builds its menu entry.</td></tr>
+    <tr><td><b>bind_tools</b></td><td>Returns a model that sends your tool menu with every call.</td></tr>
+    <tr><td><b>HumanMessage / AIMessage / ToolMessage</b></td><td>LangChain&#x27;s classes for user, model and tool messages.</td></tr>
+    <tr><td><b>.invoke()</b></td><td>LangChain&#x27;s standard way to run a model or a tool.</td></tr>
+    <tr><td><b>SKU</b></td><td>Stock Keeping Unit: a product id such as SKU-003.</td></tr>
+    <tr><td><b>Reorder point</b></td><td>The stock level at or below which you should order more.</td></tr>
+    <tr><td><b>Lead time</b></td><td>How many days the supplier takes to deliver.</td></tr>
+    <tr><td><b>.env</b></td><td>A local file holding secrets such as OPENAI_API_KEY; read by load_dotenv().</td></tr>
+  </table>
+</section>
+<!-- ============ SOURCE ============ -->
+<section class="slide" id="source">
+  <div class="slide-head"><span class="num">{ }</span><h3>Full source</h3></div>
+  <p class="oneliner">The starter files exactly as handed out, TODOs included. The .env.example is shown in section 3.</p>
+  <details class="orig" open><summary>1_tool_calling_from_scratch.py (complete starter file)</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">1_tool_calling_from_scratch.py</span><span class="badge key">needs OpenAI key</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="sd">"""</span>
+<span class="sd">Exercise 3.1 — Tool Calling from Scratch (plain OpenAI SDK, no frameworks)</span>
+<span class="sd">Created by Shivank Agarwal</span>
+
+<span class="sd">LLMs are good with words but can be wrong with exact maths.</span>
+<span class="sd">"Tool calling" lets the LLM ask OUR Python code to do a job, then use the result.</span>
+
+<span class="sd">The flow (remember these 4 steps):</span>
+<span class="sd">  1. We send the question + a description of our tools (a JSON "menu")</span>
+<span class="sd">  2. The LLM replies either with a normal answer OR with "please call tool X with arguments Y"</span>
+<span class="sd">  3. Our code runs the Python function and sends the result back (role = "tool")</span>
+<span class="sd">  4. The LLM writes the final answer using that result</span>
+
+<span class="sd">Run it:</span>
+<span class="sd">    python 1_tool_calling_from_scratch.py</span>
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># reads OPENAI_API_KEY from the .env file</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">()</span>
+<span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gpt-6-luna"</span>
+
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># 1) The real Python function (the "tool")</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">square_root</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">number</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Cannot compute square root of a negative number."</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+
+
+<span class="c1"># Maps the tool NAME the LLM will use -&gt; the Python function we run</span>
+<span class="n">tool_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"square_root"</span><span class="p">:</span> <span class="n">square_root</span><span class="p">}</span>
+
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># 2) The tool "menu" we show the LLM (JSON Schema)</span>
+<span class="c1">#    The LLM never sees our Python code. It only sees this name, description and parameters.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># ----- TODO 1: Describe the square_root tool in OpenAI's JSON tool format -----</span>
+<span class="c1"># Hint: A list with one dict: {"type": "function", "function": {"name": ..., "description": ..., "parameters": {...}}}</span>
+<span class="c1"># Hint: "parameters" is a JSON Schema: {"type": "object", "properties": {"number": {"type": "number", ...}}, "required": ["number"]}</span>
+<span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">chat_with_tools</span><span class="p">(</span><span class="n">user_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">user_message</span><span class="p">}]</span>
+
+    <span class="c1"># Step 1: ask the LLM, and tell it which tools exist.</span>
+    <span class="c1"># reasoning_effort="none" is required for tool calling with this model in the Chat Completions API.</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+        <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+        <span class="n">reasoning_effort</span><span class="o">=</span><span class="s2">"none"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span>
+    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>  <span class="c1"># keep the assistant's reply (including its tool requests) in the history</span>
+
+    <span class="c1"># Step 2: did the LLM ask for a tool?</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">message</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">message</span><span class="o">.</span><span class="n">content</span>  <span class="c1"># no tool needed, e.g. "What is the capital of France?"</span>
+
+    <span class="c1"># Step 3: run every tool the LLM asked for and send the results back</span>
+    <span class="k">for</span> <span class="n">tool_call</span> <span class="ow">in</span> <span class="n">message</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="c1"># ----- TODO 2: Run the requested tool and add its result to messages -----</span>
+        <span class="c1"># Hint: The tool name is in tool_call.function.name</span>
+        <span class="c1"># Hint: The arguments are a JSON string in tool_call.function.arguments</span>
+        <span class="c1"># Hint: json.loads(...) turns the arguments into a dict, then call tool_map[name](**args)</span>
+        <span class="c1"># Hint: Append {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}</span>
+        <span class="k">pass</span>  <span class="c1"># replace with your code</span>
+
+    <span class="c1"># Step 4: ask again; now the LLM can see the tool results and write the final answer</span>
+    <span class="c1"># ----- TODO 3: Call the LLM a second time with the updated messages and return its text -----</span>
+    <span class="c1"># Hint: Same client.chat.completions.create(...) call as in Step 1, with the updated messages</span>
+    <span class="k">return</span> <span class="s2">"TODO"</span>  <span class="c1"># replace with your code</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">questions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">"What is the square root of 144?"</span><span class="p">,</span>
+        <span class="s2">"What is the capital of France?"</span><span class="p">,</span>               <span class="c1"># no tool needed</span>
+        <span class="s2">"Can you calculate the square root of 2025 for me?"</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Q: </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"A: </span><span class="si">{</span><span class="n">chat_with_tools</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>2_tool_calling_with_langchain.py (complete starter file)</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">2_tool_calling_with_langchain.py</span><span class="badge key">needs OpenAI key</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="sd">"""</span>
+<span class="sd">Exercise 3.2 — The same Tool Calling, with LangChain</span>
+<span class="sd">Created by Shivank Agarwal</span>
+
+<span class="sd">Same 4 steps as Exercise 3.1, but LangChain removes the boring parts:</span>
+<span class="sd">  * @tool builds the JSON "menu" for us from the function name, type hints and docstring</span>
+<span class="sd">  * llm.bind_tools([...]) attaches the menu to every call</span>
+<span class="sd">  * response.tool_calls gives the requests already parsed into Python dicts</span>
+
+<span class="sd">Run it:</span>
+<span class="sd">    python 2_tool_calling_with_langchain.py</span>
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.messages</span><span class="w"> </span><span class="kn">import</span> <span class="n">HumanMessage</span><span class="p">,</span> <span class="n">ToolMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">tool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatOpenAI</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+
+<span class="c1"># ----- TODO 1: Turn square_root into a LangChain tool -----</span>
+<span class="c1"># Hint: Put the @tool decorator above the function</span>
+<span class="c1"># Hint: The docstring becomes the tool description the LLM reads, so keep it clear</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">square_root</span><span class="p">(</span><span class="n">number</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calculate the square root of a non-negative number."""</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>  <span class="c1"># add the decorator above this function</span>
+
+
+<span class="n">tools</span> <span class="o">=</span> <span class="p">[</span><span class="n">square_root</span><span class="p">]</span>
+<span class="n">tool_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">}</span>  <span class="c1"># "square_root" -&gt; the tool object</span>
+
+<span class="n">llm</span> <span class="o">=</span> <span class="n">ChatOpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"gpt-6-luna"</span><span class="p">,</span> <span class="n">reasoning_effort</span><span class="o">=</span><span class="s2">"none"</span><span class="p">)</span>
+<span class="n">llm_with_tools</span> <span class="o">=</span> <span class="n">llm</span><span class="o">.</span><span class="n">bind_tools</span><span class="p">(</span><span class="n">tools</span><span class="p">)</span>  <span class="c1"># the LLM now knows the tool exists</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">chat_with_tools</span><span class="p">(</span><span class="n">user_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">HumanMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">user_message</span><span class="p">)]</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">llm_with_tools</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>  <span class="c1"># Step 1: ask</span>
+    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>  <span class="c1"># Step 2: no tool needed</span>
+        <span class="c1"># .text = the answer as plain text. (With tools bound, LangChain talks to OpenAI's newer</span>
+        <span class="c1"># "Responses API", where .content is a list of blocks; .text joins them for us.)</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+
+    <span class="c1"># ----- TODO 2: Run every requested tool and add a ToolMessage with its result -----</span>
+    <span class="c1"># Hint: Each tool call is a dict with keys "name", "args" and "id"</span>
+    <span class="c1"># Hint: tool_map[tc["name"]].invoke(tc["args"]) runs the tool</span>
+    <span class="c1"># Hint: messages.append(ToolMessage(content=str(result), tool_call_id=tc["id"]))</span>
+    <span class="k">pass</span>  <span class="c1"># replace with your code</span>
+
+    <span class="k">return</span> <span class="n">llm_with_tools</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>  <span class="c1"># Step 4: final answer (.text = plain text)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="c1"># Peek at the JSON "menu" that @tool generated for us</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Tool name       :"</span><span class="p">,</span> <span class="n">square_root</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Tool description:"</span><span class="p">,</span> <span class="n">square_root</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Tool arguments  :"</span><span class="p">,</span> <span class="n">square_root</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">questions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">"Is 15241383937 the square of 123456?"</span><span class="p">,</span>  <span class="c1"># a trap: 123456 squared is 15241383936</span>
+        <span class="s2">"What is the capital of France?"</span><span class="p">,</span>
+        <span class="s2">"Can you calculate the square root of 2025 for me?"</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Q: </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"A: </span><span class="si">{</span><span class="n">chat_with_tools</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>3_inventory_tools_demo.py (complete starter file)</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">3_inventory_tools_demo.py</span><span class="badge key">needs OpenAI key</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="sd">"""</span>
+<span class="sd">Exercise 3.3 — An LLM that can use FOUR tools (warehouse assistant)</span>
+<span class="sd">Created by Shivank Agarwal</span>
+
+<span class="sd">Same pattern as 3.2, but now the LLM must CHOOSE the right tool from a menu of four,</span>
+<span class="sd">and fill in the arguments (SKU id, lead time) from the user's plain-English question.</span>
+
+<span class="sd">Run it:</span>
+<span class="sd">    python 3_inventory_tools_demo.py</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.messages</span><span class="w"> </span><span class="kn">import</span> <span class="n">HumanMessage</span><span class="p">,</span> <span class="n">ToolMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">tool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatOpenAI</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># A tiny "database" (a Python dict) of warehouse items. SKU = Stock Keeping Unit = product id.</span>
+<span class="c1"># reorder_point = when stock falls to this level or below, we should order more.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="n">INVENTORY</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"SKU-001"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Industrial Valve"</span><span class="p">,</span> <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span> <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>  <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">7000</span><span class="p">},</span>
+    <span class="s2">"SKU-002"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Hydraulic Pump"</span><span class="p">,</span>   <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>  <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>  <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">35000</span><span class="p">},</span>
+    <span class="s2">"SKU-003"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Conveyor Belt"</span><span class="p">,</span>    <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>   <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>  <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">17500</span><span class="p">},</span>
+    <span class="s2">"SKU-004"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Safety Helmet"</span><span class="p">,</span>    <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">},</span>
+    <span class="s2">"SKU-005"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Pressure Gauge"</span><span class="p">,</span>   <span class="s2">"stock"</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>  <span class="s2">"reorder_point"</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span>  <span class="s2">"unit_cost"</span><span class="p">:</span> <span class="mi">4500</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># How many units of each item we use per day (on average)</span>
+<span class="n">DAILY_DEMAND</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"SKU-001"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">"SKU-002"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"SKU-003"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"SKU-004"</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">"SKU-005"</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
+
+
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># Tools. The docstring is what the LLM reads to decide WHICH tool to use, so it must be clear.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_stock_level</span><span class="p">(</span><span class="n">sku</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return current stock level and reorder point for a given SKU."""</span>
+    <span class="n">sku</span> <span class="o">=</span> <span class="n">sku</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">INVENTORY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"SKU </span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2"> not found."</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s2">"LOW"</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">"stock"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"reorder_point"</span><span class="p">]</span> <span class="k">else</span> <span class="s2">"OK"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2">): stock=</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'stock'</span><span class="p">]</span><span class="si">}</span><span class="s2">, reorder_point=</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'reorder_point'</span><span class="p">]</span><span class="si">}</span><span class="s2">, status=</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_reorder_quantity</span><span class="p">(</span><span class="n">sku</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">lead_time_days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calculate recommended reorder quantity for a SKU given supplier lead time in days."""</span>
+    <span class="n">sku</span> <span class="o">=</span> <span class="n">sku</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">INVENTORY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"SKU </span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2"> not found."</span>
+    <span class="n">daily</span> <span class="o">=</span> <span class="n">DAILY_DEMAND</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Simple rule of thumb:</span>
+    <span class="c1">#   demand during delivery wait  = daily demand x lead time</span>
+    <span class="c1">#   safety buffer                = the same amount again (in case of delays / spikes)</span>
+    <span class="c1">#   order                        = (wait demand + buffer) - what we already have</span>
+    <span class="n">lead_time_demand</span> <span class="o">=</span> <span class="n">daily</span> <span class="o">*</span> <span class="n">lead_time_days</span>
+    <span class="n">safety_buffer</span> <span class="o">=</span> <span class="n">lead_time_demand</span>
+    <span class="n">reorder_qty</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">lead_time_demand</span> <span class="o">+</span> <span class="n">safety_buffer</span> <span class="o">-</span> <span class="n">item</span><span class="p">[</span><span class="s2">"stock"</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">total_cost</span> <span class="o">=</span> <span class="n">reorder_qty</span> <span class="o">*</span> <span class="n">item</span><span class="p">[</span><span class="s2">"unit_cost"</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2">): recommend ordering </span><span class="si">{</span><span class="n">reorder_qty</span><span class="si">}</span><span class="s2"> units "</span>
+        <span class="sa">f</span><span class="s2">"(lead_time_demand=</span><span class="si">{</span><span class="n">lead_time_demand</span><span class="si">}</span><span class="s2">, safety_buffer=</span><span class="si">{</span><span class="n">safety_buffer</span><span class="si">}</span><span class="s2">, "</span>
+        <span class="sa">f</span><span class="s2">"lead_time=</span><span class="si">{</span><span class="n">lead_time_days</span><span class="si">}</span><span class="s2">d, estimated_cost=Rs </span><span class="si">{</span><span class="n">total_cost</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">days_until_stockout</span><span class="p">(</span><span class="n">sku</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Estimate how many days until a SKU runs out of stock at current demand rate."""</span>
+    <span class="n">sku</span> <span class="o">=</span> <span class="n">sku</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">INVENTORY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"SKU </span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2"> not found."</span>
+    <span class="n">daily</span> <span class="o">=</span> <span class="n">DAILY_DEMAND</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sku</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"stock"</span><span class="p">]</span> <span class="o">/</span> <span class="n">daily</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">sku</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">days</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> days until stockout (stock=</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'stock'</span><span class="p">]</span><span class="si">}</span><span class="s2">, daily_demand=</span><span class="si">{</span><span class="n">daily</span><span class="si">}</span><span class="s2">)"</span>
+
+
+<span class="c1"># ----- TODO 1: Write a 4th tool that lists every SKU at or below its reorder point -----</span>
+<span class="c1"># Hint: Decorate with @tool and write a clear docstring (the LLM reads it!)</span>
+<span class="c1"># Hint: Loop over INVENTORY.items() and keep items where stock &lt;= reorder_point</span>
+<span class="c1"># Hint: Return a string, e.g. "Items needing reorder (2 total): SKU-002 (...); SKU-003 (...)"</span>
+<span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_low_stock_items</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""List all SKUs that are at or below their reorder point and need restocking."""</span>
+    <span class="k">return</span> <span class="s2">"TODO"</span>  <span class="c1"># replace with your code</span>
+
+
+<span class="c1"># ----- TODO 2: Put all four tools in a list, build tool_map, and bind the tools to the LLM -----</span>
+<span class="c1"># Hint: tool_map = {t.name: t for t in tools}</span>
+<span class="c1"># Hint: ChatOpenAI(model="gpt-6-luna", reasoning_effort="none").bind_tools(tools)</span>
+<span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">tool_map</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">llm_with_tools</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># replace with your code</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">chat_with_tools</span><span class="p">(</span><span class="n">user_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Same 4-step loop as Exercise 3.2."""</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">HumanMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">user_message</span><span class="p">)]</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">llm_with_tools</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>  <span class="c1"># .text = the answer as plain text</span>
+
+    <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">tool_map</span><span class="p">[</span><span class="n">tc</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]]</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">tc</span><span class="p">[</span><span class="s2">"args"</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"   [tool] </span><span class="si">{</span><span class="n">tc</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">tc</span><span class="p">[</span><span class="s1">'args'</span><span class="p">]</span><span class="si">}</span><span class="s2">) -&gt; </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ToolMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="n">tool_call_id</span><span class="o">=</span><span class="n">tc</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">llm_with_tools</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">questions</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">"What is the current stock level for SKU-003?"</span><span class="p">,</span>
+        <span class="s2">"Which items need to be reordered right now?"</span><span class="p">,</span>
+        <span class="s2">"How many days until SKU-002 runs out of stock?"</span><span class="p">,</span>
+        <span class="s2">"What quantity of SKU-003 should I order if my supplier takes 10 days to deliver?"</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">questions</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Q: </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"A: </span><span class="si">{</span><span class="n">chat_with_tools</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>requirements.txt</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">requirements.txt</span><button class="copy" type="button">Copy</button></div><pre class="hl"># Hands-On: RAG and Tool Calling — created by Shivank Agarwal
+# Install with:  pip install -r requirements.txt
+# Python 3.11, 3.12 or 3.13 recommended.
+
+# LLM + embeddings (OpenAI)
+openai&gt;=2.0
+langchain-core&gt;=1.0
+langchain-openai&gt;=1.7
+
+# Chunking, vector store, local models
+langchain-text-splitters&gt;=1.0
+langchain-experimental&gt;=0.4
+langchain-chroma&gt;=1.0
+langchain-huggingface&gt;=1.0
+chromadb&gt;=1.0
+sentence-transformers&gt;=5.0
+
+# Word vectors, keyword search, maths
+gensim&gt;=4.4
+rank_bm25&gt;=0.2.2
+numpy&gt;=2.0
+pandas&gt;=2.2
+scikit-learn&gt;=1.5
+
+# Web apps, notebooks, settings
+gradio&gt;=6.0
+jupyter
+python-dotenv&gt;=1.0
+</pre></div>
+  </details>
+</section>
+
+<!-- awsq:bottom -->
+<nav class="awsq awsq-bottom" aria-label="Bootcamp navigation (bottom)"><div class="awsq-box"><div class="awsq-head"><span class="awsq-cap">Scaler AWS AI Bootcamp · Week 5 · Lesson 22 of 23</span><a class="aih" href="../../" title="Back to the AI-Infusion home page">⌂ AI-Infusion</a></div><div class="awsq-row"><a class="awsq-l awsq-prev" href="../chunking-hyde/"><span class="awsq-d">← Previous</span><span class="awsq-t">Lesson 21 · Chunking strategies and HyDE</span></a><a class="awsq-home" href="../week-5/"><b>Scaler AWS AI Bootcamp</b>Week 5 · all lessons</a><a class="awsq-l awsq-next" href="../inventory-agent-steps/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 23 · Inventory agent, step by step</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="done" href="../memory-explained/" title="Lesson 15 · Memory, explained simply">15</a></li><li><a class="done" href="../mcp-explained/" title="Lesson 16 · MCP, explained simply">16</a></li><li><a class="done" href="../memory-mcp-code/" title="Lesson 17 · Memory and MCP in code">17</a></li><li><a class="done" href="../evals-explained/" title="Lesson 18 · Evals, explained simply">18</a></li><li><a class="done" href="../component-evals/" title="Lesson 19 · Component evals in code">19</a></li><li><a class="done" href="../embeddings-reranking/" title="Lesson 20 · Embeddings, similarity and reranking">20</a></li><li><a class="done" href="../chunking-hyde/" title="Lesson 21 · Chunking strategies and HyDE">21</a></li><li><a class="cur" href="../tool-calling-basics/" title="Lesson 22 · Tool calling basics" aria-current="page">22</a></li><li><a class="" href="../inventory-agent-steps/" title="Lesson 23 · Inventory agent, step by step">23</a></li><li><a class="" href="../ai-evals-why/" title="Homework 1 · AI Evals 1 · Why AI evals">H1</a></li><li><a class="" href="../ai-evals-methods/" title="Homework 2 · AI Evals 2 · Evaluation methods">H2</a></li><li><a class="" href="../ai-evals-quantitative/" title="Homework 3 · AI Evals 3 · Metrics, judges, test sets">H3</a></li><li><a class="" href="../ai-evals-after-launch/" title="Homework 4 · AI Evals 4 · After launch">H4</a></li><li><a class="" href="../ai-evals-governance/" title="Homework 5 · AI Evals 5 · Tools and governance">H5</a></li></ol><div class="awsq-files"><b>Project files</b><a class="awsq-fb" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-22-tool-calling" target="_blank" rel="noopener">&lt;/&gt; Browse the code<small>GitHub</small></a><a class="awsq-fb" href="../../zips/Code/Zips/aws-bootcamp-section-22-tool-calling.zip" download>⬇ Download all<small>.zip</small></a></div></div></nav>
+<!-- /awsq:bottom -->
+<footer>Tool calling basics: code explainer · code by Shivank Agarwal</footer>
+</main>
+</div>
+<script>
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const text = btn.closest('.codebox').querySelector('pre').innerText;
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 1400); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, () => fb(text, done));
+    else fb(text, done);
+  });
+});
+function fb(text, done) { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) {} t.remove(); }
+const bar = document.getElementById('progress');
+window.addEventListener('scroll', () => { const h = document.documentElement; bar.style.width = (100 * h.scrollTop / (h.scrollHeight - h.clientHeight)) + '%'; }, {passive: true});
+const links = {}; document.querySelectorAll('nav.toc a').forEach(a => links[a.getAttribute('href').slice(1)] = a);
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && links[e.target.id]) { Object.values(links).forEach(l => l.classList.remove('active')); links[e.target.id].classList.add('active'); } }), {rootMargin: '-35% 0px -60% 0px'});
+document.querySelectorAll('section.slide').forEach(s => io.observe(s));
+document.querySelectorAll('.mobile-toc a').forEach(a => a.addEventListener('click', () => a.closest('details').open = false));
+</script>
+</body>
+</html>

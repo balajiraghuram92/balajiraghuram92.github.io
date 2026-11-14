@@ -48,6 +48,11 @@ WEEK5 = [
     ("memory-mcp-code", "17", "Lesson 17", "Memory and MCP in code"),
     ("evals-explained", "18", "Lesson 18", "Evals, explained simply"),
     ("component-evals", "19", "Lesson 19", "Component evals in code"),
+    # hands-on: RAG and tool calling (code-first workshop modules)
+    ("embeddings-reranking", "20", "Lesson 20", "Embeddings, similarity and reranking"),
+    ("chunking-hyde", "21", "Lesson 21", "Chunking strategies and HyDE"),
+    ("tool-calling-basics", "22", "Lesson 22", "Tool calling basics"),
+    ("inventory-agent-steps", "23", "Lesson 23", "Inventory agent, step by step"),
     ("ai-evals-why", "H1", "Homework 1", "AI Evals 1 · Why AI evals"),
     ("ai-evals-methods", "H2", "Homework 2", "AI Evals 2 · Evaluation methods"),
     ("ai-evals-quantitative", "H3", "Homework 3", "AI Evals 3 · Metrics, judges, test sets"),
@@ -162,6 +167,10 @@ _CODE = {
     "inventory-agent": ("Aws-Bootcamp/section-14-inventory-agent", "aws-bootcamp-section-14-inventory-agent"),
     "memory-mcp-code": ("Aws-Bootcamp/section-17-memory-mcp", "aws-bootcamp-section-17-memory-mcp"),
     "component-evals": ("Aws-Bootcamp/section-19-component-evals", "aws-bootcamp-section-19-component-evals"),
+    "embeddings-reranking": ("Aws-Bootcamp/section-20-embeddings-reranking", "aws-bootcamp-section-20-embeddings-reranking"),
+    "chunking-hyde": ("Aws-Bootcamp/section-21-chunking-hyde", "aws-bootcamp-section-21-chunking-hyde"),
+    "tool-calling-basics": ("Aws-Bootcamp/section-22-tool-calling", "aws-bootcamp-section-22-tool-calling"),
+    "inventory-agent-steps": ("Aws-Bootcamp/section-23-inventory-agent-steps", "aws-bootcamp-section-23-inventory-agent-steps"),
     # the five AI Evals homework chapters share one code folder
     **{f: ("Aws-Bootcamp/homework-ai-evals-in-practice", "aws-bootcamp-homework-ai-evals-in-practice")
        for f in ("ai-evals-why", "ai-evals-methods", "ai-evals-quantitative", "ai-evals-after-launch", "ai-evals-governance")},
@@ -208,7 +217,8 @@ FINANCE = {"finance-section-1", "finance-nps-project", "trip-buddy", "finance-pa
 INMAIN = FINANCE | {"llm-building-blocks", "agentic-bug-fixing", "observability-explained", "observability-langsmith",
                     "guardrails-explained", "guardrails-nemo", "inventory-agent", "memory-explained", "mcp-explained",
                     "memory-mcp-code", "evals-explained", "component-evals", "ai-evals-why", "ai-evals-methods",
-                    "ai-evals-quantitative", "ai-evals-after-launch", "ai-evals-governance", "adaptive-learning-case-study"}
+                    "ai-evals-quantitative", "ai-evals-after-launch", "ai-evals-governance", "adaptive-learning-case-study",
+                    "embeddings-reranking", "chunking-hyde", "tool-calling-basics", "inventory-agent-steps"}
 # Reading chapters with no code: no Project files box.
 NOCODE = {"llm-building-blocks", "observability-explained", "guardrails-explained", "memory-explained", "mcp-explained",
           "evals-explained", "finance-part-2-frameworks", "finance-part-3-deep-search", "finance-part-4-reasoning",

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bootcamp Week 5</title>
-<meta name="description" content="Scaler AWS AI Bootcamp, Week 5: Lessons 15 to 19 on agent memory, MCP and evaluating agents, with the five AI Evals in Practice chapters as homework.">
+<meta name="description" content="Scaler AWS AI Bootcamp, Week 5: Lessons 15 to 23 on agent memory, MCP, evaluating agents and hands-on RAG and tool calling, with the five AI Evals in Practice chapters as homework.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="../../assets/hub.css">
@@ -19,7 +19,7 @@
     <p class="awsb-eyebrow"><i></i>Scaler AWS AI Bootcamp · Week 5</p>
     <h1 id="awsb-h">Agents that remember, <em>measured</em></h1>
     <p class="awsb-sub">Give agents memory and connect them to tools over MCP, then learn to prove with evidence that an agent does its job: score each part, read the failures, and check the LLM judge against people. The AI Evals notes are this week's homework.</p>
-    <ul class="awsb-meta"><li>Lessons 15–19</li><li>5 homework chapters</li><li>Memory · MCP · evals · LLM judges</li></ul>
+    <ul class="awsb-meta"><li>Lessons 15–23</li><li>5 homework chapters</li><li>Memory · MCP · evals · embeddings · chunking · tool calling</li></ul>
 
     <div class="awsb-part" id="recordings">
       <span class="awsb-pnum">Watch</span>
@@ -29,7 +29,7 @@
 
     <div class="awsb-part" id="sessions">
       <span class="awsb-pnum">Learn</span>
-      <div><h2>Week 5 lessons</h2><p>The course continues from Week 4's Lesson 14. Read each "explained simply" lesson before its code; each lesson page links the next.</p></div>
+      <div><h2>Week 5 lessons</h2><p>The course continues from Week 4's Lesson 14. Read each "explained simply" lesson before its code; Lessons 20 to 23 are a hands-on RAG and tool-calling workshop. Each lesson page links the next.</p></div>
     </div>
     <div class="awsb-grid">
       <article class="awsb-card" style="--c:#7EA6FF">
@@ -71,6 +71,38 @@
       <ul><li>Score an inventory agent's router, prompt, search and tools</li><li>Review the answers by hand in a small annotator page</li><li>Measure how well the LLM judge agrees with a person (kappa)</li></ul>
       <p class="awsb-lab"><b>Lab</b>Run the evals, label the answers in annotator.html, then score the judge</p>
       <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-19-component-evals" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-19-component-evals.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#7EA6FF">
+      <div class="awsb-num">20</div>
+      <p class="awsb-ln">Lesson 20 · Hands-on code explainer</p>
+      <h3><a href="../embeddings-reranking/">Embeddings, similarity and reranking</a></h3>
+      <ul><li>Turn words and sentences into embeddings</li><li>Search by meaning with cosine similarity and top-K</li><li>Rerank the top results with a cross-encoder</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Fill the TODOs in a GloVe notebook, a top-K search app and a retrieve-then-rerank app (free local models, no key)</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-20-embeddings-reranking" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-20-embeddings-reranking.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#C79BFF">
+      <div class="awsb-num">21</div>
+      <p class="awsb-ln">Lesson 21 · Hands-on code explainer</p>
+      <h3><a href="../chunking-hyde/">Chunking strategies and HyDE</a></h3>
+      <ul><li>Cut one article at 50, 150 and 400 characters and compare what search finds</li><li>Fixed-length, semantic and Markdown-heading chunking</li><li>HyDE: search with an LLM-written answer instead of the question</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Fill the notebook's TODOs: split, store in Chroma, search, then BM25 with and without HyDE</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-21-chunking-hyde" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-21-chunking-hyde.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#5FD07E">
+      <div class="awsb-num">22</div>
+      <p class="awsb-ln">Lesson 22 · Hands-on code explainer</p>
+      <h3><a href="../tool-calling-basics/">Tool calling basics</a></h3>
+      <ul><li>Why LLMs slip on exact maths and lookups</li><li>The 4-step tool loop by hand with the OpenAI SDK, then with LangChain</li><li>A warehouse assistant that picks one of four tools</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Fill the TODOs in three starter scripts and run four warehouse tools through the loop</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-22-tool-calling" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-22-tool-calling.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#F2B705">
+      <div class="awsb-num">23</div>
+      <p class="awsb-ln">Lesson 23 · Hands-on code explainer · 8 steps</p>
+      <h3><a href="../inventory-agent-steps/">Inventory agent, step by step</a></h3>
+      <ul><li>Exact product facts in SQLite, planning know-how in ChromaDB</li><li>Python tools do the safety-stock maths, not the LLM</li><li>Agent loop vs fixed pipeline, ending in a Gradio chat app</li></ul>
+      <p class="awsb-lab"><b>Build</b>An inventory planning chat agent combining SQLite, RAG, tools and an agent loop</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-23-inventory-agent-steps" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-23-inventory-agent-steps.zip" download>⬇ Code (.zip)</a></span></div>
     </article>
     </div>
 

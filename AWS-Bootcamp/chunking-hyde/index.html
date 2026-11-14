@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 5 · Lesson 21 · Chunking strategies and HyDE · Scaler AWS AI Bootcamp</title>
+<style>
+:root{
+  --bg:#f7f5ef; --paper:#ffffff; --ink:#1c1b19; --muted:#5d5a53; --line:#e4dfd3;
+  --accent:#f2b705; --navy:#1f2a44;
+  --blue-bg:#eef4ff; --blue:#2f63c9;
+  --amber-bg:#fff5d6; --amber:#c98a00;
+  --green-bg:#e8f6ec; --green:#23804c;
+  --rose-bg:#fdeceb; --rose:#b8352a;
+  --gray-bg:#f2f0ea; --gray:#8d877a;
+  --code-bg:#14161b;
+  --serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 var(--sans)}
+a{color:var(--blue)}
+#progress{position:fixed;top:0;left:0;height:4px;width:0;background:var(--accent);z-index:50}
+
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);max-width:1240px;margin:0 auto}
+nav.toc{position:sticky;top:0;height:100vh;overflow:auto;padding:28px 18px 40px 22px;border-right:1px solid var(--line);font-size:14px}
+nav.toc .brand{font:700 15px/1.3 var(--serif);color:var(--navy);margin-bottom:14px}
+nav.toc .grp{margin:16px 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+nav.toc a{display:flex;gap:8px;padding:3px 8px;border-radius:6px;color:var(--ink);text-decoration:none;line-height:1.35}
+nav.toc a span.n{flex:0 0 22px;color:var(--muted);font-variant-numeric:tabular-nums}
+nav.toc a:hover{background:#ece8dd}
+nav.toc a.active{background:var(--navy);color:#fff}
+nav.toc a.active span.n{color:#cfd6e6}
+main{padding:34px 44px 80px;min-width:0}
+.mobile-toc{display:none}
+@media (max-width:1000px){
+  .layout{grid-template-columns:1fr}
+  nav.toc{display:none}
+  main{padding:22px 16px 60px}
+  .mobile-toc{display:block;margin-bottom:18px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+  .mobile-toc summary{font-weight:700;cursor:pointer}
+  .mobile-toc a{display:block;padding:3px 0}
+}
+
+/* ---------- hero ---------- */
+.hero{background:var(--navy);color:#fff;border-radius:18px;padding:40px 40px 34px;margin-bottom:26px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;background:var(--accent);opacity:.9;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.hero .kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#f6d36b;font-weight:700}
+.hero h1{font:700 40px/1.12 var(--serif);margin:10px 0 12px;max-width:720px;position:relative;z-index:1}
+.hero p{max-width:690px;color:#dfe4ef;margin:0 0 8px;position:relative;z-index:1}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;position:relative;z-index:1}
+.legend span{font-size:13px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12)}
+
+.intro{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:30px}
+.intro h2{font:700 22px/1.3 var(--serif);margin:0 0 10px;color:var(--navy)}
+.roadmap{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.roadmap .step{background:var(--gray-bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px}
+.roadmap .step b{display:block;color:var(--navy)}
+.roadmap .arr{color:var(--muted)}
+
+/* ---------- part dividers ---------- */
+.part{margin:46px 0 14px;display:flex;align-items:center;gap:14px}
+.part .tag{background:var(--accent);color:#2a2100;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:6px}
+.part h2{margin:0;font:700 26px/1.2 var(--serif);color:var(--navy)}
+
+/* ---------- slide cards ---------- */
+section.slide{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:26px 30px 24px;margin:18px 0 26px;scroll-margin-top:16px}
+.slide-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.slide-head .num{background:var(--navy);color:#fff;font-weight:700;font-size:13px;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.slide-head h3{font:700 26px/1.25 var(--serif);margin:0;color:var(--ink)}
+.oneliner{color:var(--muted);font-size:16px;margin:2px 0 14px}
+section.slide h4{margin:0 0 6px;font-size:13px;letter-spacing:.07em;text-transform:uppercase}
+section.slide p{margin:0 0 10px}
+section.slide ul,section.slide ol{margin:4px 0 10px;padding-left:22px}
+section.slide li{margin:3px 0}
+
+.box{border-radius:12px;padding:14px 18px 8px;margin:14px 0;border-left:5px solid}
+.box.said{background:var(--gray-bg);border-color:var(--gray)} .box.said h4{color:#6b665b}
+.box.simple{background:var(--blue-bg);border-color:var(--blue)} .box.simple h4{color:var(--blue)}
+.box.analogy{background:var(--amber-bg);border-color:var(--amber)} .box.analogy h4{color:#8a5d00}
+.box.real{background:var(--green-bg);border-color:var(--green)} .box.real h4{color:var(--green)}
+.box.careful{background:var(--rose-bg);border-color:var(--rose)} .box.careful h4{color:var(--rose)}
+.box.try{background:#f4f3fb;border-color:#5b4fc4} .box.try h4{color:#4b40a8}
+
+details.orig{margin:6px 0 4px}
+details.orig summary{cursor:pointer;color:var(--muted);font-size:14px}
+details.orig img{display:block;width:100%;max-width:640px;border:1px solid var(--line);border-radius:8px;margin-top:8px}
+
+/* ---------- code ---------- */
+.codebox{margin:12px 0 4px;border-radius:12px;overflow:hidden;background:var(--code-bg);border:1px solid #23262e}
+.codebar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#1d2027;color:#c9ced8;font:13px var(--mono)}
+.codebar .fname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{font:700 11px var(--sans);letter-spacing:.03em;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.badge.run{background:#1f6f43;color:#dff7e8}
+.badge.key{background:#7a5a00;color:#fff1c7}
+.badge.gpu{background:#6b2f8a;color:#f3e3ff}
+.badge.local{background:#1f4f8a;color:#e1edff}
+.copy{background:#2c313b;color:#e6e9ef;border:0;border-radius:6px;padding:3px 9px;font:12px var(--sans);cursor:pointer}
+.copy:hover{background:#3a404c}
+pre.hl{margin:0;padding:14px 16px;overflow:auto;font:13.5px/1.55 var(--mono);color:#e6edf3;tab-size:4}
+.outbox{margin:0 0 12px;border-radius:0 0 12px 12px;background:#0b0d10;border:1px solid #23262e;border-top:0;position:relative;top:-6px;padding-top:6px}
+.outbar{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#7ee2a8;padding:8px 14px 0}
+.outbox pre{margin:0;padding:6px 14px 12px;overflow:auto;font:13px/1.5 var(--mono);color:#cfe9d8}
+code.i{font:14.5px var(--mono);background:#efece4;padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+
+/* ---------- tables ---------- */
+table.t{border-collapse:collapse;width:100%;margin:10px 0 14px;font-size:15px}
+table.t th,table.t td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+table.t th{background:#f0ede5;font-weight:700}
+table.t td.fill{background:#fff5d6}
+@media (max-width:700px){table.t{display:block;overflow-x:auto;font-size:14px}}
+.threecol{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:700px){.threecol{grid-template-columns:1fr}}
+
+/* ---------- diagrams ---------- */
+.diagram{background:#fbfaf6;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0;overflow-x:auto}
+.flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+.flow .b{background:#fff;border:2px solid var(--navy);border-radius:10px;padding:8px 14px;font-weight:600;text-align:center;font-size:15px}
+.flow .b.dark{background:var(--navy);color:#fff}
+.flow .b.y{background:var(--accent);border-color:#b98a00;color:#2a2100}
+.flow .b.g{background:var(--green-bg);border-color:var(--green)}
+.flow .b.r{background:var(--rose-bg);border-color:var(--rose)}
+.flow .b small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.flow .b.dark small{color:#cfd6e6}
+.flow .a{font-size:22px;color:var(--muted)}
+.caption{font-size:13.5px;color:var(--muted);text-align:center;margin-top:8px}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:700px){.twocol{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.card h5{margin:0 0 6px;font-size:15px;color:var(--navy)}
+.stack{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.stack div{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden}
+.tl{display:flex;align-items:stretch;height:34px;border-radius:6px;overflow:hidden;font-size:12px;font-weight:700}
+.tl div{display:flex;align-items:center;justify-content:center;color:#fff;border-right:1px solid rgba(255,255,255,.4)}
+.chip{display:inline-block;font:600 14px var(--mono);padding:4px 9px;border-radius:6px;border:1px solid var(--line);background:#fff;margin:2px}
+.chip.ok{background:var(--green-bg);border-color:var(--green)}
+.chip.bad{background:var(--rose-bg);border-color:var(--rose);text-decoration:line-through}
+.chip.new{background:#fff5d6;border-color:var(--amber)}
+.chip.ghost{color:var(--muted)}
+.grid-kv{display:inline-grid;gap:3px}
+.grid-kv .row{display:flex;gap:3px;align-items:center}
+.grid-kv .c{width:20px;height:20px;border-radius:4px}
+.c.re{background:#e8833a} .c.ca{background:#5fb27f} .c.no{background:transparent}
+.grid-kv .lbl{font-size:12px;color:var(--muted);width:54px}
+.bars .bar{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:14px}
+.bars .bar .lab{width:92px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.bars .bar .fillbar{height:18px;border-radius:4px}
+
+/* ---------- widgets ---------- */
+.widget{background:#fff;border:2px dashed #c9c2b2;border-radius:12px;padding:14px 16px;margin:12px 0}
+.widget h5{margin:0 0 10px;font-size:15px;color:var(--navy)}
+.widget .row{display:flex;flex-wrap:wrap;gap:10px 16px;margin-bottom:10px}
+.widget label{font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.widget input,.widget textarea{font:15px var(--mono);padding:6px 8px;border:1px solid #cfc8b8;border-radius:6px;width:130px;background:#fffdf8}
+.widget textarea{width:100%;height:46px}
+.widget button{background:var(--navy);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+.widget .res{font:15px/1.6 var(--mono);background:#f6f4ee;border-radius:8px;padding:10px 12px;white-space:pre-wrap}
+.stream-out{min-height:72px;font-size:16px;background:#f6f4ee;border-radius:8px;padding:10px 12px;margin-top:8px}
+.cursor{display:inline-block;width:8px;height:17px;background:var(--navy);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ---------- glossary & quiz ---------- */
+dl.gloss{display:grid;grid-template-columns:200px 1fr;gap:6px 16px;margin:0}
+dl.gloss dt{font-weight:700;color:var(--navy)}
+dl.gloss dd{margin:0}
+@media (max-width:700px){dl.gloss{grid-template-columns:1fr} dl.gloss dd{margin-bottom:8px}}
+details.q{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+details.q summary{cursor:pointer;font-weight:600}
+details.q p{margin:8px 0 2px}
+footer{color:var(--muted);font-size:14px;text-align:center;margin-top:40px}
+
+@media print{
+  nav.toc,.mobile-toc,#progress,.copy{display:none !important}
+  .layout{display:block} main{padding:0}
+  section.slide{break-inside:avoid-page}
+  body{background:#fff}
+}
+pre { line-height: 125%; }
+td.linenos .normal { color: #6e7681; background-color: #0d1117; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #6e7681; background-color: #0d1117; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #e6edf3; background-color: #6e7681; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #e6edf3; background-color: #6e7681; padding-left: 5px; padding-right: 5px; }
+pre.hl .hll { background-color: #6e7681 }
+pre.hl { background: #0d1117; color: #E6EDF3 }
+pre.hl .c { color: #8B949E; font-style: italic } /* Comment */
+pre.hl .err { color: #F85149 } /* Error */
+pre.hl .esc { color: #E6EDF3 } /* Escape */
+pre.hl .g { color: #E6EDF3 } /* Generic */
+pre.hl .k { color: #FF7B72 } /* Keyword */
+pre.hl .l { color: #A5D6FF } /* Literal */
+pre.hl .n { color: #E6EDF3 } /* Name */
+pre.hl .o { color: #FF7B72; font-weight: bold } /* Operator */
+pre.hl .x { color: #E6EDF3 } /* Other */
+pre.hl .p { color: #E6EDF3 } /* Punctuation */
+pre.hl .ch { color: #8B949E; font-style: italic } /* Comment.Hashbang */
+pre.hl .cm { color: #8B949E; font-style: italic } /* Comment.Multiline */
+pre.hl .cp { color: #8B949E; font-weight: bold; font-style: italic } /* Comment.Preproc */
+pre.hl .cpf { color: #8B949E; font-style: italic } /* Comment.PreprocFile */
+pre.hl .c1 { color: #8B949E; font-style: italic } /* Comment.Single */
+pre.hl .cs { color: #8B949E; font-weight: bold; font-style: italic } /* Comment.Special */
+pre.hl .gd { color: #FFA198; background-color: #490202 } /* Generic.Deleted */
+pre.hl .ge { color: #E6EDF3; font-style: italic } /* Generic.Emph */
+pre.hl .ges { color: #E6EDF3; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+pre.hl .gr { color: #FFA198 } /* Generic.Error */
+pre.hl .gh { color: #79C0FF; font-weight: bold } /* Generic.Heading */
+pre.hl .gi { color: #56D364; background-color: #0F5323 } /* Generic.Inserted */
+pre.hl .go { color: #8B949E } /* Generic.Output */
+pre.hl .gp { color: #8B949E } /* Generic.Prompt */
+pre.hl .gs { color: #E6EDF3; font-weight: bold } /* Generic.Strong */
+pre.hl .gu { color: #79C0FF } /* Generic.Subheading */
+pre.hl .gt { color: #FF7B72 } /* Generic.Traceback */
+pre.hl .g-Underline { color: #E6EDF3; text-decoration: underline } /* Generic.Underline */
+pre.hl .kc { color: #79C0FF } /* Keyword.Constant */
+pre.hl .kd { color: #FF7B72 } /* Keyword.Declaration */
+pre.hl .kn { color: #FF7B72 } /* Keyword.Namespace */
+pre.hl .kp { color: #79C0FF } /* Keyword.Pseudo */
+pre.hl .kr { color: #FF7B72 } /* Keyword.Reserved */
+pre.hl .kt { color: #FF7B72 } /* Keyword.Type */
+pre.hl .ld { color: #79C0FF } /* Literal.Date */
+pre.hl .m { color: #A5D6FF } /* Literal.Number */
+pre.hl .s { color: #A5D6FF } /* Literal.String */
+pre.hl .na { color: #E6EDF3 } /* Name.Attribute */
+pre.hl .nb { color: #E6EDF3 } /* Name.Builtin */
+pre.hl .nc { color: #F0883E; font-weight: bold } /* Name.Class */
+pre.hl .no { color: #79C0FF; font-weight: bold } /* Name.Constant */
+pre.hl .nd { color: #D2A8FF; font-weight: bold } /* Name.Decorator */
+pre.hl .ni { color: #FFA657 } /* Name.Entity */
+pre.hl .ne { color: #F0883E; font-weight: bold } /* Name.Exception */
+pre.hl .nf { color: #D2A8FF; font-weight: bold } /* Name.Function */
+pre.hl .nl { color: #79C0FF; font-weight: bold } /* Name.Label */
+pre.hl .nn { color: #FF7B72 } /* Name.Namespace */
+pre.hl .nx { color: #E6EDF3 } /* Name.Other */
+pre.hl .py { color: #79C0FF } /* Name.Property */
+pre.hl .nt { color: #7EE787 } /* Name.Tag */
+pre.hl .nv { color: #79C0FF } /* Name.Variable */
+pre.hl .ow { color: #FF7B72; font-weight: bold } /* Operator.Word */
+pre.hl .pm { color: #E6EDF3 } /* Punctuation.Marker */
+pre.hl .w { color: #6E7681 } /* Text.Whitespace */
+pre.hl .mb { color: #A5D6FF } /* Literal.Number.Bin */
+pre.hl .mf { color: #A5D6FF } /* Literal.Number.Float */
+pre.hl .mh { color: #A5D6FF } /* Literal.Number.Hex */
+pre.hl .mi { color: #A5D6FF } /* Literal.Number.Integer */
+pre.hl .mo { color: #A5D6FF } /* Literal.Number.Oct */
+pre.hl .sa { color: #79C0FF } /* Literal.String.Affix */
+pre.hl .sb { color: #A5D6FF } /* Literal.String.Backtick */
+pre.hl .sc { color: #A5D6FF } /* Literal.String.Char */
+pre.hl .dl { color: #79C0FF } /* Literal.String.Delimiter */
+pre.hl .sd { color: #A5D6FF } /* Literal.String.Doc */
+pre.hl .s2 { color: #A5D6FF } /* Literal.String.Double */
+pre.hl .se { color: #79C0FF } /* Literal.String.Escape */
+pre.hl .sh { color: #79C0FF } /* Literal.String.Heredoc */
+pre.hl .si { color: #A5D6FF } /* Literal.String.Interpol */
+pre.hl .sx { color: #A5D6FF } /* Literal.String.Other */
+pre.hl .sr { color: #79C0FF } /* Literal.String.Regex */
+pre.hl .s1 { color: #A5D6FF } /* Literal.String.Single */
+pre.hl .ss { color: #A5D6FF } /* Literal.String.Symbol */
+pre.hl .bp { color: #E6EDF3 } /* Name.Builtin.Pseudo */
+pre.hl .fm { color: #D2A8FF; font-weight: bold } /* Name.Function.Magic */
+pre.hl .vc { color: #79C0FF } /* Name.Variable.Class */
+pre.hl .vg { color: #79C0FF } /* Name.Variable.Global */
+pre.hl .vi { color: #79C0FF } /* Name.Variable.Instance */
+pre.hl .vm { color: #79C0FF } /* Name.Variable.Magic */
+pre.hl .il { color: #A5D6FF } /* Literal.Number.Integer.Long */
+
+.outbox.standalone{top:0;border-radius:12px;border-top:1px solid #23262e;margin:10px 0 14px}
+.outbox.standalone pre{white-space:pre-wrap;overflow-wrap:anywhere}
+pre.mini{background:#14161b;color:#e6edf3;border-radius:10px;padding:12px 14px;overflow:auto;font:13.5px/1.55 var(--mono);margin:8px 0 10px}
+details.orig > .codebox{margin-top:10px}
+section.slide h4 code.i{text-transform:none;letter-spacing:0;font-size:14px}
+</style>
+<meta name="description" content="Scaler AWS AI Bootcamp, Week 5, Lesson 21: cut documents into chunks (recursive, fixed-length, semantic, Markdown headings), see how chunk size changes what a vector search finds, and use HyDE to search with an LLM-written fake answer. Every notebook cell explained.">
+<style>
+/* bootcamp nav: use this page's navy and amber instead of the yellow accent, which is too light for white text */
+@media (max-width:640px){.hero:after{width:140px;height:140px;right:-50px;top:-50px;opacity:.3}}
+main .awsq{--q-acc:var(--navy);--q-acc-t:#e6eaf3;--q-acc-ink:var(--navy);--q-cur:#a86f00;--q-on:#fff;--q-card2:var(--gray-bg)}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="layout">
+<nav class="toc" id="toc">
+  <div class="brand">Chunking strategies &amp; HyDE<br><span style="font:400 13px var(--sans);color:var(--muted)">code walkthrough · code by Shivank Agarwal</span></div>
+  <div class="grp">Start here</div>
+  <a href="#what"><span class="n">1</span>What you will achieve</a>
+  <a href="#picture"><span class="n">2</span>The big picture</a>
+  <a href="#run"><span class="n">3</span>How to run it</a>
+  <a href="#map"><span class="n">4</span>The notebook at a glance</a>
+  <div class="grp">Walk through the code</div>
+  <a href="#setup"><span class="n">0</span>Setup: loading the key</a>
+  <a href="#p21"><span class="n">2.1</span>Finding a good chunk size</a>
+  <a href="#p22"><span class="n">2.2</span>Fixed-length chunking</a>
+  <a href="#p23"><span class="n">2.3</span>Semantic chunking</a>
+  <a href="#p24"><span class="n">2.4</span>Structure-based chunking</a>
+  <a href="#p25"><span class="n">2.5</span>HyDE</a>
+  <div class="grp">Compare</div>
+  <a href="#compare"><span class="n">⇄</span>The strategies side by side</a>
+  <a href="#hyde-when"><span class="n">?</span>When HyDE helps, and when not</a>
+  <div class="grp">Teach &amp; extend</div>
+  <a href="#fits"><span class="n">↔</span>Where this fits</a>
+  <a href="#exercises"><span class="n">✎</span>Exercises</a>
+  <a href="#quiz"><span class="n">✓</span>Quick quiz</a>
+  <a href="#gloss"><span class="n">★</span>Glossary</a>
+  <a href="#source"><span class="n">{ }</span>Full source</a>
+</nav>
+
+<main>
+<!-- awsq:top -->
+<style>
+.awsq{--q-card:var(--card,var(--surface,#fff));--q-card2:var(--card-2,var(--surface-2,#f3f3f0));--q-rule:var(--rule,var(--line,#ddd));
+  --q-ink:var(--ink,#1a1a1a);--q-muted:var(--muted,#666);--q-acc:var(--tool,var(--accent,#0b7f73));--q-acc-t:var(--tool-t,var(--accent-soft,#d6f2ee));
+  --q-acc-ink:var(--tool-ink,var(--accent,#075a51));--q-cur:var(--brain,var(--gold,#b07600));--q-on:var(--card,var(--surface,#fff));
+  --q-focus:var(--focus,var(--accent,#2958c4));--q-mono:var(--font-mono,"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace);
+  max-width:72rem;margin:18px auto;padding:0 40px;font-family:var(--font-body,inherit)}
+.awsq-box{background:var(--q-card);border:1px solid var(--q-rule);border-radius:12px;padding:12px 14px}
+.awsq-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
+.awsq-cap{display:block;margin:0;font:600 .7rem/1.4 var(--q-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+.awsq-l{display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;padding:9px 13px;border-radius:9px;border:1px solid var(--q-rule);color:var(--q-ink);text-decoration:none;font-size:.95rem;line-height:1.3}
+a.awsq-l:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-next{text-align:right;align-items:flex-end}
+.awsq-d{font:600 .7rem/1.3 var(--q-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--q-acc)}
+.awsq-t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+span.awsq-l{border-style:dashed;color:var(--q-muted)} span.awsq-l .awsq-d,span.awsq-l .awsq-t{color:var(--q-muted);font-weight:400}
+a.awsq-home{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 12px;border-radius:9px;text-decoration:none;color:var(--q-ink);text-align:center;font-size:.85rem;line-height:1.3}
+a.awsq-home:hover{background:var(--q-card2);text-decoration:none}
+.awsq-home b{font:600 .7rem/1.3 var(--q-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-steps{display:flex;gap:5px;margin:11px 0 0;padding:0;list-style:none}
+.awsq-steps li{flex:1 1 0;margin:0;padding:0;list-style:none}
+.awsq-steps li::before{content:none}
+.awsq-steps a{display:block;text-align:center;padding:4px 0;border-radius:5px;font:600 .75rem/1.4 var(--q-mono);text-decoration:none;background:var(--q-card2);border:1px solid var(--q-rule);color:var(--q-muted)}
+.awsq-steps a.done{background:var(--q-acc-t);color:var(--q-acc-ink);border-color:transparent}
+.awsq-steps a.cur{background:var(--q-cur);color:var(--q-on);border-color:transparent}
+.awsq-steps a:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-recs{display:flex;flex-wrap:wrap;gap:8px;margin:11px 0 0}
+.awsq-rec{flex:1 1 220px;display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:9px;border:1px solid var(--q-acc);background:var(--q-acc-t);
+  color:var(--q-acc-ink);font-weight:700;font-size:.92rem;line-height:1.3;text-decoration:none}
+a.awsq-rec:hover{text-decoration:none;filter:brightness(.97)}
+.awsq-rec i{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--q-acc);color:var(--q-on);font-style:normal;font-size:.7rem}
+.awsq-rec small{margin-left:auto;font:600 .68rem/1.3 var(--q-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.awsq-files{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:11px 0 0;padding:10px 0 0;border-top:1px dashed var(--q-rule)}
+.awsq-files > b{margin-right:4px;font:600 .7rem/1.3 var(--q-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-fb{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;border:1px solid var(--q-rule);color:var(--q-ink);
+  font-size:.85rem;font-weight:700;line-height:1.3;text-decoration:none}
+a.awsq-fb:hover{border-color:var(--q-acc);text-decoration:none}
+.awsq-fb small{font:600 .66rem/1.3 var(--q-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--q-muted)}
+span.awsq-fb{border-style:dashed;color:var(--q-muted);font-weight:600}
+.awsq a:focus-visible{outline:2px solid var(--q-focus);outline-offset:2px}
+.awsq a.aih{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--q-acc);color:var(--q-on);
+  font:700 .74rem/1.2 var(--q-mono);letter-spacing:.04em;text-decoration:none;white-space:nowrap}
+.awsq a.aih:hover{filter:brightness(1.08);text-decoration:none}
+.awsq-ver{display:flex;justify-content:flex-end;margin:11px 0 0;padding:10px 0 0;border-top:1px dashed var(--q-rule)}
+a.awsq-vl{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid var(--q-acc);color:var(--q-acc-ink);
+  font-size:.85rem;font-weight:700;line-height:1.3;text-decoration:none}
+a.awsq-vl:hover{background:var(--q-acc-t);text-decoration:none}
+.awsq-vl small{font:600 .66rem/1.3 var(--q-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--q-muted)}
+.awsq-bottom{padding:0 !important;margin:48px 0 8px;max-width:none}
+.awsq-inmain{padding:0 !important;margin:0 0 28px;max-width:none}
+@media (max-width:1100px){.awsq{padding:0 24px}}
+@media (max-width:640px){.awsq-steps{flex-wrap:wrap}.awsq-steps li{flex:1 0 28px}.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}a.awsq-rec small{display:none}}
+@media print{.awsq{display:none}}
+</style>
+<nav class="awsq awsq-top awsq-inmain" aria-label="Bootcamp navigation (top)"><div class="awsq-box"><div class="awsq-head"><span class="awsq-cap">Scaler AWS AI Bootcamp · Week 5 · Lesson 21 of 23</span><a class="aih" href="../../" title="Back to the AI-Infusion home page">⌂ AI-Infusion</a></div><div class="awsq-row"><a class="awsq-l awsq-prev" href="../embeddings-reranking/"><span class="awsq-d">← Previous</span><span class="awsq-t">Lesson 20 · Embeddings, similarity and reranking</span></a><a class="awsq-home" href="../week-5/"><b>Scaler AWS AI Bootcamp</b>Week 5 · all lessons</a><a class="awsq-l awsq-next" href="../tool-calling-basics/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 22 · Tool calling basics</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="done" href="../memory-explained/" title="Lesson 15 · Memory, explained simply">15</a></li><li><a class="done" href="../mcp-explained/" title="Lesson 16 · MCP, explained simply">16</a></li><li><a class="done" href="../memory-mcp-code/" title="Lesson 17 · Memory and MCP in code">17</a></li><li><a class="done" href="../evals-explained/" title="Lesson 18 · Evals, explained simply">18</a></li><li><a class="done" href="../component-evals/" title="Lesson 19 · Component evals in code">19</a></li><li><a class="done" href="../embeddings-reranking/" title="Lesson 20 · Embeddings, similarity and reranking">20</a></li><li><a class="cur" href="../chunking-hyde/" title="Lesson 21 · Chunking strategies and HyDE" aria-current="page">21</a></li><li><a class="" href="../tool-calling-basics/" title="Lesson 22 · Tool calling basics">22</a></li><li><a class="" href="../inventory-agent-steps/" title="Lesson 23 · Inventory agent, step by step">23</a></li><li><a class="" href="../ai-evals-why/" title="Homework 1 · AI Evals 1 · Why AI evals">H1</a></li><li><a class="" href="../ai-evals-methods/" title="Homework 2 · AI Evals 2 · Evaluation methods">H2</a></li><li><a class="" href="../ai-evals-quantitative/" title="Homework 3 · AI Evals 3 · Metrics, judges, test sets">H3</a></li><li><a class="" href="../ai-evals-after-launch/" title="Homework 4 · AI Evals 4 · After launch">H4</a></li><li><a class="" href="../ai-evals-governance/" title="Homework 5 · AI Evals 5 · Tools and governance">H5</a></li></ol><div class="awsq-recs"><span class="awsq-rec"><i aria-hidden="true">▶</i>Scaler class recording<small>link coming soon</small></span></div><div class="awsq-files"><b>Project files</b><a class="awsq-fb" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-21-chunking-hyde" target="_blank" rel="noopener">&lt;/&gt; Browse the code<small>GitHub</small></a><a class="awsq-fb" href="../../zips/Code/Zips/aws-bootcamp-section-21-chunking-hyde.zip" download>⬇ Download all<small>.zip</small></a></div></div></nav>
+<!-- /awsq:top -->
+<details class="mobile-toc"><summary>☰ Contents</summary><a href="#what">What you will achieve</a><a href="#picture">The big picture</a><a href="#run">How to run it</a><a href="#map">The notebook at a glance</a><a href="#setup">Setup: loading the key</a><a href="#p21">Finding a good chunk size</a><a href="#p22">Fixed-length chunking</a><a href="#p23">Semantic chunking</a><a href="#p24">Structure-based chunking</a><a href="#p25">HyDE</a><a href="#compare">The strategies side by side</a><a href="#hyde-when">When HyDE helps, and when not</a><a href="#fits">Where this fits</a><a href="#exercises">Exercises</a><a href="#quiz">Quick quiz</a><a href="#gloss">Glossary</a><a href="#source">Full source</a></details>
+<header class="hero">
+  <div class="kicker">Lesson 21 · Hands-on code explainer · Chunking strategies and HyDE</div>
+  <h1>Chunking and HyDE: how you cut a document decides what RAG can find</h1>
+  <p>Before a RAG system can search a long document, it cuts it into small pieces called <b>chunks</b>. In this notebook you cut the same text four different ways, watch how the search results change, and then try <b>HyDE</b>: a trick where an LLM writes a fake answer first, and you search with that instead of the question.</p>
+  <p>Every cell is shown and explained, with the TODOs you fill in and one possible answer for each.</p>
+  <div class="legend"><span>LangChain text splitters</span><span>OpenAI embeddings</span><span>Chroma</span><span>SemanticChunker</span><span>BM25</span><span>gpt-6-luna</span></div>
+</header>
+
+<!-- ============ WHAT ============ -->
+<section class="slide" id="what">
+  <div class="slide-head"><span class="num">1</span><h3>What you will achieve</h3></div>
+  <p class="oneliner">By the end you can pick a chunking strategy for a document and explain why, and you know when HyDE is worth an extra LLM call.</p>
+  <ul>
+    <li>Cut one article into chunks of 50, 150 and 400 characters and see which size gives the clearest search results.</li>
+    <li>Try three ways of deciding <i>where</i> to cut: every N characters, where the meaning changes, and at Markdown headings.</li>
+    <li>Search a small shoe catalogue with and without HyDE, and see the results change.</li>
+  </ul>
+  <div class="box simple"><h4>💡 Why chunking matters so much</h4>
+    <p><b>RAG</b> (Retrieval-Augmented Generation) means: find the pieces of your documents that match a question, then give those pieces to an LLM so it can answer from them. The search never sees the whole document. It only sees chunks. So:</p>
+    <ul>
+      <li>If an answer is split across two chunks, the search may find only half of it.</li>
+      <li>If one chunk holds five topics, it matches a question about any of them only weakly.</li>
+      <li>Whatever you cut badly at indexing time, no clever prompt can fix later.</li>
+    </ul>
+  </div>
+  <div class="box simple"><h4>💡 What HyDE is, in one paragraph</h4>
+    <p><b>HyDE</b> stands for <b>Hy</b>pothetical <b>D</b>ocument <b>E</b>mbeddings. Questions and documents are often written in different words: a shopper says "running shoes", the catalogue says "trainers" and "Pegasus". HyDE asks an LLM to <i>imagine</i> a good answer first. That fake answer is written in document-style words, so searching with it finds the real documents. The fake answer is never shown to the user; it is only used to search.</p>
+  </div>
+  <div class="box analogy"><h4>🔧 Analogy: cutting a textbook into flashcards</h4>
+    <p>Imagine turning a textbook into flashcards for a quiz. Cards with half a sentence each are useless. Cards with a whole chapter each are too vague to find the one fact you need. One idea per card works best. Chunking is choosing how to cut those cards, and the search engine can only ever hand you whole cards.</p>
+  </div>
+</section>
+
+<!-- ============ PICTURE ============ -->
+<section class="slide" id="picture">
+  <div class="slide-head"><span class="num">2</span><h3>The big picture: index once, search many times</h3></div>
+  <p class="oneliner">Chunking happens in the top row, once. HyDE changes only the bottom row: what you send to the search.</p>
+  <div class="diagram">
+    <svg viewBox="0 0 760 380" width="100%" style="max-width:760px;display:block;margin:auto" role="img" aria-label="Indexing: a long document is cut into chunks by a chunker, each chunk is embedded and stored in a vector store. Searching: a question is embedded and compared with the stored vectors; with HyDE, an LLM first writes a hypothetical answer and that answer is embedded instead.">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1f2a44"/></marker></defs>
+      <text x="20" y="34" font-size="12.5" font-weight="700" fill="#5d5a53" letter-spacing="1">INDEXING · ONCE PER DOCUMENT</text>
+      <rect x="20" y="50" width="120" height="70" rx="10" fill="#fff" stroke="#1f2a44" stroke-width="2"/><text x="80" y="80" text-anchor="middle" font-size="15" font-weight="700">Long</text><text x="80" y="99" text-anchor="middle" font-size="15" font-weight="700">document</text>
+      <line x1="140" y1="85" x2="168" y2="85" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/>
+      <rect x="170" y="50" width="120" height="70" rx="10" fill="#f2b705" stroke="#b98a00" stroke-width="2"/><text x="230" y="80" text-anchor="middle" font-size="15" font-weight="700" fill="#2a2100">Chunker</text><text x="230" y="99" text-anchor="middle" font-size="12" fill="#2a2100">size · overlap · rule</text>
+      <line x1="290" y1="85" x2="318" y2="85" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/>
+      <rect x="320" y="50" width="120" height="70" rx="10" fill="#fbfaf6" stroke="#1f2a44" stroke-width="2"/>
+      <rect x="334" y="60" width="92" height="14" rx="3" fill="#eef4ff" stroke="#2f63c9"/><rect x="334" y="79" width="92" height="14" rx="3" fill="#eef4ff" stroke="#2f63c9"/><rect x="334" y="98" width="92" height="14" rx="3" fill="#eef4ff" stroke="#2f63c9"/>
+      <text x="380" y="138" text-anchor="middle" font-size="12.5" fill="#5d5a53">chunks</text>
+      <line x1="440" y1="85" x2="468" y2="85" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/>
+      <rect x="470" y="50" width="120" height="70" rx="10" fill="#1f2a44"/><text x="530" y="80" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Embedding</text><text x="530" y="99" text-anchor="middle" font-size="12" fill="#cfd6e6">text → 1,536 numbers</text>
+      <line x1="590" y1="85" x2="618" y2="85" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/>
+      <rect x="620" y="50" width="120" height="70" rx="10" fill="#e8f6ec" stroke="#23804c" stroke-width="2"/><text x="680" y="80" text-anchor="middle" font-size="15" font-weight="700">Vector store</text><text x="680" y="99" text-anchor="middle" font-size="12" fill="#5d5a53">Chroma</text>
+      <line x1="680" y1="120" x2="680" y2="213" stroke="#1f2a44" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar)"/><text x="672" y="172" text-anchor="end" font-size="12" fill="#5d5a53">find nearest vectors</text>
+      <text x="20" y="196" font-size="12.5" font-weight="700" fill="#5d5a53" letter-spacing="1">SEARCHING · EVERY QUESTION</text>
+      <rect x="20" y="215" width="120" height="60" rx="10" fill="#fff" stroke="#1f2a44" stroke-width="2"/><text x="80" y="250" text-anchor="middle" font-size="15" font-weight="700">Question</text>
+      <line x1="140" y1="232" x2="618" y2="232" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/><text x="380" y="224" text-anchor="middle" font-size="12.5" fill="#5d5a53">plain RAG: embed the question itself</text>
+      <path d="M140,262 L198,292" stroke="#c98a00" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+      <rect x="200" y="270" width="250" height="50" rx="10" fill="#fff5d6" stroke="#c98a00" stroke-width="2"/><text x="325" y="292" text-anchor="middle" font-size="14" font-weight="700">LLM writes a hypothetical</text><text x="325" y="310" text-anchor="middle" font-size="14" font-weight="700">(fake) answer</text>
+      <path d="M450,295 L618,262" stroke="#c98a00" stroke-width="2" fill="none" marker-end="url(#ar)"/><text x="535" y="305" text-anchor="middle" font-size="12.5" fill="#8a5d00">HyDE: embed the fake answer</text>
+      <rect x="620" y="215" width="120" height="60" rx="10" fill="#1f2a44"/><text x="680" y="242" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Embed +</text><text x="680" y="261" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">search</text>
+      <line x1="680" y1="275" x2="680" y2="318" stroke="#1f2a44" stroke-width="2" marker-end="url(#ar)"/>
+      <rect x="600" y="320" width="160" height="46" rx="10" fill="#e8f6ec" stroke="#23804c" stroke-width="2"/><text x="680" y="348" text-anchor="middle" font-size="14" font-weight="700">top-k real chunks</text>
+    </svg>
+    <p class="caption">Top: the document is cut, each chunk becomes a vector (a list of numbers) and is stored. Bottom: the plain path embeds the question; the HyDE path embeds an LLM-written fake answer instead.</p>
+  </div>
+  <table class="t">
+    <tr><th>Step</th><th>In plain words</th><th>In this notebook</th></tr>
+    <tr><td><b>Chunker</b></td><td>Decides where to cut the text</td><td><code class="i">RecursiveCharacterTextSplitter</code>, <code class="i">CharacterTextSplitter</code>, <code class="i">SemanticChunker</code>, <code class="i">MarkdownHeaderTextSplitter</code></td></tr>
+    <tr><td><b>Embedding</b></td><td>Turns text into numbers so "similar meaning" becomes "close together"</td><td><code class="i">OpenAIEmbeddings(model="text-embedding-3-small")</code></td></tr>
+    <tr><td><b>Vector store</b></td><td>A database that finds the nearest vectors to a query</td><td><code class="i">Chroma</code> (in memory, one collection per chunk size)</td></tr>
+    <tr><td><b>Search</b></td><td>Returns the k best chunks</td><td><code class="i">db.similarity_search(query, k=...)</code>, and BM25 keyword search in Part 2.5</td></tr>
+    <tr><td><b>HyDE</b></td><td>An LLM writes a fake answer to search with</td><td><code class="i">ChatOpenAI(model="gpt-6-luna")</code> in Part 2.5</td></tr>
+  </table>
+  <div class="box careful"><h4>⚠️ One honest note about Part 2.5</h4>
+    <p>The diagram shows HyDE with embeddings, which is how it is used in real RAG. The notebook shows it with <b>BM25</b> keyword search instead, because the effect is much easier to see when you can count matching words. The idea is the same.</p>
+  </div>
+</section>
+
+<!-- ============ RUN ============ -->
+<section class="slide" id="run">
+  <div class="slide-head"><span class="num">3</span><h3>How to run it</h3></div>
+  <div class="box try"><h4>✎ Setup (about 10 minutes)</h4>
+    <ol>
+      <li>Download the lesson folder (use the "Download all" button in the box at the top of this page). It holds <code class="i">chunking_strategies.ipynb</code>, <code class="i">requirements.txt</code> and <code class="i">.env.example</code>.</li>
+      <li>In a terminal, inside that folder, install the libraries (Python 3.11, 3.12 or 3.13):<br><code class="i">pip install -r requirements.txt</code></li>
+      <li>Copy <code class="i">.env.example</code> to a new file called <code class="i">.env</code> in the same folder, and paste your own key after the <code class="i">=</code> sign: <code class="i">OPENAI_API_KEY=sk-...</code> (no quotes, no spaces).</li>
+      <li>Start Jupyter <b>from that same folder</b>, so the notebook can find your <code class="i">.env</code>:<br><code class="i">jupyter notebook chunking_strategies.ipynb</code> (or <code class="i">jupyter lab</code>, or open the file in VS Code and pick your Python as the kernel).</li>
+      <li>Run the cells from top to bottom with Shift+Enter. Fill in each <code class="i">TODO</code> before you run its cell.</li>
+    </ol>
+  </div>
+  <div class="box simple"><h4>💡 How the notebook finds your key</h4>
+    <p>The first code cell calls <code class="i">load_dotenv()</code>, which copies the lines of your <code class="i">.env</code> file into environment variables. If <code class="i">OPENAI_API_KEY</code> is still missing after that (no <code class="i">.env</code>, or a typo in it), the cell uses <code class="i">getpass</code> to ask you to paste the key into a hidden input box. Either way, the key is never written inside the notebook itself. The cell then prints <code class="i">API key loaded: True</code> or <code class="i">False</code>.</p>
+  </div>
+  <p><b>Which parts need an OpenAI key, and which run on your computer?</b></p>
+  <table class="t">
+    <tr><th>Part</th><th>Needs the key?</th><th>Why</th></tr>
+    <tr><td>2.1 cutting into 50/150/400 chunks</td><td>No</td><td>The splitter only counts characters.</td></tr>
+    <tr><td>2.1 storing in Chroma and searching</td><td class="fill"><b>Yes</b></td><td>Every chunk and the question are sent to OpenAI's embedding model.</td></tr>
+    <tr><td>2.2 fixed-length chunking</td><td>No</td><td>Pure string cutting.</td></tr>
+    <tr><td>2.3 semantic chunking</td><td class="fill"><b>Yes</b></td><td><code class="i">SemanticChunker</code> embeds every sentence to measure meaning.</td></tr>
+    <tr><td>2.4 Markdown heading chunking</td><td>No</td><td>It only looks for <code class="i">#</code>, <code class="i">##</code>, <code class="i">###</code>.</td></tr>
+    <tr><td>2.5 BM25 search without HyDE, and the final scoring</td><td>No</td><td><code class="i">rank_bm25</code> counts words on your machine.</td></tr>
+    <tr><td>2.5 writing the hypothetical answer (TODO 7)</td><td class="fill"><b>Yes</b></td><td>The chat model <code class="i">gpt-6-luna</code> writes it.</td></tr>
+  </table>
+  <div class="box careful"><h4>⚠️ Things that trip people up</h4>
+    <ul>
+      <li><b>Never commit or share your <code class="i">.env</code>.</b> It holds a key that can spend your money.</li>
+      <li>The commented <code class="i">%pip</code> line in the first cell points at <code class="i">../../00_Setup/requirements.txt</code>, the folder layout of the original workshop. In this download, <code class="i">requirements.txt</code> sits next to the notebook, so use <code class="i">%pip install -q -r requirements.txt</code> instead.</li>
+      <li><code class="i">requirements.txt</code> is shared by the whole workshop, so it also installs things this notebook doesn't use (Gradio, gensim, sentence-transformers). The first install can take a few minutes.</li>
+      <li>If your OpenAI account can't use <code class="i">gpt-6-luna</code>, change the model name in Part 2.5 to a chat model you do have.</li>
+      <li>The OpenAI calls in this notebook are small (a few short texts), so they cost very little, but they are not free.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ MAP ============ -->
+<section class="slide" id="map">
+  <div class="slide-head"><span class="num">4</span><h3>The notebook at a glance</h3></div>
+  <p class="oneliner">Five parts, eight TODOs. Each TODO is one or two lines, and the hints in the cell tell you which function to call.</p>
+  <table class="t">
+    <tr><th>Part</th><th>Question it answers</th><th>Text used</th><th>Your TODOs</th></tr>
+    <tr><td><b>2.1</b> Chunk size</td><td>Does chunk size change what we retrieve?</td><td>A short article about the heart</td><td>1 split · 2 store · 3 search</td></tr>
+    <tr><td><b>2.2</b> Fixed-length</td><td>What happens if we cut every N characters?</td><td>A Markdown article about machine learning</td><td>4 cut at line breaks</td></tr>
+    <tr><td><b>2.3</b> Semantic</td><td>Can we cut where the meaning changes?</td><td>Same ML article</td><td>5 SemanticChunker</td></tr>
+    <tr><td><b>2.4</b> Structure</td><td>Can we cut at the headings the author already wrote?</td><td>Same ML article</td><td>6 MarkdownHeaderTextSplitter</td></tr>
+    <tr><td><b>2.5</b> HyDE</td><td>Does searching with a fake answer find more?</td><td>12 shoe product titles</td><td>7 write the fake answer · 8 search again</td></tr>
+  </table>
+  <div class="box real"><h4>🌍 Why the same text is reused in 2.2 to 2.4</h4>
+    <p>Using one Machine Learning article for all three strategies makes it a fair comparison: the only thing that changes is <i>how</i> it is cut. Run 2.2, 2.3 and 2.4 and put the outputs side by side.</p>
+  </div>
+</section>
+
+<div class="part"><span class="tag">Walkthrough</span><h2>The notebook, part by part</h2></div>
+<p style="color:var(--muted);margin-top:-4px">Each block below is copied exactly from the notebook. "Cell n" counts the code cells from the top. The green "your answer" blocks are one possible way to fill a TODO; they are not in the notebook.</p>
+
+<!-- ============ SETUP ============ -->
+<section class="slide" id="setup">
+  <div class="slide-head"><span class="num">SETUP</span><h3>Installing and loading the key</h3></div>
+  <p class="oneliner">Two small cells before Part 2.1: an optional install line, and the key loader.</p>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 1 · optional install</span><span class="badge local">runs locally</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="c1"># Run this once if the libraries are not installed yet (remove the # first):</span>
+<span class="c1"># %pip install -q -r ../../00_Setup/requirements.txt</span>
+</pre></div>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 2 · load the API key</span><span class="badge local">runs locally</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">getpass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># reads OPENAI_API_KEY from a .env file if you have one</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">]</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s2">"Enter your OpenAI API key: "</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"API key loaded:"</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">)))</span>
+</pre></div>
+  <div class="box simple"><h4>💡 Line by line</h4>
+    <ul>
+      <li><code class="i">load_dotenv()</code> looks for a <code class="i">.env</code> file and loads it into <code class="i">os.environ</code>. If there is no file, it quietly does nothing.</li>
+      <li><code class="i">if not os.getenv("OPENAI_API_KEY"):</code> is true when the key is missing or empty.</li>
+      <li><code class="i">getpass.getpass(...)</code> shows an input box that hides what you type, so the key doesn't appear on screen or in the saved notebook.</li>
+      <li><code class="i">bool(os.getenv(...))</code> prints <code class="i">True</code> if a key is set. It doesn't check the key is <i>valid</i>: a wrong key only fails later, at the first OpenAI call.</li>
+    </ul>
+  </div>
+  <div class="box analogy"><h4>🔧 Analogy: the spare key under the mat</h4>
+    <p>The notebook first checks the usual place (your <code class="i">.env</code> file). Only if it's not there does it knock and ask you to hand it over. Nothing is ever written on the door.</p>
+  </div>
+</section>
+
+<!-- ============ 2.1 ============ -->
+<section class="slide" id="p21">
+  <div class="slide-head"><span class="num">PART 2.1</span><h3>Finding a good chunk size</h3></div>
+  <p class="oneliner">Cut one article three ways (50, 150, 400 characters), store each version in its own vector database, and ask all three the same question.</p>
+  <h4>Step 1 · Cut the article into chunks</h4>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 3 · split at three sizes</span><span class="badge local">runs locally</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="o">---</span>
+<span class="c1">## 2.1 Finding a good chunk size</span>
+<span class="n">We</span> <span class="n">cut</span> <span class="n">the</span> <span class="n">same</span> <span class="n">short</span> <span class="n">article</span> <span class="n">into</span> <span class="n">chunks</span> <span class="n">of</span> <span class="o">**</span><span class="mi">50</span><span class="o">**</span><span class="p">,</span> <span class="o">**</span><span class="mi">150</span><span class="o">**</span> <span class="ow">and</span> <span class="o">**</span><span class="mi">400</span><span class="o">**</span> <span class="n">characters</span><span class="p">,</span>
+<span class="n">store</span> <span class="n">each</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">its</span> <span class="n">own</span> <span class="n">vector</span> <span class="n">database</span><span class="p">,</span> <span class="ow">and</span> <span class="n">ask</span> <span class="n">the</span> <span class="n">same</span> <span class="n">question</span> <span class="n">to</span> <span class="nb">all</span> <span class="n">three</span><span class="o">.</span>
+
+<span class="o">*</span> <span class="n">Too</span> <span class="n">small</span> <span class="err">→</span> <span class="n">each</span> <span class="n">chunk</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">fragment</span><span class="p">,</span> <span class="n">the</span> <span class="n">answer</span> <span class="ow">is</span> <span class="n">spread</span> <span class="n">over</span> <span class="n">many</span> <span class="n">pieces</span>
+<span class="o">*</span> <span class="n">Too</span> <span class="n">large</span> <span class="err">→</span> <span class="n">one</span> <span class="n">chunk</span> <span class="n">holds</span> <span class="n">many</span> <span class="n">topics</span><span class="p">,</span> <span class="n">the</span> <span class="n">match</span> <span class="ow">is</span> <span class="n">blurry</span>
+<span class="o">*</span> <span class="n">Just</span> <span class="n">right</span> <span class="err">→</span> <span class="n">one</span> <span class="n">chunk</span> <span class="n">holds</span> <span class="n">one</span> <span class="n">complete</span> <span class="n">idea</span>
+</pre></div>
+  <div class="box simple"><h4>💡 What is going on</h4>
+    <ul>
+      <li>A LangChain <code class="i">Document</code> is just text (<code class="i">page_content</code>) plus a dictionary of labels (<code class="i">metadata</code>). The label <code class="i">"source": "heart_article"</code> is copied onto every chunk, so you always know where a chunk came from.</li>
+      <li><b>chunk_size</b> is the maximum length of one chunk, counted in <b>characters</b> (letters, spaces and punctuation), not words or tokens.</li>
+      <li><b>chunk_overlap</b> is how many characters the end of one chunk shares with the start of the next. The hint uses 10% of the size: 5, 15 and 40 characters.</li>
+      <li><code class="i">RecursiveCharacterTextSplitter</code> tries to cut at the "nicest" place first. It tries paragraph breaks (<code class="i">"\n\n"</code>), then line breaks (<code class="i">"\n"</code>), then spaces, and only cuts inside a word if nothing else fits. That is why it's the usual default.</li>
+    </ul>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 700 150" width="100%" style="max-width:700px;display:block;margin:auto" role="img" aria-label="Three chunks laid over one line of text; neighbouring chunks share a small overlap region at their edges.">
+      <rect x="20" y="20" width="660" height="22" rx="4" fill="#f2f0ea" stroke="#8d877a"/><text x="350" y="36" text-anchor="middle" font-size="12.5" fill="#5d5a53">the whole text, one character after another</text>
+      <rect x="20" y="58" width="240" height="22" rx="4" fill="#eef4ff" stroke="#2f63c9"/><text x="130" y="74" text-anchor="middle" font-size="12.5">chunk 1</text>
+      <rect x="230" y="88" width="240" height="22" rx="4" fill="#eef4ff" stroke="#2f63c9"/><text x="340" y="104" text-anchor="middle" font-size="12.5">chunk 2</text>
+      <rect x="440" y="118" width="240" height="22" rx="4" fill="#eef4ff" stroke="#2f63c9"/><text x="550" y="134" text-anchor="middle" font-size="12.5">chunk 3</text>
+      <rect x="230" y="58" width="30" height="52" fill="#f2b705" opacity=".55"/><rect x="440" y="88" width="30" height="52" fill="#f2b705" opacity=".55"/>
+      <text x="275" y="54" font-size="11.5" fill="#8a5d00">overlap</text><text x="485" y="84" font-size="11.5" fill="#8a5d00">overlap</text>
+    </svg>
+    <p class="caption">Overlap: the yellow strips appear in two chunks, so a sentence cut at the edge still appears whole in at least one of them.</p>
+  </div>
+  <details class="orig"><summary>Stuck? One possible answer for TODO 1 (not in the notebook: try it yourself first)</summary><div class="codebox"><div class="codebar"><span class="fname">possible answer · TODO 1</span><span class="badge run">your answer</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">splitter</span> <span class="o">=</span> <span class="n">RecursiveCharacterTextSplitter</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">chunk_overlap</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">size</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">))</span>
+<span class="n">chunks</span> <span class="o">=</span> <span class="n">splitter</span><span class="o">.</span><span class="n">split_documents</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+</pre></div></details>
+  <div class="box try"><h4>✎ What to look for when you run it</h4>
+    <p>The cell prints how many chunks each size makes, then the 150-size chunks. Small sizes make many chunks; 400 makes very few for this short article. Read the 150-size chunks: does each one hold roughly one idea?</p>
+  </div>
+
+  <h4>Step 2 · Embed the chunks and store them in Chroma</h4>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 4 · one Chroma collection per size</span><span class="badge key">needs OpenAI key</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.documents</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_text_splitters</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecursiveCharacterTextSplitter</span>
+
+<span class="n">document_text</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">The human heart is a muscular organ that pumps blood through the circulatory system.</span>
+<span class="s2">This blood delivers oxygen and nutrients to the body and removes metabolic waste. The heart</span>
+<span class="s2">has four chambers: the right atrium, the right ventricle, the left atrium, and the left ventricle.</span>
+<span class="s2">The average adult heart beats about 60 to 100 times per minute. The circulatory system consists of the heart,</span>
+<span class="s2">blood vessels, and blood. It is a vital part of the human body, responsible for transporting essential substances.</span>
+<span class="s2">A healthy lifestyle, including regular exercise and a balanced diet, is crucial for cardiovascular health.</span>
+<span class="s2">"""</span>
+
+<span class="c1"># Wrap the text in a LangChain Document (text + metadata)</span>
+<span class="n">documents</span> <span class="o">=</span> <span class="p">[</span><span class="n">Document</span><span class="p">(</span><span class="n">page_content</span><span class="o">=</span><span class="n">document_text</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">"source"</span><span class="p">:</span> <span class="s2">"heart_article"</span><span class="p">})]</span>
+
+<span class="n">chunk_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">400</span><span class="p">]</span>   <span class="c1"># small, medium, large (in characters)</span>
+<span class="n">chunked_documents</span> <span class="o">=</span> <span class="p">{}</span>         <span class="c1"># size -&gt; list of chunks</span>
+
+<span class="k">for</span> <span class="n">size</span> <span class="ow">in</span> <span class="n">chunk_sizes</span><span class="p">:</span>
+    <span class="c1"># ----- TODO 1: Split the document with RecursiveCharacterTextSplitter (10% overlap) and store the chunks -----</span>
+    <span class="c1"># Hint: RecursiveCharacterTextSplitter(chunk_size=size, chunk_overlap=int(size * 0.1))</span>
+    <span class="c1"># Hint: splitter.split_documents(documents) returns a list of smaller Documents</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+    <span class="n">chunked_documents</span><span class="p">[</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunks</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"chunk_size=</span><span class="si">{</span><span class="n">size</span><span class="si">:</span><span class="s2">&lt;4</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span><span class="si">}</span><span class="s2"> chunks"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">The medium (150) chunks look like this:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chunked_documents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  [</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">chunk</span><span class="o">.</span><span class="n">page_content</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  <div class="box simple"><h4>💡 What is going on</h4>
+    <ul>
+      <li><b>An embedding</b> is a list of numbers that stands for the meaning of a text. <code class="i">text-embedding-3-small</code> gives 1,536 numbers per text. Texts with similar meaning get similar numbers.</li>
+      <li><b>Chroma</b> is a vector database: it stores each chunk next to its embedding and can quickly find the ones closest to a new embedding. Without a save folder, it lives in memory and disappears when the notebook stops.</li>
+      <li>A <b>collection</b> is one named table inside Chroma. Using <code class="i">f"heart_chunks_{size}"</code> keeps the three sizes apart, so the comparison is fair.</li>
+      <li><b>ids</b> give each chunk a fixed name like <code class="i">150-0</code>. If you run the cell twice, Chroma overwrites the same ids instead of storing every chunk twice (which would fill your results with duplicates).</li>
+    </ul>
+  </div>
+  <details class="orig"><summary>Stuck? One possible answer for TODO 2 (not in the notebook: try it yourself first)</summary><div class="codebox"><div class="codebar"><span class="fname">possible answer · TODO 2</span><span class="badge run">your answer</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">db</span> <span class="o">=</span> <span class="n">Chroma</span><span class="o">.</span><span class="n">from_documents</span><span class="p">(</span>
+    <span class="n">chunks</span><span class="p">,</span>
+    <span class="n">embeddings</span><span class="p">,</span>
+    <span class="n">collection_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"heart_chunks_</span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="n">ids</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">))],</span>
+<span class="p">)</span>
+</pre></div></details>
+
+  <h4>Step 3 · Ask the same question to all three</h4>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 5 · search each store</span><span class="badge key">needs OpenAI key</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_chroma</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chroma</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAIEmbeddings</span>
+
+<span class="c1"># OpenAI embedding model: turns each chunk into a list of 1,536 numbers</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">OpenAIEmbeddings</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"text-embedding-3-small"</span><span class="p">)</span>
+
+<span class="n">vector_dbs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># size -&gt; Chroma vector store</span>
+
+<span class="k">for</span> <span class="n">size</span><span class="p">,</span> <span class="n">chunks</span> <span class="ow">in</span> <span class="n">chunked_documents</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="c1"># ----- TODO 2: Store the chunks of this size in their own Chroma collection -----</span>
+    <span class="c1"># Hint: Chroma.from_documents(chunks, embeddings, collection_name=..., ids=...)</span>
+    <span class="c1"># Hint: Use a different collection_name per size, e.g. f"heart_chunks_{size}"</span>
+    <span class="c1"># Hint: ids like f"{size}-{i}" stop duplicates if you run the cell twice</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># replace with your code</span>
+    <span class="n">vector_dbs</span><span class="p">[</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">db</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Stored </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span><span class="si">}</span><span class="s2"> chunks for size </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  <div class="box simple"><h4>💡 What is going on</h4>
+    <p><code class="i">similarity_search</code> embeds the question with the same model, then returns the <code class="i">k</code> chunks whose embeddings are closest. <code class="i">min(k, len(...))</code> matters because the 400-size store may hold fewer than 3 chunks, and asking for more than exist can give a warning.</p>
+  </div>
+  <details class="orig"><summary>Stuck? One possible answer for TODO 3 (not in the notebook: try it yourself first)</summary><div class="codebox"><div class="codebar"><span class="fname">possible answer · TODO 3</span><span class="badge run">your answer</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">retrieved_docs</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">similarity_search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunked_documents</span><span class="p">[</span><span class="n">size</span><span class="p">])))</span>
+</pre></div></details>
+  <div class="box try"><h4>✎ What to look for</h4>
+    <p>The notebook's own note says: with size 50 the answer comes back in fragments; with size 400 the whole article comes back as one block; size 150 usually gives the most focused answer for this text. Check whether you see the same.</p>
+  </div>
+  <div class="box real"><h4>🌍 In real projects</h4>
+    <p>There is no single "right" size. Short, factual text (FAQs, product data) likes small chunks. Long reasoning (contracts, manuals) needs bigger ones. Teams test a few sizes on real questions, exactly like this cell does, and keep the one that finds the right chunk most often. Real systems usually measure size in tokens and use something like 200 to 1,000 tokens, because their documents are much longer than this toy article.</p>
+  </div>
+  <div class="box careful"><h4>⚠️ Watch out</h4>
+    <p>The best size here (150 characters) is about this tiny 600-character article. Don't copy it to your own documents; test your own.</p>
+  </div>
+</section>
+
+<!-- ============ 2.2 ============ -->
+<section class="slide" id="p22">
+  <div class="slide-head"><span class="num">PART 2.2</span><h3>Fixed-length chunking</h3></div>
+  <p class="oneliner">The simplest rule: cut every N characters. First the crude version, then a polite one that only cuts at line breaks.</p>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 6 · pure fixed length</span><span class="badge local">runs locally</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">query</span> <span class="o">=</span> <span class="s2">"What is the primary function of the heart and its connection to the circulatory system?"</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># how many chunks to bring back</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Query: </span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">size</span><span class="p">,</span> <span class="n">db</span> <span class="ow">in</span> <span class="n">vector_dbs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Chunk size </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="c1"># ----- TODO 3: Retrieve the k most similar chunks from this vector store -----</span>
+    <span class="c1"># Hint: db.similarity_search(query, k=...) returns a list of Documents</span>
+    <span class="c1"># Hint: A small store may have fewer than k chunks, so use min(k, len(chunked_documents[size]))</span>
+    <span class="n">retrieved_docs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">retrieved_docs</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Result </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">page_content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  <div class="box simple"><h4>💡 What is going on</h4>
+    <ul>
+      <li><code class="i">textwrap.dedent</code> removes the spaces at the start of every line (they are there only because the text is indented inside the Python code). Without it, the headings would start with spaces instead of <code class="i">#</code>, and Part 2.4 could not find them. <code class="i">.strip()</code> removes the blank first and last lines.</li>
+      <li><code class="i">separator=""</code> means "any place is a fine place to cut". So the splitter makes 100-character pieces and happily cuts in the middle of a word.</li>
+      <li><code class="i">split_text</code> works on a plain string and returns plain strings. (<code class="i">split_documents</code> in 2.1 works on Documents and keeps their metadata.)</li>
+    </ul>
+  </div>
+  <div class="box try"><h4>✎ What to look for</h4>
+    <p>The printout uses <code class="i">repr()</code>, which shows quotes and <code class="i">\n</code> so you can see exactly where each chunk starts and ends. Look for words broken in half between two chunks.</p>
+  </div>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 7 · TODO 4: cut only at line breaks</span><span class="badge local">runs locally</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="o">**</span><span class="n">Look</span> <span class="n">at</span> <span class="n">the</span> <span class="n">output</span><span class="p">:</span><span class="o">**</span> <span class="k">with</span> <span class="n">size</span> <span class="mi">50</span> <span class="n">the</span> <span class="n">answer</span> <span class="ow">is</span> <span class="n">chopped</span> <span class="n">into</span> <span class="n">fragments</span><span class="p">;</span> <span class="k">with</span> <span class="n">size</span> <span class="mi">400</span> <span class="n">the</span> <span class="n">whole</span>
+<span class="n">article</span> <span class="n">comes</span> <span class="n">back</span> <span class="k">as</span> <span class="n">one</span> <span class="n">block</span><span class="o">.</span> <span class="n">Size</span> <span class="mi">150</span> <span class="n">usually</span> <span class="n">gives</span> <span class="n">the</span> <span class="n">cleanest</span><span class="p">,</span> <span class="n">most</span> <span class="n">focused</span> <span class="n">answer</span> <span class="k">for</span> <span class="n">this</span> <span class="n">text</span><span class="o">.</span>
+</pre></div>
+  <div class="box simple"><h4>💡 What changes</h4>
+    <p>With <code class="i">separator="\n"</code> the splitter first breaks the text into lines, then packs whole lines into chunks of up to 200 characters, with up to 20 characters of overlap. No word is broken. If one line alone is longer than 200 characters, it is kept whole and you get a warning, because the splitter has nowhere else to cut.</p>
+  </div>
+  <details class="orig"><summary>Stuck? One possible answer for TODO 4 (not in the notebook: try it yourself first)</summary><div class="codebox"><div class="codebar"><span class="fname">possible answer · TODO 4</span><span class="badge run">your answer</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">line_splitter</span> <span class="o">=</span> <span class="n">CharacterTextSplitter</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">chunks</span> <span class="o">=</span> <span class="n">line_splitter</span><span class="o">.</span><span class="n">split_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</pre></div></details>
+  <div class="box analogy"><h4>🔧 Analogy: cutting a loaf of bread</h4>
+    <p>Pure fixed length is a bread slicer set to 1 cm: fast and even, but it doesn't care where the raisins are. Cutting at line breaks is slicing only between rolls in a tray: still simple, but you never cut through one.</p>
+  </div>
+  <div class="box careful"><h4>⚠️ Watch out</h4>
+    <p>Fixed-length chunks ignore meaning. A heading can end up at the bottom of one chunk while its paragraph starts the next, so a search for that topic finds a chunk with the heading but not the content.</p>
+  </div>
+</section>
+
+<!-- ============ 2.3 ============ -->
+<section class="slide" id="p23">
+  <div class="slide-head"><span class="num">PART 2.3</span><h3>Semantic chunking: cut where the meaning changes</h3></div>
+  <p class="oneliner">Instead of counting characters, embed every sentence and cut where one sentence is far in meaning from the next.</p>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 8 · TODO 5: SemanticChunker</span><span class="badge key">needs OpenAI key</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="o">---</span>
+<span class="c1">## 2.2 Fixed-length chunking</span>
+<span class="n">The</span> <span class="n">simplest</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">cut</span> <span class="n">every</span> <span class="n">N</span> <span class="n">characters</span><span class="o">.</span>
+<span class="n">We</span> <span class="n">use</span> <span class="n">a</span> <span class="n">small</span> <span class="n">Markdown</span> <span class="n">article</span> <span class="n">about</span> <span class="n">Machine</span> <span class="n">Learning</span> <span class="k">for</span> <span class="n">parts</span> <span class="mf">2.2</span> <span class="n">to</span> <span class="mf">2.4</span><span class="o">.</span>
+</pre></div>
+  <div class="box simple"><h4>💡 How SemanticChunker decides</h4>
+    <ol>
+      <li>It splits the text into sentences (at full stops, question marks and exclamation marks).</li>
+      <li>It embeds each sentence (together with its neighbours, to smooth things out).</li>
+      <li>It measures how different each sentence is from the next one.</li>
+      <li>Where the difference is unusually big (by default, bigger than 95% of all the gaps in the text), it cuts. That is a "topic jump".</li>
+    </ol>
+    <p><code class="i">create_documents([text])</code> takes a list of strings and returns Documents, one per chunk. There is no <code class="i">chunk_size</code>: chunks are as long as the topic is.</p>
+  </div>
+  <details class="orig"><summary>Stuck? One possible answer for TODO 5 (not in the notebook: try it yourself first)</summary><div class="codebox"><div class="codebar"><span class="fname">possible answer · TODO 5</span><span class="badge run">your answer</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">semantic_chunker</span> <span class="o">=</span> <span class="n">SemanticChunker</span><span class="p">(</span><span class="n">OpenAIEmbeddings</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"text-embedding-3-small"</span><span class="p">))</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">semantic_chunker</span><span class="o">.</span><span class="n">create_documents</span><span class="p">([</span><span class="n">text</span><span class="p">])</span>
+</pre></div></details>
+  <div class="box try"><h4>✎ What to look for</h4>
+    <p>Count the chunks and compare them with 2.2. Do the cuts fall between supervised, unsupervised and reinforcement learning? Notice that chunks can be very different lengths.</p>
+  </div>
+  <div class="box careful"><h4>⚠️ Watch out</h4>
+    <ul>
+      <li>The notebook warns you may see a yellow <code class="i">DeprecationWarning</code> because <code class="i">langchain-experimental</code> is being retired. It's only a notice; the code still runs.</li>
+      <li>Semantic chunking costs embedding calls <i>for every sentence</i> at indexing time, and is slower. For a big library that adds up.</li>
+      <li>This article's lists ("- Classification: ...") have no full stops, so several list lines may be treated as one "sentence".</li>
+    </ul>
+  </div>
+  <div class="box real"><h4>🌍 In real projects</h4>
+    <p>Semantic chunking helps most with long text that has no headings: meeting transcripts, chat logs, scanned reports. When the document already has good headings, Part 2.4 is cheaper and usually just as good.</p>
+  </div>
+</section>
+
+<!-- ============ 2.4 ============ -->
+<section class="slide" id="p24">
+  <div class="slide-head"><span class="num">PART 2.4</span><h3>Structure-based chunking: cut at the headings</h3></div>
+  <p class="oneliner">Many documents already have sections. Cut there, and remember which heading each chunk came from.</p>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 9 · TODO 6: MarkdownHeaderTextSplitter</span><span class="badge local">runs locally</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_text_splitters</span><span class="w"> </span><span class="kn">import</span> <span class="n">CharacterTextSplitter</span>
+
+<span class="c1"># textwrap.dedent removes the common left indentation so headings start with "#"</span>
+<span class="n">text</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">    # Machine Learning Fundamentals</span>
+
+<span class="s2">    Machine learning is a subset of artificial intelligence that enables computers to learn and improve from experience without being explicitly programmed.</span>
+
+<span class="s2">    ## Types of Machine Learning</span>
+
+<span class="s2">    ### Supervised Learning</span>
+<span class="s2">    Supervised learning uses labeled training data to learn a mapping function from input to output. Common examples include:</span>
+<span class="s2">    - Classification: Predicting categories (spam/not spam)</span>
+<span class="s2">    - Regression: Predicting continuous values (house prices)</span>
+
+<span class="s2">    ### Unsupervised Learning</span>
+<span class="s2">    Unsupervised learning finds hidden patterns in data without labeled examples:</span>
+<span class="s2">    - Clustering: Grouping similar data points</span>
+<span class="s2">    - Dimensionality reduction: Reducing feature space</span>
+
+<span class="s2">    ### Reinforcement Learning</span>
+<span class="s2">    An agent learns through interaction with an environment, receiving rewards or penalties for actions taken.</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+<span class="c1"># (a) Pure fixed length: separator="" means "cut anywhere", even in the middle of a word</span>
+<span class="n">naive_splitter</span> <span class="o">=</span> <span class="n">CharacterTextSplitter</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+<span class="n">naive_chunks</span> <span class="o">=</span> <span class="n">naive_splitter</span><span class="o">.</span><span class="n">split_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Pure fixed-length (first 3 chunks) - notice the broken words:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">naive_chunks</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"   "</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">chunk</span><span class="p">))</span>
+</pre></div>
+  <div class="box simple"><h4>💡 What is going on</h4>
+    <ul>
+      <li><code class="i">headers_to_split_on</code> is a list of pairs: the Markdown mark to look for, and the name to store it under. <code class="i">("##", "Header 2")</code> means "every line starting with <code class="i">## </code> starts a new chunk, and its text goes into <code class="i">metadata["Header 2"]</code>".</li>
+      <li>Each chunk gets <b>all</b> the headings above it. The Supervised Learning chunk carries <code class="i">Header 1</code> = Machine Learning Fundamentals, <code class="i">Header 2</code> = Types of Machine Learning and <code class="i">Header 3</code> = Supervised Learning.</li>
+      <li>By default the heading lines themselves are removed from <code class="i">page_content</code> and kept only in the metadata.</li>
+    </ul>
+  </div>
+  <details class="orig"><summary>Stuck? One possible answer for TODO 6 (not in the notebook: try it yourself first)</summary><div class="codebox"><div class="codebar"><span class="fname">possible answer · TODO 6</span><span class="badge run">your answer</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">markdown_splitter</span> <span class="o">=</span> <span class="n">MarkdownHeaderTextSplitter</span><span class="p">(</span><span class="n">headers_to_split_on</span><span class="o">=</span><span class="n">headers_to_split_on</span><span class="p">)</span>
+<span class="n">md_header_splits</span> <span class="o">=</span> <span class="n">markdown_splitter</span><span class="o">.</span><span class="n">split_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</pre></div></details>
+  <div class="box try"><h4>✎ What to look for</h4>
+    <p>Look at each <code class="i">Metadata:</code> line. You should get one chunk per section, and each chunk should hold exactly one topic. Compare this with the fixed-length chunks from 2.2.</p>
+  </div>
+  <div class="box real"><h4>🌍 Why the metadata is gold</h4>
+    <ul>
+      <li><b>Filtering:</b> "search only inside the Supervised Learning section".</li>
+      <li><b>Showing sources:</b> the answer can say "from: Types of Machine Learning › Supervised Learning".</li>
+      <li><b>Context:</b> you can put the headings back in front of the chunk before embedding, so a short chunk still "knows" what it's about.</li>
+    </ul>
+  </div>
+  <div class="box careful"><h4>⚠️ Watch out</h4>
+    <p>Sections can be huge or tiny. A common recipe is two steps: cut at headings first, then run <code class="i">RecursiveCharacterTextSplitter</code> on any section that is still too long. The headings stay in the metadata of every piece.</p>
+  </div>
+</section>
+
+<!-- ============ 2.5 ============ -->
+<section class="slide" id="p25">
+  <div class="slide-head"><span class="num">PART 2.5</span><h3>HyDE: search with a fake answer</h3></div>
+  <p class="oneliner">A shopper types "I want running shoes". The catalogue says "trainers", "sneakers", "Ultraboost". The words don't match. HyDE fixes that.</p>
+  <h4>Step 1 · Keyword search without HyDE</h4>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 10 · BM25 without HyDE</span><span class="badge local">runs locally</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="c1"># ----- TODO 4: Fixed-length chunks of up to 200 characters that only cut at line breaks, with 20 characters overlap -----</span>
+<span class="c1"># Hint: CharacterTextSplitter(chunk_size=200, chunk_overlap=20, separator="\n")</span>
+<span class="c1"># Hint: .split_text(text) returns a list of strings</span>
+<span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Fixed-length chunks that respect line breaks:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Chunk </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> (length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="si">}</span><span class="s2">):"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span>
+</pre></div>
+  <div class="box simple"><h4>💡 What is going on</h4>
+    <ul>
+      <li><b>BM25</b> is classic keyword search, the kind search engines used before AI. It gives a product a higher score when it contains the query's words, especially rare words, and it doesn't understand meaning at all.</li>
+      <li><b>Tokenizing</b> means cutting text into words. Here it's just <code class="i">.lower().split()</code>: lower-case, then split at spaces.</li>
+      <li><code class="i">BM25Okapi(tokenized_products)</code> builds the index: it counts which words appear in which product titles.</li>
+      <li><code class="i">get_scores(...)</code> returns one score per product. <code class="i">np.argsort(...)[::-1]</code> lists product positions from best to worst score; the code keeps only scores above <code class="i">0.1</code> and at most 3.</li>
+    </ul>
+  </div>
+  <div class="diagram">
+    <p style="margin:0 0 6px"><b>Query words:</b> <span class="chip">i</span><span class="chip">want</span><span class="chip">running</span><span class="chip ok">shoes</span></p>
+    <p style="margin:0 0 6px"><b>Catalogue words:</b> <span class="chip ghost">sneakers</span><span class="chip ghost">trainers</span><span class="chip ghost">marathon</span><span class="chip ok">shoes</span><span class="chip ghost">footwear</span><span class="chip ghost">boots</span></p>
+    <p class="caption">Only one product title contains "shoes", and none contains "running". BM25 has almost nothing to match on.</p>
+  </div>
+  <div class="box try"><h4>✎ What to look for</h4>
+    <p>Very few products (maybe only one, maybe none) come back. Real running products such as the Pegasus or Gel-Kayano trainers are missed because they don't share a word with the query.</p>
+  </div>
+
+  <h4>Step 2 · Ask the LLM to imagine the answer</h4>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 11 · TODO 7: write the hypothetical answer</span><span class="badge key">needs OpenAI key</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="o">---</span>
+<span class="c1">## 2.3 Semantic chunking</span>
+<span class="n">Instead</span> <span class="n">of</span> <span class="n">counting</span> <span class="n">characters</span><span class="p">,</span> <span class="n">the</span> <span class="o">**</span><span class="n">SemanticChunker</span><span class="o">**</span> <span class="n">embeds</span> <span class="n">every</span> <span class="n">sentence</span> <span class="ow">and</span> <span class="n">cuts</span> <span class="n">where</span> <span class="n">the</span> <span class="n">meaning</span>
+<span class="n">of</span> <span class="n">one</span> <span class="n">sentence</span> <span class="ow">is</span> <span class="n">far</span> <span class="kn">from</span><span class="w"> </span><span class="nn">the</span> <span class="nb">next</span> <span class="n">one</span> <span class="p">(</span><span class="n">a</span> <span class="s2">"topic jump"</span><span class="p">)</span><span class="o">.</span>
+
+<span class="o">&gt;</span> <span class="n">You</span> <span class="n">may</span> <span class="n">see</span> <span class="n">a</span> <span class="n">yellow</span> <span class="err">`</span><span class="ne">DeprecationWarning</span><span class="err">`</span> <span class="n">saying</span> <span class="err">`</span><span class="n">langchain</span><span class="o">-</span><span class="n">experimental</span><span class="err">`</span> <span class="ow">is</span> <span class="n">being</span> <span class="n">retired</span><span class="o">.</span>
+<span class="o">&gt;</span> <span class="n">That</span> <span class="ow">is</span> <span class="n">only</span> <span class="n">a</span> <span class="n">notice</span> <span class="kn">from</span><span class="w"> </span><span class="nn">the</span> <span class="n">library</span><span class="o">.</span> <span class="n">The</span> <span class="n">code</span> <span class="n">still</span> <span class="n">works</span><span class="p">,</span> <span class="n">so</span> <span class="n">carry</span> <span class="n">on</span><span class="o">.</span>
+</pre></div>
+  <div class="box simple"><h4>💡 What is going on</h4>
+    <ul>
+      <li><code class="i">ChatOpenAI</code> is LangChain's wrapper around OpenAI chat models. <code class="i">reasoning_effort="none"</code> asks for a quick, direct reply without long "thinking", which is all we need here.</li>
+      <li>The prompt asks for <b>fake product titles</b>, not an answer for the shopper. We want text that <i>looks like the documents</i>, so it shares their words.</li>
+      <li><code class="i">llm.invoke(prompt)</code> sends the prompt and returns a message; <code class="i">.text</code> is the reply as a plain string.</li>
+    </ul>
+  </div>
+  <details class="orig"><summary>Stuck? One possible answer for TODO 7 (not in the notebook: try it yourself first)</summary><div class="codebox"><div class="codebar"><span class="fname">possible answer · TODO 7</span><span class="badge run">your answer</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Write 4 short product titles from an online shoe store that match: </span><span class="si">{</span><span class="n">shopper_query</span><span class="si">}</span><span class="s2">"</span>
+<span class="n">hyde_answer</span> <span class="o">=</span> <span class="n">llm</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+</pre></div></details>
+  <div class="box try"><h4>✎ What to look for</h4>
+    <p>Read the printed fake answer. It will probably mention brands and words like "trainers", "running" or "marathon". It doesn't matter that the products are invented: they are only used to search.</p>
+  </div>
+
+  <h4>Step 3 · Search again with question + fake answer</h4>
+  <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 12 · TODO 8: BM25 with HyDE</span><span class="badge local">runs locally</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_experimental.text_splitter</span><span class="w"> </span><span class="kn">import</span> <span class="n">SemanticChunker</span>
+
+<span class="c1"># ----- TODO 5: Create a SemanticChunker with OpenAI embeddings and split the text into Documents -----</span>
+<span class="c1"># Hint: SemanticChunker(OpenAIEmbeddings(model="text-embedding-3-small"))</span>
+<span class="c1"># Hint: .create_documents([text]) returns a list of Documents</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Chunk </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">page_content</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span>
+</pre></div>
+  <div class="box simple"><h4>💡 What is going on</h4>
+    <p>The shopper's words and the LLM's words are joined into one long query, tokenized the same way, and scored with the same BM25 index. Now words like "trainers" and "sneakers" are in the query, so the real running products score higher. This cell prints the top 3 without the <code class="i">0.1</code> filter, so it always shows 3 lines.</p>
+  </div>
+  <details class="orig"><summary>Stuck? One possible answer for TODO 8 (not in the notebook: try it yourself first)</summary><div class="codebox"><div class="codebar"><span class="fname">possible answer · TODO 8</span><span class="badge run">your answer</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">hyde_query</span> <span class="o">=</span> <span class="n">shopper_query</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">hyde_answer</span>
+<span class="n">scores_hyde</span> <span class="o">=</span> <span class="n">bm25</span><span class="o">.</span><span class="n">get_scores</span><span class="p">(</span><span class="n">hyde_query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+</pre></div></details>
+  <div class="box careful"><h4>⚠️ A sneaky detail: punctuation</h4>
+    <p><code class="i">.split()</code> only splits at spaces, so punctuation sticks to words. If the LLM writes <code class="i">trainers,</code> (with a comma), that token is <code class="i">trainers,</code> and does <b>not</b> match <code class="i">trainers</code>. If HyDE helps less than you expected, look for this. A small regex tokenizer (exercise 5) fixes it.</p>
+  </div>
+  <div class="box analogy"><h4>🔧 Analogy: asking a shop assistant</h4>
+    <p>You say "something for running". A good assistant thinks "ah, Pegasus, Gel-Kayano, Ultraboost" and walks to the shelf with those labels. HyDE gives your search that assistant: the LLM translates the question into shelf-label words.</p>
+  </div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section class="slide" id="compare">
+  <div class="slide-head"><span class="num">⇄</span><h3>The strategies side by side</h3></div>
+  <p class="oneliner">Everything the notebook tries, in one table.</p>
+  <table class="t">
+    <tr><th>Strategy</th><th>Class used</th><th>Where it cuts</th><th>Key needed?</th><th>Good at</th><th>Weak at</th></tr>
+    <tr><td><b>Recursive character</b> (2.1)</td><td><code class="i">RecursiveCharacterTextSplitter</code></td><td>At paragraphs, then lines, then spaces, staying under <code class="i">chunk_size</code></td><td>No</td><td>A safe default for almost any text</td><td>Knows nothing about topics or headings</td></tr>
+    <tr><td><b>Pure fixed length</b> (2.2a)</td><td><code class="i">CharacterTextSplitter(separator="")</code></td><td>Exactly every N characters</td><td>No</td><td>Simplest and fastest; equal sizes</td><td>Breaks words and sentences</td></tr>
+    <tr><td><b>Fixed length at line breaks</b> (2.2b)</td><td><code class="i">CharacterTextSplitter(separator="\n")</code></td><td>Only at line breaks</td><td>No</td><td>Simple, never breaks a word</td><td>Very long lines can't be cut</td></tr>
+    <tr><td><b>Semantic</b> (2.3)</td><td><code class="i">SemanticChunker</code></td><td>Where meaning jumps between sentences</td><td class="fill">Yes</td><td>Long text with no headings (transcripts)</td><td>Slower, costs embeddings, uneven sizes</td></tr>
+    <tr><td><b>Structure / headings</b> (2.4)</td><td><code class="i">MarkdownHeaderTextSplitter</code></td><td>At <code class="i">#</code>, <code class="i">##</code>, <code class="i">###</code></td><td>No</td><td>Docs, wikis, manuals; gives heading metadata</td><td>Needs headings; sections can be too big</td></tr>
+  </table>
+  <table class="t">
+    <tr><th>Search method</th><th>Where</th><th>Matches on</th><th>Key needed?</th></tr>
+    <tr><td><b>Vector search</b></td><td>2.1 (<code class="i">Chroma.similarity_search</code>)</td><td>Meaning (close embeddings)</td><td class="fill">Yes (OpenAI embeddings)</td></tr>
+    <tr><td><b>BM25 keyword search</b></td><td>2.5</td><td>Exact words</td><td>No</td></tr>
+    <tr><td><b>BM25 + HyDE</b></td><td>2.5</td><td>Exact words, from question + LLM's fake answer</td><td class="fill">Yes (one chat call)</td></tr>
+  </table>
+  <div class="box simple"><h4>💡 The trade-offs in one breath</h4>
+    <p>Smaller chunks are more precise but lose context. Bigger chunks keep context but blur the match. Overlap protects the edges but stores some text twice. Smarter cutting (semantic, headings) gives cleaner chunks but needs either money (embeddings) or structure (headings). HyDE finds more, at the cost of one LLM call, a little delay, and some risk, on every question.</p>
+  </div>
+</section>
+
+<!-- ============ HYDE WHEN ============ -->
+<section class="slide" id="hyde-when">
+  <div class="slide-head"><span class="num">?</span><h3>When HyDE helps, and when it doesn't</h3></div>
+  <div class="twocol">
+    <div class="card"><h5>Helps when…</h5><ul>
+      <li>Questions are short or vague ("running shoes", "my laptop is slow").</li>
+      <li>Users and documents use different words (shoppers vs catalogue, patients vs medical notes).</li>
+      <li>You use keyword search, or embeddings that match question-to-document poorly.</li>
+    </ul></div>
+    <div class="card"><h5>Hurts or wastes money when…</h5><ul>
+      <li>The query is already precise: a product code, an error message, a name.</li>
+      <li>The LLM doesn't know the topic (your company's private terms) and imagines the wrong words.</li>
+      <li>Every millisecond counts: one extra LLM call per question adds delay and cost.</li>
+    </ul></div>
+  </div>
+  <div class="box careful"><h4>⚠️ Never show the fake answer as the answer</h4>
+    <p>The hypothetical answer may contain made-up facts and products. It is only a search key. The final answer must come from the <b>real</b> chunks that the search returns.</p>
+  </div>
+  <div class="box real"><h4>🌍 In real projects</h4>
+    <p>Teams often search with <b>both</b> the plain question and the HyDE answer and merge the results, so a bad imagination can't hide good results. They also cache HyDE answers for common questions to save calls.</p>
+  </div>
+</section>
+
+<!-- ============ FITS ============ -->
+<section class="slide" id="fits">
+  <div class="slide-head"><span class="num">↔</span><h3>Where this fits</h3></div>
+  <table class="t">
+    <tr><th>Lesson</th><th>How it connects</th></tr>
+    <tr><td><a href="../embeddings-reranking/">Lesson 20 · Embeddings, similarity and reranking</a></td><td>The previous lesson: what embeddings are and how similarity and reranking order the chunks you make here.</td></tr>
+    <tr><td><a href="../tool-calling-basics/">Lesson 22 · Tool calling</a></td><td>Next: letting the LLM call your Python functions, for example a search over these chunks.</td></tr>
+    <tr><td><a href="../inventory-agent-steps/">Lesson 23 · Inventory agent, step by step</a></td><td>Puts retrieval and tools together into one agent.</td></tr>
+    <tr><td><a href="../../Learnings/Class-3-4-AI-infusion/">AI-Infusion Lessons 3–4 · RAG: give your AI a library</a></td><td>The gentle introduction to RAG, if the idea of retrieval is still new.</td></tr>
+    <tr><td><a href="../../AWS-Capstone/production-rag/">Capstone Project 4 · Production RAG from scratch</a></td><td>The same ideas at production scale: extraction, chunking and hybrid search on real documents.</td></tr>
+  </table>
+</section>
+
+<!-- ============ EXERCISES ============ -->
+<section class="slide" id="exercises">
+  <div class="slide-head"><span class="num">✎</span><h3>Exercises (easy → hard)</h3></div>
+  <ol>
+    <li><b>Try more sizes.</b> In Part 2.1 set <code class="i">chunk_sizes = [50, 100, 150, 250, 400]</code>. Which size first returns the sentence about the heart pumping blood through the circulatory system as one whole chunk?</li>
+    <li><b>Overlap on and off.</b> In Part 2.1, change <code class="i">int(size * 0.1)</code> to <code class="i">0</code>, then to <code class="i">int(size * 0.3)</code>. Print the 150-size chunks each time. What is repeated, and does the search answer change?</li>
+    <li><b>Ask a different question.</b> In Part 2.1, ask "How many chambers does the heart have?". Which chunk size answers it best, and is it the same winner as before?</li>
+    <li><b>Two-step chunking.</b> After Part 2.4, run <code class="i">RecursiveCharacterTextSplitter(chunk_size=120, chunk_overlap=10).split_documents(md_header_splits)</code>. Check that every small piece still carries its heading metadata.</li>
+    <li><b>Fix the tokenizer.</b> In Part 2.5, replace <code class="i">.lower().split()</code> with <code class="i">re.findall(r"[a-z0-9-]+", text.lower())</code> (remember <code class="i">import re</code>) for the products, the plain query and the HyDE query. Do the HyDE scores change?</li>
+    <li><b>HyDE with embeddings.</b> Put the 12 product titles in a Chroma collection with <code class="i">OpenAIEmbeddings</code>. Search with <code class="i">shopper_query</code>, then with <code class="i">hyde_answer</code>. Is the gap smaller than with BM25? Why might that be?</li>
+    <li><b>Make HyDE fail.</b> Change the query to an exact product name, e.g. "Clarks formal leather boots". Does adding the fake answer push the right product down? Write one sentence on when you would switch HyDE off.</li>
+  </ol>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section class="slide" id="quiz">
+  <div class="slide-head"><span class="num">✓</span><h3>Quick quiz</h3></div>
+  <details class="q"><summary>1. In this notebook, what unit is <code class="i">chunk_size</code> measured in?</summary><p>Characters (letters, spaces and punctuation), not words or tokens.</p></details>
+  <details class="q"><summary>2. Why does the code give each Chroma chunk an id like <code class="i">"150-0"</code>?</summary><p>So that running the cell again overwrites the same chunks instead of storing duplicates, which would fill the search results with copies.</p></details>
+  <details class="q"><summary>3. What does <code class="i">separator=""</code> do in <code class="i">CharacterTextSplitter</code>?</summary><p>It allows a cut anywhere, even in the middle of a word, so every chunk is exactly the chunk size (except the last).</p></details>
+  <details class="q"><summary>4. Which two parts need an OpenAI key besides the HyDE step?</summary><p>Storing and searching in Part 2.1 (OpenAI embeddings) and semantic chunking in Part 2.3 (it embeds every sentence).</p></details>
+  <details class="q"><summary>5. What extra thing does <code class="i">MarkdownHeaderTextSplitter</code> give you that the other splitters don't?</summary><p>Each chunk's headings, stored in its metadata (Header 1, Header 2, Header 3), which you can use for filtering and for showing sources.</p></details>
+  <details class="q"><summary>6. In HyDE, why do we ask the LLM for fake product titles instead of advice for the shopper?</summary><p>Because we search with the LLM's text. Text that looks like the documents shares their words (or meaning), so it finds them. Advice would not look like a product title.</p></details>
+  <details class="q"><summary>7. Name one case where HyDE is a bad idea.</summary><p>When the query is already exact (a product code or error message), when the LLM doesn't know your private terms, or when the extra LLM call's delay and cost are too much.</p></details>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section class="slide" id="gloss">
+  <div class="slide-head"><span class="num">★</span><h3>Glossary</h3></div>
+  <table class="t">
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td><b>RAG</b></td><td>Retrieval-Augmented Generation: find relevant pieces of your documents, then let an LLM answer using them.</td></tr>
+    <tr><td><b>Chunk</b></td><td>One small piece of a document that is stored and searched on its own.</td></tr>
+    <tr><td><b>Chunk size</b></td><td>The maximum length of one chunk (characters in this notebook).</td></tr>
+    <tr><td><b>Chunk overlap</b></td><td>Text shared between the end of one chunk and the start of the next, so edges aren't lost.</td></tr>
+    <tr><td><b>Document (LangChain)</b></td><td>An object with <code class="i">page_content</code> (the text) and <code class="i">metadata</code> (labels like the source or headings).</td></tr>
+    <tr><td><b>Metadata</b></td><td>Extra labels stored with a chunk: where it came from, which heading it was under.</td></tr>
+    <tr><td><b>Embedding</b></td><td>A list of numbers that represents the meaning of a text; similar texts get similar numbers.</td></tr>
+    <tr><td><b>Vector store</b></td><td>A database that stores embeddings and finds the closest ones to a query. Here: Chroma.</td></tr>
+    <tr><td><b>Collection</b></td><td>One named group of chunks inside a vector store.</td></tr>
+    <tr><td><b>k</b></td><td>How many results the search returns.</td></tr>
+    <tr><td><b>Recursive character splitting</b></td><td>Cutting at the nicest boundary that fits: paragraphs, then lines, then spaces, then characters.</td></tr>
+    <tr><td><b>Semantic chunking</b></td><td>Cutting where the meaning changes, measured by comparing sentence embeddings.</td></tr>
+    <tr><td><b>Structure-based chunking</b></td><td>Cutting at the document's own sections, e.g. Markdown headings.</td></tr>
+    <tr><td><b>BM25</b></td><td>A classic keyword-search scoring method: more shared and rarer words give a higher score.</td></tr>
+    <tr><td><b>Token / tokenizing</b></td><td>Here: cutting text into words for BM25. (LLMs also use "tokens", which are word pieces.)</td></tr>
+    <tr><td><b>HyDE</b></td><td>Hypothetical Document Embeddings: search with an LLM-written fake answer instead of the question.</td></tr>
+    <tr><td><b>.env / dotenv</b></td><td>A private file of settings like API keys, loaded into environment variables by <code class="i">load_dotenv()</code>.</td></tr>
+    <tr><td><b>getpass</b></td><td>A Python function that asks for input without showing what you type.</td></tr>
+  </table>
+</section>
+
+<!-- ============ SOURCE ============ -->
+<section class="slide" id="source">
+  <div class="slide-head"><span class="num">{ }</span><h3>Full source</h3></div>
+  <p class="oneliner">All 12 code cells of <code class="i">chunking_strategies.ipynb</code>, in order, exactly as you download them (TODOs unfilled).</p>
+  <details class="orig"><summary>Cell 1</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 1</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="c1"># Run this once if the libraries are not installed yet (remove the # first):</span>
+<span class="c1"># %pip install -q -r ../../00_Setup/requirements.txt</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 2</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 2</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">getpass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># reads OPENAI_API_KEY from a .env file if you have one</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">]</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s2">"Enter your OpenAI API key: "</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"API key loaded:"</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">)))</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 3</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 3</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.documents</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_text_splitters</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecursiveCharacterTextSplitter</span>
+
+<span class="n">document_text</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">The human heart is a muscular organ that pumps blood through the circulatory system.</span>
+<span class="s2">This blood delivers oxygen and nutrients to the body and removes metabolic waste. The heart</span>
+<span class="s2">has four chambers: the right atrium, the right ventricle, the left atrium, and the left ventricle.</span>
+<span class="s2">The average adult heart beats about 60 to 100 times per minute. The circulatory system consists of the heart,</span>
+<span class="s2">blood vessels, and blood. It is a vital part of the human body, responsible for transporting essential substances.</span>
+<span class="s2">A healthy lifestyle, including regular exercise and a balanced diet, is crucial for cardiovascular health.</span>
+<span class="s2">"""</span>
+
+<span class="c1"># Wrap the text in a LangChain Document (text + metadata)</span>
+<span class="n">documents</span> <span class="o">=</span> <span class="p">[</span><span class="n">Document</span><span class="p">(</span><span class="n">page_content</span><span class="o">=</span><span class="n">document_text</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">"source"</span><span class="p">:</span> <span class="s2">"heart_article"</span><span class="p">})]</span>
+
+<span class="n">chunk_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">400</span><span class="p">]</span>   <span class="c1"># small, medium, large (in characters)</span>
+<span class="n">chunked_documents</span> <span class="o">=</span> <span class="p">{}</span>         <span class="c1"># size -&gt; list of chunks</span>
+
+<span class="k">for</span> <span class="n">size</span> <span class="ow">in</span> <span class="n">chunk_sizes</span><span class="p">:</span>
+    <span class="c1"># ----- TODO 1: Split the document with RecursiveCharacterTextSplitter (10% overlap) and store the chunks -----</span>
+    <span class="c1"># Hint: RecursiveCharacterTextSplitter(chunk_size=size, chunk_overlap=int(size * 0.1))</span>
+    <span class="c1"># Hint: splitter.split_documents(documents) returns a list of smaller Documents</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+    <span class="n">chunked_documents</span><span class="p">[</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">chunks</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"chunk_size=</span><span class="si">{</span><span class="n">size</span><span class="si">:</span><span class="s2">&lt;4</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span><span class="si">}</span><span class="s2"> chunks"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">The medium (150) chunks look like this:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chunked_documents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  [</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">chunk</span><span class="o">.</span><span class="n">page_content</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 4</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 4</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_chroma</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chroma</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAIEmbeddings</span>
+
+<span class="c1"># OpenAI embedding model: turns each chunk into a list of 1,536 numbers</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">OpenAIEmbeddings</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"text-embedding-3-small"</span><span class="p">)</span>
+
+<span class="n">vector_dbs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># size -&gt; Chroma vector store</span>
+
+<span class="k">for</span> <span class="n">size</span><span class="p">,</span> <span class="n">chunks</span> <span class="ow">in</span> <span class="n">chunked_documents</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="c1"># ----- TODO 2: Store the chunks of this size in their own Chroma collection -----</span>
+    <span class="c1"># Hint: Chroma.from_documents(chunks, embeddings, collection_name=..., ids=...)</span>
+    <span class="c1"># Hint: Use a different collection_name per size, e.g. f"heart_chunks_{size}"</span>
+    <span class="c1"># Hint: ids like f"{size}-{i}" stop duplicates if you run the cell twice</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># replace with your code</span>
+    <span class="n">vector_dbs</span><span class="p">[</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">db</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Stored </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span><span class="si">}</span><span class="s2"> chunks for size </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 5</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 5</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="n">query</span> <span class="o">=</span> <span class="s2">"What is the primary function of the heart and its connection to the circulatory system?"</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># how many chunks to bring back</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Query: </span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">size</span><span class="p">,</span> <span class="n">db</span> <span class="ow">in</span> <span class="n">vector_dbs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Chunk size </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="c1"># ----- TODO 3: Retrieve the k most similar chunks from this vector store -----</span>
+    <span class="c1"># Hint: db.similarity_search(query, k=...) returns a list of Documents</span>
+    <span class="c1"># Hint: A small store may have fewer than k chunks, so use min(k, len(chunked_documents[size]))</span>
+    <span class="n">retrieved_docs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">retrieved_docs</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Result </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">page_content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 6</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 6</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_text_splitters</span><span class="w"> </span><span class="kn">import</span> <span class="n">CharacterTextSplitter</span>
+
+<span class="c1"># textwrap.dedent removes the common left indentation so headings start with "#"</span>
+<span class="n">text</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">    # Machine Learning Fundamentals</span>
+
+<span class="s2">    Machine learning is a subset of artificial intelligence that enables computers to learn and improve from experience without being explicitly programmed.</span>
+
+<span class="s2">    ## Types of Machine Learning</span>
+
+<span class="s2">    ### Supervised Learning</span>
+<span class="s2">    Supervised learning uses labeled training data to learn a mapping function from input to output. Common examples include:</span>
+<span class="s2">    - Classification: Predicting categories (spam/not spam)</span>
+<span class="s2">    - Regression: Predicting continuous values (house prices)</span>
+
+<span class="s2">    ### Unsupervised Learning</span>
+<span class="s2">    Unsupervised learning finds hidden patterns in data without labeled examples:</span>
+<span class="s2">    - Clustering: Grouping similar data points</span>
+<span class="s2">    - Dimensionality reduction: Reducing feature space</span>
+
+<span class="s2">    ### Reinforcement Learning</span>
+<span class="s2">    An agent learns through interaction with an environment, receiving rewards or penalties for actions taken.</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+<span class="c1"># (a) Pure fixed length: separator="" means "cut anywhere", even in the middle of a word</span>
+<span class="n">naive_splitter</span> <span class="o">=</span> <span class="n">CharacterTextSplitter</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+<span class="n">naive_chunks</span> <span class="o">=</span> <span class="n">naive_splitter</span><span class="o">.</span><span class="n">split_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Pure fixed-length (first 3 chunks) - notice the broken words:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">naive_chunks</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"   "</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">chunk</span><span class="p">))</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 7</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 7</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="c1"># ----- TODO 4: Fixed-length chunks of up to 200 characters that only cut at line breaks, with 20 characters overlap -----</span>
+<span class="c1"># Hint: CharacterTextSplitter(chunk_size=200, chunk_overlap=20, separator="\n")</span>
+<span class="c1"># Hint: .split_text(text) returns a list of strings</span>
+<span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Fixed-length chunks that respect line breaks:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Chunk </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> (length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="si">}</span><span class="s2">):"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 8</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 8</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_experimental.text_splitter</span><span class="w"> </span><span class="kn">import</span> <span class="n">SemanticChunker</span>
+
+<span class="c1"># ----- TODO 5: Create a SemanticChunker with OpenAI embeddings and split the text into Documents -----</span>
+<span class="c1"># Hint: SemanticChunker(OpenAIEmbeddings(model="text-embedding-3-small"))</span>
+<span class="c1"># Hint: .create_documents([text]) returns a list of Documents</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Chunk </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">page_content</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 9</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 9</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_text_splitters</span><span class="w"> </span><span class="kn">import</span> <span class="n">MarkdownHeaderTextSplitter</span>
+
+<span class="n">headers_to_split_on</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">"#"</span><span class="p">,</span> <span class="s2">"Header 1"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"##"</span><span class="p">,</span> <span class="s2">"Header 2"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"###"</span><span class="p">,</span> <span class="s2">"Header 3"</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="c1"># ----- TODO 6: Split the Markdown text at the headings listed above -----</span>
+<span class="c1"># Hint: MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)</span>
+<span class="c1"># Hint: .split_text(text) returns Documents that carry the headings in .metadata</span>
+<span class="n">md_header_splits</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># replace with your code</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">md_header_splits</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Chunk </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">page_content</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Metadata: </span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 10</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 10</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rank_bm25</span><span class="w"> </span><span class="kn">import</span> <span class="n">BM25Okapi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatOpenAI</span>
+
+<span class="n">shopper_query</span> <span class="o">=</span> <span class="s2">"I want running shoes"</span>
+<span class="n">products</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"Adidas Ultraboost sneakers for men , Marathon Shoes"</span><span class="p">,</span>
+    <span class="s2">"Nike Air Zoom Pegasus trainers"</span><span class="p">,</span>
+    <span class="s2">"Puma casual footwear for everyday wear"</span><span class="p">,</span>
+    <span class="s2">"Woodland leather trekking boots"</span><span class="p">,</span>
+    <span class="s2">"Asics Gel-Kayano stability trainers"</span><span class="p">,</span>
+    <span class="s2">"Reebok CrossFit gym footwear"</span><span class="p">,</span>
+    <span class="s2">"Clarks formal leather boots"</span><span class="p">,</span>
+    <span class="s2">"Skechers lightweight walking sneakers"</span><span class="p">,</span>
+    <span class="s2">"New Balance Fresh Foam trail trainers"</span><span class="p">,</span>
+    <span class="s2">"Bata budget-friendly casual footwear"</span><span class="p">,</span>
+    <span class="s2">"Fila sports footwear for gym workouts"</span><span class="p">,</span>
+    <span class="s2">"Converse high-top casual sneakers"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># BM25 works on words, so we lower-case and split every product title into words</span>
+<span class="n">tokenized_products</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">products</span><span class="p">]</span>
+<span class="n">bm25</span> <span class="o">=</span> <span class="n">BM25Okapi</span><span class="p">(</span><span class="n">tokenized_products</span><span class="p">)</span>
+
+<span class="c1"># --- Search WITHOUT HyDE: use the shopper's words directly -------------------</span>
+<span class="n">scores_no_hyde</span> <span class="o">=</span> <span class="n">bm25</span><span class="o">.</span><span class="n">get_scores</span><span class="p">(</span><span class="n">shopper_query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+<span class="n">top_no_hyde</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">scores_no_hyde</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">scores_no_hyde</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Top products WITHOUT HyDE:"</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">top_no_hyde</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"  - No relevant results found"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">top_no_hyde</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  - </span><span class="si">{</span><span class="n">products</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">  (score: </span><span class="si">{</span><span class="n">scores_no_hyde</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 11</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 11</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="c1"># Chat model used to write the hypothetical answer.</span>
+<span class="c1"># reasoning_effort="none" -&gt; fast, direct answers (no long "thinking")</span>
+<span class="n">llm</span> <span class="o">=</span> <span class="n">ChatOpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"gpt-6-luna"</span><span class="p">,</span> <span class="n">reasoning_effort</span><span class="o">=</span><span class="s2">"none"</span><span class="p">)</span>
+
+<span class="c1"># ----- TODO 7: Ask the LLM to write a hypothetical answer (fake product listings) for the shopper's query -----</span>
+<span class="c1"># Hint: Write a prompt like: "Write 4 short product titles from an online shoe store that match: &lt;query&gt;"</span>
+<span class="c1"># Hint: llm.invoke(prompt).text gives you the text answer</span>
+<span class="n">hyde_answer</span> <span class="o">=</span> <span class="s2">""</span>  <span class="c1"># replace with your code</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Hypothetical answer written by the LLM:</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">hyde_answer</span><span class="p">)</span>
+</pre></div>
+  </details>
+  <details class="orig"><summary>Cell 12</summary>
+    <div class="codebox"><div class="codebar"><span class="fname">chunking_strategies.ipynb · cell 12</span><button class="copy" type="button">Copy</button></div><pre class="hl"><span class="c1"># ----- TODO 8: Search again with the query + hypothetical answer and print the top 3 products -----</span>
+<span class="c1"># Hint: hyde_query = shopper_query + " " + hyde_answer</span>
+<span class="c1"># Hint: Lower-case and split it into words, then bm25.get_scores(words)</span>
+<span class="c1"># Hint: np.argsort(scores)[::-1][:3] gives the indexes of the 3 best products</span>
+<span class="n">scores_hyde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">products</span><span class="p">))</span>  <span class="c1"># replace with your code</span>
+
+<span class="n">top_hyde</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">scores_hyde</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Top products WITH HyDE:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">top_hyde</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  - </span><span class="si">{</span><span class="n">products</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">  (score: </span><span class="si">{</span><span class="n">scores_hyde</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</pre></div>
+  </details>
+</section>
+
+<!-- awsq:bottom -->
+<nav class="awsq awsq-bottom" aria-label="Bootcamp navigation (bottom)"><div class="awsq-box"><div class="awsq-head"><span class="awsq-cap">Scaler AWS AI Bootcamp · Week 5 · Lesson 21 of 23</span><a class="aih" href="../../" title="Back to the AI-Infusion home page">⌂ AI-Infusion</a></div><div class="awsq-row"><a class="awsq-l awsq-prev" href="../embeddings-reranking/"><span class="awsq-d">← Previous</span><span class="awsq-t">Lesson 20 · Embeddings, similarity and reranking</span></a><a class="awsq-home" href="../week-5/"><b>Scaler AWS AI Bootcamp</b>Week 5 · all lessons</a><a class="awsq-l awsq-next" href="../tool-calling-basics/"><span class="awsq-d">Next →</span><span class="awsq-t">Lesson 22 · Tool calling basics</span></a></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="done" href="../memory-explained/" title="Lesson 15 · Memory, explained simply">15</a></li><li><a class="done" href="../mcp-explained/" title="Lesson 16 · MCP, explained simply">16</a></li><li><a class="done" href="../memory-mcp-code/" title="Lesson 17 · Memory and MCP in code">17</a></li><li><a class="done" href="../evals-explained/" title="Lesson 18 · Evals, explained simply">18</a></li><li><a class="done" href="../component-evals/" title="Lesson 19 · Component evals in code">19</a></li><li><a class="done" href="../embeddings-reranking/" title="Lesson 20 · Embeddings, similarity and reranking">20</a></li><li><a class="cur" href="../chunking-hyde/" title="Lesson 21 · Chunking strategies and HyDE" aria-current="page">21</a></li><li><a class="" href="../tool-calling-basics/" title="Lesson 22 · Tool calling basics">22</a></li><li><a class="" href="../inventory-agent-steps/" title="Lesson 23 · Inventory agent, step by step">23</a></li><li><a class="" href="../ai-evals-why/" title="Homework 1 · AI Evals 1 · Why AI evals">H1</a></li><li><a class="" href="../ai-evals-methods/" title="Homework 2 · AI Evals 2 · Evaluation methods">H2</a></li><li><a class="" href="../ai-evals-quantitative/" title="Homework 3 · AI Evals 3 · Metrics, judges, test sets">H3</a></li><li><a class="" href="../ai-evals-after-launch/" title="Homework 4 · AI Evals 4 · After launch">H4</a></li><li><a class="" href="../ai-evals-governance/" title="Homework 5 · AI Evals 5 · Tools and governance">H5</a></li></ol><div class="awsq-files"><b>Project files</b><a class="awsq-fb" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-21-chunking-hyde" target="_blank" rel="noopener">&lt;/&gt; Browse the code<small>GitHub</small></a><a class="awsq-fb" href="../../zips/Code/Zips/aws-bootcamp-section-21-chunking-hyde.zip" download>⬇ Download all<small>.zip</small></a></div></div></nav>
+<!-- /awsq:bottom -->
+<footer>Chunking strategies and HyDE: code explainer · code by Shivank Agarwal</footer>
+</main>
+</div>
+<script>
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const text = btn.closest('.codebox').querySelector('pre').innerText;
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 1400); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, () => fb(text, done));
+    else fb(text, done);
+  });
+});
+function fb(text, done) { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) {} t.remove(); }
+const bar = document.getElementById('progress');
+window.addEventListener('scroll', () => { const h = document.documentElement; bar.style.width = (100 * h.scrollTop / (h.scrollHeight - h.clientHeight)) + '%'; }, {passive: true});
+const links = {}; document.querySelectorAll('nav.toc a').forEach(a => links[a.getAttribute('href').slice(1)] = a);
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && links[e.target.id]) { Object.values(links).forEach(l => l.classList.remove('active')); links[e.target.id].classList.add('active'); } }), {rootMargin: '-35% 0px -60% 0px'});
+document.querySelectorAll('section.slide').forEach(s => io.observe(s));
+document.querySelectorAll('.mobile-toc a').forEach(a => a.addEventListener('click', () => a.closest('details').open = false));
+</script>
+</body>
+</html>
