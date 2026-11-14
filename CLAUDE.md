@@ -17,10 +17,32 @@ the AWS AI Capstone projects and Interview Ready. Pushing `main` publishes it.
 - **Nav, recordings and project-file links are generated.** Edit the tables in
   `tools/bootcamp_nav.py` (weeks, `CAPSTONE`, `GITHUB`, `ZIPS`, `LINKS`), then run
   `python tools/bootcamp_nav.py`. Don't hand-edit the `<!-- awsq:* -->` / `<!-- aqfiles -->` blocks.
+- **Adding a bootcamp week or lesson: link it everywhere.** A new week was once added without the
+  hub links being checked. Every time:
+  1. Lesson page at `AWS-Bootcamp/<folder>/index.html`. If it is a self-contained page with its own
+     `<main>` (e.g. a code explainer with a side TOC), put empty `<!-- awsq:top -->`/`<!-- /awsq:top -->`
+     markers just inside `<main>` and `<!-- awsq:bottom -->`/`<!-- /awsq:bottom -->` before its footer,
+     add the folder to `INMAIN` (and to `NOCODE` if it has no code), and give `main .awsq` colour
+     overrides that match the page.
+  2. Add the lesson to its `WEEKn` list and the week to `WEEKS` (with an entry in `WEEK_RECORDINGS`,
+     `[]` until the links exist) in `tools/bootcamp_nav.py`; code goes in `_CODE` and `tools/build_code_zips.py`.
+  3. Week page `AWS-Bootcamp/week-N/index.html` (copy the previous week's), with a card per lesson
+     and an empty `<!-- recs:weekN -->` block.
+  4. Link the week from **all** of: `AWS-Bootcamp/index.html` (a `.awsb-day` card, the "New" badge
+     and the `awsb-latest` bar; move both off the older week), the bootcamp tile in the home
+     `index.html`, the previous week page's "Next" note, and the meta descriptions that list weeks.
+  5. Run `python tools/build_code_zips.py`, `python tools/bootcamp_nav.py`, then
+     **`python -I tools/check_links.py`**: it must report 0 problems. It checks every relative link
+     on the site and that each week is linked from the hub, the home tile, the previous week and
+     its own week page.
+  6. After the push, check the live page (GitHub Pages takes a minute or two to deploy, so an old
+     copy right after a push is normal; reload with Ctrl+F5).
 - **Code and zips.** Source code lives in `zips/Code/<Programme>/...`; `python tools/build_code_zips.py`
   rebuilds the downloadable zips in `zips/Code/Zips/`. "Browse the code" links point at
   `https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/...`.
 - **Never publish secrets.** Before any push, run `tools/scan_secrets.py` (via a background Haiku agent).
+  It scans HEAD, so commit first, then scan, then push. Also run `python -I tools/check_links.py`
+  before every push.
   GitHub push protection blocks known key formats (it caught a Stripe docs key once): replace with
   a placeholder and amend; never Bypass.
   `zips/Code/Ai-Infusion/Lesson-7/` is a clone of github.com/22f1001418/InterviewIQ, holds a real
