@@ -57,6 +57,13 @@ the AWS AI Capstone projects and Interview Ready. Pushing `main` publishes it.
   `.env`, and is git-ignored on purpose.
 - **Git** isn't on PATH; use GitHub Desktop's:
   `C:\Users\raghuram\AppData\Local\GitHubDesktop\app-3.6.10\resources\app\git\cmd\git.exe`.
+- **Pushing.** `.claude/settings.local.json` lets Claude run exactly
+  `& "<that git.exe>" push origin main` (plus `fetch origin`, `status`, `log`) without a prompt;
+  force pushes are denied. Claude still pushes only after the user's yes in chat, once the commit,
+  `scan_secrets.py` and `check_links.py` are clean. Then confirm with `fetch origin` that
+  `origin/main` has the commit. If the push says it can't read a username, Git Credential Manager has
+  no saved GitHub sign-in: the user runs that push command once in their own terminal and signs in
+  in the browser. Never enter credentials for them.
 - `_config.yml` keeps the source-code folders, `tools/` and these notes off the live site (smaller deploys).
   If you add a folder that pages must link to directly, check it is not excluded there.
 - Open items are in `MIGRATION-TODO.md`.
