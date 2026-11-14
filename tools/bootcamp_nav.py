@@ -30,8 +30,11 @@ WEEK2 = [
     ("shipping-agents-to-production", "6", "Lesson 6", "Shipping agents to production"),
     ("evals-observability-governance", "7", "Lesson 7", "Evals, observability and governance"),
 ]
+WEEK3 = [
+    ("agentic-bug-fixing", "8", "Lesson 8", "Agentic bug fixing"),
+]
 # (label, folder of the week page, lessons)
-WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2)]
+WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2), ("Week 3", "week-3", WEEK3)]
 # Every page in order across the weeks: (folder, step, kind, title, week label, week folder)
 SEQ = [(*item, week, wdir) for week, wdir, items in WEEKS for item in items]
 
@@ -69,6 +72,8 @@ WEEK_RECORDINGS = {
         ("Week 2 · session 1", _REC.format("ai-bootcamp-3")),
         ("Week 2 · session 2", _REC.format("ai-bootcamp-4")),
     ],
+    # an empty list shows "link coming soon"
+    "week-3": [],
 }
 RECORDINGS = {folder: WEEK_RECORDINGS[wdir] for folder, *_, wdir in SEQ}
 
@@ -119,6 +124,7 @@ _CODE = {
     "How-agents-talk": ("Aws-Bootcamp/section-05-mcp-and-a2a", "aws-bootcamp-section-05-mcp-and-a2a"),
     "shipping-agents-to-production": ("Aws-Bootcamp/section-06-production-deployment", "aws-bootcamp-section-06-production-deployment"),
     "evals-observability-governance": ("Aws-Bootcamp/section-07-evals-observability-governance", "aws-bootcamp-section-07-evals-observability-governance"),
+    "agentic-bug-fixing": ("Aws-Bootcamp/section-08-agentic-bug-fixing", "aws-bootcamp-section-08-agentic-bug-fixing"),
     "Class-1": ("Ai-Infusion/lesson-1", "ai-infusion-lesson-1"),
     "Class-2": ("Ai-Infusion/lesson-2", "ai-infusion-lesson-2"),
     "Class-3-4": ("Ai-Infusion/lesson-3", "ai-infusion-lesson-3-4"),
@@ -156,6 +162,9 @@ LINKS = {
 
 # Pages built on the finance template sit inside <main>, not the lesson .wrap.
 FINANCE = {"finance-section-1", "finance-nps-project", "trip-buddy"}
+# Pages whose nav sits inside their own padded <main> (the finance ones, plus code explainers with a side TOC).
+# The explainers carry the awsq markers by hand: top just inside <main>, bottom before <footer>.
+INMAIN = FINANCE | {"agentic-bug-fixing"}
 
 BRAND = "Scaler AWS AI Bootcamp"
 
@@ -322,7 +331,7 @@ def version_link(folder, v2):
 def side(i, cur_week, cls, label, v2=False):
     if i < 0 or i >= len(SEQ):
         # the capstone projects are their own section of the site, so the bootcamp simply ends here
-        msg = "You're at the start" if i < 0 else "End of the bootcamp · Weeks 3–4 coming soon"
+        msg = "You're at the start" if i < 0 else "End of the bootcamp · Week 4 coming soon"
         return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">{msg}</span></span>'
     folder, _, kind, title, week, _ = SEQ[i]
     # name the week when prev / next crosses into another one
@@ -350,8 +359,8 @@ def nav(i, where, v2=False):
         cls = "cur" if j == i else ("done" if j < i else "")
         cur = ' aria-current="page"' if j == i else ""
         steps.append(f'<li><a class="{cls}" href="../{href(f, v2)}/" title="{e(kind)} · {e(title)}"{cur}>{step}</a></li>')
-    extra = " awsq-inmain" if folder in FINANCE and where == "top" else ""
-    every = "all projects" if all(s[1].startswith("P") for s in week_items(wdir)) else "all lessons"
+    extra = " awsq-inmain" if folder in INMAIN and where == "top" else ""
+    every ="all projects" if all(s[1].startswith("P") for s in week_items(wdir)) else "all lessons"
     return (f'<nav class="awsq awsq-{where}{extra}" aria-label="Bootcamp navigation ({where})"><div class="awsq-box">'
             f'<div class="awsq-head"><span class="awsq-cap">{e(caption(i, v2))}</span>{HOME_BTN}</div>'
             f'<div class="awsq-row">{side(i - 1, week, "awsq-prev", "← Previous", v2)}'
@@ -533,7 +542,8 @@ def build_hubs():
         s = p.read_text(encoding="utf-8")
         links = "".join(f'<a href="{e(url)}" target="_blank" rel="noopener"><i aria-hidden="true">▶</i>'
                         f'<span>{e(label)}<small>Scaler recording · opens in a new tab</small></span></a>'
-                        for label, url in WEEK_RECORDINGS[wdir])
+                        for label, url in WEEK_RECORDINGS[wdir]) or (
+                    '<span><i aria-hidden="true">▶</i><span>Class recordings<small>link coming soon</small></span></span>')
         tag = "recs:" + wdir.replace("-", "")
         block = f'<!-- {tag} --><div class="awsb-recs">{links}</div><!-- /{tag} -->'
         s, n = re.subn(rf"<!-- {tag} -->.*?<!-- /{tag} -->", lambda m: block, s, flags=re.S)

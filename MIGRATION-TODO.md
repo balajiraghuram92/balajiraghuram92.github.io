@@ -52,6 +52,14 @@ GitHub link as the fallback.
 - [ ] More Week 2 projects: add each one to `WEEK2` in `tools/bootcamp_nav.py`, and a card on
       `AWS-Bootcamp/week-2/index.html`.
 
+## 2b. Bootcamp Week 3
+
+- [x] `AWS-Bootcamp/week-3/` is live with Lesson 8, Agentic bug fixing (`AWS-Bootcamp/agentic-bug-fixing/`,
+      code in `zips/Code/Aws-Bootcamp/section-08-agentic-bug-fixing/`).
+- [ ] Week 3 recordings: fill `WEEK_RECORDINGS["week-3"]` in `tools/bootcamp_nav.py` (shows "link coming soon"
+      until then), and drop "Recordings coming soon" from the Week 3 card on `AWS-Bootcamp/index.html`.
+- [ ] More Week 3 lessons: add each one to `WEEK3` and a card on `AWS-Bootcamp/week-3/index.html`.
+
 ## 3. Other placeholders
 
 - [ ] Recording links: Week 1 and all 11 AI-Infusion classes are in. Class 4 points at a

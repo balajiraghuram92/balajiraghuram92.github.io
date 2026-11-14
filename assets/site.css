@@ -23,6 +23,8 @@
 .tile p{margin:0;color:var(--ink-2);font-size:16px;line-height:1.55}
 .tile ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
 .tile li{margin:0;padding:5px 10px;border-radius:6px;border:1px solid var(--rule);font:500 12px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--ink-2)}
+.tile li.is-new{border-color:#5FD07E;color:var(--ink)}
+.tile li.is-new b{margin-left:4px;padding:1px 6px;border-radius:999px;background:#5FD07E;color:#0E1530;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
 .tile .go{margin-top:auto;padding-top:10px;font:600 13px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--accent)}
 .tile-aws{--accent:#F2A93B;--ink:#EEF1FB;--ink-2:#A9B2D6;--rule:#2A3768;
   background:radial-gradient(600px 300px at 90% -10%,rgba(242,169,59,.25),transparent 60%),linear-gradient(180deg,#0E1530,#141D3F);border-color:#2A3768}

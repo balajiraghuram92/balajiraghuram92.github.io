@@ -83,14 +83,27 @@ a.awsb-day:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0
 .awsb-day .awsb-go{margin-top:auto;padding-top:6px;font-size:13px;color:var(--acc)}
 .awsb-day.is-soon{border-style:dashed;background:rgba(255,255,255,.02)}
 .awsb-day.is-soon .awsb-pnum{background:transparent;color:var(--dim);border:1px solid var(--line)}
+/* "New" badge on the latest week, and the note at the top that jumps to it */
+.awsb-day.is-new{border-color:#5FD07E;box-shadow:0 0 0 1px #5FD07E inset}
+.awsb-new{position:absolute;top:18px;right:18px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#5FD07E;color:#0E1530;
+  font:700 11px/1.2 "IBM Plex Mono",ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase}
+.awsb-new::before{content:"";width:7px;height:7px;border-radius:50%;background:#0E1530;animation:awsb-pulse 1.6s ease-in-out infinite}
+@keyframes awsb-pulse{50%{opacity:.25}}
+a.awsb-latest{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 22px;padding:12px 16px;border-radius:12px;border:1px solid #5FD07E;
+  background:rgba(95,208,126,.1);color:var(--ink);text-decoration:none;font-size:15px;line-height:1.4}
+a.awsb-latest:hover{background:rgba(95,208,126,.18)}
+a.awsb-latest .awsb-new{position:static}
+a.awsb-latest b{color:#5FD07E}
+.awsb-latest .awsb-go{margin-left:auto;color:#5FD07E;font-size:13px}
 .awsb-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
 .awsb-recs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:0 0 40px}
 .awsb-recs a{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--acc);background:rgba(242,169,59,.1);
   color:var(--ink);text-decoration:none;font-weight:700;font-size:15.5px}
 .awsb-recs a:hover{background:rgba(242,169,59,.18)}
+.awsb-recs > span{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px dashed var(--acc);color:var(--dim);font-weight:700;font-size:15.5px}
 .awsb-recs i{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--acc);color:var(--bg);font-style:normal;font-size:12px}
 .awsb-recs small{display:block;font:500 11.5px/1.3 "IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--dim);font-weight:500;margin-top:2px}
-@media (prefers-reduced-motion:reduce){.awsb-day{transition:none}a.awsb-day:hover{transform:none}}
+@media (prefers-reduced-motion:reduce){.awsb-new::before{animation:none}.awsb-day{transition:none}a.awsb-day:hover{transform:none}}
 
 /* AWS AI Capstone: three projects per row, and the capstone card marked as important */
 .awsb-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
