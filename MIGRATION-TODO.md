@@ -69,6 +69,15 @@ GitHub link as the fallback.
 - [ ] Week 4 recordings: fill `WEEK_RECORDINGS["week-4"]` and drop "Recordings coming soon" from the
       Week 4 card on `AWS-Bootcamp/index.html`.
 
+## 2d. Bootcamp Week 5 and Capstone row 4
+
+- [x] `AWS-Bootcamp/week-5/`: Lessons 15-19 (memory, MCP, evals) and homework H1-H5 (the AI Evals in
+      Practice chapters, sharing `zips/Code/Aws-Bootcamp/homework-ai-evals-in-practice/`).
+- [x] `AWS-Capstone/` row 4 "AWS Week 5 projects": AI agents in finance Parts 2-7 (P8-P13) and the
+      adaptive learning app case study (P14). None of them has code yet.
+- [ ] Week 5 recordings: fill `WEEK_RECORDINGS["week-5"]` and drop "Recordings coming soon" from the
+      Week 5 card on `AWS-Bootcamp/index.html`.
+
 ## 3. Other placeholders
 
 - [ ] Recording links: Week 1 and all 11 AI-Infusion classes are in. Class 4 points at a

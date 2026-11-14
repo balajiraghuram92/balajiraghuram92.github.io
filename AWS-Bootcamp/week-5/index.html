@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bootcamp Week 5</title>
+<meta name="description" content="Scaler AWS AI Bootcamp, Week 5: Lessons 15 to 19 on agent memory, MCP and evaluating agents, with the five AI Evals in Practice chapters as homework.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../../assets/hub.css">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="../../assets/bootcamp.css">
+</head>
+<body class="bc">
+<section class="awsb" aria-labelledby="awsb-h">
+  <div class="awsb-in">
+    <nav class="sitebar" aria-label="Site (top)"><a class="sb-home" href="../../">⌂ AI-Infusion</a><a href="../../AWS-Bootcamp/" aria-current="page">Scaler AWS AI Bootcamp</a><a href="../../AWS-Capstone/">AWS AI Capstone</a><a href="../../AI-Infusion/">AI-Infusion lessons</a><a href="../../Interview-Ready/">Interview Ready</a><a class="sb-help" href="../../help/"><span>Help</span></a></nav>
+    <p class="awsb-crumb"><a href="../">Scaler AWS AI Bootcamp</a> / Week 5</p>
+    <p class="awsb-eyebrow"><i></i>Scaler AWS AI Bootcamp · Week 5</p>
+    <h1 id="awsb-h">Agents that remember, <em>measured</em></h1>
+    <p class="awsb-sub">Give agents memory and connect them to tools over MCP, then learn to prove with evidence that an agent does its job: score each part, read the failures, and check the LLM judge against people. The AI Evals notes are this week's homework.</p>
+    <ul class="awsb-meta"><li>Lessons 15–19</li><li>5 homework chapters</li><li>Memory · MCP · evals · LLM judges</li></ul>
+
+    <div class="awsb-part" id="recordings">
+      <span class="awsb-pnum">Watch</span>
+      <div><h2>Week 5 recordings</h2><p>The full Week 5 classes on Scaler. They open in a new tab.</p></div>
+    </div>
+    <!-- recs:week5 --><div class="awsb-recs"><span><i aria-hidden="true">▶</i><span>Class recordings<small>link coming soon</small></span></span></div><!-- /recs:week5 -->
+
+    <div class="awsb-part" id="sessions">
+      <span class="awsb-pnum">Learn</span>
+      <div><h2>Week 5 lessons</h2><p>The course continues from Week 4's Lesson 14. Read each "explained simply" lesson before its code; each lesson page links the next.</p></div>
+    </div>
+    <div class="awsb-grid">
+      <article class="awsb-card" style="--c:#7EA6FF">
+      <div class="awsb-num">15</div>
+      <p class="awsb-ln">Lesson 15 · Explained simply · slide by slide</p>
+      <h3><a href="../memory-explained/">Memory, explained simply</a></h3>
+      <ul><li>A model forgets between calls: memory is what your app saves and sends back</li><li>Short-term memory is the chat history: trim it, delete from it or summarise it</li><li>Long-term memory: facts, past events and how to act</li></ul>
+      <p class="awsb-lab"><b>Try</b>Make two separate model calls, then one with the history sent along, and compare</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span></div>
+    </article>
+      <article class="awsb-card" style="--c:#C79BFF">
+      <div class="awsb-num">16</div>
+      <p class="awsb-ln">Lesson 16 · Explained simply · slide by slide</p>
+      <h3><a href="../mcp-explained/">MCP, explained simply</a></h3>
+      <ul><li>One shared standard, so a tool built once works in any AI app</li><li>Hosts, clients and servers, and the tools, resources and prompts servers offer</li><li>Why tool descriptions matter for safety</li></ul>
+      <p class="awsb-lab"><b>Try</b>Build a small FastMCP server with a word_count tool, then call it from a client</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span></div>
+    </article>
+      <article class="awsb-card" style="--c:#5FD07E">
+      <div class="awsb-num">17</div>
+      <p class="awsb-ln">Lesson 17 · Code explainer</p>
+      <h3><a href="../memory-mcp-code/">Memory and MCP in code</a></h3>
+      <ul><li>An agent that remembers its customers' facts and preferences</li><li>A chat that trims, deletes or summarises its own history</li><li>Tools served over MCP for a model to call</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Make the agent remember a change across runs, then move the MCP server into its own program</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-17-memory-mcp" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-17-memory-mcp.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#FF8A7A">
+      <div class="awsb-num">18</div>
+      <p class="awsb-ln">Lesson 18 · Explained simply · slide by slide</p>
+      <h3><a href="../evals-explained/">Evals, explained simply</a></h3>
+      <ul><li>Judge an agent on real questions, not one answer that sounded good</li><li>Score every part (prompt, search, tools, router) and look for patterns in the failures</li><li>Check that people and the LLM judge agree, beyond chance</li></ul>
+      <p class="awsb-lab"><b>Try</b>Compare two prompt versions by how many checks each one passes</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span></div>
+    </article>
+      <article class="awsb-card" style="--c:#F2B705">
+      <div class="awsb-num">19</div>
+      <p class="awsb-ln">Lesson 19 · Code explainer</p>
+      <h3><a href="../component-evals/">Component evals in code</a></h3>
+      <ul><li>Score an inventory agent's router, prompt, search and tools</li><li>Review the answers by hand in a small annotator page</li><li>Measure how well the LLM judge agrees with a person (kappa)</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Run the evals, label the answers in annotator.html, then score the judge</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-19-component-evals" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-19-component-evals.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+    </div>
+
+    <div class="awsb-part" id="homework">
+      <span class="awsb-pnum">Homework</span>
+      <div><h2>Week 5 homework: AI Evals in Practice</h2><p>Five chapters of notes that go deeper into evals, each with runnable scripts that evaluate DoubtBot, a teaching assistant for a Python course. Read them in order after Lesson 19.</p></div>
+    </div>
+    <div class="awsb-grid">
+      <article class="awsb-card" style="--c:#7EA6FF">
+      <div class="awsb-num">H1</div>
+      <p class="awsb-ln">Homework 1 · AI Evals in Practice · Chapter 1</p>
+      <h3><a href="../ai-evals-why/">Why AI evals</a></h3>
+      <ul><li>An eval is a repeatable test that shows if a feature is good enough for real users</li><li>Leaderboard scores don't replace testing your own product</li><li>Scope first: problem, baseline, metric and a clear pass or fail rule</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Run ch1_01_first_eval.py, then ch1_04 to catch the judge changing its answer when the order is swapped</p>
+      <div class="awsb-foot"><span class="awsb-go">Open chapter →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/homework-ai-evals-in-practice" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-homework-ai-evals-in-practice.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#C79BFF">
+      <div class="awsb-num">H2</div>
+      <p class="awsb-ln">Homework 2 · AI Evals in Practice · Chapter 2</p>
+      <h3><a href="../ai-evals-methods/">Evaluation methods</a></h3>
+      <ul><li>Human, rule-based, similarity, simulation and LLM-judge methods, and when to use each</li><li>Read real outputs and name each failure to build an error taxonomy</li><li>No traces yet? Bootstrap them by replaying old questions</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Run ch2_01_rule_based_checks.py (no key needed), then ch2_04 on the TA notes</p>
+      <div class="awsb-foot"><span class="awsb-go">Open chapter →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/homework-ai-evals-in-practice" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-homework-ai-evals-in-practice.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#5FD07E">
+      <div class="awsb-num">H3</div>
+      <p class="awsb-ln">Homework 3 · AI Evals in Practice · Chapter 3</p>
+      <h3><a href="../ai-evals-quantitative/">Metrics, judges and test sets</a></h3>
+      <ul><li>Turn the error taxonomy into a short list of metrics</li><li>Write an LLM judge with a clear rubric, then check it against human labels</li><li>Size the test set, then set a SHIP / NO SHIP release gate</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Run ch3_06_test_set_size.py (no key needed), then ch3_02 and ch3_07</p>
+      <div class="awsb-foot"><span class="awsb-go">Open chapter →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/homework-ai-evals-in-practice" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-homework-ai-evals-in-practice.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#FF8A7A">
+      <div class="awsb-num">H4</div>
+      <p class="awsb-ln">Homework 4 · AI Evals in Practice · Chapter 4</p>
+      <h3><a href="../ai-evals-after-launch/">After launch</a></h3>
+      <ul><li>Run a pilot and check whether the gain is real or luck</li><li>Monitor a sample of live traffic for what offline tests missed</li><li>Connect eval metrics to business outcomes</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Run ch4_01_pilot_ab_test.py (no key needed), then ch4_02 on the live traces</p>
+      <div class="awsb-foot"><span class="awsb-go">Open chapter →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/homework-ai-evals-in-practice" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-homework-ai-evals-in-practice.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#F2B705">
+      <div class="awsb-num">H5</div>
+      <p class="awsb-ln">Homework 5 · AI Evals in Practice · Chapter 5</p>
+      <h3><a href="../ai-evals-governance/">Tools and governance</a></h3>
+      <ul><li>Choose eval tools by the features you need; start with plain pytest</li><li>Turn governance rules into scenario tests and catch lost escalations</li><li>Evaluate agents with simulated users</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Run pytest -q ch5_01_test_doubtbot_evals.py, then ch5_07_simulated_user_agent.py</p>
+      <div class="awsb-foot"><span class="awsb-go">Open chapter →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/homework-ai-evals-in-practice" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-homework-ai-evals-in-practice.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+    </div>
+
+    <p class="awsb-note">Lessons 10 to 14 are on the <a href="../week-4/">Week 4 page</a>. This week's projects, the rest of the <i>AI agents in finance</i> course and an adaptive learning app case study, are in the <a href="../../AWS-Capstone/#week-5-projects">AWS AI Capstone</a>. Need to set up your laptop? See <a href="../../help/">Help</a>.</p>
+    <nav class="sitebar sitebar-bottom" aria-label="Site (bottom)"><a class="sb-home" href="../../">⌂ AI-Infusion</a><a href="../../AWS-Bootcamp/" aria-current="page">Scaler AWS AI Bootcamp</a><a href="../../AWS-Capstone/">AWS AI Capstone</a><a href="../../AI-Infusion/">AI-Infusion lessons</a><a href="../../Interview-Ready/">Interview Ready</a><a class="sb-help" href="../../help/"><span>Help</span></a></nav>
+  </div>
+</section>
+</body>
+</html>

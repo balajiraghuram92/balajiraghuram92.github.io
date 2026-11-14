@@ -41,8 +41,22 @@ WEEK4 = [
     ("guardrails-nemo", "13", "Lesson 13", "Guardrails demo with NeMo"),
     ("inventory-agent", "14", "Lesson 14", "Inventory agent, v0 to v7"),
 ]
+# Week 5: lessons, then the homework reading ("H" steps, numbered within the week)
+WEEK5 = [
+    ("memory-explained", "15", "Lesson 15", "Memory, explained simply"),
+    ("mcp-explained", "16", "Lesson 16", "MCP, explained simply"),
+    ("memory-mcp-code", "17", "Lesson 17", "Memory and MCP in code"),
+    ("evals-explained", "18", "Lesson 18", "Evals, explained simply"),
+    ("component-evals", "19", "Lesson 19", "Component evals in code"),
+    ("ai-evals-why", "H1", "Homework 1", "AI Evals 1 · Why AI evals"),
+    ("ai-evals-methods", "H2", "Homework 2", "AI Evals 2 · Evaluation methods"),
+    ("ai-evals-quantitative", "H3", "Homework 3", "AI Evals 3 · Metrics, judges, test sets"),
+    ("ai-evals-after-launch", "H4", "Homework 4", "AI Evals 4 · After launch"),
+    ("ai-evals-governance", "H5", "Homework 5", "AI Evals 5 · Tools and governance"),
+]
 # (label, folder of the week page, lessons)
-WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2), ("Week 3", "week-3", WEEK3), ("Week 4", "week-4", WEEK4)]
+WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2), ("Week 3", "week-3", WEEK3), ("Week 4", "week-4", WEEK4),
+         ("Week 5", "week-5", WEEK5)]
 # Every page in order across the weeks: (folder, step, kind, title, week label, week folder)
 SEQ = [(*item, week, wdir) for week, wdir, items in WEEKS for item in items]
 
@@ -57,6 +71,14 @@ CAPSTONE = [
     ("agentic-rag", "P5", "Agentic RAG"),
     ("deep-search-agents", "P6", "Deep search agents"),
     ("vendor-risk-assessor", "P7", "Capstone · AI vendor risk assessor"),
+    # row 4: AWS Week 5 projects (Parts 2-7 of the AI agents in finance course; Part 1 is P2), and a design case study
+    ("finance-part-2-frameworks", "P8", "Finance Part 2 · Agent frameworks"),
+    ("finance-part-3-deep-search", "P9", "Finance Part 3 · Deep search"),
+    ("finance-part-4-reasoning", "P10", "Finance Part 4 · Reasoning paradigms"),
+    ("finance-part-5-teams", "P11", "Finance Part 5 · Teams of agents"),
+    ("finance-part-6-agentic-rag", "P12", "Finance Part 6 · Agentic RAG"),
+    ("finance-part-7-production", "P13", "Finance Part 7 · Evaluation and production"),
+    ("adaptive-learning-case-study", "P14", "Case study · Adaptive learning app"),
 ]
 
 # Lessons that keep Scaler's original page at <folder>/ and our reworked page at <folder>-v2/.
@@ -83,6 +105,7 @@ WEEK_RECORDINGS = {
     # an empty list shows "link coming soon"
     "week-3": [],
     "week-4": [],
+    "week-5": [],
 }
 RECORDINGS = {folder: WEEK_RECORDINGS[wdir] for folder, *_, wdir in SEQ}
 
@@ -137,6 +160,11 @@ _CODE = {
     "observability-langsmith": ("Aws-Bootcamp/section-11-observability-langsmith", "aws-bootcamp-section-11-observability-langsmith"),
     "guardrails-nemo": ("Aws-Bootcamp/section-13-guardrails-nemo", "aws-bootcamp-section-13-guardrails-nemo"),
     "inventory-agent": ("Aws-Bootcamp/section-14-inventory-agent", "aws-bootcamp-section-14-inventory-agent"),
+    "memory-mcp-code": ("Aws-Bootcamp/section-17-memory-mcp", "aws-bootcamp-section-17-memory-mcp"),
+    "component-evals": ("Aws-Bootcamp/section-19-component-evals", "aws-bootcamp-section-19-component-evals"),
+    # the five AI Evals homework chapters share one code folder
+    **{f: ("Aws-Bootcamp/homework-ai-evals-in-practice", "aws-bootcamp-homework-ai-evals-in-practice")
+       for f in ("ai-evals-why", "ai-evals-methods", "ai-evals-quantitative", "ai-evals-after-launch", "ai-evals-governance")},
     "Class-1": ("Ai-Infusion/lesson-1", "ai-infusion-lesson-1"),
     "Class-2": ("Ai-Infusion/lesson-2", "ai-infusion-lesson-2"),
     "Class-3-4": ("Ai-Infusion/lesson-3", "ai-infusion-lesson-3-4"),
@@ -173,13 +201,18 @@ LINKS = {
 }
 
 # Pages built on the finance template sit inside <main>, not the lesson .wrap.
-FINANCE = {"finance-section-1", "finance-nps-project", "trip-buddy"}
+FINANCE = {"finance-section-1", "finance-nps-project", "trip-buddy", "finance-part-2-frameworks", "finance-part-3-deep-search",
+           "finance-part-4-reasoning", "finance-part-5-teams", "finance-part-6-agentic-rag", "finance-part-7-production"}
 # Pages whose nav sits inside their own padded <main> (the finance ones, plus code explainers with a side TOC).
 # The explainers carry the awsq markers by hand: top just inside <main>, bottom before <footer>.
 INMAIN = FINANCE | {"llm-building-blocks", "agentic-bug-fixing", "observability-explained", "observability-langsmith",
-                    "guardrails-explained", "guardrails-nemo", "inventory-agent"}
+                    "guardrails-explained", "guardrails-nemo", "inventory-agent", "memory-explained", "mcp-explained",
+                    "memory-mcp-code", "evals-explained", "component-evals", "ai-evals-why", "ai-evals-methods",
+                    "ai-evals-quantitative", "ai-evals-after-launch", "ai-evals-governance", "adaptive-learning-case-study"}
 # Reading chapters with no code: no Project files box.
-NOCODE = {"llm-building-blocks", "observability-explained", "guardrails-explained"}
+NOCODE = {"llm-building-blocks", "observability-explained", "guardrails-explained", "memory-explained", "mcp-explained",
+          "evals-explained", "finance-part-2-frameworks", "finance-part-3-deep-search", "finance-part-4-reasoning",
+          "finance-part-5-teams", "finance-part-6-agentic-rag", "finance-part-7-production", "adaptive-learning-case-study"}
 
 BRAND = "Scaler AWS AI Bootcamp"
 
@@ -234,7 +267,7 @@ a.awsq-vl:hover{background:var(--q-acc-t);text-decoration:none}
 .awsq-bottom{padding:0 !important;margin:48px 0 8px;max-width:none}
 .awsq-inmain{padding:0 !important;margin:0 0 28px;max-width:none}
 @media (max-width:1100px){.awsq{padding:0 24px}}
-@media (max-width:640px){.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}a.awsq-rec small{display:none}}
+@media (max-width:640px){.awsq-steps{flex-wrap:wrap}.awsq-steps li{flex:1 0 28px}.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}a.awsq-rec small{display:none}}
 @media print{.awsq{display:none}}
 </style>"""
 
@@ -327,8 +360,9 @@ def caption(i, v2=False):
     tag = " · v2" if v2 else ""
     if step == "0":
         return f"{BRAND} · {week} · Revision{tag}"
-    if step.startswith("P"):
-        n = sum(1 for s in week_items(wdir) if s[1].startswith("P"))
+    if step[0] in "PH":
+        # projects and homework are numbered within their week
+        n = sum(1 for s in week_items(wdir) if s[1][0] == step[0])
         return f"{BRAND} · {week} · {kind} of {n}{tag}"
     # lessons are numbered across the whole course, so count them across every week
     n = max(int(s[1]) for s in SEQ if s[1].isdigit())
@@ -451,7 +485,7 @@ def cap_nav(i, where):
             cls = f"{cls} key".strip()
         cur = ' aria-current="page"' if j == i else ""
         steps.append(f'<li><a class="{cls}" href="../{f}/" title="Project {st[1:]} · {e(t)}"{cur}>{st}{" ★" if f == "vendor-risk-assessor" else ""}</a></li>')
-    extra = " awsq-inmain" if folder in FINANCE and where == "top" else ""
+    extra = " awsq-inmain" if folder in INMAIN and where == "top" else ""
     own = " awsq-own" if folder in CAP_OWN else ""
     cap = f"{CAP_BRAND} · Project {step[1:]} of {len(CAPSTONE)}"
     return (f'<div class="awsq awsq-{where}{extra}{own}" role="navigation" aria-label="Capstone navigation ({where})"><div class="awsq-box">'

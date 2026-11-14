@@ -219,7 +219,8 @@ def remember(skipped=()):
     m = load_manifest()
     for e in json.loads(p.read_text(encoding="utf-8"))["items"]:
         if e["status"] in ("new", "seen-title") and e["kind"] != "secret" and e["staged"] not in skipped:
-            m[e["sha256"]] = e.get("target") or f"ingested from {e['source']}"
+            # the plan's target is only a proposed folder; record where the file came from instead
+            m[e["sha256"]] = f"ingested from {e['source']}"
     save_manifest(m)
     print(f"{MANIFEST.relative_to(ROOT)}: {len(m)} fingerprints")
 
