@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bootcamp Week 4</title>
+<meta name="description" content="Scaler AWS AI Bootcamp, Week 4: Lessons 10 to 14 on observability and guardrails. The ideas explained simply, demos with LangSmith and NeMo Guardrails, and an inventory agent built in 8 steps.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../../assets/hub.css">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="../../assets/bootcamp.css">
+</head>
+<body class="bc">
+<section class="awsb" aria-labelledby="awsb-h">
+  <div class="awsb-in">
+    <nav class="sitebar" aria-label="Site (top)"><a class="sb-home" href="../../">⌂ AI-Infusion</a><a href="../../AWS-Bootcamp/" aria-current="page">Scaler AWS AI Bootcamp</a><a href="../../AWS-Capstone/">AWS AI Capstone</a><a href="../../AI-Infusion/">AI-Infusion lessons</a><a href="../../Interview-Ready/">Interview Ready</a><a class="sb-help" href="../../help/"><span>Help</span></a></nav>
+    <p class="awsb-crumb"><a href="../">Scaler AWS AI Bootcamp</a> / Week 4</p>
+    <p class="awsb-eyebrow"><i></i>Scaler AWS AI Bootcamp · Week 4</p>
+    <h1 id="awsb-h">Agents you can <em>watch and trust</em></h1>
+    <p class="awsb-sub">See inside your agent with observability, keep it safe with guardrails, then put both to work: each idea is explained simply first, then shown in running code, and the week ends with an inventory agent built up one idea at a time.</p>
+    <ul class="awsb-meta"><li>Lessons 10–14</li><li>Observability · LangSmith · NeMo Guardrails · caching</li></ul>
+
+    <div class="awsb-part" id="recordings">
+      <span class="awsb-pnum">Watch</span>
+      <div><h2>Week 4 recordings</h2><p>The full Week 4 classes on Scaler. They open in a new tab.</p></div>
+    </div>
+    <!-- recs:week4 --><div class="awsb-recs"><span><i aria-hidden="true">▶</i><span>Class recordings<small>link coming soon</small></span></span></div><!-- /recs:week4 -->
+
+    <div class="awsb-part" id="sessions">
+      <span class="awsb-pnum">Learn</span>
+      <div><h2>Week 4 lessons</h2><p>The course continues from Week 3's Lesson 9. Read each "explained simply" lesson before its demo; each lesson page links the next.</p></div>
+    </div>
+    <div class="awsb-grid">
+      <article class="awsb-card" style="--c:#7EA6FF">
+      <div class="awsb-num">10</div>
+      <p class="awsb-ln">Lesson 10 · Explained simply · slide by slide</p>
+      <h3><a href="../observability-explained/">Observability, explained simply</a></h3>
+      <ul><li>Why agents need observability, not just uptime checks</li><li>MELT: metrics, events, logs and traces</li><li>A debugging story from symptom to fix, and tools like LangSmith</li></ul>
+      <p class="awsb-lab"><b>Try</b>Find the prompt version that fails in only one region, with a short pandas script</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span></div>
+    </article>
+      <article class="awsb-card" style="--c:#C79BFF">
+      <div class="awsb-num">11</div>
+      <p class="awsb-ln">Lesson 11 · Code explainer</p>
+      <h3><a href="../observability-langsmith/">Observability demo with LangSmith</a></h3>
+      <ul><li>A chatbot that reuses saved answers for repeated questions</li><li>Two caches: the exact same text, and the same meaning</li><li>LangSmith traces showing the time and cost of every step</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Run the personality bot, then open its traces to see cache hits, time and cost</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-11-observability-langsmith" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-11-observability-langsmith.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#FF8A7A">
+      <div class="awsb-num">12</div>
+      <p class="awsb-ln">Lesson 12 · Explained simply · slide by slide</p>
+      <h3><a href="../guardrails-explained/">Guardrails, explained simply</a></h3>
+      <ul><li>How AI gets attacked: prompt injection, leaking and jailbreaks</li><li>Guardrails: checks on what goes into the model and what comes out</li><li>Real incidents, layers of defence, and guardrails at scale</li></ul>
+      <p class="awsb-lab"><b>Try</b>Compare a vulnerable and a defended answer to a hidden-instruction attack</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span></div>
+    </article>
+      <article class="awsb-card" style="--c:#5FD07E">
+      <div class="awsb-num">13</div>
+      <p class="awsb-ln">Lesson 13 · Code explainer</p>
+      <h3><a href="../guardrails-nemo/">Guardrails demo with NeMo</a></h3>
+      <ul><li>Safety rules kept in config files, not in Python code</li><li>Blocking injection, leaking, jailbreaks and harmful requests</li><li>Input, dialogue and output rails checking every message</li></ul>
+      <p class="awsb-lab"><b>Lab</b>Run the guarded chatbot and throw attack messages at it</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-13-guardrails-nemo" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-13-guardrails-nemo.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+      <article class="awsb-card" style="--c:#F2B705">
+      <div class="awsb-num">14</div>
+      <p class="awsb-ln">Lesson 14 · Code explainer · v0 to v7</p>
+      <h3><a href="../inventory-agent/">Inventory agent, v0 to v7</a></h3>
+      <ul><li>One prompt grown into a production-style agent, one idea per version</li><li>A SQLite database and tools, guardrails, a cache and email alerts</li><li>LangSmith tracing, and a tool so code does the maths, not the model</li></ul>
+      <p class="awsb-lab"><b>Build</b>An assistant that answers "Should I reorder toothpaste?" from a live inventory</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span><span class="awsb-links"><a class="awsb-zip" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-14-inventory-agent" target="_blank" rel="noopener">&lt;/&gt; GitHub</a><a class="awsb-zip" href="../../zips/Code/Zips/aws-bootcamp-section-14-inventory-agent.zip" download>⬇ Code (.zip)</a></span></div>
+    </article>
+    </div>
+
+    <p class="awsb-note">Lessons 8 and 9 are on the <a href="../week-3/">Week 3 page</a>. Need to set up your laptop? See <a href="../../help/">Help</a>.</p>
+    <nav class="sitebar sitebar-bottom" aria-label="Site (bottom)"><a class="sb-home" href="../../">⌂ AI-Infusion</a><a href="../../AWS-Bootcamp/" aria-current="page">Scaler AWS AI Bootcamp</a><a href="../../AWS-Capstone/">AWS AI Capstone</a><a href="../../AI-Infusion/">AI-Infusion lessons</a><a href="../../Interview-Ready/">Interview Ready</a><a class="sb-help" href="../../help/"><span>Help</span></a></nav>
+  </div>
+</section>
+</body>
+</html>

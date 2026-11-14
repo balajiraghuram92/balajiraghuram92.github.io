@@ -34,8 +34,15 @@ WEEK3 = [
     ("llm-building-blocks", "8", "Lesson 8", "Building blocks of LLM systems"),
     ("agentic-bug-fixing", "9", "Lesson 9", "Agentic bug fixing"),
 ]
+WEEK4 = [
+    ("observability-explained", "10", "Lesson 10", "Observability, explained simply"),
+    ("observability-langsmith", "11", "Lesson 11", "Observability demo with LangSmith"),
+    ("guardrails-explained", "12", "Lesson 12", "Guardrails, explained simply"),
+    ("guardrails-nemo", "13", "Lesson 13", "Guardrails demo with NeMo"),
+    ("inventory-agent", "14", "Lesson 14", "Inventory agent, v0 to v7"),
+]
 # (label, folder of the week page, lessons)
-WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2), ("Week 3", "week-3", WEEK3)]
+WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2), ("Week 3", "week-3", WEEK3), ("Week 4", "week-4", WEEK4)]
 # Every page in order across the weeks: (folder, step, kind, title, week label, week folder)
 SEQ = [(*item, week, wdir) for week, wdir, items in WEEKS for item in items]
 
@@ -75,6 +82,7 @@ WEEK_RECORDINGS = {
     ],
     # an empty list shows "link coming soon"
     "week-3": [],
+    "week-4": [],
 }
 RECORDINGS = {folder: WEEK_RECORDINGS[wdir] for folder, *_, wdir in SEQ}
 
@@ -126,6 +134,9 @@ _CODE = {
     "shipping-agents-to-production": ("Aws-Bootcamp/section-06-production-deployment", "aws-bootcamp-section-06-production-deployment"),
     "evals-observability-governance": ("Aws-Bootcamp/section-07-evals-observability-governance", "aws-bootcamp-section-07-evals-observability-governance"),
     "agentic-bug-fixing": ("Aws-Bootcamp/section-08-agentic-bug-fixing", "aws-bootcamp-section-08-agentic-bug-fixing"),
+    "observability-langsmith": ("Aws-Bootcamp/section-11-observability-langsmith", "aws-bootcamp-section-11-observability-langsmith"),
+    "guardrails-nemo": ("Aws-Bootcamp/section-13-guardrails-nemo", "aws-bootcamp-section-13-guardrails-nemo"),
+    "inventory-agent": ("Aws-Bootcamp/section-14-inventory-agent", "aws-bootcamp-section-14-inventory-agent"),
     "Class-1": ("Ai-Infusion/lesson-1", "ai-infusion-lesson-1"),
     "Class-2": ("Ai-Infusion/lesson-2", "ai-infusion-lesson-2"),
     "Class-3-4": ("Ai-Infusion/lesson-3", "ai-infusion-lesson-3-4"),
@@ -165,9 +176,10 @@ LINKS = {
 FINANCE = {"finance-section-1", "finance-nps-project", "trip-buddy"}
 # Pages whose nav sits inside their own padded <main> (the finance ones, plus code explainers with a side TOC).
 # The explainers carry the awsq markers by hand: top just inside <main>, bottom before <footer>.
-INMAIN = FINANCE | {"llm-building-blocks", "agentic-bug-fixing"}
+INMAIN = FINANCE | {"llm-building-blocks", "agentic-bug-fixing", "observability-explained", "observability-langsmith",
+                    "guardrails-explained", "guardrails-nemo", "inventory-agent"}
 # Reading chapters with no code: no Project files box.
-NOCODE = {"llm-building-blocks"}
+NOCODE = {"llm-building-blocks", "observability-explained", "guardrails-explained"}
 
 BRAND = "Scaler AWS AI Bootcamp"
 
@@ -336,7 +348,7 @@ def version_link(folder, v2):
 def side(i, cur_week, cls, label, v2=False):
     if i < 0 or i >= len(SEQ):
         # the capstone projects are their own section of the site, so the bootcamp simply ends here
-        msg = "You're at the start" if i < 0 else "End of the bootcamp · Week 4 coming soon"
+        msg = "You're at the start" if i < 0 else "End of the bootcamp · more weeks coming soon"
         return f'<span class="awsq-l {cls}"><span class="awsq-d">{label}</span><span class="awsq-t">{msg}</span></span>'
     folder, _, kind, title, week, _ = SEQ[i]
     # name the week when prev / next crosses into another one

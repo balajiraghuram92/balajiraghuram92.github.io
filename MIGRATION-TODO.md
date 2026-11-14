@@ -61,6 +61,14 @@ GitHub link as the fallback.
       until then), and drop "Recordings coming soon" from the Week 3 card on `AWS-Bootcamp/index.html`.
 - [ ] More Week 3 lessons: add each one to `WEEK3` and a card on `AWS-Bootcamp/week-3/index.html`.
 
+## 2c. Bootcamp Week 4
+
+- [x] `AWS-Bootcamp/week-4/` is live with Lessons 10-14 (observability and guardrails): two
+      "explained simply" pages (no code), the LangSmith and NeMo Guardrails demos and the inventory
+      agent, code in `zips/Code/Aws-Bootcamp/section-11-*`, `section-13-*`, `section-14-*`.
+- [ ] Week 4 recordings: fill `WEEK_RECORDINGS["week-4"]` and drop "Recordings coming soon" from the
+      Week 4 card on `AWS-Bootcamp/index.html`.
+
 ## 3. Other placeholders
 
 - [ ] Recording links: Week 1 and all 11 AI-Infusion classes are in. Class 4 points at a

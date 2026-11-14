@@ -60,6 +60,10 @@ def page_errors(rel, brand, inmain):
         errs.append("nav markers are empty; run python tools/bootcamp_nav.py")
     if inmain and not re.search(r"\.awsq\s*\{[^}]*--q-acc", s):
         errs.append("nav sits inside <main> but the page has no `.awsq{--q-acc:…}` colour override")
+    if inmain and 'class="mobile-toc"' not in s and re.search(r"\.mobile-toc\s*\{", s):
+        errs.append("CSS styles a .mobile-toc menu but the page has none (no contents on phones)")
+    if 'class="mobile-toc"' in s and "closest('details').open = false" not in s:
+        errs.append("phone contents menu does not close after a tap (add the close-on-tap line)")
     body = re.sub(r"<script\b.*?</script>", "", s, flags=re.S | re.I)
     ids = set(re.findall(r'\bid\s*=\s*"([^"]+)"', body))
     for a in sorted(set(re.findall(r'href\s*=\s*"#([^"]+)"', body))):
