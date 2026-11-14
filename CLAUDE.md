@@ -57,13 +57,13 @@ the AWS AI Capstone projects and Interview Ready. Pushing `main` publishes it.
   `.env`, and is git-ignored on purpose.
 - **Git** isn't on PATH; use GitHub Desktop's:
   `C:\Users\raghuram\AppData\Local\GitHubDesktop\app-3.6.10\resources\app\git\cmd\git.exe`.
-- **Pushing: the user pushes from GitHub Desktop.** Claude commits locally, runs `scan_secrets.py`
-  and `check_links.py`, shows the review, then asks the user to click **Push origin** in GitHub
-  Desktop. Don't try `git push` from the shell: it has no GitHub sign-in (the user chose not to add
-  one). After they say they pushed, run `git fetch origin` and confirm `origin/main` has the commit;
-  if not, tell them (GitHub Desktop can lag, or the click didn't take). Never enter credentials.
-  `.claude/settings.local.json` pre-approves `fetch origin`, `status` and `log` with that git.exe;
-  force pushes are denied.
+- **Pushing: Claude pushes, after the user's yes.** `.claude/settings.local.json` pre-approves exactly
+  `& "<that git.exe>" push origin main` (plus `fetch origin`, `status`, `log`); force pushes are
+  denied. Order: commit locally, `scan_secrets.py` and `check_links.py` clean, show the review, push
+  only on the user's yes in chat, then `git fetch origin` and confirm `origin/main` has the commit.
+  If the push says it can't read a username, Git Credential Manager has no saved GitHub sign-in:
+  ask the user to run that push command once in their own terminal and sign in in the browser
+  (GitHub Desktop's Push origin also works as a fallback). Never enter credentials for them.
 - `_config.yml` keeps the source-code folders, `tools/` and these notes off the live site (smaller deploys).
   If you add a folder that pages must link to directly, check it is not excluded there.
 - Open items are in `MIGRATION-TODO.md`.
