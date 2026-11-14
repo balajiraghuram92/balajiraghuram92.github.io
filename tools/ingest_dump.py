@@ -23,6 +23,7 @@ Where things go
 import hashlib
 import html
 import json
+import os
 import pathlib
 import re
 import shutil
@@ -232,8 +233,13 @@ def done():
         dest = DONE / src.name
         if dest.exists():
             dest = DONE / f"{src.stem}-{len(list(DONE.iterdir()))}{src.suffix}"
-        shutil.move(str(src), str(dest))
-        print("moved", src.name, "→", dest.relative_to(ROOT))
+        # rename, never copy-then-delete: a rename either happens whole or not at all, so a folder the
+        # user is working in (e.g. with a running .venv) is left untouched instead of half-deleted
+        try:
+            os.rename(src, dest)
+            print("moved", src.name, "→", dest.relative_to(ROOT))
+        except OSError as err:
+            print(f"left in place: {src.name} ({err.strerror}; something has it open). Move it by hand later.")
     shutil.rmtree(STAGE, ignore_errors=True)
 
 
