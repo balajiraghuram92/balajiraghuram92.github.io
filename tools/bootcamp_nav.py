@@ -222,7 +222,7 @@ a.awsq-vl:hover{background:var(--q-acc-t);text-decoration:none}
 .awsq-bottom{padding:0 !important;margin:48px 0 8px;max-width:none}
 .awsq-inmain{padding:0 !important;margin:0 0 28px;max-width:none}
 @media (max-width:1100px){.awsq{padding:0 24px}}
-@media (max-width:640px){.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}.awsq-rec small{display:none}}
+@media (max-width:640px){.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}a.awsq-rec small{display:none}}
 @media print{.awsq{display:none}}
 </style>"""
 

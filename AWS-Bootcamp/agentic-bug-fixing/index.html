@@ -274,6 +274,7 @@ section.slide h4 code.i{text-transform:none;letter-spacing:0;font-size:14px}
 <meta name="description" content="Scaler AWS AI Bootcamp, Week 3, Lesson 9: a LangGraph agent that runs a Python function, asks OpenAI GPT to fix it when it crashes, and retries up to 3 times. Every line explained.">
 <style>
 /* bootcamp nav: use this page's navy and amber instead of the yellow accent, which is too light for white text */
+@media (max-width:640px){.hero:after{width:140px;height:140px;right:-50px;top:-50px;opacity:.3}}
 main .awsq{--q-acc:var(--navy);--q-acc-t:#e6eaf3;--q-acc-ink:var(--navy);--q-cur:#a86f00;--q-on:#fff;--q-card2:var(--gray-bg)}
 </style>
 </head>
@@ -359,11 +360,12 @@ a.awsq-vl:hover{background:var(--q-acc-t);text-decoration:none}
 .awsq-bottom{padding:0 !important;margin:48px 0 8px;max-width:none}
 .awsq-inmain{padding:0 !important;margin:0 0 28px;max-width:none}
 @media (max-width:1100px){.awsq{padding:0 24px}}
-@media (max-width:640px){.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}.awsq-rec small{display:none}}
+@media (max-width:640px){.awsq{padding:0 16px}.awsq-t{white-space:normal;overflow-wrap:anywhere}.awsq-row{grid-template-columns:1fr 1fr}a.awsq-home{grid-column:1 / -1;grid-row:1;flex-direction:row;gap:8px}a.awsq-rec small{display:none}}
 @media print{.awsq{display:none}}
 </style>
 <nav class="awsq awsq-top awsq-inmain" aria-label="Bootcamp navigation (top)"><div class="awsq-box"><div class="awsq-head"><span class="awsq-cap">Scaler AWS AI Bootcamp · Week 3 · Lesson 9 of 9</span><a class="aih" href="../../" title="Back to the AI-Infusion home page">⌂ AI-Infusion</a></div><div class="awsq-row"><a class="awsq-l awsq-prev" href="../llm-building-blocks/"><span class="awsq-d">← Previous</span><span class="awsq-t">Lesson 8 · Building blocks of LLM systems</span></a><a class="awsq-home" href="../week-3/"><b>Scaler AWS AI Bootcamp</b>Week 3 · all lessons</a><span class="awsq-l awsq-next"><span class="awsq-d">Next →</span><span class="awsq-t">End of the bootcamp · Week 4 coming soon</span></span></div><ol class="awsq-steps" aria-label="All lessons"><li><a class="done" href="../llm-building-blocks/" title="Lesson 8 · Building blocks of LLM systems">8</a></li><li><a class="cur" href="../agentic-bug-fixing/" title="Lesson 9 · Agentic bug fixing" aria-current="page">9</a></li></ol><div class="awsq-recs"><span class="awsq-rec"><i aria-hidden="true">▶</i>Scaler class recording<small>link coming soon</small></span></div><div class="awsq-files"><b>Project files</b><a class="awsq-fb" href="https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/Aws-Bootcamp/section-08-agentic-bug-fixing" target="_blank" rel="noopener">&lt;/&gt; Browse the code<small>GitHub</small></a><a class="awsq-fb" href="../../zips/Code/Zips/aws-bootcamp-section-08-agentic-bug-fixing.zip" download>⬇ Download all<small>.zip</small></a></div></div></nav>
 <!-- /awsq:top -->
+<details class="mobile-toc"><summary>☰ Contents</summary><a href="#what">What it does</a><a href="#picture">The big picture</a><a href="#run">How to run it</a><a href="#changes">What changed vs Groq</a><a href="#step0">Imports &amp; settings</a><a href="#step1">The State</a><a href="#step2">The prompt</a><a href="#step3">Helper functions</a><a href="#step4">The Agent (graph)</a><a href="#step5">The Gradio app</a><a href="#step6">Terminal demo</a><a href="#trace">One request, step by step</a><a href="#examples">The 7 examples</a><a href="#lecture">Link to the lecture</a><a href="#exercises">Exercises</a><a href="#safety">Safety note</a><a href="#gloss">Glossary</a><a href="#source">Full source</a></details>
 <header class="hero">
   <div class="kicker">By Shivank Agarwal · code explainer · agentic_bug_fixing_openai.py</div>
   <h1>The bug-fixing agent: an AI that repairs crashing Python functions</h1>
@@ -1559,6 +1561,7 @@ window.addEventListener('scroll', () => { const h = document.documentElement; ba
 const links = {}; document.querySelectorAll('nav.toc a').forEach(a => links[a.getAttribute('href').slice(1)] = a);
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && links[e.target.id]) { Object.values(links).forEach(l => l.classList.remove('active')); links[e.target.id].classList.add('active'); } }), {rootMargin: '-35% 0px -60% 0px'});
 document.querySelectorAll('section.slide').forEach(s => io.observe(s));
+document.querySelectorAll('.mobile-toc a').forEach(a => a.addEventListener('click', () => a.closest('details').open = false));
 </script>
 </body>
 </html>

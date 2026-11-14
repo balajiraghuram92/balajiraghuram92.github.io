@@ -32,9 +32,16 @@ the AWS AI Capstone projects and Interview Ready. Pushing `main` publishes it.
      and the `awsb-latest` bar; move both off the older week), the bootcamp tile in the home
      `index.html`, the previous week page's "Next" note, and the meta descriptions that list weeks.
   5. Run `python tools/build_code_zips.py`, `python tools/bootcamp_nav.py`, then
-     **`python -I tools/check_links.py`**: it must report 0 problems. It checks every relative link
-     on the site and that each week is linked from the hub, the home tile, the previous week and
-     its own week page.
+     **`python -I tools/check_links.py`** and **`python -I tools/check_blueprint.py`**: both must report
+     0 problems. check_links checks every relative link on the site and that each week is linked from
+     the hub, the home tile, the previous week and its own week page; check_blueprint checks each
+     lesson / project page, week page and hub has the standard structure (nav top and bottom, meta
+     tags, cards, in-page links, one "New" badge on the latest week).
+  5b. **Verify with Opus before any review or push.** One `model: "opus"` agent (report only, no
+     edits) opens every new or changed page on the preview next to a reference page of the same kind
+     and checks: same blueprint, every nav link lands right, every TOC link / button / demo / copy
+     button works, no console errors or failed requests, no horizontal scroll at phone width. Fix
+     and re-run until it says `VERDICT: PASS`. The prompt is in `.claude/skills/ingest-dump/SKILL.md`.
   6. After the push, check the live page (GitHub Pages takes a minute or two to deploy, so an old
      copy right after a push is normal; reload with Ctrl+F5).
 - **New material goes through `data-dump/` and `/ingest-dump`.** The user drops zips, folders, HTML,
@@ -59,7 +66,8 @@ the AWS AI Capstone projects and Interview Ready. Pushing `main` publishes it.
   `C:\Users\raghuram\AppData\Local\GitHubDesktop\app-3.6.10\resources\app\git\cmd\git.exe`.
 - **Pushing: Claude pushes, after the user's yes.** `.claude/settings.local.json` pre-approves exactly
   `& "<that git.exe>" push origin main` (plus `fetch origin`, `status`, `log`); force pushes are
-  denied. Order: commit locally, `scan_secrets.py` and `check_links.py` clean, show the review, push
+  denied. Order: commit locally, `scan_secrets.py`, `check_links.py` and `check_blueprint.py` clean,
+  the Opus verifier's PASS for page changes, show the review, push
   only on the user's yes in chat, then `git fetch origin` and confirm `origin/main` has the commit.
   If the push says it can't read a username, Git Credential Manager has no saved GitHub sign-in:
   ask the user to run that push command once in their own terminal and sign in in the browser
