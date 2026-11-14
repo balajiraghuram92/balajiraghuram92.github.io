@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bootcamp Week 3</title>
-<meta name="description" content="Scaler AWS AI Bootcamp, Week 3: inference optimization and Lesson 8, a LangGraph agent that fixes crashing Python functions with OpenAI GPT.">
+<meta name="description" content="Scaler AWS AI Bootcamp, Week 3: Lesson 8, the building blocks of LLM systems, and Lesson 9, a LangGraph agent that fixes crashing Python functions with OpenAI GPT.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="../../assets/hub.css">
@@ -18,8 +18,8 @@
     <p class="awsb-crumb"><a href="../">Scaler AWS AI Bootcamp</a> / Week 3</p>
     <p class="awsb-eyebrow"><i></i>Scaler AWS AI Bootcamp · Week 3</p>
     <h1 id="awsb-h">Faster, cheaper, <em>self-fixing</em> agents</h1>
-    <p class="awsb-sub">Look at what an LLM call really costs in money and time, then build an agent that runs a Python function, asks GPT to fix it when it crashes, and stops after three tries.</p>
-    <ul class="awsb-meta"><li>Lesson 8</li><li>Inference optimization · LangGraph · OpenAI · Gradio</li></ul>
+    <p class="awsb-sub">Learn the building blocks every LLM system is made of, look at what an LLM call really costs in money and time, then build an agent that runs a Python function, asks GPT to fix it when it crashes, and stops after three tries.</p>
+    <ul class="awsb-meta"><li>Lessons 8–9</li><li>LLM building blocks · LangGraph · OpenAI · Gradio</li></ul>
 
     <div class="awsb-part" id="recordings">
       <span class="awsb-pnum">Watch</span>
@@ -32,9 +32,17 @@
       <div><h2>Week 3 lessons</h2><p>The course continues from Week 2's Lesson 7. Each lesson page links the next.</p></div>
     </div>
     <div class="awsb-grid">
-      <article class="awsb-card" style="--c:#F2B705">
+      <article class="awsb-card" style="--c:#7EA6FF">
       <div class="awsb-num">08</div>
-      <p class="awsb-ln">Lesson 8 · Code explainer</p>
+      <p class="awsb-ln">Lesson 8 · LLM System Design · Chapter 1</p>
+      <h3><a href="../llm-building-blocks/">Building blocks of LLM systems</a></h3>
+      <ul><li>Tokens, embeddings, prompts and the context window</li><li>RAG, GraphRAG, context engineering and AI agents</li><li>Measuring speed and quality (TTFT, TPS), and how LLM systems fail</li></ul>
+      <p class="awsb-lab"><b>Try</b>Live demos: temperature slider, GraphRAG walk, agent loop step-through</p>
+      <div class="awsb-foot"><span class="awsb-go">Open lesson →</span></div>
+    </article>
+      <article class="awsb-card" style="--c:#F2B705">
+      <div class="awsb-num">09</div>
+      <p class="awsb-ln">Lesson 9 · Code explainer</p>
       <h3><a href="../agentic-bug-fixing/">Agentic bug fixing</a></h3>
       <ul><li>A two-node LangGraph loop: run the code, ask GPT to fix it, run again</li><li>A retry brake (3 attempts) so a bad fix can't burn money forever</li><li>How cost, latency, caching and streaming from the inference lecture show up in a real agent</li></ul>
       <p class="awsb-lab"><b>Lab</b>Paste a crashing function into a Gradio app and see GPT's fix as a diff</p>

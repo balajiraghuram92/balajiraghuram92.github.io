@@ -31,7 +31,8 @@ WEEK2 = [
     ("evals-observability-governance", "7", "Lesson 7", "Evals, observability and governance"),
 ]
 WEEK3 = [
-    ("agentic-bug-fixing", "8", "Lesson 8", "Agentic bug fixing"),
+    ("llm-building-blocks", "8", "Lesson 8", "Building blocks of LLM systems"),
+    ("agentic-bug-fixing", "9", "Lesson 9", "Agentic bug fixing"),
 ]
 # (label, folder of the week page, lessons)
 WEEKS = [("Week 1", "week-1", WEEK1), ("Week 2", "week-2", WEEK2), ("Week 3", "week-3", WEEK3)]
@@ -164,7 +165,9 @@ LINKS = {
 FINANCE = {"finance-section-1", "finance-nps-project", "trip-buddy"}
 # Pages whose nav sits inside their own padded <main> (the finance ones, plus code explainers with a side TOC).
 # The explainers carry the awsq markers by hand: top just inside <main>, bottom before <footer>.
-INMAIN = FINANCE | {"agentic-bug-fixing"}
+INMAIN = FINANCE | {"llm-building-blocks", "agentic-bug-fixing"}
+# Reading chapters with no code: no Project files box.
+NOCODE = {"llm-building-blocks"}
 
 BRAND = "Scaler AWS AI Bootcamp"
 
@@ -275,6 +278,8 @@ def files_box(key, cls):
 
     cls is the class prefix of the nav it sits in ("awsq" or "aq").
     """
+    if key in NOCODE:
+        return ""
     repo = GITHUB.get(key, "").rstrip("/")
     zip_name = ZIPS.get(key, "")
     fb = f"{cls}-fb"
