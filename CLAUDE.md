@@ -37,6 +37,14 @@ the AWS AI Capstone projects and Interview Ready. Pushing `main` publishes it.
      its own week page.
   6. After the push, check the live page (GitHub Pages takes a minute or two to deploy, so an old
      copy right after a push is normal; reload with Ctrl+F5).
+- **New material goes through `data-dump/` and `/ingest-dump`.** The user drops zips, folders, HTML,
+  `.py` or notebooks in `data-dump/` (git-ignored) and runs `/ingest-dump [week]`
+  (`.claude/skills/ingest-dump/SKILL.md`; `.claude/` is git-ignored, so the skill is local to this PC).
+  `tools/ingest_dump.py plan` unzips and labels each file duplicate / seen-title / new using
+  `tools/ingested.json` and the site's own files; Haiku agents build the pages; the main session
+  wires nav, hubs and the Capstone "AWS Week N projects" row, runs the checks, commits, and **stops
+  for the user's review. Never push without their yes.** Folder or zip names with "project" or
+  "capstone" mean a Capstone project; everything else is a lesson in the week.
 - **Code and zips.** Source code lives in `zips/Code/<Programme>/...`; `python tools/build_code_zips.py`
   rebuilds the downloadable zips in `zips/Code/Zips/`. "Browse the code" links point at
   `https://github.com/balajiraghuram92/balajiraghuram92.github.io/tree/main/zips/Code/...`.

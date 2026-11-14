@@ -1,6 +1,8 @@
 /zips/Excersises
 /zips/future-with-shivank-agentic-ai-on-aws
 /.claude
+# raw drops for /ingest-dump: unreviewed, may hold secrets; only the processed pages and code are committed
+/data-dump/
 
 # Code under zips/Code: never publish secrets or build junk
 .env
